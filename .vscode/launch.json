@@ -1,0 +1,27 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "my_expense",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                //"--web-port=56565",
+                "--web-hostname=192.168.1.73"
+            ],
+        },
+        {
+            "name": "my_expense (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                //"--web-port=56565",
+                "--web-hostname=192.168.1.73"
+            ],
+        }
+    ]
+}

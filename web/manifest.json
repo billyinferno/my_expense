@@ -1,0 +1,23 @@
+{
+    "name": "myExpense",
+    "short_name": "myExpense",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#263238",
+    "theme_color": "#8bc34a",
+    "description": "Personal Expense Tracker.",
+    "orientation": "portrait",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
