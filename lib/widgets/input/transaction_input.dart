@@ -86,7 +86,7 @@ class _TransactionInputState extends State<TransactionInput> {
   String _calcOperation = "";
   bool _amountReset = false;
   bool _isAmountFocus = false;
-  bool _isCustomPinpad = true; // change to false later
+  bool _isCustomPinpad = true;
 
   // text field controller
   FocusNode _nameFocus = FocusNode();
@@ -710,368 +710,9 @@ class _TransactionInputState extends State<TransactionInput> {
         _generateCalculator(screenHeight, keyboardHeight)
       );
     }
-    else if(_isCustomPinpad && _isAmountFocus) {
+    else if(_isCustomPinpad && _isAmountFocus && !isOpen) {
       _returnWidget.add(
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            height: 350,
-            width: double.infinity,
-            color: secondaryDark,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: GestureDetector(
-                    onTap: (() {
-                      _amountFocus.unfocus();
-                    }),
-                    child: Container(
-                      height: 25,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          "done",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: secondaryLight,
-                          ),
-                        ),
-                      ),
-                      margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                    ),
-                  ),
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "AC",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            color: primaryBackground,
-                          ),
-                        )
-                      ),
-                      color: Colors.white,
-                      onTap: (() {
-                        // clear the calc memory
-                        setState(() {                          
-                          _calcMemory = 0;
-                          _calcAmount = 0;
-                          _currentAmount = 0;
-                          _calcOperation = "";
-                          _amountController.text = "";
-                          _currentAmountFontSize = 25;
-                        });
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "%",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            color: primaryBackground,
-                          ),
-                        )
-                      ),
-                      color: Colors.white,
-                      onTap: (() {
-                        _performCustomCalc("%");
-                      }),
-                    ),
-                     _calcButton(
-                      child: Center(
-                        child: Icon(
-                          Ionicons.backspace_outline,
-                          color: primaryBackground,
-                          size: 25,
-                        )
-                      ),
-                      color: Colors.white,
-                      onTap: (() {
-                        // check if got length or not?
-                        _removeAmountControllerText();
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "÷",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      color: Colors.orange,
-                      onTap: (() {
-                        _performCustomCalc("/");
-                      }),
-                    ),
-                  ],
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "7",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        _setAmountControllertext("7");
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "8",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        _setAmountControllertext("8");
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "9",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        _setAmountControllertext("9");
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "×",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      color: Colors.orange,
-                      onTap: (() {
-                        _performCustomCalc("*");
-                      }),
-                    ),
-                  ],
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "4",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        _setAmountControllertext("4");
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "5",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        _setAmountControllertext("5");
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "6",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        _setAmountControllertext("6");
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "-",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      color: Colors.orange,
-                      onTap: (() {
-                        _performCustomCalc("-");
-                      }),
-                    ),
-                  ],
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "1",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        _setAmountControllertext("1");
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "2",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        _setAmountControllertext("2");
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "3",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        _setAmountControllertext("3");
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "+",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      color: Colors.orange,
-                      onTap: (() {
-                        _performCustomCalc("+");
-                      }),
-                    ),
-                  ],
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: <Widget>[
-                    _calcButton(
-                      flex: 2,
-                      child: Center(
-                        child: Text(
-                          "0",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        if(_amountController.text.length > 0) {
-                          _setAmountControllertext("0");
-                        }
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          ".",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      onTap: (() {
-                        // check if we already have "." on the amount controller or not?
-                        if(!_amountController.text.contains(".")) {
-                          // check if this the first character?
-                          if(_amountController.text.length == 0) {
-                            _setAmountControllertext("0.");  
-                          }
-                          else {
-                            _setAmountControllertext(".");
-                          }
-                        }
-                      }),
-                    ),
-                    _calcButton(
-                      child: Center(
-                        child: Text(
-                          "=",
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ),
-                      color: Colors.orange,
-                      onTap: (() {
-                        _performCustomCalc("=");
-                      }),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 25,),
-              ],
-            ),
-          ),
-        )
+        _generateCustomCalculator()
       );
     }
 
@@ -1099,6 +740,370 @@ class _TransactionInputState extends State<TransactionInput> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _generateCustomCalculator() {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Container(
+        height: 350,
+        width: double.infinity,
+        color: secondaryDark,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Expanded(
+              child: GestureDetector(
+                onTap: (() {
+                  _amountFocus.unfocus();
+                }),
+                child: Container(
+                  height: 25,
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      "done",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: secondaryLight,
+                      ),
+                    ),
+                  ),
+                  margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                ),
+              ),
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "AC",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: primaryBackground,
+                      ),
+                    )
+                  ),
+                  color: Colors.white,
+                  onTap: (() {
+                    // clear the calc memory
+                    setState(() {                          
+                      _calcMemory = 0;
+                      _calcAmount = 0;
+                      _currentAmount = 0;
+                      _calcOperation = "";
+                      _amountController.text = "";
+                      _currentAmountFontSize = 25;
+                    });
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "%",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: primaryBackground,
+                      ),
+                    )
+                  ),
+                  color: Colors.white,
+                  onTap: (() {
+                    _performCustomCalc("%");
+                  }),
+                ),
+                  _calcButton(
+                  child: Center(
+                    child: Icon(
+                      Ionicons.backspace_outline,
+                      color: primaryBackground,
+                      size: 25,
+                    )
+                  ),
+                  color: Colors.white,
+                  onTap: (() {
+                    // check if got length or not?
+                    _removeAmountControllerText();
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "÷",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  color: Colors.orange,
+                  onTap: (() {
+                    _performCustomCalc("/");
+                  }),
+                ),
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "7",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    _setAmountControllertext("7");
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "8",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    _setAmountControllertext("8");
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "9",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    _setAmountControllertext("9");
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "×",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  color: Colors.orange,
+                  onTap: (() {
+                    _performCustomCalc("*");
+                  }),
+                ),
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "4",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    _setAmountControllertext("4");
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "5",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    _setAmountControllertext("5");
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "6",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    _setAmountControllertext("6");
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "-",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  color: Colors.orange,
+                  onTap: (() {
+                    _performCustomCalc("-");
+                  }),
+                ),
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "1",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    _setAmountControllertext("1");
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "2",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    _setAmountControllertext("2");
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "3",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    _setAmountControllertext("3");
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "+",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  color: Colors.orange,
+                  onTap: (() {
+                    _performCustomCalc("+");
+                  }),
+                ),
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                _calcButton(
+                  flex: 2,
+                  child: Center(
+                    child: Text(
+                      "0",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    if(_amountController.text.length > 0) {
+                      _setAmountControllertext("0");
+                    }
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      ".",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    // check if we already have "." on the amount controller or not?
+                    if(!_amountController.text.contains(".")) {
+                      // check if this the first character?
+                      if(_amountController.text.length == 0) {
+                        _setAmountControllertext("0.");  
+                      }
+                      else {
+                        _setAmountControllertext(".");
+                      }
+                    }
+                  }),
+                ),
+                _calcButton(
+                  child: Center(
+                    child: Text(
+                      "=",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  color: Colors.orange,
+                  onTap: (() {
+                    _performCustomCalc("=");
+                  }),
+                ),
+              ],
+            ),
+            SizedBox(height: 25,),
+          ],
         ),
       ),
     );
