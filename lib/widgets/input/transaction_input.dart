@@ -24,6 +24,7 @@ import 'package:my_expense/utils/prefs/shared_category.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
+import 'package:my_expense/widgets/input/calcbutton.dart';
 import 'package:my_expense/widgets/item/expand_animation.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -524,30 +525,6 @@ class _TransactionInputState extends State<TransactionInput> {
     // debugPrint("Reset : " + _amountReset.toString());
   }
 
-  Widget _calcButton({int? flex, Color? color, Color? borderColor, double? borderWidth, required Widget child, required VoidCallback onTap}) {
-    int _flex = (flex ?? 1);
-    Color _color = (color ?? secondaryDark);
-    Color _borderColor = (borderColor ?? secondaryLight);
-    double _borderWidth = (borderWidth ?? 1.0);
-
-    return Expanded(
-      flex: _flex,
-      child: GestureDetector(
-        onTap: (() {
-          onTap();
-        }),
-        child: Container(
-          height: 60,
-          decoration: BoxDecoration(
-            color: _color,
-            border: Border.all(color: _borderColor, width: _borderWidth),
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-
   void _resizeAmountControllerFont() {
     if(_amountController.text.length > 6) {
       _currentAmountFontSize = 25 - ((10/6) * (_amountController.text.length - 6));
@@ -781,7 +758,7 @@ class _TransactionInputState extends State<TransactionInput> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "AC",
@@ -805,7 +782,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     });
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "%",
@@ -821,7 +798,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _performCustomCalc("%");
                   }),
                 ),
-                  _calcButton(
+                  CalcButton(
                   child: Center(
                     child: Icon(
                       Ionicons.backspace_outline,
@@ -835,7 +812,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _removeAmountControllerText();
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "÷",
@@ -856,7 +833,7 @@ class _TransactionInputState extends State<TransactionInput> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "7",
@@ -870,7 +847,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _setAmountControllertext("7");
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "8",
@@ -884,7 +861,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _setAmountControllertext("8");
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "9",
@@ -898,7 +875,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _setAmountControllertext("9");
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "×",
@@ -919,7 +896,7 @@ class _TransactionInputState extends State<TransactionInput> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "4",
@@ -933,7 +910,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _setAmountControllertext("4");
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "5",
@@ -947,7 +924,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _setAmountControllertext("5");
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "6",
@@ -961,7 +938,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _setAmountControllertext("6");
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "-",
@@ -982,7 +959,7 @@ class _TransactionInputState extends State<TransactionInput> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "1",
@@ -996,7 +973,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _setAmountControllertext("1");
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "2",
@@ -1010,7 +987,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _setAmountControllertext("2");
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "3",
@@ -1024,7 +1001,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     _setAmountControllertext("3");
                   }),
                 ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       "+",
@@ -1045,24 +1022,7 @@ class _TransactionInputState extends State<TransactionInput> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _calcButton(
-                  flex: 2,
-                  child: Center(
-                    child: Text(
-                      "0",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    if(_amountController.text.length > 0) {
-                      _setAmountControllertext("0");
-                    }
-                  }),
-                ),
-                _calcButton(
+                CalcButton(
                   child: Center(
                     child: Text(
                       ".",
@@ -1085,7 +1045,24 @@ class _TransactionInputState extends State<TransactionInput> {
                     }
                   }),
                 ),
-                _calcButton(
+                CalcButton(
+                  flex: 2,
+                  child: Center(
+                    child: Text(
+                      "0",
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ),
+                  onTap: (() {
+                    if(_amountController.text.length > 0) {
+                      _setAmountControllertext("0");
+                    }
+                  }),
+                ),
+                CalcButton(
                   child: Center(
                     child: Text(
                       "=",
