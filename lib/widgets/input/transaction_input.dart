@@ -87,7 +87,7 @@ class _TransactionInputState extends State<TransactionInput> {
   String _calcOperation = "";
   bool _amountReset = false;
   bool _isAmountFocus = false;
-  bool _isCustomPinpad = true;
+  bool _isCustomPinpad = false;
 
   // text field controller
   FocusNode _nameFocus = FocusNode();
@@ -444,87 +444,6 @@ class _TransactionInputState extends State<TransactionInput> {
     }
   }
 
-  void _performCalculation(String operation) {
-    if(_amountController.text.length > 0 && _calcAmount > 0) {
-      // check if we got _calcOperation before? if not it means that
-      // we just need to store this on the _calcMemory
-      if(_calcOperation == "") {
-        // if the operation is "=", means we don't need to change
-        // anything as this is asking for final result
-        if(operation == "=") {
-          return;
-        }
-
-        // store current amount to the calc memory
-        _calcMemory = _calcAmount;
-
-        // store current operation to the calc operation
-        _calcOperation = operation;
-
-        // set amount reset into true, so when user press another
-        // number it will be replaced with the number
-        _amountReset = true;
-      }
-      else {
-        // it means that we already have previous data, now we need
-        // to perform the calculation operation that we need to do 
-
-        switch(_calcOperation) {
-          case "+":
-            _calcMemory += _calcAmount;
-            break;
-          case "-":
-            _calcMemory -= _calcAmount;
-            break;
-          case "/":
-            _calcMemory /= _calcAmount;
-            break;
-          case "*":
-            _calcMemory *= _calcAmount;
-            break;
-          default:
-            _calcMemory += _calcAmount;
-            break;
-        }
-
-        // we are not accepting minus value
-        // so if already less than 0, then default this into 0 instead.
-        if(_calcMemory < 0) {
-          _calcMemory = 0.0;
-        }
-
-        // we got the calculation, now we can showed this on the amount controller
-        _amountController.text = fCCY.format(_calcMemory);
-
-        _currentAmount = _calcMemory;
-        _calcAmount = 0;
-
-        // now we see if the operation is "=" or not?
-        // if "=", means it's finished, we cal clear the _calcMemory and _calcOperation
-        if(operation == "=") {
-          _calcMemory = 0;
-          _calcOperation = "";
-          _amountReset = false;
-        }
-        else {
-          // user want to perform another calculation for this
-          // so set the next operation
-          _calcOperation = operation;
-          _amountReset = true;
-        }
-
-        setState(() {
-          _resizeAmountControllerFont();
-        });
-      }
-    }
-
-    // debugPrint("Calculator:");
-    // debugPrint("Memory : " + _calcMemory.toString());
-    // debugPrint("Operation : " + _calcOperation);
-    // debugPrint("Reset : " + _amountReset.toString());
-  }
-
   void _resizeAmountControllerFont() {
     if(_amountController.text.length > 6) {
       _currentAmountFontSize = 25 - ((10/6) * (_amountController.text.length - 6));
@@ -695,33 +614,6 @@ class _TransactionInputState extends State<TransactionInput> {
 
     return _returnWidget;
   }
-
-  Widget _customKey({required VoidCallback onTap, required String text}) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: (() {
-          onTap();
-        }),
-        child: Container(
-          height: 45,
-          margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            color: Colors.grey[600],
-          ),
-          child: Center(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 30,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
 
   Widget _generateCustomCalculator() {
     return Align(
@@ -1099,49 +991,119 @@ class _TransactionInputState extends State<TransactionInput> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            _customKey(
+            CalcButton(
+              child: Center(
+                child: Text(
+                  "AC",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: primaryBackground,
+                  ),
+                )
+              ),
+              color: Colors.white,
               onTap: (() {
-                // reset the amount controller, calc memory, operation
-                setState(() {                  
-                  _currentAmount = 0;
-                  _calcAmount = 0;
+                // clear the calc memory
+                setState(() {                          
                   _calcMemory = 0;
-                  _amountController.text = "";
+                  _calcAmount = 0;
+                  _currentAmount = 0;
                   _calcOperation = "";
+                  _amountController.text = "";
                   _currentAmountFontSize = 25;
                 });
               }),
-              text: "C",
             ),
-            _customKey(
+            CalcButton(
+              child: Center(
+                child: Text(
+                  "+",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              ),
+              color: Colors.orange,
               onTap: (() {
-                _performCalculation("+");
+                _performCustomCalc("+");
               }),
-              text: "+",
             ),
-            _customKey(
+            CalcButton(
+              child: Center(
+                child: Text(
+                  "-",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              ),
+              color: Colors.orange,
               onTap: (() {
-                _performCalculation("-");
+                _performCustomCalc("-");
               }),
-              text: "−",
             ),
-            _customKey(
+            CalcButton(
+              child: Center(
+                child: Text(
+                  "×",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              ),
+              color: Colors.orange,
               onTap: (() {
-                _performCalculation("*");
+                _performCustomCalc("*");
               }),
-              text: "×",
             ),
-            _customKey(
+            CalcButton(
+              child: Center(
+                child: Text(
+                  "÷",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              ),
+              color: Colors.orange,
               onTap: (() {
-                _performCalculation("/");
+                _performCustomCalc("/");
               }),
-              text: "÷",
             ),
-            _customKey(
+            CalcButton(
+              child: Center(
+                child: Text(
+                  "%",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              ),
+              color: Colors.orange,
               onTap: (() {
-                _performCalculation("=");
+                _performCustomCalc("%");
               }),
-              text: "=",
+            ),
+            CalcButton(
+              child: Center(
+                child: Text(
+                  "=",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                )
+              ),
+              color: Colors.orange,
+              onTap: (() {
+                _performCustomCalc("=");
+              }),
             ),
           ],
         ),
@@ -1629,7 +1591,7 @@ class _TransactionInputState extends State<TransactionInput> {
                   DecimalTextInputFormatter(decimalRange: 3),
                 ],
                 onChanged: (value) {
-                  debugPrint("On Changed");
+                  debugPrint("On Changed : " + value);
                   String _val = value;
                   // check if we have amount reset or not?
                   if(_amountReset) {

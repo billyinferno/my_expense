@@ -20,7 +20,7 @@ class CalcButton extends StatelessWidget {
 
     return Expanded(
       flex: _flex,
-      child: GestureDetector(
+      child: InkWell(
         onTap: (() {
           onTap();
         }),
