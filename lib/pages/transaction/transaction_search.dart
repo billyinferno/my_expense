@@ -105,13 +105,19 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   onSubmitted: ((_) async {
                     await _submitSearch().then((_) {
                       // remove the focus from the text
-                      FocusScope.of(context).unfocus();
+                      FocusScopeNode _currentFocus = FocusScope.of(context);
+                      if(!_currentFocus.hasPrimaryFocus) {
+                        _currentFocus.unfocus();
+                      }
                     });
                   }),
                   onSuffixTap: (() async {
                     _submitSearch().then((_) {
                       // remove the focus from the text
-                      FocusScope.of(context).unfocus();
+                      FocusScopeNode _currentFocus = FocusScope.of(context);
+                      if(!_currentFocus.hasPrimaryFocus) {
+                        _currentFocus.unfocus();
+                      }
                     });
                   }),
                 ),
