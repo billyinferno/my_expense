@@ -97,56 +97,6 @@ class _HomeListState extends State<HomeList> {
     });
   }
 
-  // Future<void> _showYearSelection() {
-  //   return showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-  //     return Container(
-  //       height: 300,
-  //       color: secondaryDark,
-  //       child: Column(
-  //         children: <Widget>[
-  //           Container(
-  //             height: 40,
-  //             decoration: BoxDecoration(
-  //               border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-  //             ),
-  //             child: Center(child: Text("Select Year")),
-  //           ),
-  //           SizedBox(height: 10,),
-  //           Expanded(
-  //             child: ListView.builder(
-  //               itemCount: (_lastDay.year - _firstDay.year),
-  //               itemBuilder: (BuildContext context, int index) {
-  //                 return Container(
-  //                   height: 60,
-  //                   decoration: BoxDecoration(
-  //                     border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-  //                   ),
-  //                   child: ListTile(
-  //                     title: Text((_lastDay.year - index).toString()),
-  //                     trailing: Visibility(
-  //                       visible: (_currentFocusedDay.year == (_lastDay.year - index)),
-  //                       child: Icon(
-  //                         Ionicons.checkmark_circle,
-  //                         size: 20,
-  //                         color: accentColors[0],
-  //                       ),
-  //                     ),
-  //                     onTap: () {
-  //                       setFocusedDay(DateTime((_lastDay.year - index), _currentFocusedDay.month, _currentFocusedDay.day));
-  //                       _refreshTransaction(_currentFocusedDay);
-  //                       Navigator.pop(context);
-  //                     },
-  //                   ),
-  //                 );
-  //               },
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     );
-  //   });
-  // }
-
   Future<void> _showCalendarPicker() async {
     Future<DateTime?> _date = showDatePicker(
       context: context,
@@ -176,57 +126,7 @@ class _HomeListState extends State<HomeList> {
         setFocusedDay(DateTime(_newDate.toLocal().year, _newDate.toLocal().month, _newDate.toLocal().day));
         _refreshTransaction(_currentFocusedDay);
       }
-      // else {
-      //   debugPrint("No date selected");
-      // }
     });
-    // return showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-    //   return Container(
-    //     height: 300,
-    //     color: secondaryDark,
-    //     child: Column(
-    //       children: <Widget>[
-    //         Container(
-    //           height: 40,
-    //           decoration: BoxDecoration(
-    //             border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-    //           ),
-    //           child: Center(child: Text("Select Month")),
-    //         ),
-    //         SizedBox(height: 10,),
-    //         Expanded(
-    //           child: ListView.builder(
-    //             itemCount: 12,
-    //             itemBuilder: (BuildContext context, int index) {
-    //               return Container(
-    //                 height: 60,
-    //                 decoration: BoxDecoration(
-    //                   border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-    //                 ),
-    //                 child: ListTile(
-    //                   title: Text(DateFormat("MMMM").format(DateTime(_currentFocusedDay.year, (index+1), _currentFocusedDay.day))),
-    //                   trailing: Visibility(
-    //                     visible: (_currentFocusedDay.month == (index+1)),
-    //                     child: Icon(
-    //                       Ionicons.checkmark_circle,
-    //                       size: 20,
-    //                       color: accentColors[0],
-    //                     ),
-    //                   ),
-    //                   onTap: () {
-    //                     setFocusedDay(DateTime(_currentFocusedDay.year, (index+1), _currentFocusedDay.day));
-    //                     _refreshTransaction(_currentFocusedDay);
-    //                     Navigator.pop(context);
-    //                   },
-    //                 ),
-    //               );
-    //             },
-    //           ),
-    //         ),
-    //       ],
-    //     ),
-    //   );
-    // });
   }
 
   @override
