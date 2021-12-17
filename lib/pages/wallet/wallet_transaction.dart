@@ -165,11 +165,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               gradient: LinearGradient(
-              colors: <Color>[
-                (_wallet.enabled ? IconList.getColor(_wallet.walletType.type) : secondaryDark),
-                (_wallet.enabled ? lighten(IconList.getDarkColor(_wallet.walletType.type),0.1) : secondaryBackground),
-              ]
-          ),
+                  colors: <Color>[
+                    (_wallet.enabled ? IconList.getColor(_wallet.walletType.type) : secondaryDark),
+                    (_wallet.enabled ? lighten(IconList.getDarkColor(_wallet.walletType.type),0.1) : secondaryBackground),
+                  ]
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,40 +320,57 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           child: Container(
             color: Colors.transparent,
             padding: EdgeInsets.all(10),
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: _transactions.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide(color: primaryLight, width: 1.0))
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        height: 40,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(40),
-                          color: _getColor(_transactions[index]),
-                        ),
-                        child: _getIcon(_transactions[index]),
-                      ),
-                      SizedBox(width: 10,),
-                      Expanded(
-                        child: Container(
-                          child: _getName(_transactions[index]),
-                        )
-                      ),
-                      SizedBox(width: 10,),
-                      _getAmount(_transactions[index]),
-                    ],
-                  ),
-                );
+            child: RefreshIndicator(
+              color: accentColors[6],
+              onRefresh: () async {
+                debugPrint("🔃 Refresh wallet");
+
+                // fetch the transaction for this date
+                showLoaderDialog(context);
+
+                await _fetchTransactionWallet(_currentDate, true).then((_) {
+                  Navigator.pop(context);
+                }).onError((error, stackTrace) {
+                  debugPrint("Error when refresh wallet for " + DateFormat("MMMM yyyy").format(_currentDate.toLocal()));
+                  Navigator.pop(context);
+                });
               },
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: _scrollController,
+                itemCount: _transactions.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0))
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          height: 40,
+                          width: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(40),
+                            color: _getColor(_transactions[index]),
+                          ),
+                          child: _getIcon(_transactions[index]),
+                        ),
+                        SizedBox(width: 10,),
+                        Expanded(
+                          child: Container(
+                            child: _getName(_transactions[index]),
+                          )
+                        ),
+                        SizedBox(width: 10,),
+                        _getAmount(_transactions[index]),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),
