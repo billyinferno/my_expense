@@ -17,7 +17,6 @@ import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/transaction_input.dart';
-import 'package:provider/provider.dart';
 
 class TransactionAddPage extends StatefulWidget {
   final Object? params;

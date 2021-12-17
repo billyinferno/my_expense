@@ -16,7 +16,6 @@ import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/transaction_input.dart';
-import 'package:provider/provider.dart';
 
 class TransactionEditPage extends StatefulWidget {
   final Object? params;
@@ -102,11 +101,56 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     Future<List<WorthModel>> _futureNetWorth;
 
     String _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnUpdate.date.toLocal().year, txnUpdate.date.toLocal().month, 1));
+    String _prevDay = DateFormat('yyyy-MM-dd').format(DateTime(paramsData.date.toLocal().year, paramsData.date.toLocal().month, 1));
 
-    // update the new transaction to the wallet transaction
-    await TransactionSharedPreferences.updateTransactionWallet(txnUpdate.wallet.id, _refreshDay, txnUpdate);
-    if (txnUpdate.walletTo != null) {
-      await TransactionSharedPreferences.updateTransactionWallet(txnUpdate.walletTo!.id, _refreshDay, txnUpdate);
+    // check whether this transaction moved from one wallet to another wallet?
+    // first check whether this is expense, income, or transfer?
+    bool _isWalletMoved = false;
+    if(txnUpdate.type == "expense" || txnUpdate.type == "income") {
+      if(paramsData.wallet.id == txnUpdate.wallet.id) {
+        // do nothing
+      }
+      else {
+        // change wallet
+        _isWalletMoved = true;
+      }
+    }
+    else {
+      // this is transfer, check both
+      if(paramsData.wallet.id == txnUpdate.wallet.id &&
+         paramsData.walletTo?.id == txnUpdate.walletTo?.id) {
+        // do nothing
+      }
+      else {
+        // change wallet for transfer
+        _isWalletMoved = true;
+      }
+    }
+
+    // if there are no wallet moved, then we can just update the wallet
+    if(!_isWalletMoved) {
+      // update the new transaction to the wallet transaction
+      await TransactionSharedPreferences.updateTransactionWallet(txnUpdate.wallet.id, _refreshDay, txnUpdate);
+      if (txnUpdate.walletTo != null) {
+        await TransactionSharedPreferences.updateTransactionWallet(txnUpdate.walletTo!.id, _refreshDay, txnUpdate);
+      }
+    }
+    else {
+      // check which wallet is being moved
+      if(paramsData.wallet.id != txnUpdate.wallet.id) {
+        // moved the transaction from previous wallet to the new wallet
+        await TransactionSharedPreferences.deleteTransactionWallet(paramsData.wallet.id, _prevDay, paramsData);
+        await TransactionSharedPreferences.addTransactionWallet(txnUpdate.wallet.id, _refreshDay, txnUpdate);
+      }
+
+      if(txnUpdate.walletTo != null) {
+        // check if both wallet the same or not?
+        if(paramsData.walletTo!.id != txnUpdate.walletTo!.id) {
+          // moved the transaction from previous wallet to the new wallet
+          await TransactionSharedPreferences.deleteTransactionWallet(paramsData.walletTo!.id, _prevDay, paramsData);
+          await TransactionSharedPreferences.addTransactionWallet(txnUpdate.walletTo!.id, _refreshDay, txnUpdate);
+        }
+      }
     }
 
     // check if this is expense or income?
