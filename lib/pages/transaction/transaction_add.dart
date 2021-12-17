@@ -102,7 +102,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
   void saveTransaction(TransactionModel? txn) async {
     // now we can try to send updated data to the backend
     TransactionModel _txn = txn!;
-    await _transactionHttp.addTransaction(context, _txn).then((value) {
+    await _transactionHttp.addTransaction(context, _txn, selectedDate).then((value) {
       // update necessary information after we add the transaction
       updateInformation(value).then((_) {
         // finished update information

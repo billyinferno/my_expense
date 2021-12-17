@@ -25,8 +25,7 @@ class TransactionHTTPService {
     _bearerToken = UserSharedPreferences.getJWT();
   }
 
-  Future<TransactionListModel> updateTransaction(BuildContext context,
-      TransactionModel txn, TransactionListModel prevTxn) async {
+  Future<TransactionListModel> updateTransaction(BuildContext context, TransactionModel txn, TransactionListModel prevTxn) async {
     bool _sameDate = isSameDay(txn.date.toLocal(), prevTxn.date.toLocal());
     _checkJWT();
 
@@ -51,9 +50,8 @@ class TransactionHTTPService {
         TransactionListModel _txnUpdate =
             TransactionListModel.fromJson(jsonDecode(response.body));
 
-        // get the list of transaction date from shared preferences
-        List<TransactionListModel>? _txnListShared =
-            TransactionSharedPreferences.getTransaction(date);
+        // get the list of previous transaction date from shared preferences
+        List<TransactionListModel>? _txnListShared = TransactionSharedPreferences.getTransaction(date);
 
         // the transaction list shouldn't be NULL, since we update it
         // in case null, then we just add this transaction to the transaction
@@ -118,8 +116,7 @@ class TransactionHTTPService {
     }
   }
 
-  Future<TransactionListModel> addTransaction(
-      BuildContext context, TransactionModel txn) async {
+  Future<TransactionListModel> addTransaction(BuildContext context, TransactionModel txn, DateTime selectedDate) async {
     _checkJWT();
 
     // check if we got JWT token or not?
@@ -154,10 +151,12 @@ class TransactionHTTPService {
         // and set back this shared preferences
         await TransactionSharedPreferences.setTransaction(date, _txnListShared);
 
-        // once add on the shared preferences, we can change the
-        // TransactionListModel provider so it will update the home list page
-        Provider.of<HomeProvider>(context, listen: false)
-            .setTransactionList(_txnListShared);
+        // for transaction that actually add on the different date, we cannot notify the home list
+        // to show this transaction, because currently we are in a different date between the transaction
+        // being add and the date being selected on the home list
+        if (isSameDay(txn.date.toLocal(), selectedDate.toLocal())) {
+          Provider.of<HomeProvider>(context, listen: false).setTransactionList(_txnListShared);
+        }
 
         // return from the proc
         return _txnAdd;
