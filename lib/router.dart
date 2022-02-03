@@ -43,6 +43,7 @@ class _RouterPageState extends State<RouterPage> {
   @override
   Widget build(BuildContext context) {
     final _themeData = ThemeData(
+      fontFamily: '--apple-system',
       brightness: Brightness.dark,
       backgroundColor: primaryBackground,
       appBarTheme: const AppBarTheme(backgroundColor: primaryDark),
