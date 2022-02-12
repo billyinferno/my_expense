@@ -91,16 +91,34 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     },
                     groupValue: _sliding,
                     children: {
-                      0: Text("Both"),
-                      1: Text("Name"),
-                      2: Text("Category"),
+                      0: Text(
+                        "Both",
+                        style: TextStyle(
+                          fontFamily: '--apple-system'
+                        ),
+                      ),
+                      1: Text(
+                        "Name",
+                        style: TextStyle(
+                          fontFamily: '--apple-system'
+                        ),
+                      ),
+                      2: Text(
+                        "Category",
+                        style: TextStyle(
+                          fontFamily: '--apple-system'
+                        ),
+                      ),
                     },
                   ),
                 ),
                 SizedBox(height: 10,),
                 CupertinoSearchTextField(
                   controller: _searchController,
-                  style: TextStyle(color: textColor2),
+                  style: TextStyle(
+                    color: textColor2,
+                    fontFamily: '--apple-system'
+                  ),
                   suffixIcon: Icon(Ionicons.arrow_forward_circle),
                   onSubmitted: ((_) async {
                     await _submitSearch().then((_) {

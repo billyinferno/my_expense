@@ -1830,6 +1830,11 @@ class _TransactionInputState extends State<TransactionInput> {
               child: CupertinoTheme(
                 data: CupertinoThemeData(
                   brightness: Brightness.dark,
+                  textTheme: CupertinoTextThemeData(
+                    textStyle: TextStyle(
+                      fontFamily: '--apple-system',
+                    )
+                  )
                 ),
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.date,

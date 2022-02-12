@@ -16,20 +16,35 @@ class ShowMyDialog {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return CupertinoAlertDialog(
-            title: Text(dialogTitle ?? "Confirmation"),
+            title: Text(
+              dialogTitle ?? "Confirmation",
+              style: TextStyle(
+                fontFamily: '--apple-system',
+              ),
+            ),
             content: SingleChildScrollView(
               padding: EdgeInsets.all(10),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(dialogText ?? "Are your sure?"),
+                  Text(
+                    dialogText ?? "Are your sure?",
+                    style: TextStyle(
+                      fontFamily: '--apple-system',
+                    ),
+                  ),
                 ],
               ),
             ),
             actions: <Widget>[
               CupertinoDialogAction(
-                child: Text(confirmText ?? "Confirm"),
+                child: Text(
+                  confirmText ?? "Confirm",
+                  style: TextStyle(
+                    fontFamily: '--apple-system',
+                  ),
+                ),
                 isDefaultAction: true,
                 onPressed: () {
                   //debugPrint("Confirmed");
@@ -37,7 +52,12 @@ class ShowMyDialog {
                 },
               ),
               CupertinoDialogAction(
-                child: Text(cancelText ?? "Cancel"),
+                child: Text(
+                  cancelText ?? "Cancel",
+                  style: TextStyle(
+                    fontFamily: '--apple-system',
+                  ),
+                ),
                 onPressed: () {
                   //debugPrint("Cancelled");
                   Navigator.pop(context, false);
@@ -45,35 +65,6 @@ class ShowMyDialog {
               ),
             ],
           );
-          /*return AlertDialog(
-            title: Text(dialogTitle ?? "Confirmation"),
-            content: SingleChildScrollView(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(dialogText ?? "Are your sure?"),
-                ],
-              ),
-            ),
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () {
-                    print("Confirmed");
-                    Navigator.pop(context, true);
-                  },
-                  child: Text(confirmText ?? "Confirm"),
-              ),
-              TextButton(
-                onPressed: () {
-                  print("Cancelled");
-                  Navigator.pop(context, false);
-                },
-                child: Text(cancelText ?? "Cancel"),
-              ),
-            ],
-          );*/
         }
     );
   }
