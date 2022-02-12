@@ -308,6 +308,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                     style: TextStyle(
                       color: textColor2,
                       fontSize: 20,
+                      fontFamily: '--apple-system'
                     ),
                   );
                 })),
@@ -338,6 +339,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
               style: TextStyle(
                 color: textColor2,
                 fontSize: 20,
+                fontFamily: '--apple-system'
               ),
             );
           })),
@@ -365,6 +367,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                     dateTimePickerTextStyle: TextStyle(
                       color: textColor2,
                       fontSize: 20,
+                      fontFamily: '--apple-system'
                     ),
                   ),
                 ),
@@ -399,6 +402,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                     dateTimePickerTextStyle: TextStyle(
                       color: textColor2,
                       fontSize: 20,
+                      fontFamily: '--apple-system'
                     ),
                   ),
                 ),
