@@ -10,6 +10,7 @@ import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/error_model.dart';
 import 'package:my_expense/model/login_model.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/misc/error_parser.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -310,7 +311,7 @@ class _LoginPageState extends State<LoginPage> {
               Container(
                 width: double.infinity,
                 child: Text(
-                  "v.0.0.1 - alpha",
+                  'version - ' + Globals.appVersion,
                   style: TextStyle(
                     color: textColor2,
                     fontSize: 8,
