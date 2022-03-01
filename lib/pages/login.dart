@@ -124,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             Text(
-              "v.0.0.1 - alpha",
+              'version - ' + Globals.appVersion,
               style: TextStyle(
                 color: textColor2,
                 fontSize: 10,
