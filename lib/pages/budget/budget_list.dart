@@ -566,20 +566,17 @@ class _BudgetListPageState extends State<BudgetListPage> {
       required double budgetAmount}) {
     // format the amount
     return Slidable(
-      actionPane: SlidableScrollActionPane(),
-      actionExtentRatio: 0.20,
-      secondaryActions: <Widget>[
-        IconSlideAction(
-          caption: 'Delete',
-          foregroundColor: textColor,
-          color: accentColors[2],
-          iconWidget: Icon(
-            Ionicons.trash,
-            size: 20,
-            color: textColor,
-          ),
-          onTap: () {
-            if (!_isLoading) {
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.20,
+        children: <SlidableAction>[
+          SlidableAction(
+            label: 'Delete',
+            foregroundColor: textColor,
+            backgroundColor: accentColors[2],
+            icon: Ionicons.trash,
+            onPressed: (_) {
+              if (!_isLoading) {
               late Future<bool?> result = ShowMyDialog(
                       dialogTitle: "Delete Budget",
                       dialogText: "Do you want to delete " + categoryName + "?",
@@ -598,9 +595,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 }
               });
             }
-          },
-        ),
-      ],
+            }
+          ),
+        ],
+      ),
       child: GestureDetector(
         onDoubleTap: (() {
           // debugPrint("Edit for id " +

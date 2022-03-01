@@ -383,37 +383,35 @@ class _HomeListState extends State<HomeList> {
   Widget generateListItem(int index, TransactionListModel txn, BuildContext context) {
     // debugPrint("Txn " + txn.date.toLocal().toString());
     return Slidable(
-      actionPane: SlidableScrollActionPane(),
-      actionExtentRatio: 0.20,
-      secondaryActions: <Widget>[
-        IconSlideAction(
-          caption: 'Delete',
-          foregroundColor: textColor,
-          color: accentColors[2],
-          iconWidget: Icon(
-            Ionicons.trash,
-            size: 20,
-            color: textColor,
-          ),
-          onTap: () {
-            if (!_isLoading) {
-              late Future<bool?> result = ShowMyDialog(
-                      dialogTitle: "Delete Item",
-                      dialogText: "Do you want to delete " + txn.name + "?",
-                      confirmText: "Delete",
-                      cancelText: "Cancel")
-                  .show(context);
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.20,
+        children: <SlidableAction>[
+          SlidableAction(
+            label: 'Delete',
+            foregroundColor: textColor,
+            backgroundColor: accentColors[2],
+            icon: Ionicons.trash,
+            onPressed: ((_) {
+              if (!_isLoading) {
+                late Future<bool?> result = ShowMyDialog(
+                        dialogTitle: "Delete Item",
+                        dialogText: "Do you want to delete " + txn.name + "?",
+                        confirmText: "Delete",
+                        cancelText: "Cancel")
+                    .show(context);
 
-              // check the result of the dialog box
-              result.then((value) {
-                if (value == true) {
-                  _deleteTransaction(txn);
-                }
-              });
-            }
-          },
-        ),
-      ],
+                // check the result of the dialog box
+                result.then((value) {
+                  if (value == true) {
+                    _deleteTransaction(txn);
+                  }
+                });
+              }
+            })
+          ),
+        ],
+      ),
       child: GestureDetector(
         onTap: () {
           Navigator.pushNamed(context, '/transaction/edit', arguments: txn);

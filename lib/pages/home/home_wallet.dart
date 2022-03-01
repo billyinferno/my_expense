@@ -180,97 +180,83 @@ class _HomeWalletState extends State<HomeWallet> {
 
   Widget generateSlidable(WalletModel wallet, BuildContext context) {
     return Slidable(
-      actionPane: SlidableScrollActionPane(),
-      actionExtentRatio: 0.15,
-      secondaryActions: <Widget>[
-        IconSlideAction(
-          caption: 'Edit',
-          foregroundColor: accentColors[1],
-          color: primaryBackground,
-          iconWidget: Icon(
-            Ionicons.pencil,
-            size: 20,
-            color: accentColors[8],
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.75,
+        children: <SlidableAction>[
+          SlidableAction(
+            label: 'Edit',
+            foregroundColor: accentColors[1],
+            backgroundColor: primaryBackground,
+            icon: Ionicons.pencil,
+            onPressed: ((_) {
+              Navigator.pushNamed(context, '/wallet/edit', arguments: wallet);
+            })
           ),
-          onTap: () {
-            //debugPrint("Display the edit wallet page for " + wallet.id.toString());
-            Navigator.pushNamed(context, '/wallet/edit', arguments: wallet);
-          },
-        ),
-        IconSlideAction(
-          caption: 'Delete',
-          foregroundColor: accentColors[2],
-          color: primaryBackground,
-          iconWidget: Icon(
-            Ionicons.trash,
-            size: 20,
-            color: accentColors[2],
-          ),
-          onTap: () {
-            if(!isLoading) {
-              late Future<bool?> result = ShowMyDialog(
-                dialogTitle: "Delete Wallet",
-                dialogText: "Do you want to delete " + wallet.name + "?\nThis will also delete all related transaction to this wallet.",
-                confirmText: "Delete",
-                cancelText: "Cancel"
-              ).show(context);
+          SlidableAction(
+            label: 'Delete',
+            foregroundColor: accentColors[2],
+            backgroundColor: primaryBackground,
+            icon: Ionicons.trash,
+            onPressed: ((_) {
+              if(!isLoading) {
+                late Future<bool?> result = ShowMyDialog(
+                  dialogTitle: "Delete Wallet",
+                  dialogText: "Do you want to delete " + wallet.name + "?\nThis will also delete all related transaction to this wallet.",
+                  confirmText: "Delete",
+                  cancelText: "Cancel"
+                ).show(context);
 
-              // check the result of the dialog box
-              result.then((value) async {
-                if(value == true) {
-                  await _deleteWallet(wallet.id).then((_) {
-                    Navigator.pop(context);
-                    // clear all the cache for the application so we can just
-                    // fetch again all data from internet, for this let user knew
-                    // that we will delete all the cache
-                    late Future<bool?> userConfirm = ShowMyDialog(
-                        dialogTitle: "Cache Clear",
-                        dialogText: "We will clear all the cache for the application.",
-                        confirmText: "Okay",
-                    ).show(context);
+                // check the result of the dialog box
+                result.then((value) async {
+                  if(value == true) {
+                    await _deleteWallet(wallet.id).then((_) {
+                      Navigator.pop(context);
+                      // clear all the cache for the application so we can just
+                      // fetch again all data from internet, for this let user knew
+                      // that we will delete all the cache
+                      late Future<bool?> userConfirm = ShowMyDialog(
+                          dialogTitle: "Cache Clear",
+                          dialogText: "We will clear all the cache for the application.",
+                          confirmText: "Okay",
+                      ).show(context);
 
-                    userConfirm.then((value) {
-                      _clearCache();
+                      userConfirm.then((value) {
+                        _clearCache();
+                      });
+                    }).onError((error, stackTrace) {
+                      debugPrint("Error when clicking delete wallet");
+                      Navigator.pop(context);
                     });
-                  }).onError((error, stackTrace) {
-                    debugPrint("Error when clicking delete wallet");
-                    Navigator.pop(context);
-                  });
-                }
-              });
-            }
-            else {
-              debugPrint("Something still happen");
-            }
-          },
-        ),
-        IconSlideAction(
-          caption: (wallet.enabled ? 'Disable' : 'Enable'),
-          foregroundColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
-          color: primaryBackground,
-          iconWidget: Icon(
-            (wallet.enabled ? Ionicons.alert : Ionicons.checkmark),
-            size: 20,
-            color: (wallet.enabled ? accentColors[7] : accentColors[6]),
+                  }
+                });
+              }
+            })
           ),
-          onTap: () {
-            late Future<bool?> result = ShowMyDialog(
+          SlidableAction(
+            label: (wallet.enabled ? 'Disable' : 'Enable'),
+            foregroundColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
+            backgroundColor: primaryBackground,
+            icon: (wallet.enabled ? Ionicons.alert : Ionicons.checkmark),
+            onPressed: ((_) {
+              late Future<bool?> result = ShowMyDialog(
                 dialogTitle: (wallet.enabled ? 'Disable' : 'Enable') + " Wallet",
                 dialogText: "Do you want to " + (wallet.enabled ? 'Disable' : 'Enable') + " " + wallet.name + "?",
                 confirmText: (wallet.enabled ? 'Disable' : 'Enable'),
                 cancelText: "Cancel")
                 .show(context);
 
-            // check the result of the dialog box
-            result.then((value) {
-              if (value == true) {
-                // disable the wallet
-                _enableWallet(wallet);
-              }
-            });
-          },
-        ),
-      ],
+              // check the result of the dialog box
+              result.then((value) {
+                if (value == true) {
+                  // disable the wallet
+                  _enableWallet(wallet);
+                }
+              });
+            })
+          ),
+        ],
+      ),
       child: GestureDetector(
         onTap: () {
           //debugPrint("Opening the wallet list of transaction page");
