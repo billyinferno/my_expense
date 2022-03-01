@@ -21,6 +21,7 @@ SnackBar createSnackBar({required String message, Icon? icon, int? duration}) {
             style: TextStyle(
               color: textColor,
               fontSize: 15,
+              fontFamily: '--apple-system',
             ),
           ),
         ],
