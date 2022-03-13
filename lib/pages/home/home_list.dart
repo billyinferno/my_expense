@@ -13,6 +13,7 @@ import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/pages/home/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
+import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/misc/my_callback.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
@@ -106,13 +107,13 @@ class _HomeListState extends State<HomeList> {
       initialEntryMode: DatePickerEntryMode.calendarOnly,
       builder: ((BuildContext context, Widget? child) {
         return Theme(
-          data: ThemeData.dark().copyWith(
+          data: Globals.themeData.copyWith(
             colorScheme: ColorScheme.dark(
-                primary: accentColors[6],
-                onPrimary: textColor,
-                surface: secondaryDark,
-                onSurface: textColor2,
-                ),
+              primary: accentColors[6],
+              onPrimary: textColor,
+              surface: secondaryDark,
+              onSurface: textColor2,
+            ),
             dialogBackgroundColor:secondaryBackground,
           ),
           child: child!,

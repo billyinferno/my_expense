@@ -18,6 +18,7 @@ import 'package:my_expense/pages/wallet/wallet_transaction.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/anim/page_transition.dart';
+import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:provider/provider.dart';
 
@@ -42,41 +43,6 @@ class _RouterPageState extends State<RouterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final _themeData = ThemeData(
-      fontFamily: '--apple-system',
-      brightness: Brightness.dark,
-      backgroundColor: primaryBackground,
-      appBarTheme: const AppBarTheme(backgroundColor: primaryDark),
-      scaffoldBackgroundColor: primaryBackground,
-      primaryColor: primaryBackground,
-      //accentColor: accentColors[0],
-      iconTheme: const IconThemeData().copyWith(color: textColor),
-      // fontFamily: 'Roboto',
-      textTheme: TextTheme(
-        headline2: const TextStyle(
-          color: textColor,
-          fontSize: 32.0,
-          fontWeight: FontWeight.bold,
-        ),
-        headline4: const TextStyle(
-          color: textColor2,
-          fontSize: 12.0,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 2.0,
-        ),
-        bodyText1: const TextStyle(
-          color: textColor,
-          fontSize: 14.0,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1.0,
-        ),
-        bodyText2: const TextStyle(
-          color: textColor,
-          letterSpacing: 1.0,
-        ),
-      ),
-    );
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<HomeProvider>(
@@ -86,8 +52,8 @@ class _RouterPageState extends State<RouterPage> {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'My Expense',
-        theme: _themeData.copyWith(
-          colorScheme: _themeData.colorScheme.copyWith(
+        theme: Globals.themeData.copyWith(
+          colorScheme: Globals.themeData.colorScheme.copyWith(
             secondary: accentColors[0],
           ),
         ),
