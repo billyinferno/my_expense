@@ -108,6 +108,16 @@ class _HomeListState extends State<HomeList> {
       builder: ((BuildContext context, Widget? child) {
         return Theme(
           data: Globals.themeData.copyWith(
+            textTheme: TextTheme(
+              headline4: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              headline5: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             colorScheme: ColorScheme.dark(
               primary: accentColors[6],
               onPrimary: textColor,
