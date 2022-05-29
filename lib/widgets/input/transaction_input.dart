@@ -1833,9 +1833,11 @@ class _TransactionInputState extends State<TransactionInput> {
                   textTheme: CupertinoTextThemeData(
                     textStyle: TextStyle(
                       fontFamily: '--apple-system',
+                      fontSize: 20,
                     ),
                     dateTimePickerTextStyle: TextStyle(
                       fontFamily: '--apple-system',
+                      fontSize: 20,
                     ),
                   )
                 ),
@@ -2349,6 +2351,16 @@ class _TransactionInputState extends State<TransactionInput> {
               child: CupertinoTheme(
                 data: CupertinoThemeData(
                   brightness: Brightness.dark,
+                  textTheme: CupertinoTextThemeData(
+                    textStyle: TextStyle(
+                      fontFamily: '--apple-system',
+                      fontSize: 20,
+                    ),
+                    dateTimePickerTextStyle: TextStyle(
+                      fontFamily: '--apple-system',
+                      fontSize: 20,
+                    ),
+                  )
                 ),
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.date,
