@@ -306,7 +306,7 @@ class _TransactionInputState extends State<TransactionInput> {
               IconButton(
                 onPressed: () {
                   // check if the date is today date or not?
-                  if(DateTime.now().toLocal().isBefore(_selectedDate)) {
+                  if(DateTime.now().toLocal().isBefore(_selectedDate.toLocal())) {
                     late Future<bool?> result = ShowMyDialog(
                         dialogTitle: "Future Date",
                         dialogText: "Are you sure want to add a future date?.",
