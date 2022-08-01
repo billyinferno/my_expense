@@ -8,12 +8,12 @@ class IconList {
     switch(name.toLowerCase()) {
       case "wallet": { return Icon(FontAwesomeIcons.wallet, color: Color(0xFFFFFFFF), size: _size,); }
       case "asset": { return Icon(FontAwesomeIcons.fileInvoiceDollar, color: Color(0xFFFFFFFF), size: _size); }
-      case "cash": { return Icon(FontAwesomeIcons.moneyBill1, color: Color(0xFFFFFFFF), size: _size); }
+      case "cash": { return Icon(FontAwesomeIcons.moneyBillAlt, color: Color(0xFFFFFFFF), size: _size); }
       case "checking": { return Icon(FontAwesomeIcons.solidCreditCard, color: Color(0xFFFFFFFF), size: _size); }
       case "credit card": { return Icon(FontAwesomeIcons.ccVisa, color: Color(0xFFFFFFFF), size: _size); }
       case "debit card": { return Icon(FontAwesomeIcons.solidCreditCard, color: Color(0xFFFFFFFF), size: _size); }
       case "investment": { return Icon(FontAwesomeIcons.chartArea, color: Color(0xFFFFFFFF), size: _size); }
-      case "loan": { return Icon(FontAwesomeIcons.handHoldingDollar, color: Color(0xFFFFFFFF), size: _size); }
+      case "loan": { return Icon(FontAwesomeIcons.handHoldingUsd, color: Color(0xFFFFFFFF), size: _size); }
       case "savings": { return Icon(FontAwesomeIcons.piggyBank, color: Color(0xFFFFFFFF), size: _size); }
       case "other": { return Icon(FontAwesomeIcons.wallet, color: Color(0xFFFFFFFF), size: _size); }
       default: { return Icon(FontAwesomeIcons.wallet, color: Color(0xFFFFFFFF), size: _size); }
