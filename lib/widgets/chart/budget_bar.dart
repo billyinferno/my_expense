@@ -61,14 +61,16 @@ class BudgetBar extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
+                        child: SizedBox(
+                          child: Text(
+                            title,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                      Expanded(
+                      SizedBox(
                         child: Visibility(
                           visible: (showLeftText == null ? true : showLeftText!),
                           child: Text(
@@ -79,7 +81,7 @@ class BudgetBar extends StatelessWidget {
                             textAlign: TextAlign.right,
                           ),
                         ),
-                      ),
+                      )
                     ],
                   ),
                   SizedBox(
@@ -96,8 +98,9 @@ class BudgetBar extends StatelessWidget {
                             color: secondaryBackground,
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: ClipRect(
+                          child: ClipRRect(
                             clipBehavior: Clip.hardEdge,
+                            borderRadius: BorderRadius.circular(20),
                             child: OverflowBox(
                               alignment: Alignment.centerLeft,
                               child: FractionallySizedBox(
