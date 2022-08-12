@@ -147,57 +147,44 @@ class BudgetBar extends StatelessWidget {
   Color _getBarColor() {
     // check the budget being used
     double _totalUsed = budgetUsed / budgetTotal;
-    double _fraction;
+    // double _fraction;
     int _sR = 0;
     int _sG = 0;
     int _sB = 0;
     int _tR = 0;
     int _tG = 0;
     int _tB = 0;
+    int _count;
 
-    if (_totalUsed >= 0.80) {
-      // red
+    // get the current
+    _count = ((_totalUsed - 0.01) * 100).toInt();
+
+    if (_count >= 100) {
       return accentColors[10];
-    } else if (_totalUsed >= 0.60) {
-      // blend between red and orange
-      // fraction will be used by the secondary color
-      _sR = accentColors[2].red - accentColors[1].red;
-      _sG = accentColors[2].green - accentColors[1].green;
-      _sB = accentColors[2].blue - accentColors[1].blue;
-
-      _fraction = (0.80 - _totalUsed) * 100;
-      _sR = _sR.toDouble() ~/ _fraction;
-      _sG = _sG.toDouble() ~/ _fraction;
-      _sB = _sB.toDouble() ~/ _fraction;
-      //print(_totalUsed.toString() + " : " + _sR.toString() + "," + _sG.toString() + "," + _sB.toString());
-
-      _tR = (accentColors[1].red + _sR);
-      _tG = (accentColors[1].green + _sG);
-      _tB = (accentColors[1].blue + _sB);
-
-      return Color.fromARGB(0xFF, _tR, _tG, _tB);
-    } else if (_totalUsed >= 0.40) {
-      // orange
-      return accentColors[1];
-    } else if (_totalUsed >= 0.20) {
-      // blend between orange and blue
-      // fraction will be used by the secondary color
-      _sR = accentColors[1].red - accentColors[4].red;
-      _sG = accentColors[1].green - accentColors[4].green;
-      _sB = accentColors[1].blue - accentColors[4].blue;
-
-      _fraction = (0.40 - _totalUsed) * 100;
-      _sR = _sR.toDouble() ~/ _fraction;
-      _sG = _sG.toDouble() ~/ _fraction;
-      _sB = _sB.toDouble() ~/ _fraction;
-      //print(_totalUsed.toString() + " : " + _sR.toString() + "," + _sG.toString() + "," + _sB.toString());
-
-      _tR = (accentColors[4].red + _sR);
-      _tG = (accentColors[4].green + _sG);
-      _tB = (accentColors[4].blue + _sB);
-
-      return Color.fromARGB(0xFF, _tR, _tG, _tB);
     }
-    return accentColors[4];
+
+    // between 1%-50% put gradient between green orange
+    if (_count <= 50) {
+      _sR = ((1 - (_count/99)) * accentColors[0].red).toInt();
+      _sG = ((1 - (_count/99)) * accentColors[0].green).toInt();
+      _sB = ((1 - (_count/99)) * accentColors[0].blue).toInt();
+
+      _tR = ((_count/99) * accentColors[1].red).toInt();
+      _tG = ((_count/99) * accentColors[1].green).toInt();
+      _tB = ((_count/99) * accentColors[1].blue).toInt();
+
+      return Color.fromARGB(0xFF, (_sR + _tR), (_sG + _tG), (_sB + _tB));      
+    }
+
+    // other than that put orange to red
+    _sR = ((1 - (_count/50)) * accentColors[1].red).toInt();
+    _sG = ((1 - (_count/50)) * accentColors[1].green).toInt();
+    _sB = ((1 - (_count/50)) * accentColors[1].blue).toInt();
+
+    _tR = ((_count/50) * accentColors[10].red).toInt();
+    _tG = ((_count/50) * accentColors[10].green).toInt();
+    _tB = ((_count/50) * accentColors[10].blue).toInt();
+
+    return Color.fromARGB(0xFF, (_sR + _tR), (_sG + _tG), (_sB + _tB));
   }
 }
