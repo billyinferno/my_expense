@@ -39,7 +39,17 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
 
   @override
   void initState() {
+    DateTime? prefCurrentTime;
+
     selectedDate = widget.params as DateTime;
+    
+    // check on the shared preferences if the transaction list current time is already set or not?
+    // if not then use params.
+    prefCurrentTime = TransactionSharedPreferences.getTransactionListCurrentDate();
+    if (prefCurrentTime != null) {
+      selectedDate = prefCurrentTime;
+    }
+
     super.initState();
   }
 

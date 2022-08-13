@@ -100,9 +100,19 @@ class TransactionHTTPService {
         // once all the manipulation finished
         await TransactionSharedPreferences.setTransaction(date, _txnListShared);
 
-        // once add on the shared preferences, we can change the
-        // TransactionListModel provider so it will update the home list page
-        Provider.of<HomeProvider>(context, listen: false).setTransactionList(_txnListShared);
+        // for transaction that actually add on the different date, we cannot notify the home list
+        // to show this transaction, because currently we are in a different date between the transaction
+        // being add and the date being selected on the home list
+        DateTime? currentListTxnDate = TransactionSharedPreferences.getTransactionListCurrentDate();
+        if (currentListTxnDate == null) {
+          currentListTxnDate = DateTime.now();
+        }
+
+        if (isSameDay(txn.date.toLocal(), currentListTxnDate.toLocal())) {
+          // once add on the shared preferences, we can change the
+          // TransactionListModel provider so it will update the home list page
+          Provider.of<HomeProvider>(context, listen: false).setTransactionList(_txnListShared);
+        }
 
         // return from the proc
         return _txnUpdate;
