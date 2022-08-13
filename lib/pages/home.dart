@@ -1,4 +1,3 @@
-import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/model/pin_model.dart';
@@ -19,6 +18,14 @@ class _HomePageState extends State<HomePage> {
   DateTime selectedDate = DateTime.now();
 
   List<Widget> pages = [];
+  final List<IconData> iconItems = [
+    Ionicons.calendar,
+    Ionicons.stats_chart,
+    Ionicons.list,
+    Ionicons.wallet,
+  ];
+  final List<String> iconTitle = ["Calendar", "Stats", "Budget", "Account"];
+
   late PinModel? pin;
   bool isPinEnabled = false;
   bool isBodyShowed = false;
@@ -75,10 +82,65 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: getBody(),
-      bottomNavigationBar: createNavigationBar(),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 5,
+        color: primaryDark,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _barButton(0),
+            _barButton(1),
+            Expanded(child: SizedBox()),
+            _barButton(2),
+            _barButton(3),
+          ],
+        ),
+      ),
       floatingActionButton: createFloatingAddButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
+  }
+
+  Widget _barButton(int index) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: (() {
+          setState(() {
+            currentIndex = index;
+          });
+        }),
+        child: Container(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 10),
+              Icon(
+                iconItems[index],
+                size: 20,
+                color: (currentIndex == index ? accentColors[1] : Colors.white),
+              ),
+              SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  iconTitle[index],
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: (currentIndex == index ? accentColors[1] : Colors.white),
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+              SizedBox(height: 25),
+            ],
+          ),
+        ),
+      ),
+    ); 
   }
 
   Widget getBody() {
@@ -103,59 +165,6 @@ class _HomePageState extends State<HomePage> {
         size: 25,
         color: textColor,
       ),
-    );
-  }
-
-  Widget createNavigationBar() {
-    List<IconData> iconItems = [
-      Ionicons.calendar,
-      Ionicons.stats_chart,
-      Ionicons.list,
-      Ionicons.wallet,
-    ];
-
-    List<String> iconTitle = ["Calendar", "Stats", "Budget", "Account"];
-
-    return AnimatedBottomNavigationBar.builder(
-      itemCount: iconItems.length,
-      height: 80,
-      tabBuilder: (int index, bool isActive) {
-        final color = isActive ? accentColors[1] : textColor2;
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              iconItems[index],
-              size: 20,
-              color: color,
-            ),
-            SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                iconTitle[index],
-                maxLines: 1,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 10,
-                ),
-              ),
-            ),
-            SizedBox(height: 25),
-          ],
-        );
-      },
-      activeIndex: currentIndex,
-      gapLocation: GapLocation.center,
-      notchSmoothness: NotchSmoothness.defaultEdge,
-      leftCornerRadius: 10,
-      rightCornerRadius: 10,
-      backgroundColor: primaryDark,
-      splashRadius: 0,
-      onTap: ((index) {
-        selectedTab(index);
-      }),
     );
   }
 
