@@ -135,6 +135,8 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                       toDate: _stats.toDate,
                       amount: data[index].amount,
                       total: (type == "expense" ? _maxExpense : _maxIncome),
+                      name: _stats.name,
+                      search: _stats.search,
                     );
 
                     // go to stats transaction 

@@ -40,6 +40,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   DateTime _currentToDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1).subtract(Duration(days: 1));
   
   bool _showCalendar = false;
+  late String _name;
   
   List<CurrencyModel> _currencies = [];
   List<WalletModel> _wallets = [];
@@ -50,6 +51,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   late WalletModel? _currentWallet;
   IncomeExpenseCategoryModel _currentIncomeExpenseCategory = IncomeExpenseCategoryModel(expense: [], income: []);
   // late PageController _monthController;
+  final TextEditingController _nameController = TextEditingController();
   late ScrollController _scrollControllerCurrencies;
   late ScrollController _scrollControllerWallet;
   // late ScrollController _yearSelectorController;
@@ -59,6 +61,9 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   @override
   void initState() {
     super.initState();
+
+    // default the name into "Any"
+    _name = "Any";
     
     _userMe = UserSharedPreferences.getUserMe();
 
@@ -108,6 +113,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     super.dispose();
     
     // _monthController.dispose();
+    _nameController.dispose();
     _scrollControllerCurrencies.dispose();
     _scrollControllerWallet.dispose();
     // _yearSelectorController.dispose();
@@ -136,8 +142,114 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            Container(
+              height: 50,
+              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+              decoration: BoxDecoration(
+                color: secondaryDark,
+              ),
+              child: Container(
+                width: double.infinity,
+                height: 50,
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: secondaryLight, width: 1.0)),
+                ),
+                child: Container(
+                  color: Colors.transparent,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Ionicons.pencil,
+                        color: accentColors[1],
+                      ),
+                      SizedBox(width: 10,),
+                      Text(
+                        "Name",
+                        style: TextStyle(
+                          color: textColor2,
+                        ),
+                      ),
+                      const SizedBox(width: 10,),
+                      InkWell(
+                        onTap: (() {
+                          showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+                            return Container(
+                              height: 300,
+                              color: secondaryDark,
+                              child: Column(
+                                children: <Widget>[
+                                  _nameButton(value: "Any"),
+                                  _nameButton(value: "Match"),
+                                  _nameButton(value: "Exact"),
+                                ],
+                              ),
+                            );
+                          });
+                        }),
+                        child: Container(
+                          height: 30,
+                          width: 90,
+                          padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                          decoration: BoxDecoration(
+                            color: secondaryDark,
+                            border: Border.all(
+                              color: secondaryLight,
+                              width: 1.0,
+                              style: BorderStyle.solid
+                            ),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              Expanded(
+                                child: Center(
+                                  child: Text(
+                                    _name,
+                                    style: TextStyle(
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 5,),
+                              Icon(
+                                Ionicons.chevron_down,
+                                color: secondaryLight,
+                                size: 15,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10,),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _nameController,
+                          enabled: (_name.toLowerCase() == "any" ? false : true),
+                          enableSuggestions: false,
+                          keyboardType: TextInputType.name,
+                          textAlign: TextAlign.right,
+                          decoration: InputDecoration(
+                            hintText: "Transaction name",
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                            isCollapsed: true,
+                          ),
+                          textInputAction: TextInputAction.done,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            ),
             _generateCurrencySelector(),
             _generateCalendarDisplay(),
             _generateCalendar(),
@@ -659,6 +771,56 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     );
   }
 
+  Widget _nameButton({required String value}) {
+    return Container(
+      height: 60,
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+      ),
+      child: InkWell(
+        onTap: (() {
+          // check if the value is any, then clear the _nameController
+          if (value.toLowerCase() == "any") {
+            _nameController.text = "";
+          }
+
+          // rebuild widget
+          setState(() {
+            _name = value;
+          });
+
+          // remove the popup modal dialog
+          Navigator.pop(context);
+        }),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const SizedBox(width: 20,),
+              Expanded(
+                child: Text(
+                  value
+                ),
+              ),
+              const SizedBox(width: 10,),
+              Visibility(
+                visible: (_name.toLowerCase() == value.toLowerCase()),
+                child: Icon(
+                  Ionicons.checkmark_circle,
+                  size: 20,
+                  color: accentColors[0],
+                )
+              ),
+              const SizedBox(width: 20,),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   String _getTitleText() {
     if(_currentType == "month") {
       return DateFormat("MMMM yyyy").format(_currentToDate.toLocal());
@@ -709,6 +871,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           currency: _currentCurrencies!,
           wallet: _currentWallet!,
           incomeExpenseCategory: _currentIncomeExpenseCategory,
+          name: (_nameController.text.isEmpty ? '*' : _nameController.text.trim()),
+          search: _name,
         );
 
         // navigate to stats detail
@@ -726,7 +890,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   Future<void> _fetchStats() async {
-    await _transactionHttp.fetchIncomeExpenseCategory(_currentCurrencies!.id, _currentWallet!.id, _currentFromDate, _currentToDate).then((incomeExpenseCategory) {
+    await _transactionHttp.fetchIncomeExpenseCategory(_nameController.text, _name, _currentCurrencies!.id, _currentWallet!.id, _currentFromDate, _currentToDate).then((incomeExpenseCategory) {
       // set current income expense category as this
       _currentIncomeExpenseCategory = incomeExpenseCategory;
     }).onError((error, stackTrace) {

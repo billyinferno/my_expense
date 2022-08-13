@@ -9,6 +9,8 @@ class StatsDetailArgs {
   final CurrencyModel currency;
   final WalletModel wallet;
   final IncomeExpenseCategoryModel incomeExpenseCategory;
+  final String name;
+  final String search;
 
-  StatsDetailArgs({required this.type, required this.fromDate, required this.toDate, required this.currency, required this.wallet, required this.incomeExpenseCategory});
+  StatsDetailArgs({required this.type, required this.fromDate, required this.toDate, required this.currency, required this.wallet, required this.incomeExpenseCategory, required this.name, required this.search});
 }

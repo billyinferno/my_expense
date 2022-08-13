@@ -393,7 +393,7 @@ class TransactionHTTPService {
     }
   }
 
-  Future<IncomeExpenseCategoryModel> fetchIncomeExpenseCategory(int ccyId, int walletId, DateTime from, DateTime to) async {
+  Future<IncomeExpenseCategoryModel> fetchIncomeExpenseCategory(String name, String search, int ccyId, int walletId, DateTime from, DateTime to) async {
     String _dateFrom = DateFormat('yyyy-MM-dd').format(from.toLocal());
     String _dateTo = DateFormat('yyyy-MM-dd').format(to.toLocal());
 
@@ -402,7 +402,7 @@ class TransactionHTTPService {
     // check if we got JWT token or not?
     if (_bearerToken.length > 0) {
       final response = await http.get(
-        Uri.parse(Globals.apiURL + 'transactions/stats/ccy/' + ccyId.toString() + '/wallet/' + walletId.toString() + '/from/' + _dateFrom + "/to/" + _dateTo),
+        Uri.parse(Globals.apiURL + 'transactions/stats/ccy/' + ccyId.toString() + '/wallet/' + walletId.toString() + '/from/' + _dateFrom + "/to/" + _dateTo + '/name/' + (name.isEmpty ? '*' : name) + '/search/' + search.toLowerCase()),
         headers: {
           HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
         }
@@ -421,7 +421,7 @@ class TransactionHTTPService {
     }
   }
 
-  Future<List<TransactionStatsDetailModel>> fetchIncomeExpenseCategoryDetail(String type, int categoryId, int ccyId, int walletId, DateTime from, DateTime to) async {
+  Future<List<TransactionStatsDetailModel>> fetchIncomeExpenseCategoryDetail(String name, String search, String type, int categoryId, int ccyId, int walletId, DateTime from, DateTime to) async {
     String _dateFrom = DateFormat('yyyy-MM-dd').format(from.toLocal());
     String _dateTo = DateFormat('yyyy-MM-dd').format(to.toLocal());
 
@@ -430,7 +430,7 @@ class TransactionHTTPService {
     // check if we got JWT token or not?
     if (_bearerToken.length > 0) {
       final response = await http.get(
-        Uri.parse(Globals.apiURL + 'transactions/detailstats/type/' + type + '/category/' + categoryId.toString() + '/ccy/' + ccyId.toString() + '/wallet/' + walletId.toString() + '/from/' + _dateFrom + "/to/" + _dateTo),
+        Uri.parse(Globals.apiURL + 'transactions/detailstats/type/' + type + '/category/' + categoryId.toString() + '/ccy/' + ccyId.toString() + '/wallet/' + walletId.toString() + '/from/' + _dateFrom + "/to/" + _dateTo + '/name/' + (name.isEmpty ? '*' : name) + '/search/' + search.toLowerCase()),
         headers: {
           HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
         }
