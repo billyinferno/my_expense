@@ -486,6 +486,11 @@ class _HomeListState extends State<HomeList> {
     // fetch the new wallet data from API
     setLoading(true);
 
+    // store current transaction list date on shared preferences.
+    // we can use this date when we perform edit, and if the date is not the same
+    // as the current transaction list date, we don't need to refresh the provider.
+    await TransactionSharedPreferences.setTransactionListCurrentDate(refreshDay.toLocal());
+
     String _refreshDay = DateFormat('yyyy-MM-dd').format(refreshDay.toLocal());
     await _transactionHttp.fetchTransaction(_refreshDay, _force).then((value) {
       // ensure that the selectedDate and the refreshDay is the same

@@ -15,6 +15,7 @@ class TransactionSharedPreferences {
   static const _transactionMaxDate = "trx_max_date";
   static const _transactionWallet = "trx_wallet";
   static const _transactionIncomeExpense = "trx_income_expense";
+  static const _transactionListCurrentDate = "trx_list_current_date";
 
   static Future setTransaction(String date, List<TransactionListModel> model) async {
     String _key = _transactionKey + "_" + date;
@@ -354,5 +355,22 @@ class TransactionSharedPreferences {
 
     // return current value
     return _incomeExpense;
+  }
+
+  static Future<void> setTransactionListCurrentDate(DateTime date) async {
+    await MyBox.putString(_transactionListCurrentDate, date.toString());
+  }
+
+  static DateTime? getTransactionListCurrentDate() {
+    String? _data = MyBox.getString(_transactionListCurrentDate);
+    // List<String>? _data = _pref!.getStringList(_key);
+
+    if(_data != null) {
+      DateTime _date = DateTime.parse(_data);
+      return _date;
+    }
+    else {
+      return null;
+    }
   }
 }
