@@ -197,12 +197,15 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
 
   Future<void> _fetchStatsDetail() async {
     await transactionHttp.fetchIncomeExpenseCategoryDetail(
+      _args.name,
+      _args.search,
       _args.type,
       _args.categoryId,
       _args.currency.id,
       _args.walletId,
       _args.fromDate,
-      _args.toDate).then((result) {
+      _args.toDate,
+      ).then((result) {
       //result.forEach((element) {debugPrint(element.toJson().toString());});
       //debugPrint(_args.fromDate.toString());
       setTransactions(result);
