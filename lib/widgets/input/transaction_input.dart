@@ -177,8 +177,16 @@ class _TransactionInputState extends State<TransactionInput> {
         }
         _getCurrentCategoryList();
         _currentCategoryName = _currentCategoryList[_currentCategoryID]!.name;
-        _currentCategoryColor = getExpenseColor(_currentCategoryName);
-        _currentCategoryIcon = getExpenseIcon(_currentCategoryName);
+
+        // load the correct icon and color for expense or income during edit
+        if (_currentType == "expense") {
+          _currentCategoryColor = getExpenseColor(_currentCategoryName);
+          _currentCategoryIcon = getExpenseIcon(_currentCategoryName);
+        }
+        else {
+          _currentCategoryColor = getIncomeColor(_currentCategoryName);
+          _currentCategoryIcon = getIncomeIcon(_currentCategoryName);
+        }
       }
       else {
         _currentCategoryID = -1;
