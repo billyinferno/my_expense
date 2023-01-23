@@ -313,8 +313,40 @@ class _TransactionInputState extends State<TransactionInput> {
             actions: <Widget>[
               IconButton(
                 onPressed: () {
+                  // instead of checking the whole date, we can just check the year, month, and  day
+                  // since DateTime will also include time
+                  int _currYear = DateTime.now().toLocal().year;
+                  int _currMonth = DateTime.now().toLocal().month;
+                  int _currDay = DateTime.now().toLocal().day;
+                  int _selYear = _selectedDate.toLocal().year;
+                  int _selMonth = _selectedDate.toLocal().month;
+                  int _selDay = _selectedDate.toLocal().day;
+                  bool _isFutureDate = false;
+
+                  // check if year is lesser than selected year
+                  if (_currYear < _selYear) {
+                    // if so, then this is future date
+                    _isFutureDate = true;
+                  }
+                  else {
+                    // if current and selected year is the same, now check whether the current and
+                    // selected month is the same or not?
+                    if (_currMonth < _selMonth) {
+                      // is not, then this is future date
+                      _isFutureDate = true;
+                    }
+                    else {
+                      // if both year and month is the same, then check whether the day is before
+                      // or after the selected day
+                      if (_currDay < _selDay) {
+                        // if not, then this is future date
+                        _isFutureDate = true;
+                      }
+                    }
+                  }
+                  
                   // check if the date is today date or not?
-                  if(DateTime.now().toLocal().isBefore(_selectedDate.toLocal())) {
+                  if(_isFutureDate) {
                     late Future<bool?> result = ShowMyDialog(
                         dialogTitle: "Future Date",
                         dialogText: "Are you sure want to add a future date?.",
@@ -603,9 +635,9 @@ class _TransactionInputState extends State<TransactionInput> {
   List<Widget> _generateBottomWidget(bool isOpen, double screenHeight, double keyboardHeight) {
     List<Widget> _returnWidget = [];
 
-    if(isOpen && _nameFocus.hasFocus) {
+    if(_nameFocus.hasFocus) {
       _returnWidget.add(
-        _generateAutoComplete(isOpen, _nameFocus.hasFocus)
+        _generateAutoComplete(true, _nameFocus.hasFocus)
       );
     }
     else if(!_isCustomPinpad && isOpen && _isAmountFocus) {
@@ -1851,10 +1883,10 @@ class _TransactionInputState extends State<TransactionInput> {
                 ),
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.date,
-                  initialDateTime: _selectedDate,
+                  initialDateTime: _selectedDate.toLocal(),
                   onDateTimeChanged: (val) {
                     setState(() {
-                      _selectedDate = val;
+                      _selectedDate = val.toLocal();
                     });
                   },
                 ),

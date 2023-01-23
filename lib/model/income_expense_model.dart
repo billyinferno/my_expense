@@ -11,13 +11,13 @@ class IncomeExpenseModel {
       Map<DateTime, double> _expense = {};
       json["expense"].forEach((value) {
         IncomeExpense _exp = IncomeExpense.fromJson(value);
-        _expense[DateTime(_exp.date.toLocal().year, _exp.date.toLocal().month, _exp.date.toLocal().day)] = _exp.amount;
+        _expense[DateTime(_exp.date.year, _exp.date.month, _exp.date.day).toLocal()] = _exp.amount;
       });
 
       Map<DateTime, double> _income = {};
       json["income"].forEach((value) {
         IncomeExpense _inc = IncomeExpense.fromJson(value);
-        _income[DateTime(_inc.date.toLocal().year, _inc.date.toLocal().month, _inc.date.toLocal().day)] = _inc.amount;
+        _income[DateTime(_inc.date.year, _inc.date.month, _inc.date.day).toLocal()] = _inc.amount;
       });
 
       return IncomeExpenseModel(expense: _expense, income: _income);
@@ -28,12 +28,12 @@ class IncomeExpenseModel {
       List<IncomeExpense> _income = [];
 
       this.expense.forEach((key, value) {
-        IncomeExpense _exp = IncomeExpense(date: key, amount: value);
+        IncomeExpense _exp = IncomeExpense(date: key.toLocal(), amount: value);
         _expense.add(_exp);
       });
 
       this.income.forEach((key, value) {
-        IncomeExpense _inc = IncomeExpense(date: key, amount: value);
+        IncomeExpense _inc = IncomeExpense(date: key.toLocal(), amount: value);
         _income.add(_inc);
       });
 

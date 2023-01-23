@@ -146,7 +146,13 @@ class BudgetBar extends StatelessWidget {
 
   Color _getBarColor() {
     // check the budget being used
-    double _totalUsed = budgetUsed / budgetTotal;
+    double _totalUsed = 0;
+
+    // check if we have budget total or not?
+    if (budgetTotal > 0) {
+      _totalUsed = budgetUsed / budgetTotal;
+    }
+
     // double _fraction;
     int _sR = 0;
     int _sG = 0;

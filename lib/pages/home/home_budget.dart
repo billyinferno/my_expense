@@ -26,7 +26,7 @@ class HomeBudget extends StatefulWidget {
 }
 
 class _HomeBudgetState extends State<HomeBudget> {
-  DateTime firstDay = DateTime(2010, DateTime.now().month - 4, 1);
+  DateTime firstDay = DateTime(2014, 1, 1); // just default to 2014/01/01
   DateTime lastDay = DateTime(DateTime.now().year, DateTime.now().month + 1, 1);
   DateTime selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
 

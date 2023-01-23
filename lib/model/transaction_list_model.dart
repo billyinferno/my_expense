@@ -56,7 +56,7 @@ class TransactionListModel {
       json["id"],
       json["name"],
       json["type"],
-      DateTime.parse(json["date"]),
+      DateTime.parse(json["date"]).toLocal(),
       json["description"],
       _cat,
       WalletTransactionModel.fromJson(json["wallet"]),

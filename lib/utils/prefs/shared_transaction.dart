@@ -236,14 +236,14 @@ class TransactionSharedPreferences {
     TransactionListModel swp;
     for(int i=0; i<_transaction.length - 1; i++) {
       for(int j=(i+1); j<_transaction.length; j++) {
-        if(_transaction[j].date.isBefore(_transaction[i].date)) {
+        if(_transaction[j].date.toLocal().isBefore(_transaction[i].date.toLocal())) {
           // swap the data
           swp = _transaction[i];
           _transaction[i] = _transaction[j];
           _transaction[j] = swp;
         }
         else {
-          if(isSameDay(_transaction[i].date, _transaction[j].date)) {
+          if(isSameDay(_transaction[i].date.toLocal(), _transaction[j].date.toLocal())) {
             // check which ID is bigger
             if(_transaction[i].id > _transaction[j].id) {
               // swap the data

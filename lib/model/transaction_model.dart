@@ -49,7 +49,7 @@ class TransactionModel {
       json["name"],
       json["type"],
       _category,
-      DateTime.parse(json["date"]),
+      DateTime.parse(json["date"]).toLocal(),
       WalletCategoryTransactionModel.fromJson(json["wallet"]),
       json["cleared"],
       json["description"],

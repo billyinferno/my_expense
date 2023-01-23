@@ -29,8 +29,8 @@ class _HomeStatsState extends State<HomeStats> {
   final WalletHTTPService walletHttp = WalletHTTPService();
   final TransactionHTTPService transactionHttp = TransactionHTTPService();
 
-  DateTime _from = DateTime(DateTime.now().year, DateTime.now().month, 1);
-  DateTime _to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(Duration(days: 1));
+  DateTime _from = DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
+  DateTime _to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(Duration(days: 1)).toLocal();
 
   bool _isLoading = true;
   List<WorthModel> _worth = [];
@@ -265,10 +265,8 @@ class _HomeStatsState extends State<HomeStats> {
   }
 
   void _goPrevMonth() {
-    _from = DateTime(_from.year, _from.month-1, 1);
-    _to = DateTime(_to.year, _to.month, 1).subtract(Duration(days: 1));
-    // debugPrint("BBBB : " + _from.toString());
-    // debugPrint("BBBB : " + _to.toString());
+    _from = DateTime(_from.year, _from.month-1, 1).toLocal();
+    _to = DateTime(_to.year, _to.month, 1).subtract(Duration(days: 1)).toLocal();
     setLoading(true);
     if (_currencies.length > 0) {
       // only if we have currencies, then we will have wallet worth, otherwise
@@ -288,12 +286,8 @@ class _HomeStatsState extends State<HomeStats> {
   }
 
   void _goNextMonth() {
-    // debugPrint("AAAA : " + _from.toString());
-    // debugPrint("AAAA : " + (_to.month+1).toString());
     _from = DateTime(_from.year, _from.month+1, 1);
     _to = DateTime(_to.year, _to.month+2, 1).subtract(Duration(days: 1));
-    // debugPrint("BBBB : " + _from.toString());
-    // debugPrint("BBBB : " + _to.toString());
     setLoading(true);
     if (_currencies.length > 0) {
       // only if we have currencies, then we will have wallet worth, otherwise
@@ -485,7 +479,6 @@ class _HomeStatsState extends State<HomeStats> {
   }
 
   void setIncomeExpense(int ccyId, IncomeExpenseModel incomeExpense) {
-    //debugPrint("Set for currency : " + ccyId.toString() + " with expsne length : " + incomeExpense.expense.length.toString() + " and income length : " + incomeExpense.income.length.toString());
     setState(() {
       _incomeExpense[ccyId] = incomeExpense;
     });

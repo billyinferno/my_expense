@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate = DateTime.now().toLocal();
 
   List<Widget> pages = [];
   final List<IconData> iconItems = [

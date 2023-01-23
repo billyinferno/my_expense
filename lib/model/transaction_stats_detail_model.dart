@@ -25,7 +25,7 @@ class TransactionStatsDetailModel {
         id: json["id"],
         name: json["name"],
         type: json["type"],
-        date: DateTime.parse(json["date"]),
+        date: DateTime.parse(json["date"]).toLocal(),
         categoriesId: json["categories_id"],
         categoriesName: json["categories_name"],
         walletId: json["wallet_from_id"],

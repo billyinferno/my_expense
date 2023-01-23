@@ -109,11 +109,11 @@ class _HomeListState extends State<HomeList> {
         return Theme(
           data: Globals.themeData.copyWith(
             textTheme: TextTheme(
-              headline4: TextStyle(
+              headlineMedium: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
-              headline5: TextStyle(
+              headlineSmall: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -387,7 +387,7 @@ class _HomeListState extends State<HomeList> {
       _appTitleYear = DateFormat('yyyy').format(_currentFocusedDay.toLocal());
 
       // return back the selected date to the router
-      widget.userDateSelect(_currentFocusedDay);
+      widget.userDateSelect(_currentFocusedDay.toLocal());
     });
   }
 

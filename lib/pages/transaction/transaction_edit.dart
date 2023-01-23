@@ -100,8 +100,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     Future<List<WalletModel>> _futureWallets;
     Future<List<WorthModel>> _futureNetWorth;
 
-    String _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnUpdate.date.toLocal().year, txnUpdate.date.toLocal().month, 1));
-    String _prevDay = DateFormat('yyyy-MM-dd').format(DateTime(paramsData.date.toLocal().year, paramsData.date.toLocal().month, 1));
+    String _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnUpdate.date.year, txnUpdate.date.month, 1).toLocal());
+    String _prevDay = DateFormat('yyyy-MM-dd').format(DateTime(paramsData.date.year, paramsData.date.month, 1).toLocal());
 
     // check whether this transaction moved from one wallet to another wallet?
     // first check whether this is expense, income, or transfer?

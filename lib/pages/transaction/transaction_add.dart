@@ -60,7 +60,6 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    //print("Adding transaction for " + selectedDate.toString());
     return KeyboardSizeProvider(
       child: TransactionInput(
         title: "Add Transaction",
@@ -69,7 +68,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
         saveTransaction: (value) {
           saveTransaction(value);
         },
-        selectedDate: selectedDate,
+        selectedDate: selectedDate.toLocal(),
       ),
     );
   }
