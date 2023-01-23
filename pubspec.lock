@@ -70,14 +70,22 @@ packages:
       name: build_runner
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "2.3.3"
+=======
+    version: "2.3.2"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   build_runner_core:
     dependency: transitive
     description:
       name: build_runner_core
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "7.2.7"
+=======
+    version: "7.2.6"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   built_collection:
     dependency: transitive
     description:
@@ -91,7 +99,11 @@ packages:
       name: built_value
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "8.4.3"
+=======
+    version: "8.4.1"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   characters:
     dependency: transitive
     description:
@@ -119,7 +131,11 @@ packages:
       name: code_builder
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "4.4.0"
+=======
+    version: "4.3.0"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   collection:
     dependency: transitive
     description:
@@ -227,14 +243,22 @@ packages:
       name: font_awesome_flutter
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "10.3.0"
+=======
+    version: "10.2.1"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   frontend_server_client:
     dependency: transitive
     description:
       name: frontend_server_client
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "3.2.0"
+=======
+    version: "3.1.0"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   glob:
     dependency: transitive
     description:
@@ -325,7 +349,11 @@ packages:
       name: json_annotation
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "4.8.0"
+=======
+    version: "4.7.0"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   lazy_loading_list:
     dependency: "direct main"
     description:
@@ -353,7 +381,7 @@ packages:
       name: material_color_utilities
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.5"
+    version: "0.2.0"
   meta:
     dependency: transitive
     description:
@@ -402,7 +430,11 @@ packages:
       name: path_provider_android
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "2.0.22"
+=======
+    version: "2.0.20"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   path_provider_ios:
     dependency: transitive
     description:
@@ -472,14 +504,22 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "6.0.5"
+=======
+    version: "6.0.4"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   pub_semver:
     dependency: transitive
     description:
       name: pub_semver
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "2.1.3"
+=======
+    version: "2.1.2"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   pubspec_parse:
     dependency: transitive
     description:
@@ -533,7 +573,7 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.9.0"
+    version: "1.9.1"
   stack_trace:
     dependency: transitive
     description:
@@ -547,14 +587,18 @@ packages:
       name: stream_channel
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   stream_transform:
     dependency: transitive
     description:
       name: stream_transform
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "2.1.0"
+=======
+    version: "2.0.1"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   string_scanner:
     dependency: transitive
     description:
@@ -568,7 +612,11 @@ packages:
       name: table_calendar
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "3.0.8"
+=======
+    version: "3.0.7"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   term_glyph:
     dependency: transitive
     description:
@@ -582,7 +630,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.12"
+    version: "0.4.14"
   timing:
     dependency: transitive
     description:
@@ -603,7 +651,7 @@ packages:
       name: vector_math
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.2"
+    version: "2.1.4"
   watcher:
     dependency: transitive
     description:
@@ -624,14 +672,22 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "3.1.3"
+=======
+    version: "3.0.1"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   xdg_directories:
     dependency: transitive
     description:
       name: xdg_directories
       url: "https://pub.dartlang.org"
     source: hosted
+<<<<<<< HEAD
     version: "0.2.0+3"
+=======
+    version: "0.2.0+2"
+>>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   yaml:
     dependency: transitive
     description:
