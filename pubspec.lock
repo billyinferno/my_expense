@@ -70,22 +70,14 @@ packages:
       name: build_runner
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "2.3.3"
-=======
-    version: "2.3.2"
->>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   build_runner_core:
     dependency: transitive
     description:
       name: build_runner_core
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "7.2.7"
-=======
-    version: "7.2.6"
->>>>>>> f15c3a897ffd19c16fed82be9acc3c46c07aeb5f
   built_collection:
     dependency: transitive
     description:
