@@ -11,13 +11,13 @@ class IncomeExpenseModel {
       Map<DateTime, double> _expense = {};
       json["expense"].forEach((value) {
         IncomeExpense _exp = IncomeExpense.fromJson(value);
-        _expense[DateTime(_exp.date.year, _exp.date.month, _exp.date.day).toLocal()] = _exp.amount;
+        _expense[_exp.date.toLocal()] = _exp.amount;
       });
 
       Map<DateTime, double> _income = {};
       json["income"].forEach((value) {
         IncomeExpense _inc = IncomeExpense.fromJson(value);
-        _income[DateTime(_inc.date.year, _inc.date.month, _inc.date.day).toLocal()] = _inc.amount;
+        _income[_inc.date.toLocal()] = _inc.amount;
       });
 
       return IncomeExpenseModel(expense: _expense, income: _income);

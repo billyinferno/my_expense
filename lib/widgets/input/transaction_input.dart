@@ -2404,10 +2404,10 @@ class _TransactionInputState extends State<TransactionInput> {
                 ),
                 child: CupertinoDatePicker(
                   mode: CupertinoDatePickerMode.date,
-                  initialDateTime: _selectedDate,
+                  initialDateTime: _selectedDate.toLocal(),
                   onDateTimeChanged: (val) {
                     setState(() {
-                      _selectedDate = val;
+                      _selectedDate = val.toLocal();
                     });
                   },
                 ),
@@ -2583,7 +2583,7 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   String _calendarText() {
-    if(isSameDay(_selectedDate, DateTime.now())) {
+    if(isSameDay(_selectedDate.toLocal(), DateTime.now().toLocal())) {
       return "Today";
     }
     else {
