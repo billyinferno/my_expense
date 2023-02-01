@@ -331,14 +331,13 @@ class _TransactionInputState extends State<TransactionInput> {
                   else {
                     // if current and selected year is the same, now check whether the current and
                     // selected month is the same or not?
-                    if (_currMonth < _selMonth) {
+                    if (_currYear == _selYear && _currMonth < _selMonth) {
                       // is not, then this is future date
                       _isFutureDate = true;
                     }
                     else {
-                      // if both year and month is the same, then check whether the day is before
-                      // or after the selected day
-                      if (_currDay < _selDay) {
+                      // only check the day, if this is same month, since the month already check above
+                      if (_currYear == _selYear && _currMonth == _selMonth && _currDay < _selDay) {
                         // if not, then this is future date
                         _isFutureDate = true;
                       }
