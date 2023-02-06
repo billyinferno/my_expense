@@ -401,6 +401,9 @@ class _LoginPageState extends State<LoginPage> {
         walletHttp.refreshJWTToken();
         transactionHttp.refreshJWTToken();
         pinHttp.refreshJWTToken();
+
+        // set back the token expired as false
+        _isTokenExpired = false;
       }
       
       // get additional information for user
