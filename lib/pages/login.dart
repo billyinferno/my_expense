@@ -13,6 +13,7 @@ import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/misc/error_parser.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
+import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 
 class LoginPage extends StatefulWidget {
@@ -40,6 +41,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _isCheckLogin = false;
   bool _isFetchInfo = false;
   String _errorMessage = "";
+  String _bearerToken = "";
+  bool _isTokenExpired = false;
 
   @override
   void initState() {
@@ -78,7 +81,16 @@ class _LoginPageState extends State<LoginPage> {
       debugPrint("👨🏻 User " + user.username + " already login");
       await _getAdditionalInfo(false);
     }).onError((error, stackTrace) {
-      debugPrint("👨🏻 User not yet login");
+      // check whether this is due to JWT token is expired or not?
+      _bearerToken = UserSharedPreferences.getJWT();
+      if (_bearerToken.isNotEmpty) {
+        _isTokenExpired = true;
+        debugPrint("👨🏻 User token is expired");
+        ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "User token expired, please re-login"));
+      }
+      else {
+        debugPrint("👨🏻 User not yet login");
+      }
       // set loading into false, it will rebuild the widget, which
       // by right should show the login screen.
       setIsLoading(false);
@@ -380,6 +392,17 @@ class _LoginPageState extends State<LoginPage> {
     // ensure we finished storing the credentials before we actually get the
     // additional information and navigate to home
     await UserSharedPreferences.setUserLogin(_loginModel).then((value) async {
+      // when user is login, check whether this is due to token expired or not?
+      // if due to token expired, then we will need to refresh the JWT token that
+      // being used by each API call that we have before we call _getAdditionalInfo
+      if (_isTokenExpired) {
+        userHttp.refreshJWTToken();
+        categoryHttp.refreshJWTToken();
+        walletHttp.refreshJWTToken();
+        transactionHttp.refreshJWTToken();
+        pinHttp.refreshJWTToken();
+      }
+      
       // get additional information for user
       debugPrint("Get additional info for user");
       await _getAdditionalInfo(true);

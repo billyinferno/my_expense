@@ -16,6 +16,10 @@ class CategoryHTTPService {
     _bearerToken = UserSharedPreferences.getJWT();
   }
 
+  void refreshJWTToken() {
+    _bearerToken = UserSharedPreferences.getJWT();
+  }
+
   Future<void> updateDefaultCategory(String type, int categoryID) async {
     // check from shared preferences if we already have loaded category data
     _checkJWT();

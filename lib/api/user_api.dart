@@ -16,6 +16,10 @@ class UserHTTPService {
     _bearerToken = UserSharedPreferences.getJWT();
   }
 
+  void refreshJWTToken() {
+    _bearerToken = UserSharedPreferences.getJWT();
+  }
+
   Future<UsersMeModel> fetchMe() async {
     _checkJWT();
     //print("<fetchMe>" + _bearerToken);

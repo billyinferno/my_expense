@@ -15,6 +15,10 @@ class PinHTTPService {
     _bearerToken = UserSharedPreferences.getJWT();
   }
 
+  void refreshJWTToken() {
+    _bearerToken = UserSharedPreferences.getJWT();
+  }
+
   Future<PinModel> getPin([bool? force]) async {
     bool _force = (force ?? false);
 

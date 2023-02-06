@@ -18,6 +18,10 @@ class BudgetHTTPService {
     _bearerToken = UserSharedPreferences.getJWT();
   }
 
+  void refreshJWTToken() {
+    _bearerToken = UserSharedPreferences.getJWT();
+  }
+
   Future<void> updateBudgetCurrency(int currencyID) async {
     _checkJWT();
     String bearerToken = _bearerToken;

@@ -25,6 +25,10 @@ class TransactionHTTPService {
     _bearerToken = UserSharedPreferences.getJWT();
   }
 
+  void refreshJWTToken() {
+    _bearerToken = UserSharedPreferences.getJWT();
+  }
+
   Future<TransactionListModel> updateTransaction(BuildContext context, TransactionModel txn, TransactionListModel prevTxn) async {
     bool _sameDate = isSameDay(txn.date.toLocal(), prevTxn.date.toLocal());
     _checkJWT();

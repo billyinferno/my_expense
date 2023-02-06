@@ -21,6 +21,10 @@ class WalletHTTPService {
     _bearerToken = UserSharedPreferences.getJWT();
   }
 
+  void refreshJWTToken() {
+    _bearerToken = UserSharedPreferences.getJWT();
+  }
+
   Future<List<WalletModel>> fetchWallets(bool showDisabled,
       [bool? force]) async {
     bool _force = (force ?? false);
