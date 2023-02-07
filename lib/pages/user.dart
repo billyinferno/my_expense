@@ -19,6 +19,7 @@ import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/anim/page_transition.dart';
+import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
@@ -177,30 +178,255 @@ class _UserPageState extends State<UserPage> {
               ],
             ),
           ),
-          Container(
-            padding: EdgeInsets.only(bottom: 25, left: 25, right: 25),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                UserButton(
-                  icon: Ionicons.fast_food_outline,
-                  iconColor: accentColors[2],
-                  label: "Default Expense",
-                  value: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      selectedExpenseCategory!.name.toString(),
-                      //textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: textColor,
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.only(bottom: 25, left: 25, right: 25),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  UserButton(
+                    icon: Ionicons.fast_food_outline,
+                    iconColor: accentColors[2],
+                    label: "Default Expense",
+                    value: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        selectedExpenseCategory!.name.toString(),
+                        //textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: textColor,
+                        ),
                       ),
                     ),
+                    callback: (() {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Container(
+                            height: 300,
+                            color: secondaryDark,
+                            child: Column(
+                              children: <Widget>[
+                                Container(
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: primaryLight,
+                                        width: 1.0
+                                      )
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Center(
+                                          child: Text("Expense Category"),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Expanded(
+                                  child: GridView.count(
+                                    crossAxisCount: 4,
+                                    children: generateExpenseCategory(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      );
+                    }),
                   ),
-                  callback: (() {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
+                  UserButton(
+                    icon: Ionicons.cash_outline,
+                    iconColor: accentColors[0],
+                    label: "Default Income",
+                    value: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        selectedIncomeCategory!.name.toString(),
+                        //textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                    callback: (() {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Container(
+                            height: 300,
+                            color: secondaryDark,
+                            child: Column(
+                              children: <Widget>[
+                                Container(
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: primaryLight, width: 1.0)),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: Center(
+                                            child: Text("Income Category")),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          //refreshCategory();
+                                        },
+                                        icon: Icon(
+                                          Ionicons.refresh,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Expanded(
+                                  child: GridView.count(
+                                    crossAxisCount: 4,
+                                    children: generateIncomeCategory(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        });
+                    }),
+                  ),
+                  UserButton(
+                    icon: Ionicons.list,
+                    iconColor: accentColors[9],
+                    label: "Default Budget Currency",
+                    value: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        selectedCurrency!.symbol.toString(),
+                        //textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                    callback: (() {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Container(
+                            height: 300,
+                            color: secondaryDark,
+                            child: Column(
+                              children: <Widget>[
+                                Container(
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                            color: primaryLight, width: 1.0)),
+                                  ),
+                                  child: Center(child: Text("Currencies")),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Expanded(
+                                  child: ListView.builder(
+                                    itemCount: currencies.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return Container(
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            bottom: BorderSide(
+                                              color: primaryLight,
+                                              width: 1.0
+                                            )
+                                          ),
+                                        ),
+                                        child: ListTile(
+                                          leading: Container(
+                                            height: 40,
+                                            width: 40,
+                                            padding: EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(40),
+                                              color: accentColors[6],
+                                            ),
+                                            child: FittedBox(
+                                              child: Text(currencies[index].symbol.toUpperCase()),
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                          title: Text(currencies[index].description),
+                                          trailing: Visibility(
+                                            visible: (selectedCurrency!.id == currencies[index].id),
+                                            child: Icon(
+                                              Ionicons.checkmark_circle,
+                                              size: 20,
+                                              color: accentColors[0],
+                                            ),
+                                          ),
+                                          onTap: () {
+                                            // print("Selected currencies");
+                                            setState(() {
+                                              selectedCurrency = currencies[index];
+                                            });
+                                            // check if currency the same or not?
+                                            // if not the same then we can perform
+                                            // update on the default budget currency.
+                                            if (selectedCurrency!.id != currentCurrency!.id) {
+                                              // need to update the currency
+                                              updateBudgetCurrency(currencies[index].id);
+                                            }
+                                            Navigator.pop(context);
+                                          },
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      );
+                    }),
+                  ),
+                  UserButton(
+                    icon: Ionicons.wallet,
+                    iconColor: accentColors[5],
+                    label: "Default Wallet",
+                    value: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        selectedWallet!.name.toString(),
+                        //textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                    callback: (() {
+                      showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
                         return Container(
                           height: 300,
                           color: secondaryDark,
@@ -209,174 +435,41 @@ class _UserPageState extends State<UserPage> {
                               Container(
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: primaryLight,
-                                      width: 1.0
-                                    )
-                                  ),
+                                  border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Expanded(
-                                      child: Center(
-                                        child: Text("Expense Category"),
-                                      ),
+                                      child: Center(child: Text("Account")),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Expanded(
-                                child: GridView.count(
-                                  crossAxisCount: 4,
-                                  children: generateExpenseCategory(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    );
-                  }),
-                ),
-                UserButton(
-                  icon: Ionicons.cash_outline,
-                  iconColor: accentColors[0],
-                  label: "Default Income",
-                  value: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      selectedIncomeCategory!.name.toString(),
-                      //textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: textColor,
-                      ),
-                    ),
-                  ),
-                  callback: (() {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Container(
-                          height: 300,
-                          color: secondaryDark,
-                          child: Column(
-                            children: <Widget>[
-                              Container(
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                      bottom: BorderSide(
-                                          color: primaryLight, width: 1.0)),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: Center(
-                                          child: Text("Income Category")),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        //refreshCategory();
-                                      },
-                                      icon: Icon(
-                                        Ionicons.refresh,
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Expanded(
-                                child: GridView.count(
-                                  crossAxisCount: 4,
-                                  children: generateIncomeCategory(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      });
-                  }),
-                ),
-                UserButton(
-                  icon: Ionicons.list,
-                  iconColor: accentColors[9],
-                  label: "Default Budget Currency",
-                  value: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      selectedCurrency!.symbol.toString(),
-                      //textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: textColor,
-                      ),
-                    ),
-                  ),
-                  callback: (() {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Container(
-                          height: 300,
-                          color: secondaryDark,
-                          child: Column(
-                            children: <Widget>[
-                              Container(
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                      bottom: BorderSide(
-                                          color: primaryLight, width: 1.0)),
-                                ),
-                                child: Center(child: Text("Currencies")),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
+                              SizedBox(height: 10,),
                               Expanded(
                                 child: ListView.builder(
-                                  itemCount: currencies.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
+                                  itemCount: wallets.length,
+                                  itemBuilder: (BuildContext context, int index) {
                                     return Container(
                                       height: 60,
                                       decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: primaryLight,
-                                            width: 1.0
-                                          )
-                                        ),
+                                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                                       ),
                                       child: ListTile(
                                         leading: Container(
                                           height: 40,
                                           width: 40,
-                                          padding: EdgeInsets.all(5),
                                           decoration: BoxDecoration(
                                             borderRadius: BorderRadius.circular(40),
-                                            color: accentColors[6],
+                                            color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
                                           ),
-                                          child: FittedBox(
-                                            child: Text(currencies[index].symbol.toUpperCase()),
-                                            fit: BoxFit.contain,
-                                          ),
+                                          child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
                                         ),
-                                        title: Text(currencies[index].description),
+                                        title: Text(wallets[index].name),
                                         trailing: Visibility(
-                                          visible: (selectedCurrency!.id == currencies[index].id),
+                                          visible: (currentWallet!.id == wallets[index].id),
                                           child: Icon(
                                             Ionicons.checkmark_circle,
                                             size: 20,
@@ -384,16 +477,16 @@ class _UserPageState extends State<UserPage> {
                                           ),
                                         ),
                                         onTap: () {
-                                          // print("Selected currencies");
+                                          // print("Selected wallet");
                                           setState(() {
-                                            selectedCurrency = currencies[index];
+                                            selectedWallet = wallets[index];
                                           });
                                           // check if currency the same or not?
                                           // if not the same then we can perform
                                           // update on the default budget currency.
-                                          if (selectedCurrency!.id != currentCurrency!.id) {
+                                          if (selectedWallet!.id != currentWallet!.id) {
                                             // need to update the currency
-                                            updateBudgetCurrency(currencies[index].id);
+                                            updateDefaultWallet(wallets[index].id);
                                           }
                                           Navigator.pop(context);
                                         },
@@ -405,197 +498,125 @@ class _UserPageState extends State<UserPage> {
                             ],
                           ),
                         );
-                      }
-                    );
-                  }),
-                ),
-                UserButton(
-                  icon: Ionicons.wallet,
-                  iconColor: accentColors[5],
-                  label: "Default Wallet",
-                  value: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      selectedWallet!.name.toString(),
-                      //textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: textColor,
-                      ),
-                    ),
+                      });
+                    }),
                   ),
-                  callback: (() {
-                    showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                      return Container(
-                        height: 300,
-                        color: secondaryDark,
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              height: 40,
-                              decoration: BoxDecoration(
-                                border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    child: Center(child: Text("Account")),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 10,),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: wallets.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Container(
-                                    height: 60,
-                                    decoration: BoxDecoration(
-                                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                                    ),
-                                    child: ListTile(
-                                      leading: Container(
-                                        height: 40,
-                                        width: 40,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(40),
-                                          color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-                                        ),
-                                        child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
-                                      ),
-                                      title: Text(wallets[index].name),
-                                      trailing: Visibility(
-                                        visible: (currentWallet!.id == wallets[index].id),
-                                        child: Icon(
-                                          Ionicons.checkmark_circle,
-                                          size: 20,
-                                          color: accentColors[0],
-                                        ),
-                                      ),
-                                      onTap: () {
-                                        // print("Selected wallet");
-                                        setState(() {
-                                          selectedWallet = wallets[index];
-                                        });
-                                        // check if currency the same or not?
-                                        // if not the same then we can perform
-                                        // update on the default budget currency.
-                                        if (selectedWallet!.id != currentWallet!.id) {
-                                          // need to update the currency
-                                          updateDefaultWallet(wallets[index].id);
-                                        }
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
+                  UserButton(
+                    icon: Ionicons.download_outline,
+                    iconColor: accentColors[4],
+                    label: "",
+                    value: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Export Report",
+                        //textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: textColor,
                         ),
-                      );
-                    });
-                  }),
-                ),
-                UserButton(
-                  icon: Ionicons.download_outline,
-                  iconColor: accentColors[4],
-                  label: "",
-                  value: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Export Report",
-                      //textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: textColor,
                       ),
                     ),
+                    callback: (() {
+                      debugPrint("Export data");
+                    }),
                   ),
-                  callback: (() {
-                    debugPrint("Export data");
-                  }),
-                ),
-                UserButton(
-                  icon: Ionicons.pricetag_outline,
-                  iconColor: accentColors[4],
-                  label: "",
-                  value: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Refresh Transaction Tags",
-                      //textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: textColor,
+                  UserButton(
+                    icon: Ionicons.pricetag_outline,
+                    iconColor: accentColors[4],
+                    label: "",
+                    value: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Refresh Transaction Tags",
+                        //textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: textColor,
+                        ),
                       ),
                     ),
+                    callback: (() {
+                      showLoaderDialog(context);
+                      refreshTransactionTag().then((_) {
+                        // remove the loader dialog
+                        Navigator.pop(context);
+                      });
+                    }),
                   ),
-                  callback: (() {
-                    showLoaderDialog(context);
-                    refreshTransactionTag().then((_) {
-                      // remove the loader dialog
-                      Navigator.pop(context);
-                    });
-                  }),
-                ),
-                UserButton(
-                  icon: Ionicons.lock_closed_outline,
-                  iconColor: accentColors[1],
-                  label: "",
-                  value: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Change Password",
-                      //textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: textColor,
+                  UserButton(
+                    icon: Ionicons.lock_closed_outline,
+                    iconColor: accentColors[1],
+                    label: "",
+                    value: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Change Password",
+                        //textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: textColor,
+                        ),
                       ),
                     ),
+                    callback: (() {
+                      Navigator.pushNamed(context, '/user/password');
+                    }),
                   ),
-                  callback: (() {
-                    Navigator.pushNamed(context, '/user/password');
-                  }),
-                ),
-                UserButton(
-                  icon: Ionicons.keypad_outline,
-                  iconColor: accentColors[3],
-                  label: "Setup PIN",
-                  value: Align(
-                    alignment: Alignment.centerRight,
-                    child: MySwitch(enabled: _isPinEnabled,),
+                  UserButton(
+                    icon: Ionicons.keypad_outline,
+                    iconColor: accentColors[3],
+                    label: "Setup PIN",
+                    value: Align(
+                      alignment: Alignment.centerRight,
+                      child: MySwitch(enabled: _isPinEnabled,),
+                    ),
+                    callback: (() {
+                      if(_isPinEnabled) {
+                        // ask user if they really want to disable the pin?
+                        // if yes, then show the PinPad screen and if correct then remove the pin
+                        showRemovePinDialog();
+                      }
+                      else {
+                        // setup the pin
+                        showSetupPin();
+                      }
+                    }),
                   ),
-                  callback: (() {
-                    if(_isPinEnabled) {
-                      // ask user if they really want to disable the pin?
-                      // if yes, then show the PinPad screen and if correct then remove the pin
-                      showRemovePinDialog();
-                    }
-                    else {
-                      // setup the pin
-                      showSetupPin();
-                    }
-                  }),
-                ),
-                UserButton(
-                  icon: Ionicons.log_out_outline,
-                  iconColor: accentColors[2],
-                  label: "",
-                  value: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Logout",
-                      //textAlign: TextAlign.right,
-                      style: TextStyle(
-                        color: textColor,
+                  UserButton(
+                    icon: Ionicons.information,
+                    iconColor: accentColors[7],
+                    label: "Version",
+                    value: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        Globals.appVersion,
+                        //textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: textColor,
+                        ),
                       ),
                     ),
+                    callback: (() {
+                      // do nothing
+                    }),
                   ),
-                  callback: (() {
-                    showLogoutDialog();
-                  }),
-                ),
-              ],
+                  UserButton(
+                    icon: Ionicons.log_out_outline,
+                    iconColor: accentColors[2],
+                    label: "",
+                    value: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Logout",
+                        //textAlign: TextAlign.right,
+                        style: TextStyle(
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                    callback: (() {
+                      showLogoutDialog();
+                    }),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -640,11 +661,11 @@ class _UserPageState extends State<UserPage> {
     Icon _icon;
 
     if (category.type.toLowerCase() == "expense") {
-      _iconColor = getExpenseColor(category.name.toLowerCase());
-      _icon = getExpenseIcon(category.name.toLowerCase());
+      _iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
+      _icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
     } else {
-      _iconColor = getIncomeColor(category.name.toLowerCase());
-      _icon = getIncomeIcon(category.name.toLowerCase());
+      _iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
+      _icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
     }
 
     return GestureDetector(

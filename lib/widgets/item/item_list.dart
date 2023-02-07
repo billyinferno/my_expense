@@ -87,12 +87,12 @@ class ItemList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Container(
-          child: getExpenseIcon(itemCategory),
+          child: IconColorList.getExpenseIcon(itemCategory),
           height: 40,
           width: 40,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: getExpenseColor(itemCategory),
+            color: IconColorList.getExpenseColor(itemCategory),
           ),
           margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
         ),
@@ -137,12 +137,12 @@ class ItemList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Container(
-          child: getIncomeIcon(itemCategory),
+          child: IconColorList.getIncomeIcon(itemCategory),
           height: 40,
           width: 40,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: getIncomeColor(itemCategory),
+            color: IconColorList.getIncomeColor(itemCategory),
           ),
           margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
         ),

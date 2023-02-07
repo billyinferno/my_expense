@@ -180,12 +180,12 @@ class _TransactionInputState extends State<TransactionInput> {
 
         // load the correct icon and color for expense or income during edit
         if (_currentType == "expense") {
-          _currentCategoryColor = getExpenseColor(_currentCategoryName);
-          _currentCategoryIcon = getExpenseIcon(_currentCategoryName);
+          _currentCategoryColor = IconColorList.getExpenseColor(_currentCategoryName);
+          _currentCategoryIcon = IconColorList.getExpenseIcon(_currentCategoryName);
         }
         else {
-          _currentCategoryColor = getIncomeColor(_currentCategoryName);
-          _currentCategoryIcon = getIncomeIcon(_currentCategoryName);
+          _currentCategoryColor = IconColorList.getIncomeColor(_currentCategoryName);
+          _currentCategoryIcon = IconColorList.getIncomeIcon(_currentCategoryName);
         }
       }
       else {
@@ -467,8 +467,8 @@ class _TransactionInputState extends State<TransactionInput> {
         _nameController.text = name;
         _currentCategoryID = categoryId;
         _currentCategoryName = categoryName;
-        _currentCategoryColor = getExpenseColor(categoryName);
-        _currentCategoryIcon = getExpenseIcon(categoryName);
+        _currentCategoryColor = IconColorList.getExpenseColor(categoryName);
+        _currentCategoryIcon = IconColorList.getExpenseIcon(categoryName);
       });
     }
     else {
@@ -476,8 +476,8 @@ class _TransactionInputState extends State<TransactionInput> {
         _nameController.text = name;
         _currentCategoryID = categoryId;
         _currentCategoryName = categoryName;
-        _currentCategoryColor = getIncomeColor(categoryName);
-        _currentCategoryIcon = getIncomeIcon(categoryName);
+        _currentCategoryColor = IconColorList.getIncomeColor(categoryName);
+        _currentCategoryIcon = IconColorList.getIncomeIcon(categoryName);
       });
     }
   }
@@ -1184,7 +1184,7 @@ class _TransactionInputState extends State<TransactionInput> {
                   padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(35),
-                    color: (_currentType == "expense" ? getExpenseColor(_lastFound[index].category.name) : getIncomeColor(_lastFound[index].category.name)),
+                    color: (_currentType == "expense" ? IconColorList.getExpenseColor(_lastFound[index].category.name) : IconColorList.getIncomeColor(_lastFound[index].category.name)),
                   ),
                   child: Center(child: Text(_lastFound[index].name)),
                 ),
@@ -1330,8 +1330,8 @@ class _TransactionInputState extends State<TransactionInput> {
       // ensure _currentCategoryID > 0 before we got this
       if(_currentCategoryID > 0) {
         _currentCategoryName = _currentCategoryList[_currentCategoryID]!.name;
-        _currentCategoryColor = getExpenseColor(_currentCategoryName);
-        _currentCategoryIcon = getExpenseIcon(_currentCategoryName);
+        _currentCategoryColor = IconColorList.getExpenseColor(_currentCategoryName);
+        _currentCategoryIcon = IconColorList.getExpenseIcon(_currentCategoryName);
       }
       else {
         // make it a default icon instead
@@ -1351,8 +1351,8 @@ class _TransactionInputState extends State<TransactionInput> {
       // ensure _currentCategoryID > 0 before we got this
       if(_currentCategoryID > 0) {
         _currentCategoryName = _currentCategoryList[_currentCategoryID]!.name;
-        _currentCategoryColor = getIncomeColor(_currentCategoryName);
-        _currentCategoryIcon = getIncomeIcon(_currentCategoryName);
+        _currentCategoryColor = IconColorList.getIncomeColor(_currentCategoryName);
+        _currentCategoryIcon = IconColorList.getIncomeIcon(_currentCategoryName);
       }
       else {
         // make it a default icon instead
@@ -2530,11 +2530,11 @@ class _TransactionInputState extends State<TransactionInput> {
     Icon _icon;
 
     if(category.type.toLowerCase() == "expense") {
-      _iconColor = getExpenseColor(category.name.toLowerCase());
-      _icon = getExpenseIcon(category.name.toLowerCase());
+      _iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
+      _icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
     } else {
-      _iconColor = getIncomeColor(category.name.toLowerCase());
-      _icon = getIncomeIcon(category.name.toLowerCase());
+      _iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
+      _icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
     }
 
     return GestureDetector(

@@ -186,9 +186,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         width: 40,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(40),
-          color: getExpenseColor(txn.category!.name),
+          color: IconColorList.getExpenseColor(txn.category!.name),
         ),
-        child: getExpenseIcon(txn.category!.name),
+        child: IconColorList.getExpenseIcon(txn.category!.name),
       );
     }
     else if(txn.type == "income") {
@@ -197,9 +197,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         width: 40,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(40),
-          color: getIncomeColor(txn.category!.name),
+          color: IconColorList.getIncomeColor(txn.category!.name),
         ),
-        child: getIncomeIcon(txn.category!.name),
+        child: IconColorList.getIncomeIcon(txn.category!.name),
       );
     }
     else {

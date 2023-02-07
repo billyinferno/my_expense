@@ -339,8 +339,8 @@ class _HomeBudgetState extends State<HomeBudget> {
                             color: Colors.transparent,
                             padding: EdgeInsets.all(10),
                             child: BudgetBar(
-                              icon: getExpenseIcon(_budgetList[index].category.name),
-                              iconColor: getExpenseColor(_budgetList[index].category.name),
+                              icon: IconColorList.getExpenseIcon(_budgetList[index].category.name),
+                              iconColor: IconColorList.getExpenseColor(_budgetList[index].category.name),
                               title: _budgetList[index].category.name,
                               symbol: _budgetList[index].currency.symbol,
                               budgetUsed: _budgetList[index].used,

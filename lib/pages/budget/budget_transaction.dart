@@ -162,9 +162,9 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
             width: 40,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(40),
-              color: getExpenseColor(_categoryName),
+              color: IconColorList.getExpenseColor(_categoryName),
             ),
-            child: getExpenseIcon(_categoryName),
+            child: IconColorList.getExpenseIcon(_categoryName),
           ),
           SizedBox(width: 10,),
           Expanded(

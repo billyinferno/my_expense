@@ -149,10 +149,10 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                       symbol: ccy,
                       budgetUsed: (data[index].amount < 0 ? (data[index].amount * (-1)) : data[index].amount),
                       budgetTotal: (type == "expense" ? _maxExpense : _maxIncome),
-                      icon: (type == "expense" ? getExpenseIcon(data[index].categoryName) : getIncomeIcon(data[index].categoryName)),
-                      iconColor: (type == "expense" ? getExpenseColor(data[index].categoryName) : getIncomeColor(data[index].categoryName)),
+                      icon: (type == "expense" ? IconColorList.getExpenseIcon(data[index].categoryName) : IconColorList.getIncomeIcon(data[index].categoryName)),
+                      iconColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
                       showLeftText: false,
-                      barColor: (type == "expense" ? getExpenseColor(data[index].categoryName) : getIncomeColor(data[index].categoryName)),
+                      barColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
                     ),
                   ),
                 ),
@@ -177,12 +177,12 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
     List<Color> _ret = [];
     if(type == "expense") {
       _data.forEach((dt) {
-        _ret.add(getExpenseColor(dt.categoryName));
+        _ret.add(IconColorList.getExpenseColor(dt.categoryName));
       });
     }
     else {
       _data.forEach((dt) {
-        _ret.add(getIncomeColor(dt.categoryName));
+        _ret.add(IconColorList.getIncomeColor(dt.categoryName));
       });
     }
 

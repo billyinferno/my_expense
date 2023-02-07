@@ -101,7 +101,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
               symbol: _args.currency.symbol,
               budgetUsed: (_args.amount < 0 ? _args.amount * (-1) : _args.amount),
               budgetTotal: (_args.total < 0 ? _args.total * (-1) : _args.total),
-              barColor: (_args.type == "expense" ? getExpenseColor(_args.categoryName) : getIncomeColor(_args.categoryName)),
+              barColor: (_args.type == "expense" ? IconColorList.getExpenseColor(_args.categoryName) : IconColorList.getIncomeColor(_args.categoryName)),
               showLeftText: false,
             ),
           ),
@@ -137,12 +137,12 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
-            child: (_args.type == "expense" ? getExpenseIcon(txn.categoriesName) : getIncomeIcon(txn.categoriesName)),
+            child: (_args.type == "expense" ? IconColorList.getExpenseIcon(txn.categoriesName) : IconColorList.getIncomeIcon(txn.categoriesName)),
             height: 40,
             width: 40,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              color: (_args.type == "expense" ? getExpenseColor(txn.categoriesName) : getIncomeColor(txn.categoriesName)),
+              color: (_args.type == "expense" ? IconColorList.getExpenseColor(txn.categoriesName) : IconColorList.getIncomeColor(txn.categoriesName)),
             ),
             margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
           ),

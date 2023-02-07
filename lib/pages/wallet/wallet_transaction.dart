@@ -380,9 +380,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
   Color _getColor(TransactionListModel transaction) {
     if(transaction.type == "expense") {
-      return getExpenseColor(transaction.category!.name);
+      return IconColorList.getExpenseColor(transaction.category!.name);
     } else if(transaction.type == "income") {
-      return getIncomeColor(transaction.category!.name);
+      return IconColorList.getIncomeColor(transaction.category!.name);
     } else {
       // this is transfer, and this is only have 1 color
       return accentColors[4];
@@ -391,9 +391,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
   Icon _getIcon(TransactionListModel transaction) {
     if(transaction.type == "expense") {
-      return getExpenseIcon(transaction.category!.name);
+      return IconColorList.getExpenseIcon(transaction.category!.name);
     } else if(transaction.type == "income") {
-      return getIncomeIcon(transaction.category!.name);
+      return IconColorList.getIncomeIcon(transaction.category!.name);
     } else {
       // this is transfer, and this is only have 1 color
       return Icon(Ionicons.repeat, color: textColor,);

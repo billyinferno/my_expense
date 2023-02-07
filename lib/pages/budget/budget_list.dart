@@ -256,18 +256,14 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                       width: 40,
                                       padding: EdgeInsets.all(5),
                                       decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(40),
-                                        color: getExpenseColor(
-                                            _expenseCategory[_key]!.name),
+                                        borderRadius: BorderRadius.circular(40),
+                                        color: IconColorList.getExpenseColor(_expenseCategory[_key]!.name),
                                       ),
-                                      child: getExpenseIcon(
-                                          _expenseCategory[_key]!.name),
+                                      child: IconColorList.getExpenseIcon(_expenseCategory[_key]!.name),
                                     ),
                                     title: Text(_expenseCategory[_key]!.name),
                                     trailing: Visibility(
-                                      visible: (_checkIfCategorySelected(
-                                          _expenseCategory[_key]!.id)),
+                                      visible: (_checkIfCategorySelected(_expenseCategory[_key]!.id)),
                                       child: Icon(
                                         Ionicons.checkmark_circle,
                                         size: 20,
@@ -277,8 +273,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                     onTap: () async {
                                       // check if this is not already added as budget or not?
                                       // if not yet then we can add this new budget to the budget list
-                                      if (!_checkIfCategorySelected(
-                                          _expenseCategory[_key]!.id)) {
+                                      if (!_checkIfCategorySelected(_expenseCategory[_key]!.id)) {
                                         // debugPrint("Add new budget " + _expenseCategory[_key]!.id.toString());
                                         await _addBudget(_expenseCategory[_key]!.id,_currencyID).then((_) {
                                           ScaffoldMessenger.of(context).showSnackBar(
@@ -337,8 +332,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
               index: index,
               budgetId: budget.id,
               categoryId: budget.category.id,
-              categoryIcon: getExpenseIcon(budget.category.name),
-              categoryColor: getExpenseColor(budget.category.name),
+              categoryIcon: IconColorList.getExpenseIcon(budget.category.name),
+              categoryColor: IconColorList.getExpenseColor(budget.category.name),
               categoryName: budget.category.name,
               currencyId: budget.currency.id,
               currencySymbol: budget.currency.symbol,
@@ -350,8 +345,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
               index: index,
               budgetId: budget.id,
               categoryId: budget.category.id,
-              categoryIcon: getExpenseIcon(budget.category.name),
-              categoryColor: getExpenseColor(budget.category.name),
+              categoryIcon: IconColorList.getExpenseIcon(budget.category.name),
+              categoryColor: IconColorList.getExpenseColor(budget.category.name),
               categoryName: budget.category.name,
               currencyId: budget.currency.id,
               currencySymbol: budget.currency.symbol,
