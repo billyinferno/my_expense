@@ -319,35 +319,40 @@ class _HomeBudgetState extends State<HomeBudget> {
                     },
                     child: ListView.builder(
                       controller: _scrollControllerBudgetList,
-                      itemCount: _budgetList.length,
+                      itemCount: _budgetList.length + 1,
                       itemBuilder: ((BuildContext context, int index) {
-                        return GestureDetector(
-                          onTap: (() {
-                            //debugPrint("Showed the list of this transaction category " + _budgetList[index].category.id.toString() + " for this date " + selectedDate.toString());
-                            BudgetTransactionArgs _args = BudgetTransactionArgs(
-                              categoryid: _budgetList[index].category.id,
-                              categoryName: _budgetList[index].category.name,
-                              categorySymbol: _budgetList[index].currency.symbol,
-                              budgetAmount: _budgetList[index].amount,
-                              budgetUsed: _budgetList[index].used,
-                              selectedDate: selectedDate,
-                              currencyId: _currentCurrencies!.id,
-                            );
-                            Navigator.pushNamed(context, '/budget/transaction', arguments: _args);
-                          }),
-                          child: Container(
-                            color: Colors.transparent,
-                            padding: EdgeInsets.all(10),
-                            child: BudgetBar(
-                              icon: IconColorList.getExpenseIcon(_budgetList[index].category.name),
-                              iconColor: IconColorList.getExpenseColor(_budgetList[index].category.name),
-                              title: _budgetList[index].category.name,
-                              symbol: _budgetList[index].currency.symbol,
-                              budgetUsed: _budgetList[index].used,
-                              budgetTotal: _budgetList[index].amount,
+                        if (index < _budgetList.length) {
+                          return GestureDetector(
+                            onTap: (() {
+                              //debugPrint("Showed the list of this transaction category " + _budgetList[index].category.id.toString() + " for this date " + selectedDate.toString());
+                              BudgetTransactionArgs _args = BudgetTransactionArgs(
+                                categoryid: _budgetList[index].category.id,
+                                categoryName: _budgetList[index].category.name,
+                                categorySymbol: _budgetList[index].currency.symbol,
+                                budgetAmount: _budgetList[index].amount,
+                                budgetUsed: _budgetList[index].used,
+                                selectedDate: selectedDate,
+                                currencyId: _currentCurrencies!.id,
+                              );
+                              Navigator.pushNamed(context, '/budget/transaction', arguments: _args);
+                            }),
+                            child: Container(
+                              color: Colors.transparent,
+                              padding: EdgeInsets.all(10),
+                              child: BudgetBar(
+                                icon: IconColorList.getExpenseIcon(_budgetList[index].category.name),
+                                iconColor: IconColorList.getExpenseColor(_budgetList[index].category.name),
+                                title: _budgetList[index].category.name,
+                                symbol: _budgetList[index].currency.symbol,
+                                budgetUsed: _budgetList[index].used,
+                                budgetTotal: _budgetList[index].amount,
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        }
+                        else {
+                          return const SizedBox(height: 30,);
+                        }
                       }),
                     ),
                   ),

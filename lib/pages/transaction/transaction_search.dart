@@ -144,7 +144,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           ),
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
               child: ListView.builder(
                 controller: _scrollController,
                 itemCount: _transactions.length,
@@ -174,6 +174,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               ),
             ),
           ),
+          const SizedBox(height: 30,),
         ],
       ),
     );

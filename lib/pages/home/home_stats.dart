@@ -224,32 +224,37 @@ class _HomeStatsState extends State<HomeStats> {
                         }),
                         child: ListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: homeProvider.netWorth.length,
+                          itemCount: homeProvider.netWorth.length + 1,
                           itemBuilder: ((context, index) {
-                            return Container(
-                              margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
-                              decoration: BoxDecoration(
-                                color: secondaryDark,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  _generateNetWorth(homeProvider.netWorth[index]),
-                                  BarChart(
-                                    from: _from,
-                                    to: _to,
-                                    data: (_getData(homeProvider.incomeExpense[homeProvider.netWorth[index].currenciesId])),
-                                  ),
-                                ],
-                              ),
-                            );
+                            if (index < homeProvider.netWorth.length) {
+                              return Container(
+                                margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+                                decoration: BoxDecoration(
+                                  color: secondaryDark,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    _generateNetWorth(homeProvider.netWorth[index]),
+                                    BarChart(
+                                      from: _from,
+                                      to: _to,
+                                      data: (_getData(homeProvider.incomeExpense[homeProvider.netWorth[index].currenciesId])),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+                            else {
+                              // add padding on bottom
+                              return const SizedBox(height: 30,);
+                            }
                           }),
                         ),
                       ),
                     ),
-                    SizedBox(height: 25,),
                   ],
                 ),
               ),

@@ -344,18 +344,6 @@ class _HomeListState extends State<HomeList> {
                 }
               }
             }),
-            // onVerticalDragEnd: ((DragEndDetails details) {
-            //   double _velocity = (details.primaryVelocity ?? 0);
-            //   debugPrint(_velocity.toString());
-            //   if(_velocity != 0) {
-            //     if(_velocity > 0) {
-            //       debugPrint("Up");
-            //     }
-            //     else if(_velocity < 0) {
-            //       debugPrint("Down");
-            //     }
-            //   }
-            // }),
             child: (Container(
               padding: EdgeInsets.all(10),
               child: RefreshIndicator(
@@ -366,10 +354,15 @@ class _HomeListState extends State<HomeList> {
                 child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
                   controller: _scrollController,
-                  itemCount: _transactionData.length,
+                  itemCount: _transactionData.length + 1,
                   itemBuilder: (BuildContext ctx, int index) {
-                    TransactionListModel txn = _transactionData[index];
-                    return generateListItem(index, txn, context);
+                    if (index < _transactionData.length) {
+                      TransactionListModel txn = _transactionData[index];
+                      return generateListItem(index, txn, context);
+                    }
+                    else {
+                      return const SizedBox(height: 30,);
+                    }
                   },
                 ),
               ),

@@ -108,7 +108,7 @@ class _HomeWalletState extends State<HomeWallet> {
         builder: (context, homeProvider, child) {
           wallets = homeProvider.walletList;
           return (Container(
-            padding: EdgeInsets.all(10),
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
             child: RefreshIndicator(
               color: accentColors[6],
               onRefresh: () async {
@@ -117,10 +117,15 @@ class _HomeWalletState extends State<HomeWallet> {
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 controller: _scrollControllerWallet,
-                itemCount: wallets.length,
+                itemCount: wallets.length + 1,
                 itemBuilder: (BuildContext ctx, int index) {
-                  WalletModel wallet = wallets[index];
-                  return generateSlidable(wallet, context);
+                  if (index < wallets.length) {
+                    WalletModel wallet = wallets[index];
+                    return generateSlidable(wallet, context);
+                  }
+                  else {
+                    return const SizedBox(height: 30,);
+                  }
                 },
               ),
             ),
