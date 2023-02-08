@@ -10,6 +10,8 @@ import 'package:my_expense/themes/color_utils.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
+import 'package:my_expense/utils/misc/wallet_transaction_class_helper.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class WalletTransactionPage extends StatefulWidget {
   final Object? wallet;
@@ -22,15 +24,19 @@ class WalletTransactionPage extends StatefulWidget {
 class _WalletTransactionPageState extends State<WalletTransactionPage> {
   final fCCY = new NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
+  final DateFormat _dtDayMonthYear = DateFormat("dd MMM yyyy");
+  final DateFormat _dtyyyyMMdd = DateFormat("yyyy-MM-dd");
+  final DateFormat _dtMMMMyyyy = DateFormat("MMMM yyyy");
 
   late ScrollController _scrollController;
   late WalletModel _wallet;
-  late List<TransactionListModel> _transactions;
 
   bool _isLoading = true;
   DateTime _currentDate = DateTime.now();
   double _expenseAmount = 0.0;
   double _incomeAmount = 0.0;
+  Map<DateTime, WalletTransactionExpenseIncome> _totalDate = {};
+  List<WalletTransactionList> _list = [];
 
   @override
   void initState() {
@@ -81,28 +87,83 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     double _income = 0.0;
     double _expense = 0.0;
 
+    DateTime currDate;
+    WalletTransactionExpenseIncome walletExpenseIncome;
+
+    // clear the _totalDate before loop
+    _totalDate.clear();
     transactions.forEach((txn) {
+      currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
+      if (_totalDate.containsKey(currDate)) {
+        walletExpenseIncome = _totalDate[currDate]!;
+      }
+      else {
+        walletExpenseIncome = new WalletTransactionExpenseIncome();
+        walletExpenseIncome.date = currDate;
+      }
+
       if(txn.type == "income") {
         _income += txn.amount;
+        walletExpenseIncome.income += txn.amount;
       }
       if(txn.type == "expense") {
         _expense += (txn.amount * -1);
+        walletExpenseIncome.expense += (txn.amount * -1);
       }
       if(txn.type == "transfer") {
         // check whether it's from or to
         if(_wallet.id == txn.wallet.id) {
           _expense += (txn.amount * -1);
+          walletExpenseIncome.expense += (txn.amount * -1);
         }
         if(txn.walletTo != null) {
           if(_wallet.id == txn.walletTo!.id) {
             _income += txn.amount * txn.exchangeRate;
+            walletExpenseIncome.income += txn.amount * txn.exchangeRate;
           }
         }
       }
+
+      // add this walletExpenseIcon to the _totalDate
+      _totalDate[currDate] = walletExpenseIncome;
     });
 
+    // after this we generate the WalletTransactionList
+    bool isLoop = false;
+    int idx = 0;
+    
+    // clear before we loop the total date we have
+    _list.clear();
+
+    // loop thru the _totalDate
+    _totalDate.forEach((key, value) {
+      // add the header for this
+      WalletTransactionList header = WalletTransactionList();
+      header.type = 'header';
+      header.data = value;
+      _list.add(header);
+
+      // loop thru the transactions that have the same date and add this to the list
+      isLoop = true;
+      while(idx < transactions.length && isLoop) {
+        if (isSameDay(transactions[idx].date.toLocal(), key.toLocal())) {
+          // add to the transaction list
+          WalletTransactionList data = WalletTransactionList();
+          data.type = 'item';
+          data.data = transactions[idx];
+          _list.add(data);
+          
+          // next transactions
+          idx = idx + 1;
+        }
+        else {
+          // already different date
+          isLoop = false;
+        }
+      }
+    },);
+
     setState(() {
-      _transactions = transactions;
       _incomeAmount = _income;
       _expenseAmount = _expense;
     });
@@ -112,7 +173,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     bool _force = (force ?? false);
 
     // get the transaction
-    String _date = DateFormat("yyyy-MM-dd").format(DateTime(fetchDate.toLocal().year, fetchDate.toLocal().month, 1));
+    String _date = _dtyyyyMMdd.format(DateTime(fetchDate.toLocal().year, fetchDate.toLocal().month, 1));
     await _transactionHttp.fetchTransactionWallet(_wallet.id, _date, _force).then((_txns) {
       setTransactions(_txns);
       setLoading(false);
@@ -245,7 +306,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                     _setDate(_newDate);
                     Navigator.pop(context);
                   }).onError((error, stackTrace) {
-                    debugPrint("Error when fetch wallet for " + DateFormat("MMMM yyyy").format(_newDate.toLocal()));
+                    debugPrint("Error when fetch wallet for " + _dtMMMMyyyy.format(_newDate.toLocal()));
                     Navigator.pop(context);
                   });
                 }),
@@ -269,7 +330,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(DateFormat("MMMM yyyy").format(_currentDate.toLocal())),
+                      Text(_dtMMMMyyyy.format(_currentDate.toLocal())),
                       RichText(
                         text: TextSpan(
                           children: <TextSpan>[
@@ -296,7 +357,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                     _setDate(_newDate);
                     Navigator.pop(context);
                   }).onError((error, stackTrace) {
-                    debugPrint("Error when fetch wallet for " + DateFormat("MMMM yyyy").format(_newDate.toLocal()));
+                    debugPrint("Error when fetch wallet for " + _dtMMMMyyyy.format(_newDate.toLocal()));
                     Navigator.pop(context);
                   });
                 }),
@@ -317,63 +378,25 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           ),
         ),
         Expanded(
-          child: Container(
-            color: Colors.transparent,
-            padding: EdgeInsets.all(10),
-            child: RefreshIndicator(
-              color: accentColors[6],
-              onRefresh: () async {
-                debugPrint("🔃 Refresh wallet");
+          child: RefreshIndicator(
+            color: accentColors[6],
+            onRefresh: () async {
+              debugPrint("🔃 Refresh wallet");
 
-                // fetch the transaction for this date
-                showLoaderDialog(context);
+              // fetch the transaction for this date
+              showLoaderDialog(context);
 
-                await _fetchTransactionWallet(_currentDate, true).then((_) {
-                  Navigator.pop(context);
-                }).onError((error, stackTrace) {
-                  debugPrint("Error when refresh wallet for " + DateFormat("MMMM yyyy").format(_currentDate.toLocal()));
-                  Navigator.pop(context);
-                });
-              },
-              child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                itemCount: _transactions.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0))
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(40),
-                            color: _getColor(_transactions[index]),
-                          ),
-                          child: _getIcon(_transactions[index]),
-                        ),
-                        SizedBox(width: 10,),
-                        Expanded(
-                          child: Container(
-                            child: _getName(_transactions[index]),
-                          )
-                        ),
-                        SizedBox(width: 10,),
-                        _getAmount(_transactions[index]),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
+              await _fetchTransactionWallet(_currentDate, true).then((_) {
+                Navigator.pop(context);
+              }).onError((error, stackTrace) {
+                debugPrint("Error when refresh wallet for " + _dtMMMMyyyy.format(_currentDate.toLocal()));
+                Navigator.pop(context);
+              });
+            },
+            child: _generateTransactionListview(),
           ),
         ),
+        const SizedBox(height: 30,),
       ],
     );
   }
@@ -407,7 +430,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(transaction.name, overflow: TextOverflow.ellipsis,),
-          Text(transaction.category!.name + ", " + DateFormat("dd MMM yyyy").format(transaction.date.toLocal()),
+          Text(transaction.category!.name + ", " + _dtDayMonthYear.format(transaction.date.toLocal()),
             style: TextStyle(
               fontSize: 12,
               color: textColor2,
@@ -424,7 +447,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         children: <Widget>[
           Text(transaction.wallet.name + " > " + transaction.walletTo!.name, overflow: TextOverflow.ellipsis,),
           Text(
-            DateFormat("dd MMM yyyy").format(transaction.date.toLocal()),
+            _dtDayMonthYear.format(transaction.date.toLocal()),
             style: TextStyle(
               fontSize: 12,
               color: textColor2,
@@ -473,6 +496,77 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         ],
       );
     }
+  }
+
+  Widget _generateTransactionListview() {
+    return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      controller: _scrollController,
+      itemCount: _list.length,
+      itemBuilder: (context, index) {
+        // check whether the type is header or item
+        if (_list[index].type == 'header') {
+          WalletTransactionExpenseIncome header = _list[index].data as WalletTransactionExpenseIncome;
+          return Container(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            color: secondaryDark,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    _dtDayMonthYear.format(header.date)
+                  ),
+                ),
+                Text(
+                  "(" + fCCY.format(header.expense) + ")",
+                  style: TextStyle(color: accentColors[2])
+                ),
+                const SizedBox(width: 5,),
+                Text(
+                  "(" + fCCY.format(header.income) + ")",
+                  style: TextStyle(color: accentColors[6])
+                ),
+              ],
+            ),
+          );
+        }
+        else {
+          // this is item
+          TransactionListModel txn = _list[index].data as TransactionListModel;
+          return Container(
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: primaryLight, width: 1.0))
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    color: _getColor(txn),
+                  ),
+                  child: _getIcon(txn),
+                ),
+                SizedBox(width: 10,),
+                Expanded(
+                  child: Container(
+                    child: _getName(txn),
+                  )
+                ),
+                SizedBox(width: 10,),
+                _getAmount(txn),
+              ],
+            ),
+          );
+        }
+      },
+    );
   }
 
   void _setDate(DateTime newDate) {
