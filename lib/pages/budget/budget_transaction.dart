@@ -33,8 +33,11 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   double _budgetAmount = 0.0;
   int _currencyId = -1;
   bool _isLoading = true;
+  bool _sortAscending = true;
   Map<DateTime, WalletTransactionExpenseIncome> _totalDate = {};
+  Map<DateTime, WalletTransactionExpenseIncome> _totalDateSorted = {};
   List<WalletTransactionList> _list = [];
+  List<TransactionListModel> _transactions = [];
 
 
   @override
@@ -73,7 +76,46 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
           }),
         ),
         actions: <Widget>[
-          Container(width: 50, color: Colors.transparent,),
+          InkWell(
+            onTap: (() async {
+              // set the sorting to inverse
+              _sortAscending = !_sortAscending;
+              await setTransactions(_transactions);
+            }),
+            child: Container(
+              width: 50,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    (_sortAscending ? Ionicons.arrow_up : Ionicons.arrow_down),
+                    color: textColor,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        (_sortAscending ? "A" : "Z"),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: textColor,
+                        ),
+                      ),
+                      Text(
+                        (_sortAscending ? "Z" : "A"),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: textColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
       body: _createBody(),
@@ -223,67 +265,74 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     );
   }
 
-  void setTransactions(List<TransactionListModel> transactions) {
-    DateTime currDate;
-    WalletTransactionExpenseIncome walletExpenseIncome;
-    bool isLoop = false;
-    int idx = 0;
-
-    // clear the _totalDate before loop
-    _totalDate.clear();
-    transactions.forEach((txn) {
-      if (txn.type == "expense") {
-        currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
-        if (_totalDate.containsKey(currDate)) {
-          walletExpenseIncome = _totalDate[currDate]!;
-        }
-        else {
-          walletExpenseIncome = new WalletTransactionExpenseIncome();
-          walletExpenseIncome.date = currDate;
-        }
-
-        // add the expense amount
-        walletExpenseIncome.expense += (txn.amount * -1);
-
-        // add this walletExpenseIcon to the _totalDate
-        _totalDate[currDate] = walletExpenseIncome;
-      }
-    });
-
-    // clear before we loop the total date we have
-    _list.clear();
-
-    // after this we generate the WalletTransactionList
-    // loop thru the _totalDate
-    _totalDate.forEach((key, value) {
-      // add the header for this
-      WalletTransactionList header = WalletTransactionList();
-      header.type = 'header';
-      header.data = value;
-      _list.add(header);
-
-      // loop thru the transactions that have the same date and add this to the list
-      isLoop = true;
-      while(idx < transactions.length && isLoop) {
-        if (isSameDay(transactions[idx].date.toLocal(), key.toLocal())) {
-          // add to the transaction list
-          WalletTransactionList data = WalletTransactionList();
-          data.type = 'item';
-          data.data = transactions[idx];
-          _list.add(data);
-          
-          // next transactions
-          idx = idx + 1;
-        }
-        else {
-          // already different date
-          isLoop = false;
-        }
-      }
-    },);
-    
+  Future<void> setTransactions(List<TransactionListModel> transactions) async {
     setState(() {
-      // set state just to refresh the widget
+      DateTime currDate;
+      WalletTransactionExpenseIncome walletExpenseIncome;
+      bool isLoop = false;
+      int idx = 0;
+      List<TransactionListModel> txnList = [];
+
+      // copy the transaction to _transactions, and check what kind of sort we want to do?
+      if (_sortAscending) {
+        txnList = transactions.toList();
+      }
+      else {
+        txnList = transactions.reversed.toList();
+      }
+
+      // clear the _totalDate before loop
+      _totalDate.clear();
+      txnList.forEach((txn) {
+        if (txn.type == "expense") {
+          currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
+          if (_totalDate.containsKey(currDate)) {
+            walletExpenseIncome = _totalDate[currDate]!;
+          }
+          else {
+            walletExpenseIncome = new WalletTransactionExpenseIncome();
+            walletExpenseIncome.date = currDate;
+          }
+
+          // add the expense amount
+          walletExpenseIncome.expense += (txn.amount * -1);
+
+          // add this walletExpenseIcon to the _totalDate
+          _totalDate[currDate] = walletExpenseIncome;
+        }
+      });
+
+      // clear before we loop the total date we have
+      _list.clear();
+
+      // after this we generate the WalletTransactionList
+      // loop thru the _totalDate
+      _totalDate.forEach((key, value) {
+        // add the header for this
+        WalletTransactionList header = WalletTransactionList();
+        header.type = 'header';
+        header.data = value;
+        _list.add(header);
+
+        // loop thru the transactions that have the same date and add this to the list
+        isLoop = true;
+        while(idx < txnList.length && isLoop) {
+          if (isSameDay(txnList[idx].date.toLocal(), key.toLocal())) {
+            // add to the transaction list
+            WalletTransactionList data = WalletTransactionList();
+            data.type = 'item';
+            data.data = txnList[idx];
+            _list.add(data);
+            
+            // next transactions
+            idx = idx + 1;
+          }
+          else {
+            // already different date
+            isLoop = false;
+          }
+        }
+      },);
     });
   }
 
@@ -297,8 +346,10 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     bool _force = (force ?? false);
 
     String date = DateFormat('yyyy-MM-dd').format(_selectedDate.toLocal());
-    await _transactionHttp.fetchTransactionBudget(_categoryId, date, _currencyId, _force).then((value) {
-      setTransactions(value);
+    await _transactionHttp.fetchTransactionBudget(_categoryId, date, _currencyId, _force).then((value) async {
+      await setTransactions(value.reversed.toList());
+      _transactions = value.reversed.toList();
+
       setLoading(false);
     }).onError((error, stackTrace) {
       debugPrint("Error when _fetchBudget");
