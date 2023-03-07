@@ -150,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _showLoginScreen() {
-    final mq = MediaQueryData.fromView(window);
+    final mq = MediaQueryData.fromWindow(window);
 
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
