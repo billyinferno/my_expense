@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:lazy_loading_list/lazy_loading_list.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/pages/transaction/transaction_edit.dart';
@@ -12,6 +11,7 @@ import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/anim/page_transition.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
+enum PageName { summary, all, income, expense, transfer }
 
 class TransactionSearchPage extends StatefulWidget {
   const TransactionSearchPage({Key? key}) : super(key: key);
@@ -20,21 +20,43 @@ class TransactionSearchPage extends StatefulWidget {
   _TransactionSearchPageState createState() => _TransactionSearchPageState();
 }
 
+
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final fCCY = new NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService transactionHttp = TransactionHTTPService();
 
   String _searchText = "";
   String _type = "both";
-  int _limit = 50; // 50 records per fetch
+  int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
   int _start = 0; // start from 0 page
   int _sliding = 0;
-  bool _hasMore = true;
+  
+  int _resultPage = 1;
+  PageName _resultPageName = PageName.all;
+  Map<PageName, Color> _resultPageColor = {
+    PageName.summary: accentColors[1],
+    PageName.all: accentColors[3],
+    PageName.income: accentColors[6],
+    PageName.expense: accentColors[2],
+    PageName.transfer: accentColors[4],
+  };
 
   List<TransactionListModel> _transactions = [];
+  List<TransactionListModel> _income = [];
+  List<TransactionListModel> _expense = [];
+  List<TransactionListModel> _transfer = [];
+  Map<String, List<TransactionListModel>> _summaryIncome = {};
+  List<TransactionListModel> _summaryIncomeList = [];
+  Map<String, List<TransactionListModel>> _summaryExpense = {};
+  List<TransactionListModel> _summaryExpenseList = [];
 
   TextEditingController _searchController = TextEditingController();
   ScrollController _scrollController = ScrollController();
+  ScrollController _scrollControllerSummary = ScrollController();
+  ScrollController _scrollControllerIncome = ScrollController();
+  ScrollController _scrollControllerExpense = ScrollController();
+  ScrollController _scrollControllerTransfer = ScrollController();
+
 
   @override
   void initState() {
@@ -43,9 +65,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   @override
   void dispose() {
-    super.dispose();
     _searchController.dispose();
     _scrollController.dispose();
+    _scrollControllerSummary.dispose();
+    _scrollControllerIncome.dispose();
+    _scrollControllerExpense.dispose();
+    _scrollControllerTransfer.dispose();
+    super.dispose();
   }
 
   @override
@@ -142,42 +168,181 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               ],
             ),
           ),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _transactions.length,
-                itemBuilder: (context, index) {
-                  return LazyLoadingList(
-                    initialSizeOfItems: _limit,
-                    index: index,
-                    hasMore: _hasMore,
-                    loadMore: (() async {
-                      //debugPrint("Load more...");
-                      showLoaderDialog(context);
-                      await _findTransaction(_searchText, _type, _limit, _start).then((_) {
-                        Navigator.pop(context);
-                      }).onError((error, stackTrace) {
-                        Navigator.pop(context);
-                        // showed error message
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          createSnackBar(
-                            message: "Error when searching transaction",
-                          )
-                        );
-                      });
-                    }),
-                    child: _createItem(_transactions[index]),
-                  );
-                },
-              ),
-            ),
-          ),
+          _getResultPage(),
           const SizedBox(height: 30,),
         ],
       ),
     );
+  }
+
+  Widget _getResultPage() {
+    // check if we got transactions or not?
+    if (_transactions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // if got transaction we will result the transaction
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
+            child: Center(
+              child: CupertinoSlidingSegmentedControl(
+                onValueChanged: (int? value) {
+                  setState(() {
+                    _resultPage = value!;
+                    switch(_resultPage) {
+                      case 0: _resultPageName = PageName.summary; break;
+                      case 1: _resultPageName = PageName.all; break;
+                      case 2: _resultPageName = PageName.income; break;
+                      case 3: _resultPageName = PageName.expense; break;
+                      case 4: _resultPageName = PageName.transfer; break;
+                    }
+                  });
+                },
+                groupValue: _resultPage,
+                thumbColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
+                children: {
+                  0: Text(
+                      "Summary",
+                      style: TextStyle(
+                        fontFamily: '--apple-system',
+                        fontSize: 11,
+                      ),
+                    ),
+                  1: Text(
+                      "All",
+                      style: TextStyle(
+                        fontFamily: '--apple-system',
+                        fontSize: 11,
+                      ),
+                    ),
+                  2: Text(
+                      "Income",
+                      style: TextStyle(
+                        fontFamily: '--apple-system',
+                        fontSize: 11,
+                      ),
+                    ),
+                  3: Text(
+                      "Expense",
+                      style: TextStyle(
+                        fontFamily: '--apple-system',
+                        fontSize: 11,
+                      ),
+                    ),
+                  4: Text(
+                      "Transfer",
+                      style: TextStyle(
+                        fontFamily: '--apple-system',
+                        fontSize: 11,
+                      ),
+                    ),
+                },
+              ),
+            ),
+          ),
+          Expanded(
+            child: _getResultChild(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _getResultChild() {
+    switch (_resultPageName) {
+      case PageName.all:
+        return Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: _transactions.length,
+            itemBuilder: (context, index) {
+              return _createItem(_transactions[index], true);
+            },
+          ),
+        );
+      case PageName.summary:
+        return Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: SingleChildScrollView(
+            controller: _scrollControllerSummary,
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  child: Text(
+                    "Expense",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: accentColors[2],
+                    ),
+                  ),
+                ),
+                ...List<Widget>.generate(_summaryExpenseList.length, (index) {
+                  return _createItem(_summaryExpenseList[index], false);
+                }),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  child: Text(
+                    "Income",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: accentColors[6],
+                    ),
+                  ),
+                ),
+                ...List<Widget>.generate(_summaryIncomeList.length, (index) {
+                  return _createItem(_summaryIncomeList[index], false);
+                }),
+              ],
+            ),
+          ),
+        );
+      case PageName.income:
+        return Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: ListView.builder(
+            controller: _scrollControllerIncome,
+            itemCount: _income.length,
+            itemBuilder: (context, index) {
+              return _createItem(_income[index], false);
+            },
+          ),
+        );
+      case PageName.expense:
+        return Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: ListView.builder(
+            controller: _scrollControllerExpense,
+            itemCount: _expense.length,
+            itemBuilder: (context, index) {
+              return _createItem(_expense[index], false);
+            },
+          ),
+        );
+      case PageName.transfer:
+        return Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: ListView.builder(
+            controller: _scrollControllerTransfer,
+            itemCount: _transfer.length,
+            itemBuilder: (context, index) {
+              return _createItem(_transfer[index], false);
+            },
+          ),
+        );
+      default:
+      // unknown just return SizedBox.shrink();
+      return const SizedBox.shrink();
+    }
   }
 
   Widget _categoryIcon(TransactionListModel txn) {
@@ -269,19 +434,124 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       for(int i=0; i<_transactions.length; i++) {
         // check which transaction is being updated
         if(_transactions[i].id == txnUpdate.id) {
-          setState(() {
-            _transactions[i] = txnUpdate;
-          });
+          _transactions[i] = txnUpdate;
           break;
         }
       }
+
+      // after that we will perform grouping of the transactions to income, expense, and transfer
+      _groupTransactions();
+
+      setState(() {
+        // set state to rebuild the widget
+      });
     }
   }
 
-  Widget _createItem(TransactionListModel txn){
+  void _groupTransactions() {
+    // clear all the income, expense, and transfer
+    _income.clear();
+    _expense.clear();
+    _transfer.clear();
+    _summaryIncome.clear();
+    _summaryExpense.clear();
+
+    String summaryKey;
+
+    // loop thru transactions
+    for(int i=0; i<_transactions.length; i++) {
+      // generate the summary key
+      summaryKey = _transactions[i].type.toLowerCase() + "_" + (_transactions[i].category != null ? _transactions[i].category!.name : '') + "_" + _transactions[i].name + "_" + _transactions[i].wallet.currency;
+
+      // check which transaction is being updated
+      switch(_transactions[i].type.toLowerCase()) {
+        case 'income':
+          // check if summary key exists or not?
+          if (!_summaryIncome.containsKey(summaryKey)) {
+            _summaryIncome[summaryKey] = [];
+          }
+          _summaryIncome[summaryKey]!.add(_transactions[i]);
+
+          _income.add(_transactions[i]);
+          break;
+        case 'expense':
+          // check if summary key exists or not?
+          if (!_summaryExpense.containsKey(summaryKey)) {
+            _summaryExpense[summaryKey] = [];
+          }
+          _summaryExpense[summaryKey]!.add(_transactions[i]);
+
+          _expense.add(_transactions[i]);
+          break;
+        case 'transfer':
+          _transfer.add(_transactions[i]);
+          break;
+      }
+    }
+
+    // now compute the summary data so we can showed it on the summary page
+    // based on the income, and expense
+    _summaryIncomeList.clear();
+    _summaryIncome.forEach((key, value) {
+      // compute the amount
+      double amount = 0;
+      value.forEach((data) {
+        amount += data.amount;
+      });
+      
+      // create TransactionModel based on the value
+      TransactionListModel txn = TransactionListModel(
+        -1,
+        value[0].name,
+        value[0].type,
+        DateTime.now(),
+        '',
+        value[0].category,
+        value[0].wallet,
+        null,
+        value[0].usersPermissionsUser,
+        true,
+        amount,
+        1
+      );
+
+      _summaryIncomeList.add(txn);
+    });
+
+    _summaryExpenseList.clear();
+    _summaryExpense.forEach((key, value) {
+      // compute the amount
+      double amount = 0;
+      value.forEach((data) {
+        amount += data.amount;
+      });
+      
+      // create TransactionModel based on the value
+      TransactionListModel txn = TransactionListModel(
+        -1,
+        value[0].name,
+        value[0].type,
+        DateTime.now(),
+        '',
+        value[0].category,
+        value[0].wallet,
+        null,
+        value[0].usersPermissionsUser,
+        true,
+        amount,
+        1
+      );
+
+      _summaryExpenseList.add(txn);
+    });
+  }
+
+  Widget _createItem(TransactionListModel txn, [bool? canEdit]){
     return InkWell(
       onTap: (() {
-        _showTransactionEditScreen(txn);
+        if (canEdit ?? true) {
+          _showTransactionEditScreen(txn);
+        }
       }),
       child: Container(
         height: 50,
@@ -299,7 +569,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(txn.name),
+                  Text(
+                    txn.name,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   Text(
                     DateFormat('E, dd MMM yyyy').format(txn.date.toLocal()),
                     style: TextStyle(
@@ -322,17 +595,15 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       _transactions.addAll(transactions);
       // set also the start for the next transaction we need to fetch
       _start = start + limit;
+
+      // group the transactions
+      _groupTransactions();
     });
   }
 
   Future <void> _findTransaction(String searchText, String type, int limit, int start) async {
     await transactionHttp.findTransaction(type, searchText, limit, start).then((results) {
       setTransactions(results, limit, start);
-      // check if the length is same or equal with limit
-      // if not then no more data available on server
-      if(results.length < limit) {
-        _hasMore = false;
-      }
     }).onError((error, stackTrace) {
       debugPrint("error on <_findTransaction>");
       debugPrint(error.toString());
@@ -356,7 +627,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         _start = 0; // always start from 0
         _transactions.clear();
         _transactions = [];
-        _hasMore = true;
 
         // try to find the transaction
         await _findTransaction(_searchText, _type, _limit, _start).then((_) {
