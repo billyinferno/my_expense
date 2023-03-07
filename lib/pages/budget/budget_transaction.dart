@@ -35,7 +35,6 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   bool _isLoading = true;
   bool _sortAscending = true;
   Map<DateTime, WalletTransactionExpenseIncome> _totalDate = {};
-  Map<DateTime, WalletTransactionExpenseIncome> _totalDateSorted = {};
   List<WalletTransactionList> _list = [];
   List<TransactionListModel> _transactions = [];
 
