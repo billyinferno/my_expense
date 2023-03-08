@@ -39,7 +39,6 @@ dependencies:
   hive: ^2.0.4
   hive_flutter: ^1.1.0
   flutter_keyboard_size: ^1.0.0+3
-  lazy_loading_list: ^1.0.1
   crypto: ^3.0.1
   flutter_slidable: ^2.0.0
 
