@@ -19,6 +19,7 @@ import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/anim/page_transition.dart';
 import 'package:my_expense/utils/globals.dart';
+import 'package:my_expense/utils/misc/custom_scroll_behaviour.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:provider/provider.dart';
 
@@ -51,6 +52,7 @@ class _RouterPageState extends State<RouterPage> {
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
+        scrollBehavior: MyCustomScrollBehavior(),
         title: 'My Expense',
         theme: Globals.themeData.copyWith(
           colorScheme: Globals.themeData.colorScheme.copyWith(
