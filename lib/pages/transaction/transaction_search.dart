@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/transaction_api.dart';
+import 'package:my_expense/model/category_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/pages/transaction/transaction_edit.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
@@ -11,6 +12,7 @@ import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/anim/page_transition.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
+import 'package:my_expense/utils/prefs/shared_category.dart';
 enum PageName { summary, all, income, expense, transfer }
 
 class TransactionSearchPage extends StatefulWidget {
@@ -26,7 +28,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final TransactionHTTPService transactionHttp = TransactionHTTPService();
 
   String _searchText = "";
-  String _type = "both";
+  String _categoryId = "";
+  String _type = "name";
   int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
   int _start = 0; // start from 0 page
   int _sliding = 0;
@@ -46,9 +49,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   List<TransactionListModel> _expense = [];
   List<TransactionListModel> _transfer = [];
   Map<String, List<TransactionListModel>> _summaryIncome = {};
-  List<TransactionListModel> _summaryIncomeList = [];
   Map<String, List<TransactionListModel>> _summaryExpense = {};
-  List<TransactionListModel> _summaryExpenseList = [];
+  List<Widget> _summaryList = [];
+
+  Map<int, CategoryModel> _categorySelected = {};
+  Map<int, CategoryModel> _categoryExpenseList = {};
+  Map<int, CategoryModel> _categoryIncomeList = {};
+  Map<int, CategoryModel> _categoryList = {};
 
   TextEditingController _searchController = TextEditingController();
   ScrollController _scrollController = ScrollController();
@@ -60,6 +67,19 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   @override
   void initState() {
+    // get the category expense and income list from shared preferences
+    _categoryExpenseList = CategorySharedPreferences.getCategory('expense');
+    _categoryIncomeList = CategorySharedPreferences.getCategory('income');
+
+    // generate category list
+    _categoryExpenseList.forEach((key, value) {
+      _categoryList[key] = value;
+    });
+
+    _categoryIncomeList.forEach((key, value) {
+      _categoryList[key] = value;
+    });
+
     super.initState();
   }
 
@@ -109,28 +129,28 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                       setState(() {
                         _sliding = value!;
                         switch(_sliding) {
-                          case 0: _type = "both"; break;
-                          case 1: _type = "name"; break;
-                          case 2: _type = "category"; break;
+                          case 0: _type = "name"; break;
+                          case 1: _type = "category"; break;
+                          case 2: _type = "both"; break;
                         }
                       });
                     },
                     groupValue: _sliding,
                     children: {
                       0: Text(
-                        "Both",
-                        style: TextStyle(
-                          fontFamily: '--apple-system'
-                        ),
-                      ),
-                      1: Text(
                         "Name",
                         style: TextStyle(
                           fontFamily: '--apple-system'
                         ),
                       ),
-                      2: Text(
+                      1: Text(
                         "Category",
+                        style: TextStyle(
+                          fontFamily: '--apple-system'
+                        ),
+                      ),
+                      2: Text(
+                        "Both",
                         style: TextStyle(
                           fontFamily: '--apple-system'
                         ),
@@ -139,32 +159,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   ),
                 ),
                 SizedBox(height: 10,),
-                CupertinoSearchTextField(
-                  controller: _searchController,
-                  style: TextStyle(
-                    color: textColor2,
-                    fontFamily: '--apple-system'
-                  ),
-                  suffixIcon: Icon(Ionicons.arrow_forward_circle),
-                  onSubmitted: ((_) async {
-                    await _submitSearch().then((_) {
-                      // remove the focus from the text
-                      FocusScopeNode _currentFocus = FocusScope.of(context);
-                      if(!_currentFocus.hasPrimaryFocus) {
-                        _currentFocus.unfocus();
-                      }
-                    });
-                  }),
-                  onSuffixTap: (() async {
-                    _submitSearch().then((_) {
-                      // remove the focus from the text
-                      FocusScopeNode _currentFocus = FocusScope.of(context);
-                      if(!_currentFocus.hasPrimaryFocus) {
-                        _currentFocus.unfocus();
-                      }
-                    });
-                  }),
-                ),
+                _showSearchOrSelectionWidget(),
               ],
             ),
           ),
@@ -269,41 +264,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       case PageName.summary:
         return Container(
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: SingleChildScrollView(
+          child: ListView.builder(
             controller: _scrollControllerSummary,
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    "Expense",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: accentColors[2],
-                    ),
-                  ),
-                ),
-                ...List<Widget>.generate(_summaryExpenseList.length, (index) {
-                  return _createItem(_summaryExpenseList[index], false);
-                }),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Text(
-                    "Income",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: accentColors[6],
-                    ),
-                  ),
-                ),
-                ...List<Widget>.generate(_summaryIncomeList.length, (index) {
-                  return _createItem(_summaryIncomeList[index], false);
-                }),
-              ],
-            ),
+            itemCount: _summaryList.length,
+            itemBuilder: ((context, index) {
+              return _summaryList[index];
+            })
           ),
         );
       case PageName.income:
@@ -345,40 +311,41 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     }
   }
 
-  Widget _categoryIcon(TransactionListModel txn) {
-    if(txn.type == "expense") {
+  Widget _categoryIcon({required String type, required String name, double? height, double? width, double? size}) {
+    if(type == "expense") {
       return Container(
-        height: 40,
-        width: 40,
+        height: (height ?? 40),
+        width: (width ?? 40),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(40),
-          color: IconColorList.getExpenseColor(txn.category!.name),
+          borderRadius: BorderRadius.circular((height ?? 40)),
+          color: IconColorList.getExpenseColor(name),
         ),
-        child: IconColorList.getExpenseIcon(txn.category!.name),
+        child: IconColorList.getExpenseIcon(name, size),
       );
     }
-    else if(txn.type == "income") {
+    else if(type == "income") {
       return Container(
-        height: 40,
-        width: 40,
+        height: (height ?? 40),
+        width: (width ?? 40),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(40),
-          color: IconColorList.getIncomeColor(txn.category!.name),
+          borderRadius: BorderRadius.circular((height ?? 40)),
+          color: IconColorList.getIncomeColor(name),
         ),
-        child: IconColorList.getIncomeIcon(txn.category!.name),
+        child: IconColorList.getIncomeIcon(name, size),
       );
     }
     else {
       return Container(
-        height: 40,
-        width: 40,
+        height: (height ?? 40),
+        width: (width ?? 40),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular((height ?? 40)),
           color: accentColors[4],
         ),
         child: Icon(
           Ionicons.repeat,
           color: textColor,
+          size: (size ?? 20),
         ),
       );
     }
@@ -491,34 +458,21 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // now compute the summary data so we can showed it on the summary page
     // based on the income, and expense
-    _summaryIncomeList.clear();
-    _summaryIncome.forEach((key, value) {
-      // compute the amount
-      double amount = 0;
-      value.forEach((data) {
-        amount += data.amount;
-      });
-      
-      // create TransactionModel based on the value
-      TransactionListModel txn = TransactionListModel(
-        -1,
-        value[0].name,
-        value[0].type,
-        DateTime.now(),
-        '',
-        value[0].category,
-        value[0].wallet,
-        null,
-        value[0].usersPermissionsUser,
-        true,
-        amount,
-        1
-      );
+    _summaryList.clear();
 
-      _summaryIncomeList.add(txn);
-    });
+    // add the expense bar on the _summaryList
+    _summaryList.add(Container(
+      padding: const EdgeInsets.all(10),
+      child: Text(
+        "Expense",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: accentColors[2],
+        ),
+      ),
+    ));
 
-    _summaryExpenseList.clear();
+    // loop thru all the expense data
     _summaryExpense.forEach((key, value) {
       // compute the amount
       double amount = 0;
@@ -542,7 +496,45 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         1
       );
 
-      _summaryExpenseList.add(txn);
+      _summaryList.add(_createItem(txn, false));
+    });
+
+    // add the income bar on the _summaryList
+    _summaryList.add(Container(
+      padding: const EdgeInsets.all(10),
+      child: Text(
+        "Income",
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: accentColors[6],
+        ),
+      ),
+    ));
+
+    _summaryIncome.forEach((key, value) {
+      // compute the amount
+      double amount = 0;
+      value.forEach((data) {
+        amount += data.amount;
+      });
+      
+      // create TransactionModel based on the value
+      TransactionListModel txn = TransactionListModel(
+        -1,
+        value[0].name,
+        value[0].type,
+        DateTime.now(),
+        '',
+        value[0].category,
+        value[0].wallet,
+        null,
+        value[0].usersPermissionsUser,
+        true,
+        amount,
+        1
+      );
+
+      _summaryList.add(_createItem(txn, false));
     });
   }
 
@@ -562,7 +554,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            _categoryIcon(txn),
+            _categoryIcon(name: txn.category!.name, type: txn.type),
             SizedBox(width: 10,),
             Expanded(
               child: Column(
@@ -601,8 +593,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     });
   }
 
-  Future <void> _findTransaction(String searchText, String type, int limit, int start) async {
-    await transactionHttp.findTransaction(type, searchText, limit, start).then((results) {
+  Future <void> _findTransaction(String searchText, String categoryId, String type, int limit, int start) async {
+    await transactionHttp.findTransaction(type, searchText, categoryId, limit, start).then((results) {
       setTransactions(results, limit, start);
     }).onError((error, stackTrace) {
       debugPrint("error on <_findTransaction>");
@@ -612,42 +604,406 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   Future <void> _submitSearch() async {
-    if(_searchController.text != _searchText) {
-      //debugPrint("Search for " + _searchController.text);
+    // generate the _categoryId based on the list of the category selected
+    _categoryId = '';
+    _categorySelected.forEach((key, value) {
+      // if not the first one, then add ,
+      if (_categoryId.isNotEmpty) {
+        _categoryId = _categoryId + ',';
+      }
+      _categoryId = _categoryId + key.toString();
+    });
 
-      // set the search text as current search controller text
-      _searchText = _searchController.text;
-      _searchText = _searchText.trim();
+    // now check if this is name, category, or both
+    // all will have different kind of checking
+    if (_type == "name" || _type == "both") {
+      if (_searchController.text.isNotEmpty) {
+        // set the search text as current search controller text
+        _searchText = _searchController.text;
+        _searchText = _searchText.trim();
 
-      if(_searchText.length >= 3) {
-        // show the loader dialog
-        showLoaderDialog(context);
-
-        // initialize all the value
-        _start = 0; // always start from 0
-        _transactions.clear();
-        _transactions = [];
-
-        // try to find the transaction
-        await _findTransaction(_searchText, _type, _limit, _start).then((_) {
-          Navigator.pop(context);
-        }).onError((error, stackTrace) {
-          Navigator.pop(context);
-          // showed error message
+        // ensure the searchText is more than 3
+        if (_searchText.length < 3) {
           ScaffoldMessenger.of(context).showSnackBar(
             createSnackBar(
-              message: "Error when searching transaction",
+              message: "Minimum text search is 3 character",
             )
           );
-        });
-      }
-      else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          createSnackBar(
-            message: "Minimum text search is 3 character",
-          )
-        );
+          return;
+        }
       }
     }
+
+    if (_type == "category" || _type == "both") {
+      if (_categoryId.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Please select category",
+          )
+        );
+        return;
+      }
+    }
+
+    // show the loader dialog
+    showLoaderDialog(context);
+
+    // initialize all the value
+    _start = 0; // always start from 0
+    _transactions.clear();
+    _transactions = [];
+
+    // try to find the transaction
+    await _findTransaction(_searchText, _categoryId, _type, _limit, _start).then((_) {
+      Navigator.pop(context);
+    }).onError((error, stackTrace) {
+      Navigator.pop(context);
+      // showed error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        createSnackBar(
+          message: "Error when searching transaction",
+        )
+      );
+    });
+  }
+  
+  Widget _showSearchOrSelectionWidget() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        (
+          (_sliding == 0 || _sliding == 2) ?
+          CupertinoSearchTextField(
+            controller: _searchController,
+            style: TextStyle(
+              color: textColor2,
+              fontFamily: '--apple-system'
+            ),
+            suffixIcon: Icon(Ionicons.arrow_forward_circle),
+            onSubmitted: ((_) async {
+              await _submitSearch().then((_) {
+                // remove the focus from the text
+                FocusScopeNode _currentFocus = FocusScope.of(context);
+                if(!_currentFocus.hasPrimaryFocus) {
+                  _currentFocus.unfocus();
+                }
+              });
+            }),
+            onSuffixTap: (() async {
+              _submitSearch().then((_) {
+                // remove the focus from the text
+                FocusScopeNode _currentFocus = FocusScope.of(context);
+                if(!_currentFocus.hasPrimaryFocus) {
+                  _currentFocus.unfocus();
+                }
+              });
+            }),
+          ) : const SizedBox.shrink()
+        ),
+        (_sliding == 2 ? const SizedBox(height: 10,) : const SizedBox.shrink()),
+        (
+          (_sliding == 1 || _sliding == 2) ?
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: InkWell(
+                      onTap: (() {
+                        _showCategorySelectionDialog();
+                      }),
+                      child: Container(
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: primaryDark,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            bottomLeft: Radius.circular(10),
+                          ),
+                          border: Border.all(
+                            color: secondaryBackground,
+                            style: BorderStyle.solid,
+                            width: 1.0,
+                          )
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            const SizedBox(width: 10,),
+                            Icon(
+                              Ionicons.add,
+                              size: 20,
+                              color: textColor,
+                            ),
+                            const SizedBox(width: 10,),
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  "Add",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                  ),
+                                )
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: (() {
+                        setState(() {                      
+                          _categorySelected.clear();
+                        });
+                      }),
+                      child: Container(
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: primaryDark,
+                          border: Border.all(
+                            color: secondaryBackground,
+                            style: BorderStyle.solid,
+                            width: 1.0,
+                          )
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            const SizedBox(width: 10,),
+                            Icon(
+                              Ionicons.trash,
+                              size: 20,
+                              color: textColor,
+                            ),
+                            const SizedBox(width: 10,),
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  "Clear",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                  ),
+                                )
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      onTap: (() async {
+                        await _submitSearch();
+                      }),
+                      child: Container(
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: primaryDark,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                          ),
+                          border: Border.all(
+                            color: secondaryBackground,
+                            style: BorderStyle.solid,
+                            width: 1.0,
+                          )
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            const SizedBox(width: 10,),
+                            Icon(
+                              Ionicons.search,
+                              size: 20,
+                              color: textColor,
+                            ),
+                            const SizedBox(width: 10,),
+                            Expanded(
+                              child: Center(
+                                child: Text(
+                                  "Search",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                  ),
+                                )
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10,),
+              Wrap(
+                spacing: 5,
+                runSpacing: 5,
+                children: _generateChipCategory(),
+              ),
+            ],
+          ) : const SizedBox.shrink()
+        ),
+      ],
+    );
+  }
+
+  void _showCategorySelectionDialog() {
+    showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+      return Container(
+        height: 300,
+        color: secondaryDark,
+        child: Column(
+          children: <Widget>[
+            Container(
+              height: 40,
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Center(child: Text("Category Tab")),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 10,),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 4,
+                children: _generateIconCategory(),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  List<Widget> _generateIconCategory() {
+    List<Widget> _ret = [];
+
+    // loop thru all the _currentCategoryList, and generate the category icon
+    _categoryList.forEach((key, value) {
+      _ret.add(_iconCategory(value));
+    });
+
+    return _ret;
+  }
+
+  Widget _iconCategory(CategoryModel category) {
+    // check if this is expense or income
+    Color _iconColor;
+    Icon _icon;
+
+    if(category.type.toLowerCase() == "expense") {
+      _iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
+      _icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
+    } else {
+      _iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
+      _icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
+    }
+
+    return GestureDetector(
+      onTap: () {
+        //print("Select category");
+        // check if category still less than 10
+        if (_categorySelected.length < 10) {
+          setState(() {
+            _categorySelected[category.id] = category;
+          });
+          Navigator.pop(context);
+        }
+        else {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Maximum selected category is 10"));
+        }
+      },
+      child: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Center(
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: _iconColor,
+                  border: Border.all(
+                    color: (_categorySelected.containsKey(category.id) ? accentColors[4] : Colors.transparent),
+                    width: 2.0,
+                    style: BorderStyle.solid,
+                  )
+                ),
+                child: _icon,
+              ),
+            ),
+            const SizedBox(height: 10,),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      category.name,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: textColor,
+                      ),
+                      softWrap: true,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _generateChipCategory() {
+    List<Widget> result = [];
+
+    // loop thru the category selected
+    _categorySelected.forEach((key, value) {
+      result.add(
+        InkWell(
+          onTap: (() {
+            // remove this chip from the _categorySelected
+            setState(() {            
+              _categorySelected.remove(key);
+            });
+          }),
+          child: Chip(
+            avatar: _categoryIcon(type: value.type, name: value.name, height: 20, width: 20, size: 15),
+            label: Text(value.name),
+            backgroundColor: (value.type == 'expense' ? IconColorList.getExpenseColor(value.name) : IconColorList.getIncomeColor(value.name)),
+            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+          ),
+        )
+      );  
+    });
+
+    return result;
   }
 }

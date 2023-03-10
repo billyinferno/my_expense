@@ -339,13 +339,23 @@ class TransactionHTTPService {
     }
   }
 
-  Future<List<TransactionListModel>> findTransaction(String type, String search, int limit, int start) async {
+  Future<List<TransactionListModel>> findTransaction(String type, String name, String category, int limit, int start) async {
     _checkJWT();
+
+    String url = Globals.apiURL + 'transactions/search/type/' + type;
+    
+    // check the type, if both then add both name and category, if name then only name, if category then only category
+    if (type == "name" || type == "both") {
+      url = url + "/search/" + name;
+    }
+    if (type == "category" || type == "both") {
+      url = url + "/category/" + category;
+    }
     
     // check if we got JWT token or not?
     if (_bearerToken.length > 0) {
       final response = await http.get(
-        Uri.parse(Globals.apiURL + 'transactions/search/' + search + "/type/" + type + "?_limit=" + limit.toString() + "&_start=" + start.toString()),
+        Uri.parse(url + "?_limit=" + limit.toString() + "&_start=" + start.toString()),
         headers: {
           HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
         }
