@@ -416,6 +416,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   void _groupTransactions() {
+    double amount;
+    DateTime? startDate;
+    DateTime? endDate;
+    int count;
+
     // clear all the income, expense, and transfer
     _income.clear();
     _expense.clear();
@@ -475,9 +480,32 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // loop thru all the expense data
     _summaryExpense.forEach((key, value) {
       // compute the amount
-      double amount = 0;
+      amount = 0;
+      startDate = null;
+      endDate = null;
+      count = 0;
+
       value.forEach((data) {
+        if (startDate == null) {
+          startDate = data.date;
+        }
+        else {
+          if(startDate!.isAfter(data.date)) {
+            startDate = data.date;
+          }
+        }
+        
+        if (endDate == null) {
+          endDate = data.date;
+        }
+        else {
+          if(endDate!.isAfter(data.date)) {
+            endDate = data.date;
+          }
+        }
+
         amount += data.amount;
+        count++;
       });
       
       // create TransactionModel based on the value
@@ -496,7 +524,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         1
       );
 
-      _summaryList.add(_createItem(txn, false));
+      _summaryList.add(_createSummaryItem(txn: txn, startDate: startDate!, endDate: endDate!, count: count));
     });
 
     // add the income bar on the _summaryList
@@ -513,9 +541,32 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     _summaryIncome.forEach((key, value) {
       // compute the amount
-      double amount = 0;
+      amount = 0;
+      startDate = null;
+      endDate = null;
+      count = 0;
+
       value.forEach((data) {
+        if (startDate == null) {
+          startDate = data.date;
+        }
+        else {
+          if(startDate!.isAfter(data.date)) {
+            startDate = data.date;
+          }
+        }
+        
+        if (endDate == null) {
+          endDate = data.date;
+        }
+        else {
+          if(endDate!.isAfter(data.date)) {
+            endDate = data.date;
+          }
+        }
+
         amount += data.amount;
+        count++;
       });
       
       // create TransactionModel based on the value
@@ -534,8 +585,58 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         1
       );
 
-      _summaryList.add(_createItem(txn, false));
+      _summaryList.add(_createSummaryItem(txn: txn, startDate: startDate!, endDate: endDate!, count: count));
     });
+  }
+
+  Widget _createSummaryItem({required TransactionListModel txn, required DateTime startDate, required DateTime endDate, required int count}){
+    return Container(
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          _categoryIcon(name: txn.category!.name, type: txn.type),
+          SizedBox(width: 10,),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  txn.name,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  DateFormat('dd/MM/yyyy').format(startDate.toLocal()) + " - " + DateFormat('dd/MM/yyyy').format(endDate.toLocal()),
+                  style: TextStyle(
+                    fontSize: 10,
+                  ),
+                ),
+                Text(
+                  (txn.category != null ? txn.category!.name : ''),
+                  style: TextStyle(
+                    fontSize: 10,
+                  ),
+                ),
+                const SizedBox(height: 5,),
+                Text(
+                  count.toString() + " time(s)",
+                  style: TextStyle(
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 10,),
+          _getAmount(txn),
+        ],
+      ),
+    );
   }
 
   Widget _createItem(TransactionListModel txn, [bool? canEdit]){
