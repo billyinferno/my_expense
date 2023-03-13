@@ -50,6 +50,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   List<TransactionListModel> _transfer = [];
   Map<String, List<TransactionListModel>> _summaryIncome = {};
   Map<String, List<TransactionListModel>> _summaryExpense = {};
+  Map<String, double> _totalAmountIncome = {};
+  Map<String, double> _totalAmountExpense = {};
   List<Widget> _summaryList = [];
 
   Map<int, CategoryModel> _categorySelected = {};
@@ -426,7 +428,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _expense.clear();
     _transfer.clear();
     _summaryIncome.clear();
+    _totalAmountIncome.clear();
     _summaryExpense.clear();
+    _totalAmountExpense.clear();
 
     String summaryKey;
 
@@ -444,6 +448,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           }
           _summaryIncome[summaryKey]!.add(_transactions[i]);
 
+          // check if total summary key for this ccy is exists or not?
+          if (!_totalAmountIncome.containsKey(_transactions[i].wallet.currency)) {
+            _totalAmountIncome[_transactions[i].wallet.currency] = 0;
+          }
+          _totalAmountIncome[_transactions[i].wallet.currency] = _totalAmountIncome[_transactions[i].wallet.currency]! + _transactions[i].amount;
+
           _income.add(_transactions[i]);
           break;
         case 'expense':
@@ -452,6 +462,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             _summaryExpense[summaryKey] = [];
           }
           _summaryExpense[summaryKey]!.add(_transactions[i]);
+
+          // check if total summary key for this ccy is exists or not?
+          if (!_totalAmountExpense.containsKey(_transactions[i].wallet.currency)) {
+            _totalAmountExpense[_transactions[i].wallet.currency] = 0;
+          }
+          _totalAmountExpense[_transactions[i].wallet.currency] = _totalAmountExpense[_transactions[i].wallet.currency]! + _transactions[i].amount;
 
           _expense.add(_transactions[i]);
           break;
@@ -476,6 +492,39 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         ),
       ),
     ));
+
+    _totalAmountExpense.forEach((key, value) {
+      _summaryList.add(
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          width: double.infinity,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                "Total " + key,
+                style: TextStyle(
+                  color: accentColors[2],
+                ),
+              ),
+              const SizedBox(width: 10,),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    fCCY.format(value),
+                    style: TextStyle(
+                      color: accentColors[2],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        )
+      );
+    });
 
     // loop thru all the expense data
     _summaryExpense.forEach((key, value) {
@@ -538,6 +587,39 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         ),
       ),
     ));
+    
+    _totalAmountIncome.forEach((key, value) {
+      _summaryList.add(
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+          width: double.infinity,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                "Total " + key,
+                style: TextStyle(
+                  color: accentColors[0],
+                ),
+              ),
+              const SizedBox(width: 10,),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    fCCY.format(value),
+                    style: TextStyle(
+                      color: accentColors[0],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        )
+      );
+    });
 
     _summaryIncome.forEach((key, value) {
       // compute the amount
