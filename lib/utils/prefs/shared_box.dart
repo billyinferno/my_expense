@@ -90,6 +90,29 @@ class MyBox {
     }
   }
 
+  static Future<void> putBool(String key, bool value) async {
+    // check if null
+    if(keyBox == null) {
+      init();
+    }
+
+    await keyBox!.put(key, value);
+  }
+
+  static bool getBool(String key) {
+    // check if null
+    if(keyBox == null) {
+      init();
+    }
+
+    if (keyBox!.containsKey(key)) {
+      return keyBox!.get(key);
+    }
+    else {
+      return false;
+    }
+  }
+
   static List<String> getKeys(String key) {
     List<String> _result = [];
     String _key = "";

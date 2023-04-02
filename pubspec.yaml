@@ -41,6 +41,7 @@ dependencies:
   flutter_keyboard_size: ^1.0.0+3
   crypto: ^3.0.1
   flutter_slidable: ^2.0.0
+  connectivity_plus: ^3.0.3
 
 dev_dependencies:
   hive_generator: ^2.0.0
