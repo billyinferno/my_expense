@@ -187,7 +187,7 @@ class _HomeWalletState extends State<HomeWallet> {
     return Slidable(
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
-        extentRatio: 0.75,
+        extentRatio: 0.9,
         children: <SlidableAction>[
           SlidableAction(
             label: 'Edit',
@@ -258,6 +258,15 @@ class _HomeWalletState extends State<HomeWallet> {
                   _enableWallet(wallet);
                 }
               });
+            })
+          ),
+          SlidableAction(
+            label: 'Stat',
+            foregroundColor: accentColors[3],
+            backgroundColor: primaryBackground,
+            icon: Ionicons.bar_chart,
+            onPressed: ((_) {
+              Navigator.pushNamed(context, '/wallet/stat', arguments: wallet);
             })
           ),
         ],

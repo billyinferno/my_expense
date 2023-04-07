@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:my_expense/model/currency_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
+import 'package:my_expense/model/wallet_stat_model.dart';
 import 'package:my_expense/model/wallet_type_model.dart';
 import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/utils/globals.dart';
@@ -574,6 +575,31 @@ class WalletHTTPService {
       }
 
       print("Got error <updateDefaultWallet>");
+      throw Exception("res=" + response.body);
+    } else {
+      throw Exception(
+          'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
+    }
+  }
+
+  Future<List<WalletStatModel>> getStat(int id) async {
+    _checkJWT();
+
+    // check if we got JWT token or not?
+    if (_bearerToken.length > 0) {
+      final response = await http.get(
+          Uri.parse(Globals.apiURL + 'wallets/stat/$id'),
+          headers: {
+            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          });
+
+      if (response.statusCode == 200) {
+        List<dynamic> _jsonData = jsonDecode(response.body);
+        List<WalletStatModel> _walletStatModel =  _jsonData.map((e) => WalletStatModel.fromJson(e)).toList();
+        return _walletStatModel;
+      }
+
+      print("Got error <getStat>");
       throw Exception("res=" + response.body);
     } else {
       throw Exception(

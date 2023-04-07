@@ -14,6 +14,7 @@ import 'package:my_expense/pages/user.dart';
 import 'package:my_expense/pages/user/user_change_password.dart';
 import 'package:my_expense/pages/wallet/wallet_add.dart';
 import 'package:my_expense/pages/wallet/wallet_edit.dart';
+import 'package:my_expense/pages/wallet/wallet_stat.dart';
 import 'package:my_expense/pages/wallet/wallet_transaction.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
@@ -124,6 +125,10 @@ class _RouterPageState extends State<RouterPage> {
             case '/wallet/transaction':
               {
                 return createAnimationRoute(new WalletTransactionPage(wallet: settings.arguments,));
+              }
+            case '/wallet/stat':
+              {
+                return createAnimationRoute(new WalletStatPage(wallet: settings.arguments,));
               }
             case '/stats/filter':
               {
