@@ -6,7 +6,9 @@ import 'package:my_expense/pages/home/home_stats.dart';
 import 'package:my_expense/pages/home/home_wallet.dart';
 import 'package:my_expense/pages/home/home_budget.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_pin.dart';
+import 'package:my_expense/widgets/input/pin_pad.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -28,7 +30,6 @@ class _HomePageState extends State<HomePage> {
 
   late PinModel? pin;
   bool isPinEnabled = false;
-  bool isBodyShowed = false;
 
   @override
   void initState() {
@@ -54,32 +55,55 @@ class _HomePageState extends State<HomePage> {
     pages.add(HomeStats());
     pages.add(HomeBudget());
     pages.add(HomeWallet());
-
-    // check the isPinEnabled?
-    // if enabled add micro task to actually showed the pin pad screen
-    if(isPinEnabled) {
-      Future.microtask(() {
-        _showPinScreen();
-      });
-    }
-    else {
-      isBodyShowed = true;
-    }
   }
 
-  Future<void> _showPinScreen() async {
-    await Navigator.pushNamed(context, '/pin');
-    setBodyShowed(true);
-  }
-
-  void setBodyShowed(bool show) {
-    setState(() {
-      isBodyShowed = show;
-    });
+  Widget _showPinScreen() {
+    return Scaffold(
+      backgroundColor: primaryBackground,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            "Enter Passcode",
+            style: TextStyle(
+              fontSize: 25,
+            ),
+          ),
+          SizedBox(height: 5,),
+          Text("Your passcode is required"),
+          SizedBox(height: 25,),
+          PinPad(
+            hashPin: (pin!.hashPin ?? ''),
+            hashKey: (pin!.hashKey ?? ''),
+            onError: (() {
+              ScaffoldMessenger.of(context).showSnackBar(
+                createSnackBar(
+                  message: "Wrong Passcode",
+                )
+              );
+            }),
+            onSuccess: (() {
+              debugPrint("🏠 Show home");
+              setState(() {
+                isPinEnabled = false;
+              });
+            }),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // check whether we got pin enabled or not?
+    // if got pin enabled then we will show the pin screen instead of home screen
+    if (isPinEnabled) {
+      return _showPinScreen();
+    }
+    
+    // there are no pin enabled, means we can just showed the home
     return Scaffold(
       body: getBody(),
       bottomNavigationBar: BottomAppBar(
@@ -144,15 +168,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget getBody() {
-    if(!isBodyShowed) {
-      return Container();
-    }
-    else {
-      return IndexedStack(
-        index: currentIndex,
-        children: pages,
-      );
-    }
+    return pages[currentIndex];
   }
 
   Widget createFloatingAddButton() {
