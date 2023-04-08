@@ -5,6 +5,8 @@ import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/model/wallet_stat_model.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/widgets/chart/bar.dart';
+import 'package:my_expense/widgets/chart/summary_box.dart';
 
 class WalletStatPage extends StatefulWidget {
   final Object? wallet;
@@ -150,47 +152,6 @@ class _WalletStatPageState extends State<WalletStatPage> {
     );
   }
 
-  Widget _summaryBox({required Color color, required String text, required double value, required int count}) {
-    return Expanded(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            width: 25,
-            height: 50,
-            color: color,
-          ),
-          const SizedBox(width: 5,),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 10,
-                ),
-              ),
-              Text(
-                fCCY.format(value),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold
-                ),
-              ),
-              Text(
-                "Total $count",
-                style: TextStyle(
-                  fontSize: 10,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _generateBarChart() {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 0, 10, 30),
@@ -205,17 +166,17 @@ class _WalletStatPageState extends State<WalletStatPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                _summaryBox(
+                SummaryBox(
                   color: accentColors[0],
                   text: "Income",
-                  value: _totalIncome,
+                  value: fCCY.format(_totalIncome),
                   count: _countIncome,
                 ),
                 const SizedBox(width: 10,),
-                _summaryBox(
+                SummaryBox(
                   color: accentColors[2],
                   text: "Expense",
-                  value: _totalExpense,
+                  value: fCCY.format(_totalExpense),
                   count: _countExpense
                 ),
               ],
@@ -274,8 +235,8 @@ class _WalletStatPageState extends State<WalletStatPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            _bar(amount: _walletStat[index].income!, color: accentColors[0]),
-                            _bar(amount: _walletStat[index].expense!, color: accentColors[2]),
+                            Bar(amount: _walletStat[index].income!, maxAmount: _maxAmount, text: fCCY.format(_walletStat[index].income!), color: accentColors[0]),
+                            Bar(amount: _walletStat[index].expense!, maxAmount: _maxAmount, text: fCCY.format(_walletStat[index].expense!), color: accentColors[2]),
                           ],
                         ),
                       ),
@@ -286,47 +247,6 @@ class _WalletStatPageState extends State<WalletStatPage> {
               }),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _bar({required double amount, required Color color}) {
-    // if (amount <= 0) {
-    //   return Container(
-    //     height: 20,
-    //     width: double.infinity,
-    //   );
-    // }
-
-    return SizedBox(
-      width: double.infinity,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Flexible(
-            child: FractionallySizedBox(
-              alignment: FractionalOffset.centerLeft,
-              widthFactor: (amount / _maxAmount),
-              child: Container(
-                height: 20,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: color,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 5,),
-          Text(
-            fCCY.format(amount),
-            style: TextStyle(
-              fontSize: 10,
-              color: textColor,
-            ),
-          )
         ],
       ),
     );
@@ -386,7 +306,6 @@ class _WalletStatPageState extends State<WalletStatPage> {
       else {
         _walletStat.addAll(_origWalletStat.reversed.toList());
       }
-      debugPrint("${_walletStat.length}");
     });
   }
 }

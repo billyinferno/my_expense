@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
@@ -227,23 +228,40 @@ class _HomeStatsState extends State<HomeStats> {
                           itemCount: homeProvider.netWorth.length + 1,
                           itemBuilder: ((context, index) {
                             if (index < homeProvider.netWorth.length) {
-                              return Container(
-                                margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
-                                decoration: BoxDecoration(
-                                  color: secondaryDark,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: <Widget>[
-                                    _generateNetWorth(homeProvider.netWorth[index]),
-                                    BarChart(
-                                      from: _from,
-                                      to: _to,
-                                      data: (_getData(homeProvider.incomeExpense[homeProvider.netWorth[index].currenciesId])),
+                              return Slidable(
+                                endActionPane: ActionPane(
+                                  motion: const DrawerMotion(),
+                                  extentRatio: 0.2,
+                                  children: <SlidableAction>[
+                                    SlidableAction(
+                                      label: 'Stat',
+                                      foregroundColor: accentColors[3],
+                                      backgroundColor: primaryBackground,
+                                      icon: Ionicons.bar_chart,
+                                      onPressed: ((_) {
+                                        Navigator.pushNamed(context, '/stats/all', arguments: homeProvider.netWorth[index].currenciesId);
+                                      })
                                     ),
                                   ],
+                                ),
+                                child: Container(
+                                  margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+                                  decoration: BoxDecoration(
+                                    color: secondaryDark,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      _generateNetWorth(homeProvider.netWorth[index]),
+                                      BarChart(
+                                        from: _from,
+                                        to: _to,
+                                        data: (_getData(homeProvider.incomeExpense[homeProvider.netWorth[index].currenciesId])),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             }

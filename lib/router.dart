@@ -3,7 +3,7 @@ import 'package:my_expense/pages/budget/budget_list.dart';
 import 'package:my_expense/pages/budget/budget_transaction.dart';
 import 'package:my_expense/pages/home.dart';
 import 'package:my_expense/pages/login.dart';
-import 'package:my_expense/pages/pin.dart';
+import 'package:my_expense/pages/stats/stats_all.dart';
 import 'package:my_expense/pages/stats/stats_details.dart';
 import 'package:my_expense/pages/stats/stats_filter.dart';
 import 'package:my_expense/pages/stats/stats_transaction.dart';
@@ -82,10 +82,6 @@ class _RouterPageState extends State<RouterPage> {
               {
                 return MaterialPageRoute(builder: (context) => new HomePage());
               }
-            case '/pin':
-              {
-                return createAnimationRoute(new PinPage());
-              }
             case '/user':
               {
                 return createAnimationRoute(new UserPage());
@@ -133,6 +129,10 @@ class _RouterPageState extends State<RouterPage> {
             case '/stats/filter':
               {
                 return createAnimationRoute(new StatsFilterPage());
+              }
+            case '/stats/all':
+              {
+                return createAnimationRoute(new StatsAllPage(ccy: settings.arguments));
               }
             case '/stats/detail':
               {
