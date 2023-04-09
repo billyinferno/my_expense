@@ -8,6 +8,7 @@ import 'package:my_expense/pages/home/home_budget.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_pin.dart';
+import 'package:my_expense/widgets/input/bar_button.dart';
 import 'package:my_expense/widgets/input/pin_pad.dart';
 
 class HomePage extends StatefulWidget {
@@ -20,13 +21,6 @@ class _HomePageState extends State<HomePage> {
   DateTime selectedDate = DateTime.now().toLocal();
 
   List<Widget> pages = [];
-  final List<IconData> iconItems = [
-    Ionicons.calendar,
-    Ionicons.stats_chart,
-    Ionicons.list,
-    Ionicons.wallet,
-  ];
-  final List<String> iconTitle = ["Calendar", "Stats", "Budget", "Account"];
 
   late PinModel? pin;
   bool isPinEnabled = false;
@@ -105,7 +99,10 @@ class _HomePageState extends State<HomePage> {
     
     // there are no pin enabled, means we can just showed the home
     return Scaffold(
-      body: getBody(),
+      body: IndexedStack(
+        index: currentIndex,
+        children: pages,
+      ),
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 5,
@@ -114,63 +111,56 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            _barButton(0),
-            _barButton(1),
+            BarButton(
+              index: 0,
+              currentIndex: currentIndex,
+              icon: Ionicons.calendar,
+              text: "Calendar",
+              onTap: (() {
+                setState(() {
+                  currentIndex = 0;
+                });
+              }),
+            ),
+            BarButton(
+              index: 1,
+              currentIndex: currentIndex,
+              icon: Ionicons.stats_chart,
+              text: "Stats",
+              onTap: (() {
+                setState(() {
+                  currentIndex = 1;
+                });
+              }),
+            ),
             Expanded(child: SizedBox()),
-            _barButton(2),
-            _barButton(3),
+            BarButton(
+              index: 2,
+              currentIndex: currentIndex,
+              icon: Ionicons.list,
+              text: "Budget",
+              onTap: (() {
+                setState(() {
+                  currentIndex = 2;
+                });
+              }),
+            ),
+            BarButton(
+              index: 3,
+              currentIndex: currentIndex,
+              icon: Ionicons.wallet,
+              text: "Account",
+              onTap: (() {
+                setState(() {
+                  currentIndex = 3;
+                });
+              }),
+            ),
           ],
         ),
       ),
       floatingActionButton: createFloatingAddButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
-  }
-
-  Widget _barButton(int index) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: (() {
-          setState(() {
-            currentIndex = index;
-          });
-        }),
-        child: Container(
-          color: Colors.transparent,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 10),
-              Icon(
-                iconItems[index],
-                size: 20,
-                color: (currentIndex == index ? accentColors[1] : Colors.white),
-              ),
-              SizedBox(height: 4),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  iconTitle[index],
-                  maxLines: 1,
-                  style: TextStyle(
-                    color: (currentIndex == index ? accentColors[1] : Colors.white),
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              SizedBox(height: 25),
-            ],
-          ),
-        ),
-      ),
-    ); 
-  }
-
-  Widget getBody() {
-    return IndexedStack(
-      index: currentIndex,
-      children: pages,
     );
   }
 
