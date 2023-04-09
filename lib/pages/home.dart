@@ -168,7 +168,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget getBody() {
-    return pages[currentIndex];
+    return IndexedStack(
+      index: currentIndex,
+      children: pages,
+    );
   }
 
   Widget createFloatingAddButton() {
