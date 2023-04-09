@@ -42,7 +42,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
   Map<int, CategoryModel> _expenseCategory = {};
 
   List<TextEditingController> _budgetController = [];
-  Map<int, TextEditingController> _amountController = {};
   late ScrollController _scrollController;
   late ScrollController _scrollControllerAddCategory;
   
@@ -74,11 +73,12 @@ class _BudgetListPageState extends State<BudgetListPage> {
   void dispose() {
     super.dispose();
     
-    // dispose the amount controller
-    if(_amountController.length > 0) {
-      _amountController.forEach((key, value) {
-        _amountController[key]!.dispose();
-      });
+    // dispose the budget controller
+    if(_budgetController.length > 0) {
+      for(int i = 0; i < _budgetController.length; i++) {
+        _budgetController[i].dispose();
+      }
+      _budgetController.clear();
     }
 
     _scrollController.dispose();
@@ -326,7 +326,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
         itemCount: budgetList.length,
         itemBuilder: (BuildContext ctx, int index) {
           BudgetModel budget = budgetList[index];
-          _budgetController.add(new TextEditingController(text: fCCY.format(budgetList[index].amount)));
           if(index == _currentEdit) {
             return categoryEditItem(
               index: index,
@@ -412,17 +411,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
       required int currencyId,
       required String currencySymbol,
       required double budgetAmount}) {
-    
-    // create a new _amountController for this index
-    _amountController[index] = new TextEditingController();
-    // init the amount controller with space first
-    _amountController[index]!.text = "";
-    // check if the amount on the budget not 0
-    if(budgetAmount > 0) {
-      // if more than zero then set the initial text on amount controller
-      // as the amount being set for the budget
-      _amountController[index]!.text = fCCY.format(budgetAmount);
-    }
 
     return Container(
       margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
@@ -459,7 +447,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                   ),
                 ),
                 TextFormField(
-                  controller: _amountController[index],
+                  controller: _budgetController[index],
                   textAlign: TextAlign.right,
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
@@ -489,9 +477,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
             onPressed: (() {
               // debugPrint("Set budget on _budgetList and set state");
               // ensure that user input something on the text controller
-              if(_amountController[index]!.text.trim().length > 0) {
+              if(_budgetController[index].text.trim().length > 0) {
                 // check if the current amount is the same or not?
-                double _newBudgetAmount = double.parse(_amountController[index]!.text);
+                double _newBudgetAmount = double.parse(_budgetController[index].text);
                 if(_budgetList!.budgets[index].amount != _newBudgetAmount) {
                   // amount is not the same, we can save this data.
                   // rebuild the budget list with the new amount being inserted on the
@@ -509,6 +497,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
                           currency: _budgetList!.budgets[i].currency,
                         )
                       );
+
+                      // change the budget controller text to new budget amount
+                      _budgetController[index].text = fCCY.format(_newBudgetAmount);
                     }
                     else {
                       _newBudgetList.add(_budgetList!.budgets[i]);
@@ -639,12 +630,16 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
   void setBudgetList(BudgetListModel budgetList) {
     setState(() {
+      // clear the budget controller
+      _budgetController.clear();
       _budgetList = budgetList;
 
       _totalAmount = 0.0;
       if (_budgetList!.budgets.length > 0) {
         _budgetList!.budgets.forEach((budget) {
           _totalAmount += budget.amount;
+          // create text editing controller for each _budgetController
+          _budgetController.add(new TextEditingController(text: fCCY.format(budget.amount)));
         });
       }
     });
@@ -661,8 +656,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
     // fetch the budget from the web
     await _budgetHttp.fetchBudgetsList(_currencyID, _force).then((result) {
       setBudgetList(result);
-      Provider.of<HomeProvider>(context, listen: false)
-          .setBudgetAddList(result.budgets);
+      Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(result.budgets);
       setLoading(false);
     }).onError((error, stackTrace) {
       // got error
