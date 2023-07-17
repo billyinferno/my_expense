@@ -13,33 +13,40 @@ class UserChangePassword extends StatefulWidget {
   const UserChangePassword({Key? key}) : super(key: key);
 
   @override
-  _UserChangePasswordState createState() => _UserChangePasswordState();
+  State<UserChangePassword> createState() => _UserChangePasswordState();
 }
 
 class _UserChangePasswordState extends State<UserChangePassword> {
-  TextEditingController _currentPassword = TextEditingController();
-  TextEditingController _newPassword = TextEditingController();
-  TextEditingController _retypeNewPassword = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final UserHTTPService _userHttp = UserHTTPService();
+  final TextEditingController _currentPassword = TextEditingController();
+  final TextEditingController _newPassword = TextEditingController();
+  final TextEditingController _retypeNewPassword = TextEditingController();
+
+  late UsersMeModel _userMe;
 
   bool _showCurrentPassword = false;
   bool _showNewPassword = false;
   bool _showRetypeNewPassword = false;
 
-  final _userHttp = UserHTTPService();
-  late UsersMeModel _userMe;
-
   @override
   void initState() {
-    super.initState();
+    _showCurrentPassword = false;
+    _showNewPassword = false;
+    _showRetypeNewPassword = false;
+
     _userMe = UserSharedPreferences.getUserMe();
+
+    super.initState();
   }
 
   @override
   void dispose() {
-    super.dispose();
     _currentPassword.dispose();
     _newPassword.dispose();
     _retypeNewPassword.dispose();
+    super.dispose();
   }
 
   @override
@@ -57,116 +64,132 @@ class _UserChangePasswordState extends State<UserChangePassword> {
         ),
       ),
       body: Column(
-        children: [
-          Container(
-            color: secondaryDark,
-            height: 210,
-            padding: EdgeInsets.all(10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                TextFormField(
-                  controller: _currentPassword,
-                  decoration: InputDecoration(
-                    labelText: "Current Password",
-                    icon: Icon(Ionicons.lock_closed_outline),
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide(color: secondaryBackground, width: 1.0),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        (_showCurrentPassword ? Ionicons.eye_off_outline : Ionicons.eye_off_outline),
-                        color: secondaryLight,
-                      ),
-                      onPressed: (() {
-                        setState(() {
-                          _showCurrentPassword = !_showCurrentPassword;
-                        });
-                      }),
-                    ),
-                  ),
-                  obscureText: (!_showCurrentPassword),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      width: double.infinity,
+                      color: secondaryDark,
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          TextFormField(
+                            controller: _currentPassword,
+                            decoration: InputDecoration(
+                              labelText: "Current Password",
+                              icon: Icon(Ionicons.lock_closed_outline),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: secondaryBackground, width: 1.0),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  (_showCurrentPassword ? Ionicons.eye_off_outline : Ionicons.eye_off_outline),
+                                  color: secondaryLight,
+                                ),
+                                onPressed: (() {
+                                  setState(() {
+                                    _showCurrentPassword = !_showCurrentPassword;
+                                  });
+                                }),
+                              ),
+                            ),
+                            obscureText: (!_showCurrentPassword),
 
-                ),
-                SizedBox(height: 10,),
-                TextFormField(
-                  controller: _newPassword,
-                  decoration: InputDecoration(
-                    labelText: "New Password",
-                    icon: Icon(Ionicons.lock_closed_outline),
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide(color: secondaryBackground, width: 1.0),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        (_showNewPassword ? Ionicons.eye_off_outline : Ionicons.eye_off_outline),
-                        color: secondaryLight,
-                      ),
-                      onPressed: (() {
-                        setState(() {
-                          _showNewPassword = !_showNewPassword;
-                        });
-                      }),
-                    ),
-                  ),
-                  obscureText: (!_showNewPassword),
-                ),
-                SizedBox(height: 10,),
-                TextFormField(
-                  controller: _retypeNewPassword,
-                  decoration: InputDecoration(
-                    labelText: "Retype New Password",
-                    icon: Icon(Ionicons.lock_closed_outline),
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide(color: secondaryBackground, width: 1.0),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        (_showRetypeNewPassword ? Ionicons.eye_off_outline : Ionicons.eye_off_outline),
-                        color: secondaryLight,
-                      ),
-                      onPressed: (() {
-                        setState(() {
-                          _showRetypeNewPassword = !_showRetypeNewPassword;
-                        });
-                      }),
-                    ),
-                  ),
-                  obscureText: (!_showRetypeNewPassword),
+                          ),
+                          SizedBox(height: 10,),
+                          TextFormField(
+                            controller: _newPassword,
+                            decoration: InputDecoration(
+                              labelText: "New Password",
+                              icon: Icon(Ionicons.lock_closed_outline),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: secondaryBackground, width: 1.0),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  (_showNewPassword ? Ionicons.eye_off_outline : Ionicons.eye_off_outline),
+                                  color: secondaryLight,
+                                ),
+                                onPressed: (() {
+                                  setState(() {
+                                    _showNewPassword = !_showNewPassword;
+                                  });
+                                }),
+                              ),
+                            ),
+                            obscureText: (!_showNewPassword),
+                          ),
+                          SizedBox(height: 10,),
+                          TextFormField(
+                            controller: _retypeNewPassword,
+                            decoration: InputDecoration(
+                              labelText: "Retype New Password",
+                              icon: Icon(Ionicons.lock_closed_outline),
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(color: secondaryBackground, width: 1.0),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  (_showRetypeNewPassword ? Ionicons.eye_off_outline : Ionicons.eye_off_outline),
+                                  color: secondaryLight,
+                                ),
+                                onPressed: (() {
+                                  setState(() {
+                                    _showRetypeNewPassword = !_showRetypeNewPassword;
+                                  });
+                                }),
+                              ),
+                            ),
+                            obscureText: (!_showRetypeNewPassword),
 
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.all(10),
-            child: MaterialButton(
-              minWidth: double.infinity,
-              onPressed: (() {
-                _updatePassword().then((value) {
-                  // showed that we already success update the password
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    createSnackBar(
-                      message: "Password updated",
-                      icon: Icon(
-                        Ionicons.checkmark_circle,
-                        size: 20,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: MaterialButton(
+                        minWidth: double.infinity,
+                        onPressed: (() {
+                          _updatePassword().then((value) {
+                            // showed that we already success update the password
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              createSnackBar(
+                                message: "Password updated",
+                                icon: Icon(
+                                  Ionicons.checkmark_circle,
+                                  size: 20,
+                                  color: accentColors[0],
+                                ),
+                              )
+                            );
+                          }).onError((error, stackTrace) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              createSnackBar(
+                                message: error.toString(),
+                              )
+                            );
+                          });
+                        }),
+                        child: Text("Change Password"),
                         color: accentColors[0],
+                        height: 50,
                       ),
-                    )
-                  );
-                }).onError((error, stackTrace) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    createSnackBar(
-                      message: error.toString(),
-                    )
-                  );
-                });
-              }),
-              child: Text("Change Password"),
-              color: accentColors[0],
-              height: 50,
+                    ),
+                  ],
+                ),
+              ),
             ),
           )
         ],

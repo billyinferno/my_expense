@@ -319,6 +319,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                     },
                     child: ListView.builder(
                       controller: _scrollControllerBudgetList,
+                      physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: _budgetList.length + 1,
                       itemBuilder: ((BuildContext context, int index) {
                         if (index < _budgetList.length) {
