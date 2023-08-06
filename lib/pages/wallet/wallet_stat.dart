@@ -6,6 +6,7 @@ import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/model/wallet_stat_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/widgets/chart/bar.dart';
+import 'package:my_expense/widgets/chart/multi_line_chart.dart';
 import 'package:my_expense/widgets/chart/summary_box.dart';
 
 class WalletStatPage extends StatefulWidget {
@@ -19,12 +20,18 @@ class WalletStatPage extends StatefulWidget {
 class _WalletStatPageState extends State<WalletStatPage> {
   final fCCY = NumberFormat("#,##0.00", "en_US");
   final dt = DateFormat("yyyy-MM");
+  final dt2 = DateFormat("MM/yy");
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   bool _sortAscending = true;
   late WalletModel _wallet;
   late Future<bool> _getData;
   late List<WalletStatModel> _walletStat;
   late List<WalletStatModel> _origWalletStat;
+  late List<Map<String, double>> _walletLineChartData;
+  late DateTime _minDate;
+  late DateTime _maxDate;
+  late Map<DateTime, bool> _walletDateRange;
+  late int _dateOffset;
   late double _maxAmount;
   late double _totalIncome;
   late int _countIncome;
@@ -39,6 +46,15 @@ class _WalletStatPageState extends State<WalletStatPage> {
     // init the wallet list into empty list
     _walletStat = [];
     _origWalletStat = [];
+
+    // set the wallet line data into empty array
+    _walletLineChartData = [];
+    _dateOffset = 0;
+
+    // set the min and max date as 1 day before of max date which is today
+    _walletDateRange = {};
+    _minDate = DateTime.now().add(Duration(days: -1));
+    _maxDate = DateTime.now();
     _totalIncome = 0;
     _countIncome = 0;
     _totalExpense = 0;
@@ -160,6 +176,13 @@ class _WalletStatPageState extends State<WalletStatPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           const SizedBox(height: 10,),
+          MultiLineChart(
+            data: _walletLineChartData,
+            color: [accentColors[5], accentColors[0], accentColors[2]],
+            legend: const ["Total", "Income", "Expense"],
+            height: 200,
+            dateOffset: _dateOffset,
+          ),
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -253,10 +276,29 @@ class _WalletStatPageState extends State<WalletStatPage> {
   }
 
   void _getStatData() {
+    Map<String, double> walletListIncome = {};
+    Map<String, double> walletListExpense = {};
+    Map<String, double> walletListTotal = {};
+
+    double total = _wallet.startBalance;
+    
     // loop thru _walletStat and get the maximum data
     _maxAmount = double.infinity * -1;
 
+    _walletDateRange.forEach((key, value) {
+      walletListIncome[dt2.format(key)] = 0;
+      walletListExpense[dt2.format(key)] = 0;
+      walletListTotal[dt2.format(key)] = 0;
+    });
+
     _walletStat.forEach((data) {
+      // generate the wallet list income, expense, and total
+      walletListIncome[dt2.format(data.date)] = (data.income ?? 0);
+      walletListExpense[dt2.format(data.date)] = (data.expense ?? 0);
+      
+      total += (data.income ?? 0) - (data.expense ?? 0);
+      walletListTotal[dt2.format(data.date)] = total;
+      
       _totalIncome += data.income!;
       _totalExpense += data.expense!;
 
@@ -274,6 +316,14 @@ class _WalletStatPageState extends State<WalletStatPage> {
         _maxAmount = data.expense!;
       }
     });
+
+    _dateOffset = walletListTotal.length ~/ 8;
+
+    // set the wallet list data to the _walletList data
+    _walletLineChartData.clear();
+    _walletLineChartData.add(walletListTotal);
+    _walletLineChartData.add(walletListIncome);
+    _walletLineChartData.add(walletListExpense);
   }
 
   Future<bool> _getWalletStatData() async {
@@ -283,6 +333,25 @@ class _WalletStatPageState extends State<WalletStatPage> {
         // copy the response to company detail data
         _walletStat = resp;
         _origWalletStat.addAll(resp);
+
+        // get the min date, where it should be the array 0 of the _origWalletStat
+        if (_origWalletStat.length > 0) {
+          _minDate = DateTime(_origWalletStat[0].date.year, _origWalletStat[0].date.month, 1);
+          _maxDate = DateTime(_origWalletStat[_origWalletStat.length - 1].date.year, _origWalletStat[_origWalletStat.length - 1].date.month, 1);
+
+          // generate the list of date beased on _min and _max date
+          DateTime startDate = _minDate;
+          while (startDate.isBefore(_maxDate)) {
+            // add the start date in the wallet date range
+            _walletDateRange[startDate] = true;
+
+            // add next month
+            startDate = DateTime(startDate.year, startDate.month + 1, 1);
+          }
+
+          // add the _maxDate here as _maxDate will be skipped above
+          _walletDateRange[_maxDate] = true;
+        }
 
         // get the statistic data
         _getStatData();
