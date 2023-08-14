@@ -11,6 +11,7 @@ class BudgetBar extends StatelessWidget {
   final double budgetTotal;
   final bool? showLeftText;
   final Color? barColor;
+  final String? type;
 
   BudgetBar(
       {Key? key,
@@ -21,7 +22,8 @@ class BudgetBar extends StatelessWidget {
       required this.title,
       required this.symbol,
       required this.budgetUsed,
-      required this.budgetTotal})
+      required this.budgetTotal,
+      this.type})
       : super(key: key);
 
   final _fCCY = new NumberFormat("#,##0.00", "en_US");
@@ -32,6 +34,7 @@ class BudgetBar extends StatelessWidget {
   }
 
   Widget _buildBudgetBarChart() {
+    String currentType = (type ?? 'in');
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -45,7 +48,12 @@ class BudgetBar extends StatelessWidget {
               margin: EdgeInsets.only(right: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(40),
-                color: iconColor,
+                color: (currentType.toLowerCase() == 'in' ? iconColor : Colors.orange[900]!),
+                border: Border.all(
+                  color: (currentType.toLowerCase() == 'in' ? Colors.transparent : Colors.red[900]!),
+                  style: BorderStyle.solid,
+                  width: 2.0,
+                )
               ),
               child: icon,
             ),
@@ -77,7 +85,7 @@ class BudgetBar extends StatelessWidget {
                             symbol +
                                 " " +
                                 _fCCY.format(budgetTotal - budgetUsed) +
-                                " left",
+                                (budgetTotal >= budgetUsed ? " left" : " over"),
                             textAlign: TextAlign.right,
                           ),
                         ),

@@ -266,6 +266,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
                   category: _budgets[i].category,
                   amount: _budgets[i].amount,
                   used: _budgets[i].used + txnAdd.amount,
+                  status: _budgets[i].status,
                   currency: _budgets[i].currency);
               _budgets[i] = _newBudget;
               // break from for loop

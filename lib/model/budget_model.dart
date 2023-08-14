@@ -7,6 +7,7 @@ class BudgetModel {
     required this.category,
     required this.amount,
     required this.used,
+    required this.status,
     required this.currency,
   });
 
@@ -14,6 +15,7 @@ class BudgetModel {
   final CategoryModel category;
   final double amount;
   final double used;
+  final String status;
   final CurrencyModel currency;
 
   factory BudgetModel.fromJson(Map<String, dynamic> json) => BudgetModel(
@@ -21,6 +23,7 @@ class BudgetModel {
     category: CategoryModel.fromJson(json["category"]),
     amount: json["amount"] as double,
     used: json["used"] as double,
+    status: (json["status"] ?? "in"),
     currency: CurrencyModel.fromJson(json["currency"]),
   );
 
@@ -29,6 +32,7 @@ class BudgetModel {
     "category": category.toJson(),
     "amount": amount,
     "used": used,
+    "status": status,
     "currency": currency.toJson(),
   };
 }

@@ -553,6 +553,7 @@ class _HomeListState extends State<HomeList> {
                   category: _budgets[i].category,
                   amount: _budgets[i].amount,
                   used: _budgets[i].used - txnInfo.amount,
+                  status: _budgets[i].status,
                   currency: _budgets[i].currency);
               _budgets[i] = _newBudget;
               // break from for loop

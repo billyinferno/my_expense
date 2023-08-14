@@ -494,6 +494,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                           category: _budgetList!.budgets[i].category,
                           amount: _newBudgetAmount,
                           used: _budgetList!.budgets[i].used,
+                          status: "in",
                           currency: _budgetList!.budgets[i].currency,
                         )
                       );
@@ -819,7 +820,16 @@ class _BudgetListPageState extends State<BudgetListPage> {
               }
 
               // add the new budget
-              _newHomeBudgetList.add(BudgetModel(id: element.id, category: element.category, amount: element.amount, used: _used, currency: element.currency));
+              _newHomeBudgetList.add(
+                BudgetModel(
+                  id: element.id,
+                  category: element.category,
+                  amount: element.amount,
+                  used: _used,
+                  status: "in",
+                  currency: element.currency
+                )
+              );
             });
           }
           else {

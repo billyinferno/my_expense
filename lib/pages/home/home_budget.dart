@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,7 @@ import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/args/budget_transaction_args.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
+import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/chart/budget_bar.dart';
@@ -26,9 +28,9 @@ class HomeBudget extends StatefulWidget {
 }
 
 class _HomeBudgetState extends State<HomeBudget> {
-  DateTime firstDay = DateTime(2014, 1, 1); // just default to 2014/01/01
-  DateTime lastDay = DateTime(DateTime.now().year, DateTime.now().month + 1, 1);
-  DateTime selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  DateTime _firstDay = DateTime(2014, 1, 1); // just default to 2014/01/01
+  DateTime _lastDay = DateTime(DateTime.now().year, DateTime.now().month + 1, 1);
+  DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
 
   List<CurrencyModel> _currencies = []; // default to blank
   CurrencyModel? _currentCurrencies;
@@ -39,7 +41,8 @@ class _HomeBudgetState extends State<HomeBudget> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
 
-  bool isFinished = false;
+  bool _isFinished = false;
+  bool _showNotInBudget = false;
   List<BudgetModel> _budgetList = [];
 
   @override
@@ -55,15 +58,13 @@ class _HomeBudgetState extends State<HomeBudget> {
     _scrollControllerBudgetList.dispose();
   }
 
-  void setFinished(bool _finished) {
+  void setFinished(bool isFinished) {
     setState(() {
-      isFinished = _finished;
+      _isFinished = isFinished;
     });
   }
 
   Future<void> initBudgetPage() async {
-    setFinished(false);
-
     _scrollControllerCurrencies = ScrollController();
     _scrollControllerBudgetList = ScrollController();
 
@@ -71,6 +72,15 @@ class _HomeBudgetState extends State<HomeBudget> {
     // the application startup.
     _currencies = WalletSharedPreferences.getWalletUserCurrency();
     _userMe = UserSharedPreferences.getUserMe();
+
+    // set the first and last day based on user min and max date we got from
+    // transaction, so we knew exactly when is our first and last budget date.
+    DateTime userMinDate = TransactionSharedPreferences.getTransactionMinDate();
+    DateTime userMaxDate = TransactionSharedPreferences.getTransactionMaxDate();
+
+    // convert the date to the first day of the min and max transaction date
+    _firstDay = DateTime(userMinDate.year, userMinDate.month, 1);
+    _lastDay = DateTime(userMaxDate.year, userMaxDate.month, 1);
 
     // now check which currencies is being used by the user
     if(_currencies.length > 0) {
@@ -89,7 +99,7 @@ class _HomeBudgetState extends State<HomeBudget> {
       }
 
       // now fetch budget based on the _currentCurrencies
-      BudgetSharedPreferences.setBudgetCurrent(selectedDate);
+      BudgetSharedPreferences.setBudgetCurrent(_selectedDate);
       _fetchBudget();
     }
     else {
@@ -146,7 +156,7 @@ class _HomeBudgetState extends State<HomeBudget> {
       );
     }
     else {
-      if(!isFinished) {
+      if(!_isFinished) {
         // showed the loading
         return Center(
           child: Column(
@@ -174,7 +184,6 @@ class _HomeBudgetState extends State<HomeBudget> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  height: 120,
                   width: double.infinity,
                   color: secondaryDark,
                   padding: EdgeInsets.all(10),
@@ -184,14 +193,15 @@ class _HomeBudgetState extends State<HomeBudget> {
                     children: <Widget>[
                       Container(
                         child: HorizontalMonthCalendar(
-                          firstDay: firstDay,
-                          lastDay: lastDay,
-                          selectedDate: selectedDate,
+                          firstDay: _firstDay,
+                          lastDay: _lastDay,
+                          selectedDate: _selectedDate,
                           onDateSelected: ((value) {
                             setState(() {
-                              selectedDate = value;
+                              _selectedDate = value;
                               BudgetSharedPreferences.setBudgetCurrent(value);
-                              _fetchBudget(true);
+                              // in case we add transaction to other month, just refresh the budget forcefully.
+                              _fetchBudget(true, true);
                             });
                           }),
                         ),
@@ -307,6 +317,39 @@ class _HomeBudgetState extends State<HomeBudget> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 10,),
+                      Container(
+                        width: double.infinity,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(
+                              height: 15,
+                              width: 30,
+                              child: Transform.scale(
+                                scale: 0.5,
+                                child: CupertinoSwitch(
+                                  value: _showNotInBudget,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _showNotInBudget = value;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 11,),
+                            Text(
+                              "Showed Not In Budget Expense",
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: textColor,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -323,6 +366,15 @@ class _HomeBudgetState extends State<HomeBudget> {
                       itemCount: _budgetList.length + 1,
                       itemBuilder: ((BuildContext context, int index) {
                         if (index < _budgetList.length) {
+                          // check whether we will show not in budget or not?
+                          if (!_showNotInBudget) {
+                            // check current budget, whether this is in or out
+                            if (_budgetList[index].status.toLowerCase() != "in") {
+                              // return empty widget
+                              return const SizedBox();
+                            }
+                          }
+
                           return GestureDetector(
                             onTap: (() {
                               //debugPrint("Showed the list of this transaction category " + _budgetList[index].category.id.toString() + " for this date " + selectedDate.toString());
@@ -332,7 +384,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                                 categorySymbol: _budgetList[index].currency.symbol,
                                 budgetAmount: _budgetList[index].amount,
                                 budgetUsed: _budgetList[index].used,
-                                selectedDate: selectedDate,
+                                selectedDate: _selectedDate,
                                 currencyId: _currentCurrencies!.id,
                               );
                               Navigator.pushNamed(context, '/budget/transaction', arguments: _args);
@@ -347,6 +399,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                                 symbol: _budgetList[index].currency.symbol,
                                 budgetUsed: _budgetList[index].used,
                                 budgetTotal: _budgetList[index].amount,
+                                type: _budgetList[index].status,
                               ),
                             ),
                           );
@@ -391,7 +444,14 @@ class _HomeBudgetState extends State<HomeBudget> {
   double computeTotalAmount(List<BudgetModel> budgets) {
     double _amount = 0;
     budgets.forEach((budget) {
-      _amount += budget.amount;
+      if (_showNotInBudget) {
+        _amount += budget.amount;
+      }
+      else {
+        if (budget.status.toLowerCase() == "in") {
+          _amount += budget.amount;
+        }
+      }
     });
 
     return _amount;
@@ -400,7 +460,14 @@ class _HomeBudgetState extends State<HomeBudget> {
   double computeTotalUsed(List<BudgetModel> budgets) {
     double _used = 0;
     budgets.forEach((budget) {
-      _used += budget.used;
+      if (_showNotInBudget) {
+        _used += budget.used;
+      }
+      else {
+        if (budget.status.toLowerCase() == "in") {
+          _used += budget.used;
+        }
+      }
     });
 
     return _used;
@@ -420,7 +487,7 @@ class _HomeBudgetState extends State<HomeBudget> {
 
     // fetch the budget, in case it null it will fetch the budget from the
     // backend instead.
-    String _budgetDate = DateFormat('yyyy-MM-dd').format(selectedDate.toLocal());
+    String _budgetDate = DateFormat('yyyy-MM-dd').format(_selectedDate.toLocal());
     await _budgetHTTP.fetchBudgetDate(_currentCurrencies!.id, _budgetDate, _force).then((value) {
       // set the provider as we will use consumer to listen to the list
       Provider.of<HomeProvider>(context, listen: false).setBudgetList(value);
