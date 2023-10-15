@@ -104,6 +104,7 @@ class _HomePageState extends State<HomePage> {
         children: pages,
       ),
       bottomNavigationBar: BottomAppBar(
+        elevation: 0.0,
         shape: const CircularNotchedRectangle(),
         notchMargin: 5,
         color: primaryDark,
@@ -166,13 +167,23 @@ class _HomePageState extends State<HomePage> {
 
   Widget createFloatingAddButton() {
     return FloatingActionButton(
+      elevation: 0.0,
+      backgroundColor: Colors.transparent,
       onPressed: () {
         Navigator.pushNamed(context, '/transaction/add', arguments: selectedDate);
       },
-      child: Icon(
-        Ionicons.add,
-        size: 25,
-        color: textColor,
+      child: Container(
+        width: 75,
+        height: 75,
+        decoration: BoxDecoration(
+          color: accentColors[0],
+          borderRadius: BorderRadius.circular(75)
+        ),
+        child: Icon(
+          Ionicons.add,
+          size: 25,
+          color: textColor,
+        ),
       ),
     );
   }

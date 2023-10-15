@@ -341,7 +341,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                             ),
                             const SizedBox(width: 11,),
                             Text(
-                              "Showed Not In Budget Expense",
+                              "Show Not In Budget Expense",
                               style: TextStyle(
                                 fontSize: 10,
                                 color: textColor,
@@ -491,7 +491,6 @@ class _HomeBudgetState extends State<HomeBudget> {
     await _budgetHTTP.fetchBudgetDate(_currentCurrencies!.id, _budgetDate, _force).then((value) {
       // set the provider as we will use consumer to listen to the list
       Provider.of<HomeProvider>(context, listen: false).setBudgetList(value);
-      // debugPrint("Set Budget List to Provider");
     }).then((_) {
       if(_showLoader) {
         Navigator.pop(context);

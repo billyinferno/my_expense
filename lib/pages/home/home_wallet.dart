@@ -191,6 +191,7 @@ class _HomeWalletState extends State<HomeWallet> {
         children: <SlidableAction>[
           SlidableAction(
             label: 'Edit',
+            padding: const EdgeInsets.all(0),
             foregroundColor: accentColors[1],
             backgroundColor: primaryBackground,
             icon: Ionicons.pencil,
@@ -200,6 +201,7 @@ class _HomeWalletState extends State<HomeWallet> {
           ),
           SlidableAction(
             label: 'Delete',
+            padding: const EdgeInsets.all(0),
             foregroundColor: accentColors[2],
             backgroundColor: primaryBackground,
             icon: Ionicons.trash,
@@ -209,6 +211,7 @@ class _HomeWalletState extends State<HomeWallet> {
                   dialogTitle: "Delete Wallet",
                   dialogText: "Do you want to delete " + wallet.name + "?\nThis will also delete all related transaction to this wallet.",
                   confirmText: "Delete",
+                  confirmColor: accentColors[2],
                   cancelText: "Cancel"
                 ).show(context);
 
@@ -224,6 +227,7 @@ class _HomeWalletState extends State<HomeWallet> {
                           dialogTitle: "Cache Clear",
                           dialogText: "We will clear all the cache for the application.",
                           confirmText: "Okay",
+                          confirmColor: accentColors[0],
                       ).show(context);
 
                       userConfirm.then((value) {
@@ -240,6 +244,7 @@ class _HomeWalletState extends State<HomeWallet> {
           ),
           SlidableAction(
             label: (wallet.enabled ? 'Disable' : 'Enable'),
+            padding: const EdgeInsets.all(0),
             foregroundColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
             backgroundColor: primaryBackground,
             icon: (wallet.enabled ? Ionicons.alert : Ionicons.checkmark),
@@ -248,6 +253,7 @@ class _HomeWalletState extends State<HomeWallet> {
                 dialogTitle: (wallet.enabled ? 'Disable' : 'Enable') + " Wallet",
                 dialogText: "Do you want to " + (wallet.enabled ? 'Disable' : 'Enable') + " " + wallet.name + "?",
                 confirmText: (wallet.enabled ? 'Disable' : 'Enable'),
+                confirmColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
                 cancelText: "Cancel")
                 .show(context);
 
@@ -262,6 +268,7 @@ class _HomeWalletState extends State<HomeWallet> {
           ),
           SlidableAction(
             label: 'Stat',
+            padding: const EdgeInsets.all(0),
             foregroundColor: accentColors[3],
             backgroundColor: primaryBackground,
             icon: Ionicons.bar_chart,

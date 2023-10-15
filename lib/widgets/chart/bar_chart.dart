@@ -98,7 +98,7 @@ class _BarChartState extends State<BarChart> {
       else {
         return Container(
           width: double.infinity,
-          height: 35,
+          height: 40,
           margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -179,7 +179,7 @@ class _BarChartState extends State<BarChart> {
               child: Stack(
                 children: <Widget>[
                   Container(
-                    height: 15,
+                    height: 20,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: primaryLight,
@@ -193,34 +193,40 @@ class _BarChartState extends State<BarChart> {
                       Expanded(
                         flex: (250 - _incomeLength),
                         child: Container(
-                          height: 15,
+                          height: 20,
                           color: Colors.transparent,
                         ),
                       ),
                       Expanded(
                         flex: _incomeLength,
                         child: Container(
-                          height: 15,
+                          height: 20,
                           decoration: BoxDecoration(
                             color: accentColors[6],
-                            borderRadius: BorderRadius.only(topLeft: Radius.circular(15), bottomLeft: Radius.circular(15)),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              bottomLeft: Radius.circular(20)
+                            ),
                           ),
                         ),
                       ),
                       Expanded(
                         flex: _expenseLength,
                         child: Container(
-                          height: 15,
+                          height: 20,
                           decoration: BoxDecoration(
                             color: accentColors[2],
-                            borderRadius: BorderRadius.only(topRight: Radius.circular(15), bottomRight: Radius.circular(15)),
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(20),
+                              bottomRight: Radius.circular(20)
+                            ),
                           ),
                         ),
                       ),
                       Expanded(
                         flex: (250 - _expenseLength),
                         child: Container(
-                          height: 15,
+                          height: 20,
                           color: Colors.transparent,
                         ),
                       ),

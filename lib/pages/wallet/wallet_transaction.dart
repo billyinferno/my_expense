@@ -348,7 +348,6 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             children: [
               GestureDetector(
                 onTap: (() async {
-                  // debugPrint("Previous Month");
                   DateTime _newDate = DateTime(_currentDate.year, _currentDate.month - 1, 1);
 
                   // fetch the transaction for this date
@@ -399,7 +398,6 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               ),
               GestureDetector(
                 onTap: (() async {
-                  // debugPrint("Next Month");
                   DateTime _newDate = DateTime(_currentDate.year, _currentDate.month + 1, 1);
 
                   // fetch the transaction for this date
@@ -569,7 +567,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    _dtDayMonthYear.format(header.date)
+                    _dtDayMonthYear.format(header.date.toLocal())
                   ),
                 ),
                 Text(

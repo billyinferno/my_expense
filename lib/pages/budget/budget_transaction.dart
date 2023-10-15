@@ -182,7 +182,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                         children: <Widget>[
                           Expanded(
                             child: Text(
-                              _dtDayMonthYear.format(header.date)
+                              _dtDayMonthYear.format(header.date.toLocal())
                             ),
                           ),
                           Text(

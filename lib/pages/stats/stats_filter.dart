@@ -344,16 +344,12 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       // set the _currentToDate as the last day of the month
       _currentFromDate = DateTime(_currentToDate.toLocal().year, _currentToDate.toLocal().month, 1);
       _currentToDate = DateTime(_currentToDate.toLocal().year, _currentToDate.toLocal().month + 1, 1).subtract(Duration(days: 1));
-      // debugPrint("Current From Date : " + _currentFromDate.toLocal().toString());
-      // debugPrint("Current To Date : " + _currentToDate.toLocal().toString());
       return _generateMonthCalendar();
     }
     else if(_currentType == "year") {
       // set the _currentToDate as the last day of the year
       _currentFromDate = DateTime(_currentToDate.toLocal().year, 1, 1);
       _currentToDate = DateTime(_currentToDate.toLocal().year + 1, 1, 1).subtract(Duration(days: 1));
-      // debugPrint("Current From Date : " + _currentFromDate.toLocal().toString());
-      // debugPrint("Current To Date : " + _currentToDate.toLocal().toString());
       return _generateYearCalendar();
     }
     else {
@@ -361,8 +357,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       if(_currentToDate.toLocal().isBefore(_currentFromDate.toLocal())) {
         _currentToDate = DateTime(_currentFromDate.toLocal().year, _currentFromDate.toLocal().month + 1, 1).subtract(Duration(days: 1));
       }
-      // debugPrint("Current From Date : " + _currentFromDate.toLocal().toString());
-      // debugPrint("Current To Date : " + _currentToDate.toLocal().toString());
       return _generateCustomCalendar();
     }
   }
@@ -461,7 +455,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   Widget _generateCustomCalendar() {
-    // debugPrint("Max Date : " + _maxDate.toString());
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,

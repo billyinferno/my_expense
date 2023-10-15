@@ -350,6 +350,7 @@ class _TransactionInputState extends State<TransactionInput> {
                         dialogTitle: "Future Date",
                         dialogText: "Are you sure want to add a future date?.",
                         confirmText: "Add",
+                        confirmColor: accentColors[0],
                         cancelText: "Cancel"
                     ).show(context);
 
@@ -537,13 +538,10 @@ class _TransactionInputState extends State<TransactionInput> {
   void _performCustomCalc(String operand) {
     // ensure we got data when we perform calculation
     if(_amountController.text.length > 0) {      
-      // debugPrint("AAAA");
       // check what is the operand?
       if(operand == "+" || operand == "-" || operand == "*" || operand == "/") {
-        // debugPrint("BBBB");
         // check if we already have previous amount or not?
         if(_calcMemory > 0 && _calcOperation != "") {
-          // debugPrint("DDDD");
           // get the current _calcAmount
           _calcAmount = double.parse(_amountController.text);
           switch(_calcOperation) {
@@ -579,7 +577,6 @@ class _TransactionInputState extends State<TransactionInput> {
           // set the operation that user want to do
           _calcOperation = operand;
           _amountReset = true;
-          // debugPrint("EEEE");
         }
       }
       else if(operand == "%") {
@@ -596,7 +593,6 @@ class _TransactionInputState extends State<TransactionInput> {
         }
       }
       else if(operand == "=") {
-        // debugPrint("CCCC");
         // we will perform calculation based on the operand
         _calcAmount = double.parse(_amountController.text);
         switch(_calcOperation) {
@@ -1169,27 +1165,29 @@ class _TransactionInputState extends State<TransactionInput> {
           padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
           width: MediaQuery.of(context).size.width,
           color: secondaryDark,
-          child: ListView.builder(
-            itemCount: (_lastFound.length > 50 ? 50 : _lastFound.length),
-            scrollDirection: Axis.horizontal,
-            itemBuilder: ((context, index) {
-              return GestureDetector(
-                onTap: (() {
-                  _setCategory(_lastFound[index].name, _lastFound[index].category.id, _lastFound[index].category.name);
-                  // focus directly to the amount
-                  FocusScope.of(context).requestFocus(_amountFocus);
-                }),
-                child: Container(
-                  margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                  padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(35),
-                    color: (_currentType == "expense" ? IconColorList.getExpenseColor(_lastFound[index].category.name) : IconColorList.getIncomeColor(_lastFound[index].category.name)),
+          child: TextFieldTapRegion(
+            child: ListView.builder(
+              itemCount: (_lastFound.length > 50 ? 50 : _lastFound.length),
+              scrollDirection: Axis.horizontal,
+              itemBuilder: ((context, index) {
+                return GestureDetector(
+                  onTap: (() {
+                    _setCategory(_lastFound[index].name, _lastFound[index].category.id, _lastFound[index].category.name);
+                    // focus directly to the amount
+                    FocusScope.of(context).requestFocus(_amountFocus);
+                  }),
+                  child: Container(
+                    margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(35),
+                      color: (_currentType == "expense" ? IconColorList.getExpenseColor(_lastFound[index].category.name) : IconColorList.getIncomeColor(_lastFound[index].category.name)),
+                    ),
+                    child: Center(child: Text(_lastFound[index].name)),
                   ),
-                  child: Center(child: Text(_lastFound[index].name)),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ),
         ),
       ),
@@ -1629,18 +1627,18 @@ class _TransactionInputState extends State<TransactionInput> {
                   DecimalTextInputFormatter(decimalRange: 3),
                 ],
                 onChanged: (value) {
-                  // debugPrint("On Changed : " + value);
                   String _val = value;
                   // check if we have amount reset or not?
                   if(_amountReset) {
-                    // debugPrint("Amount Reset");
-                    // debugPrint("Current value : " + value);
-                    // debugPrint("_val : " + _val.substring(value.length-1));
                     // if like this, it means we will only stored the
                     // last digit of the data we inputted
                     _val = _val.substring(value.length-1);
                     _amountController.text = _val;
-                    _amountController.selection = TextSelection.fromPosition(TextPosition(offset: _amountController.text.length));
+                    _amountController.selection = TextSelection.fromPosition(
+                      TextPosition(
+                        offset: _amountController.text.length
+                      )
+                    );
                     setState(() {
                       _currentAmountFontSize = 25;
                       // set amount reset to false, as we already reset the amount
@@ -1762,9 +1760,6 @@ class _TransactionInputState extends State<TransactionInput> {
                 String _val = value;
                 // check if we have amount reset or not?
                 if(_amountReset) {
-                  // debugPrint("Amount Reset");
-                  // debugPrint("Current value : " + value);
-                  // debugPrint("_val : " + _val.substring(value.length-1));
                   // if like this, it means we will only stored the
                   // last digit of the data we inputted
                   _val = _val.substring(value.length-1);
@@ -2587,8 +2582,6 @@ class _TransactionInputState extends State<TransactionInput> {
     }
     else {
       // format selected date with Day, dd MMM yyyy
-      // debugPrint(_selectedDate.toString());
-      // debugPrint(_selectedDate.toLocal().toString());
       return DateFormat('E, MMMM dd, yyyy').format(_selectedDate.toLocal());
     }
   }

@@ -1,14 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_expense/themes/colors.dart';
 
 class ShowMyDialog {
   // const ShowMyDialog({Key? key}) : super(key: key);
-  ShowMyDialog({this.dialogTitle, this.dialogText, this.confirmText, this.cancelText});
+  ShowMyDialog({
+    this.dialogTitle,
+    this.dialogText,
+    this.confirmText,
+    this.confirmColor,
+    this.cancelText,
+    this.cancelColor
+  });
 
   final String? dialogTitle;
   final String? dialogText;
   final String? confirmText;
+  final Color? confirmColor;
   final String? cancelText;
+  final Color? cancelColor;
 
   Future<bool?> show(BuildContext context) async {
     return showDialog<bool>(
@@ -43,6 +53,7 @@ class ShowMyDialog {
                   confirmText ?? "Confirm",
                   style: TextStyle(
                     fontFamily: '--apple-system',
+                    color: (confirmColor ?? accentColors[0]),
                   ),
                 ),
                 isDefaultAction: true,
@@ -56,6 +67,7 @@ class ShowMyDialog {
                   cancelText ?? "Cancel",
                   style: TextStyle(
                     fontFamily: '--apple-system',
+                    color: (cancelColor ?? textColor),
                   ),
                 ),
                 onPressed: () {

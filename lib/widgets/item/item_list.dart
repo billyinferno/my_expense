@@ -51,151 +51,76 @@ class ItemList extends StatelessWidget {
 
     switch (type) {
       case ItemType.expense:
-        return _itemExpense(
-          (name ?? ''),
-          walletName,
-          categoryName!,
-          walletSymbol,
-          _formatAmount);
+        return _item(
+          itemName: (name ?? ''),
+          itemSub: "($walletName) ${(categoryName ?? '')}",
+          itemIcon: IconColorList.getExpenseIcon((categoryName ?? '')),
+          itemIconColor: IconColorList.getExpenseColor((categoryName ?? '')),
+          itemCCYFrom: walletSymbol,
+          itemPriceFrom: _formatAmount,
+          itemPriceFromColor: accentColors[2],
+        );
       case ItemType.income:
-        return _itemIncome(
-          (name ?? ''),
-          walletName,
-          categoryName!,
-          walletSymbol,
-          _formatAmount);
+        return _item(
+          itemName: (name ?? ''),
+          itemSub: "($walletName) ${(categoryName ?? '')}",
+          itemIcon: IconColorList.getIncomeIcon((categoryName ?? '')),
+          itemIconColor: IconColorList.getIncomeColor((categoryName ?? '')),
+          itemCCYFrom: walletSymbol,
+          itemPriceFrom: _formatAmount,
+          itemPriceFromColor: accentColors[0],
+        );
       case ItemType.transfer:
-        return _itemTransfer(
-          walletName,
-          walletToName!,
-          walletSymbol,
-          walletToSymbol!,
-          _formatAmount,
-          _formatPriceConv);
-      default:
-        return _itemExpense(
-          (name ?? ''),
-          walletName,
-          categoryName!,
-          walletSymbol,
-          _formatAmount);
-    }
-  }
-
-  Widget _itemExpense(String itemName, String itemWallet, String itemCategory, String itemCCY, String itemPrice) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Container(
-          child: IconColorList.getExpenseIcon(itemCategory),
-          height: 40,
-          width: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: IconColorList.getExpenseColor(itemCategory),
-          ),
-          margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                itemName,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                "(" + itemWallet + ") " + itemCategory,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: textColor2,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              itemCCY + " " + itemPrice,
-              style: TextStyle(
-                color: accentColors[2],
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _itemIncome(String itemName, String itemWallet, String itemCategory, String itemCCY, String itemPrice) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Container(
-          child: IconColorList.getIncomeIcon(itemCategory),
-          height: 40,
-          width: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: IconColorList.getIncomeColor(itemCategory),
-          ),
-          margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                itemName,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                "(" + itemWallet + ") " + itemCategory,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: textColor2,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              itemCCY + " " + itemPrice,
-              style: TextStyle(
-                color: accentColors[0],
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _itemTransfer(String walletFrom, String walletTo, String itemCCYFrom, String itemCCYTo, String itemPrice, String itemPriceConv) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Container(
-          child: Icon(
+        return _item(
+          itemName: (name ?? '-'),
+          itemSub: "$walletName > ${(walletToName ?? '')}",
+          itemIcon: Icon(
             Ionicons.repeat,
             color: textColor,
           ),
+          itemIconColor: accentColors[4],
+          itemCCYFrom: walletSymbol,
+          itemPriceFrom: _formatAmount,
+          itemPriceFromColor: accentColors[5],
+          itemCCYTo: walletToSymbol,
+          itemPriceTo: _formatPriceConv,
+          itemPriceToColor: accentColors[5],
+        );
+      default:
+        return _item(
+          itemName: (name ?? ''),
+          itemSub: "($walletName) ${(categoryName ?? '')}",
+          itemIcon: IconColorList.getExpenseIcon((categoryName ?? '')),
+          itemIconColor: IconColorList.getExpenseColor((categoryName ?? '')),
+          itemCCYFrom: walletSymbol,
+          itemPriceFrom: _formatAmount,
+          itemPriceFromColor: accentColors[2],
+        );
+    }
+  }
+
+  Widget _item({
+    required String itemName,
+    required String itemSub,
+    required Icon itemIcon,
+    required Color itemIconColor,
+    required String itemCCYFrom,
+    required String itemPriceFrom,
+    required Color itemPriceFromColor,
+    String? itemCCYTo,
+    String? itemPriceTo,
+    Color? itemPriceToColor,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Container(
+          child: itemIcon,
           height: 40,
           width: 40,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: accentColors[4],
+            color: itemIconColor,
           ),
           margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
         ),
@@ -204,9 +129,12 @@ class ItemList extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text("-"),
               Text(
-                walletFrom + " > " + walletTo,
+                itemName,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                itemSub,
                 style: TextStyle(
                   fontSize: 12,
                   color: textColor2,
@@ -221,18 +149,20 @@ class ItemList extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              itemCCYFrom + " " + itemPrice,
+              itemCCYFrom + " " + itemPriceFrom,
               style: TextStyle(
-                color: accentColors[5],
+                color: itemPriceFromColor,
               ),
-              textAlign: TextAlign.right,
             ),
-            Text(
-              itemCCYTo + " " + itemPriceConv,
-              style: TextStyle(
-                color: lighten(accentColors[5], 0.25),
+            Visibility(
+              visible: (itemCCYTo != null && itemPriceTo != null),
+              child: Text(
+                (itemCCYTo ?? '') + " " + (itemPriceTo ?? ''),
+                style: TextStyle(
+                  color: lighten((itemPriceToColor ?? itemPriceFromColor), 0.25),
+                ),
+                textAlign: TextAlign.right,
               ),
-              textAlign: TextAlign.right,
             ),
           ],
         ),

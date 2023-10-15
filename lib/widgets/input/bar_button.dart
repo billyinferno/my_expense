@@ -28,7 +28,7 @@ class BarButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 10),
+              SizedBox(height: 5),
               Icon(
                 icon,
                 size: 20,
@@ -46,7 +46,7 @@ class BarButton extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 25),
+              SizedBox(height: 13),
             ],
           ),
         ),

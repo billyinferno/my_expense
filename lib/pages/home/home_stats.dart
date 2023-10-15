@@ -235,6 +235,7 @@ class _HomeStatsState extends State<HomeStats> {
                                   children: <SlidableAction>[
                                     SlidableAction(
                                       label: 'Stat',
+                                      padding: const EdgeInsets.all(0),
                                       foregroundColor: accentColors[3],
                                       backgroundColor: primaryBackground,
                                       icon: Ionicons.bar_chart,
@@ -339,62 +340,41 @@ class _HomeStatsState extends State<HomeStats> {
     return _ret;
   }
 
-  double _computeAverage(Map<DateTime, double> data) {
-    // check if we got data or not?
-    if(data.length <= 0) {
-      return 0;
-    }
-
-    double _ret = 0.0;
-    double _num = 0;
-
-    data.forEach((key, value) {
-      _ret = _ret + value;
-      _num = _num + 1;
-    });
-
-    return _ret/_num;
-  }
-
   Widget _generateNetWorth(WorthModel worth) {
     double _amount = worth.walletsStartBalance + worth.walletsChangesAmount;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
       ),
       child: Column(
         children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                width: 40,
-                height: 40,
-                padding: EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(40),
-                  color: accentColors[6],
+          Container(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: 40,
+                  height: 40,
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    color: accentColors[6],
+                  ),
+                  child: FittedBox(child: Center(child: Text(worth.currenciesName))),
                 ),
-                child: FittedBox(child: Center(child: Text(worth.currenciesName))),
-              ),
-              SizedBox(
-                width: 5,
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(worth.currenciesDescription),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Text(
+                SizedBox(
+                  width: 5,
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(worth.currenciesDescription),
+                      Text(
                         worth.currenciesSymbol + " " + fCCY.format(_amount),
                         style: TextStyle(
                           color: (_amount >= 0 ? accentColors[6] : accentColors[2]),
@@ -402,11 +382,11 @@ class _HomeStatsState extends State<HomeStats> {
                           fontWeight: FontWeight.bold
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           SizedBox(height: 10,),
           Container(
@@ -440,14 +420,6 @@ class _HomeStatsState extends State<HomeStats> {
                             color: accentColors[6],
                           ),
                         ),
-                        Text(
-                          worth.currenciesSymbol + " " + fCCY.format(_incomeExpense[worth.currenciesId] != null ? _computeAverage((_incomeExpense[worth.currenciesId]!.income)) : 0.0),
-                          style: TextStyle(
-                            color: accentColors[6],
-                            fontStyle: FontStyle.italic,
-                            fontSize: 12,
-                          ),
-                        ),
                       ],
                     ),
                   )
@@ -473,14 +445,6 @@ class _HomeStatsState extends State<HomeStats> {
                           worth.currenciesSymbol + " " + fCCY.format(_incomeExpense[worth.currenciesId] != null ? _computeTotal((_incomeExpense[worth.currenciesId]!.expense)) : 0.0),
                           style: TextStyle(
                             color: accentColors[2],
-                          ),
-                        ),
-                        Text(
-                          worth.currenciesSymbol + " " + fCCY.format(_incomeExpense[worth.currenciesId] != null ? _computeAverage((_incomeExpense[worth.currenciesId]!.expense)) : 0.0),
-                          style: TextStyle(
-                            color: accentColors[2],
-                            fontStyle: FontStyle.italic,
-                            fontSize: 12,
                           ),
                         ),
                       ],

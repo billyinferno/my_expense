@@ -624,6 +624,7 @@ class _UserPageState extends State<UserPage> {
             dialogTitle: "Logout",
             dialogText: "Do you want to logout?",
             confirmText: "Logout",
+            confirmColor: accentColors[2],
             cancelText: "Cancel")
         .show(context);
 
@@ -911,6 +912,7 @@ class _UserPageState extends State<UserPage> {
             dialogTitle: "Remove Pin",
             dialogText: "Do you want to remove PIN?",
             confirmText: "Remove",
+            confirmColor: accentColors[0],
             cancelText: "Cancel")
         .show(context);
 
@@ -942,7 +944,6 @@ class _UserPageState extends State<UserPage> {
   void showSetupPin() async {
     // navigate to the remove pin screen.
     final result = await Navigator.push(context, createAnimationRoute(new PinSetupPage()));
-    // debugPrint("Result are " + result.toString());
     if(result) {
       // set the pin as disabled
       setIsPinEnabled(true);

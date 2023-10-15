@@ -198,8 +198,6 @@ class _UserChangePasswordState extends State<UserChangePassword> {
   }
 
   Future<void> _updatePassword() async {
-    // debugPrint("Pressed!");
-
     // check if all is already filled or not?
     String _strCurrentPassword = _currentPassword.text;
     String _strNewPassword = _newPassword.text;

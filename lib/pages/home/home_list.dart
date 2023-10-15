@@ -385,7 +385,6 @@ class _HomeListState extends State<HomeList> {
   }
 
   Widget generateListItem(int index, TransactionListModel txn, BuildContext context) {
-    // debugPrint("Txn " + txn.date.toLocal().toString());
     return Slidable(
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
@@ -393,6 +392,7 @@ class _HomeListState extends State<HomeList> {
         children: <SlidableAction>[
           SlidableAction(
             label: 'Delete',
+            padding: const EdgeInsets.all(0),
             foregroundColor: textColor,
             backgroundColor: accentColors[2],
             icon: Ionicons.trash,
@@ -402,6 +402,7 @@ class _HomeListState extends State<HomeList> {
                         dialogTitle: "Delete Item",
                         dialogText: "Do you want to delete " + txn.name + "?",
                         confirmText: "Delete",
+                        confirmColor: accentColors[2],
                         cancelText: "Cancel")
                     .show(context);
 
@@ -597,12 +598,10 @@ class _HomeListState extends State<HomeList> {
     if(_userMe.defaultBudgetCurrency != null) {
       if(_transactionData.length > 0) {
         // compute the total amount
-        // debugPrint(_transactionData.length.toString());
-        //debugPrint("user me : " + _userMe.defaultBudgetCurrency.toString());
         _transactionData.forEach((_txn) {
-          //debugPrint("Current Currency : " + _txn.wallet.currency + ", " + _txn.wallet.currencyId.toString());
+          // if current wallet currency same as the default budget currectr
           if(_txn.wallet.currencyId == _userMe.defaultBudgetCurrency) {
-            //debugPrint("CCCC");
+            // check the transaction type
             if(_txn.type == "expense") {
               _totalAmount -= _txn.amount;
             }
@@ -610,6 +609,7 @@ class _HomeListState extends State<HomeList> {
               _totalAmount += _txn.amount;
             }
 
+            // set the current currency symbol
             _currencySymbol = _txn.wallet.symbol;
           }
         });

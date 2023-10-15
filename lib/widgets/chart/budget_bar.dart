@@ -93,7 +93,7 @@ class BudgetBar extends StatelessWidget {
                     ],
                   ),
                   SizedBox(
-                    height: 5,
+                    height: 2,
                   ),
                   Container(
                     height: 20,

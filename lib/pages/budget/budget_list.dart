@@ -56,7 +56,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
     // get the currency ID being sent from the home budget page
     _currencyID = widget.currencyId as int;
-    // debugPrint("Current Currency : " + _currencyID.toString());
 
     // get the expense category model
     _expenseCategory = CategorySharedPreferences.getCategory("expense");
@@ -101,6 +100,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                       dialogTitle: "Discard Data",
                       dialogText: "Do you want to discard budget changes?",
                       confirmText: "Discard",
+                      confirmColor: accentColors[2],
                       cancelText: "Cancel")
                   .show(context);
 
@@ -119,7 +119,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
         actions: <Widget>[
           IconButton(
             onPressed: () async {
-              // debugPrint("Save the budget");
               await _updateBudgetList().then((_) {
                 // this is success, we can going back from this page
                 Navigator.pop(context);
@@ -224,7 +223,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                 ),
                                 IconButton(
                                   onPressed: () {
-                                    // debugPrint("Refresh Category");
+                                    //TODO: refresh the category
                                   },
                                   icon: Icon(
                                     Ionicons.refresh,
@@ -274,7 +273,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                       // check if this is not already added as budget or not?
                                       // if not yet then we can add this new budget to the budget list
                                       if (!_checkIfCategorySelected(_expenseCategory[_key]!.id)) {
-                                        // debugPrint("Add new budget " + _expenseCategory[_key]!.id.toString());
                                         await _addBudget(_expenseCategory[_key]!.id,_currencyID).then((_) {
                                           ScaffoldMessenger.of(context).showSnackBar(
                                             createSnackBar(
@@ -475,7 +473,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
             height: 40,
             minWidth: 40,
             onPressed: (() {
-              // debugPrint("Set budget on _budgetList and set state");
               // ensure that user input something on the text controller
               if(_budgetController[index].text.trim().length > 0) {
                 // check if the current amount is the same or not?
@@ -559,6 +556,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
         children: <SlidableAction>[
           SlidableAction(
             label: 'Delete',
+            padding: const EdgeInsets.all(0),
             foregroundColor: textColor,
             backgroundColor: accentColors[2],
             icon: Ionicons.trash,
@@ -568,16 +566,13 @@ class _BudgetListPageState extends State<BudgetListPage> {
                       dialogTitle: "Delete Budget",
                       dialogText: "Do you want to delete " + categoryName + "?",
                       confirmText: "Delete",
+                      confirmColor: accentColors[2],
                       cancelText: "Cancel")
                   .show(context);
 
               // check the result of the dialog box
               result.then((value) {
                 if (value == true) {
-                  // debugPrint("delete budget " +
-                  //     budgetId.toString() +
-                  //     " currency " +
-                  //     currencyId.toString());
                   _deleteBudgetList(budgetId, currencyId);
                 }
               });
@@ -588,10 +583,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
       ),
       child: GestureDetector(
         onDoubleTap: (() {
-          // debugPrint("Edit for id " +
-          //     budgetId.toString() +
-          //     ", currency id " +
-          //     currencyId.toString());
           setEditIndex(index);
         }),
         child: Container(
@@ -792,15 +783,12 @@ class _BudgetListPageState extends State<BudgetListPage> {
         String _budgetDate = "";
         List<BudgetModel> _newHomeBudgetList = [];
         List<BudgetModel>? _currentHomeBudgetList;
-        // debugPrint("Current Budget Date : " + _currentBudgetDate);
 
         // get the list of budget for this currency that we already load on the storage
         List<String> _budgetKeys = MyBox.getKeys("budget_" + _currencyID.toString());
         _budgetKeys.forEach((_budgetKey) {
           // get the current budget date
           _budgetDate = _budgetKey.replaceAll("budget_" + _currencyID.toString() + "_", "");
-          // debugPrint("Update Keys " + _budgetKey);
-          // debugPrint("Current Date " + _budgetDate);
 
           // initialize all the variable needed
           _newHomeBudgetList = [];
@@ -841,7 +829,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
           // set the new home list to the home list budget, so we can directly reflect the data
           BudgetSharedPreferences.setBudget(_currencyID, _budgetDate, _newHomeBudgetList);
           if(_budgetDate == _currentBudgetDate) {
-            // debugPrint("Set home budget for " + _currentBudgetDate);
             // after that notify the budget list on the home if this is the same as the current budget
             Provider.of<HomeProvider>(context, listen: false).setBudgetList(_newHomeBudgetList);
           }

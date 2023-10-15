@@ -248,7 +248,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
                       SizedBox(
                         width: 70,
                         child: Text(
-                          dt.format(_walletStat[index].date),
+                          dt.format(_walletStat[index].date.toLocal()),
                         ),
                       ),
                       const SizedBox(width: 5,),
