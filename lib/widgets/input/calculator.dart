@@ -241,30 +241,32 @@ class Calculator extends StatelessWidget {
 
   Widget _num({required Widget child, required String value, double? height}) {
     double _h = (height ?? 50);
-    return InkWell(
-      onTap: (() {
-        // get the value, and perform calc
-        if(value == "v") {
-          onFinished();
-        }
-        else {
-          onChange(value);
-        }
-      }),
-      child: Container(
-        width: double.infinity,
-        height: _h,
-        decoration: BoxDecoration(
-          color: secondaryDark,
-          border: Border(
-            left: BorderSide(color: primaryLight, width: 0.5),
-            right: BorderSide(color: primaryLight, width: 0.5),
-            top: BorderSide(color: primaryLight, width:0.5),
-            bottom: BorderSide(color: primaryLight, width:0.5)
-          )
-        ),
-        child: Center(
-          child: child,
+    return TextFieldTapRegion(
+      child: InkWell(
+        onTap: (() {
+          // get the value, and perform calc
+          if(value == "v") {
+            onFinished();
+          }
+          else {
+            onChange(value);
+          }
+        }),
+        child: Container(
+          width: double.infinity,
+          height: _h,
+          decoration: BoxDecoration(
+            color: secondaryDark,
+            border: Border(
+              left: BorderSide(color: primaryLight, width: 0.5),
+              right: BorderSide(color: primaryLight, width: 0.5),
+              top: BorderSide(color: primaryLight, width:0.5),
+              bottom: BorderSide(color: primaryLight, width:0.5)
+            )
+          ),
+          child: Center(
+            child: child,
+          ),
         ),
       ),
     );

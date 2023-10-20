@@ -20,17 +20,19 @@ class CalcButton extends StatelessWidget {
 
     return Expanded(
       flex: _flex,
-      child: InkWell(
-        onTap: (() {
-          onTap();
-        }),
-        child: Container(
-          height: 60,
-          decoration: BoxDecoration(
-            color: _color,
-            border: Border.all(color: _borderColor, width: _borderWidth),
+      child: TextFieldTapRegion(
+        child: InkWell(
+          onTap: (() {
+            onTap();
+          }),
+          child: Container(
+            height: 60,
+            decoration: BoxDecoration(
+              color: _color,
+              border: Border.all(color: _borderColor, width: _borderWidth),
+            ),
+            child: child,
           ),
-          child: child,
         ),
       ),
     );
