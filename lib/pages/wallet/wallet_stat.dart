@@ -5,6 +5,7 @@ import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/model/wallet_stat_model.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/misc/number_format.dart';
 import 'package:my_expense/widgets/chart/bar.dart';
 import 'package:my_expense/widgets/chart/multi_line_chart.dart';
 import 'package:my_expense/widgets/chart/summary_box.dart';
@@ -243,15 +244,37 @@ class _WalletStatPageState extends State<WalletStatPage> {
                           )
                         ),
                       ),
-                      const SizedBox(width: 5,),
                       // date,
-                      SizedBox(
+                      Container(
+                        color: secondaryBackground,
                         width: 70,
-                        child: Text(
-                          dt.format(_walletStat[index].date.toLocal()),
+                        padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              dt.format(_walletStat[index].date.toLocal()),
+                            ),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                formatCurrency(
+                                  (_walletStat[index].income ?? 0) - (_walletStat[index].expense ?? 0),
+                                  false,
+                                  true,
+                                  true,
+                                  2
+                                ),
+                                style: TextStyle(
+                                  color: indicator,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 5,),
                       // bar chart
                       Expanded(
                         child: Column(
