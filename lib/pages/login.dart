@@ -54,7 +54,6 @@ class _LoginPageState extends State<LoginPage> {
 
     Future.microtask(() async {
       await _checkLogin().then((isLogin) async {
-        debugPrint("is login $isLogin");
         if (isLogin) {
           // get additional information
           debugPrint("🔓 Already login");
