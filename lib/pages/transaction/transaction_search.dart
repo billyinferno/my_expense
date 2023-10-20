@@ -518,7 +518,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
-        color: primaryDark,
+        color: secondaryDark,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -595,7 +595,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
-        color: primaryDark,
+        color: secondaryDark,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -671,7 +671,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
-        color: primaryDark,
+        color: secondaryDark,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
