@@ -25,6 +25,7 @@ import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/calcbutton.dart';
 import 'package:my_expense/widgets/item/expand_animation.dart';
+import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class TransactionInput extends StatefulWidget {
@@ -42,6 +43,11 @@ class TransactionInput extends StatefulWidget {
 }
 
 class _TransactionInputState extends State<TransactionInput> {
+  // controller
+  final ScrollController _scrollControllerIncomeExpenseAccount = ScrollController();
+  final ScrollController _scrollControllerTransferFromAccount = ScrollController();
+  final ScrollController _scrollControllerTransferToAccount = ScrollController();
+
   // animation variable
   double _currentContainerPositioned = 0;
   final _animationDuration = Duration(milliseconds: 150);
@@ -86,7 +92,6 @@ class _TransactionInputState extends State<TransactionInput> {
   String _calcOperation = "";
   bool _amountReset = false;
   bool _isAmountFocus = false;
-  bool _isCustomPinpad = false;
 
   // text field controller
   FocusNode _nameFocus = FocusNode();
@@ -266,7 +271,9 @@ class _TransactionInputState extends State<TransactionInput> {
     _amountFocus.dispose();
     _exchangeController.dispose();
     _descriptionController.dispose();
-
+    _scrollControllerIncomeExpenseAccount.dispose();
+    _scrollControllerTransferFromAccount.dispose();
+    _scrollControllerTransferToAccount.dispose();
     super.dispose();
   }
 
@@ -281,25 +288,6 @@ class _TransactionInputState extends State<TransactionInput> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Center(child: Text(widget.title)),
-                SizedBox(width: 5,),
-                IconButton(
-                  onPressed: (() {
-                    debugPrint("Custom Keyboard");
-                    // check if the _amountFocus node is focussing
-                    // if so then unfocus it
-                    if(_amountFocus.hasFocus) {
-                      _amountFocus.unfocus();
-                    }
-
-                    // set the custom pinpad on or off
-                    setState(() {
-                      _isCustomPinpad = !_isCustomPinpad;
-                    });
-                  }),
-                  icon: Icon(
-                    Ionicons.calculator_outline
-                  ),
-                ),
               ],
             ),
             leading: IconButton(
@@ -515,26 +503,6 @@ class _TransactionInputState extends State<TransactionInput> {
     });
   }
 
-  void _removeAmountControllerText() {
-    if(_amountController.text.length > 0) {
-      setState(() {
-        // check if we got amount reset?
-        if(_amountReset) {
-          // user press operand but not enter any number, instead pressing backspace
-          // in this case we will cancel the previous operand
-          _calcOperation = "";
-          // and set the amount reset into false
-          _amountReset = false;
-        }
-        
-        // cut the last digit from the amount
-        _amountController.text = _amountController.text.substring(0, _amountController.text.length - 1);
-
-        _resizeAmountControllerFont();
-      });
-    }
-  }
-
   void _performCustomCalc(String operand) {
     // ensure we got data when we perform calculation
     if(_amountController.text.length > 0) {      
@@ -586,9 +554,13 @@ class _TransactionInputState extends State<TransactionInput> {
           _calcAmount = double.parse(_amountController.text);
           if(_calcAmount > 0) {
             // calculate the percentage
-            _calcAmount = _calcMemory * (_calcAmount / 100);
+            _calcMemory = _calcMemory * (_calcAmount / 100);
             // put the calc amount on the amount controller
-            _setAmountControllertext(fCCY.format(_calcAmount), true);
+            _setAmountControllertext(fCCY.format(_calcMemory), true);
+
+            // clear everything, we assume user press "="
+            _calcOperation = "";
+            _calcMemory = 0;
           }
         }
       }
@@ -635,381 +607,13 @@ class _TransactionInputState extends State<TransactionInput> {
         _generateAutoComplete(true, _nameFocus.hasFocus)
       );
     }
-    else if(!_isCustomPinpad && isOpen && _isAmountFocus) {
+    else if(_isAmountFocus) {
       _returnWidget.add(
         _generateCalculator(screenHeight, keyboardHeight)
       );
     }
-    else if(_isCustomPinpad && _isAmountFocus && !isOpen) {
-      _returnWidget.add(
-        _generateCustomCalculator()
-      );
-    }
 
     return _returnWidget;
-  }
-
-  Widget _generateCustomCalculator() {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        height: 350,
-        width: double.infinity,
-        color: secondaryDark,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              child: GestureDetector(
-                onTap: (() {
-                  _amountFocus.unfocus();
-                }),
-                child: Container(
-                  height: 25,
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      "done",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: secondaryLight,
-                      ),
-                    ),
-                  ),
-                  margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                ),
-              ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "AC",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: primaryBackground,
-                      ),
-                    )
-                  ),
-                  color: Colors.white,
-                  onTap: (() {
-                    // clear the calc memory
-                    setState(() {                          
-                      _calcMemory = 0;
-                      _calcAmount = 0;
-                      _currentAmount = 0;
-                      _calcOperation = "";
-                      _amountController.text = "";
-                      _currentAmountFontSize = 25;
-                    });
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "%",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        color: primaryBackground,
-                      ),
-                    )
-                  ),
-                  color: Colors.white,
-                  onTap: (() {
-                    _performCustomCalc("%");
-                  }),
-                ),
-                  CalcButton(
-                  child: Center(
-                    child: Icon(
-                      Ionicons.backspace_outline,
-                      color: primaryBackground,
-                      size: 25,
-                    )
-                  ),
-                  color: Colors.white,
-                  onTap: (() {
-                    // check if got length or not?
-                    _removeAmountControllerText();
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "÷",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  color: Colors.orange,
-                  onTap: (() {
-                    _performCustomCalc("/");
-                  }),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "7",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    _setAmountControllertext("7");
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "8",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    _setAmountControllertext("8");
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "9",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    _setAmountControllertext("9");
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "×",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  color: Colors.orange,
-                  onTap: (() {
-                    _performCustomCalc("*");
-                  }),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "4",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    _setAmountControllertext("4");
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "5",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    _setAmountControllertext("5");
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "6",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    _setAmountControllertext("6");
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "-",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  color: Colors.orange,
-                  onTap: (() {
-                    _performCustomCalc("-");
-                  }),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "1",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    _setAmountControllertext("1");
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "2",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    _setAmountControllertext("2");
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "3",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    _setAmountControllertext("3");
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "+",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  color: Colors.orange,
-                  onTap: (() {
-                    _performCustomCalc("+");
-                  }),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      ".",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    // check if we already have "." on the amount controller or not?
-                    if(!_amountController.text.contains(".")) {
-                      // check if this the first character?
-                      if(_amountController.text.length == 0) {
-                        _setAmountControllertext("0.");  
-                      }
-                      else {
-                        _setAmountControllertext(".");
-                      }
-                    }
-                  }),
-                ),
-                CalcButton(
-                  flex: 2,
-                  child: Center(
-                    child: Text(
-                      "0",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  onTap: (() {
-                    if(_amountController.text.length > 0) {
-                      _setAmountControllertext("0");
-                    }
-                  }),
-                ),
-                CalcButton(
-                  child: Center(
-                    child: Text(
-                      "=",
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  ),
-                  color: Colors.orange,
-                  onTap: (() {
-                    _performCustomCalc("=");
-                  }),
-                ),
-              ],
-            ),
-            SizedBox(height: 25,),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _generateCalculator(double screenHeight, double keyboardHeight) {
@@ -1261,9 +865,9 @@ class _TransactionInputState extends State<TransactionInput> {
     showLoaderDialog(context);
 
     // generate the transaction model that we will put
-    TransactionModel _txn;
+    var _data;
     if(_currentType == "expense" || _currentType == "income") {
-      var _data = {
+      _data = {
         "name": _nameController.text,
         "type": _currentType,
         "category": {
@@ -1282,11 +886,9 @@ class _TransactionInputState extends State<TransactionInput> {
         "walletTo": null,
         "exchange_rate": 1
       };
-
-      _txn = TransactionModel.fromJson(_data);
     }
     else {
-      var _data = {
+      _data = {
         "name": _nameController.text,
         "type": _currentType,
         "category": {
@@ -1307,11 +909,9 @@ class _TransactionInputState extends State<TransactionInput> {
         },
         "exchange_rate": _currentExchangeRate
       };
-
-      _txn = TransactionModel.fromJson(_data);
     }
 
-    return _txn;
+    return TransactionModel.fromJson(_data);
   }
 
   void _getCurrentCategoryList() {
@@ -1604,7 +1204,6 @@ class _TransactionInputState extends State<TransactionInput> {
               child: TextFormField(
                 controller: _amountController,
                 focusNode: _amountFocus,
-                readOnly: _isCustomPinpad,
                 showCursor: true,
                 textAlign: TextAlign.right,
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -1733,7 +1332,6 @@ class _TransactionInputState extends State<TransactionInput> {
             child: TextFormField(
               controller: _amountController,
               focusNode: _amountFocus,
-              readOnly: _isCustomPinpad,
               showCursor: true,
               textAlign: TextAlign.right,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -1920,50 +1518,30 @@ class _TransactionInputState extends State<TransactionInput> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 10,),
                       Expanded(
                         child: ListView.builder(
+                          controller: _scrollControllerIncomeExpenseAccount,
                           itemCount: _walletList.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return Container(
-                              height: 60,
-                              decoration: BoxDecoration(
-                                border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                              ),
-                              child: ListTile(
-                                leading: Container(
-                                  height: 40,
-                                  width: 40,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(40),
-                                    color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                                  ),
-                                  child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
-                                ),
-                                title: Text(_walletList[index].name),
-                                trailing: Visibility(
-                                  visible: (_currentWalletFromID == _walletList[index].id),
-                                  child: Icon(
-                                    Ionicons.checkmark_circle,
-                                    size: 20,
-                                    color: accentColors[0],
-                                  ),
-                                ),
-                                onTap: () {
-                                  //print("Selected wallet");
-                                  setState(() {
-                                    _currentWalletFromID = _walletList[index].id;
-                                    _currentWalletFromName = _walletList[index].name;
-                                    _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                                    _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                                  });
-                                  Navigator.pop(context);
-                                },
-                              ),
+                            return SimpleItem(
+                              color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
+                              child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
+                              description: _walletList[index].name,
+                              isSelected: (_currentWalletFromID == _walletList[index].id),
+                              onTap: (() {
+                                setState(() {
+                                  _currentWalletFromID = _walletList[index].id;
+                                  _currentWalletFromName = _walletList[index].name;
+                                  _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                                  _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+                                });
+                                Navigator.pop(context);
+                              }),
                             );
                           },
                         ),
                       ),
+                      const SizedBox(height: 20,),
                     ],
                   ),
                 );
@@ -2104,50 +1682,30 @@ class _TransactionInputState extends State<TransactionInput> {
                                     ],
                                   ),
                                 ),
-                                SizedBox(height: 10,),
                                 Expanded(
                                   child: ListView.builder(
+                                    controller: _scrollControllerTransferFromAccount,
                                     itemCount: _walletList.length,
                                     itemBuilder: (BuildContext context, int index) {
-                                      return Container(
-                                        height: 60,
-                                        decoration: BoxDecoration(
-                                          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                                        ),
-                                        child: ListTile(
-                                          leading: Container(
-                                            height: 40,
-                                            width: 40,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(40),
-                                              color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                                            ),
-                                            child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
-                                          ),
-                                          title: Text(_walletList[index].name),
-                                          trailing: Visibility(
-                                            visible: (_currentWalletFromID == _walletList[index].id),
-                                            child: Icon(
-                                              Ionicons.checkmark_circle,
-                                              size: 20,
-                                              color: accentColors[0],
-                                            ),
-                                          ),
-                                          onTap: () {
-                                            //print("Selected wallet");
-                                            setState(() {
-                                              _currentWalletFromID = _walletList[index].id;
-                                              _currentWalletFromName = _walletList[index].name;
-                                              _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                                              _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                        ),
+                                      return SimpleItem(
+                                        color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
+                                        child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
+                                        description: _walletList[index].name,
+                                        isSelected: (_currentWalletFromID == _walletList[index].id),
+                                        onTap: (() {
+                                          setState(() {
+                                            _currentWalletFromID = _walletList[index].id;
+                                            _currentWalletFromName = _walletList[index].name;
+                                            _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                                            _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+                                          });
+                                          Navigator.pop(context);
+                                        }),
                                       );
                                     },
                                   ),
                                 ),
+                                const SizedBox(height: 20,),
                               ],
                             ),
                           );
@@ -2210,50 +1768,30 @@ class _TransactionInputState extends State<TransactionInput> {
                                     ],
                                   ),
                                 ),
-                                SizedBox(height: 10,),
                                 Expanded(
                                   child: ListView.builder(
+                                    controller: _scrollControllerTransferToAccount,
                                     itemCount: _walletList.length,
                                     itemBuilder: (BuildContext context, int index) {
-                                      return Container(
-                                        height: 60,
-                                        decoration: BoxDecoration(
-                                          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                                        ),
-                                        child: ListTile(
-                                          leading: Container(
-                                            height: 40,
-                                            width: 40,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(40),
-                                              color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                                            ),
-                                            child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
-                                          ),
-                                          title: Text(_walletList[index].name),
-                                          trailing: Visibility(
-                                            visible: (_currentWalletToID == _walletList[index].id),
-                                            child: Icon(
-                                              Ionicons.checkmark_circle,
-                                              size: 20,
-                                              color: accentColors[0],
-                                            ),
-                                          ),
-                                          onTap: () {
-                                            //print("Selected wallet");
-                                            setState(() {
-                                              _currentWalletToID = _walletList[index].id;
-                                              _currentWalletToName = _walletList[index].name;
-                                              _currentWalletToType = _walletList[index].walletType.type.toLowerCase();
-                                              _currentWalletToCCY = _walletList[index].currency.name.toLowerCase();
-                                            });
-                                            Navigator.pop(context);
-                                          },
-                                        ),
+                                      return SimpleItem(
+                                        color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()), 
+                                        child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
+                                        description: _walletList[index].name,
+                                        isSelected: (_currentWalletToID == _walletList[index].id),
+                                        onTap: (() {
+                                          setState(() {
+                                            _currentWalletToID = _walletList[index].id;
+                                            _currentWalletToName = _walletList[index].name;
+                                            _currentWalletToType = _walletList[index].walletType.type.toLowerCase();
+                                            _currentWalletToCCY = _walletList[index].currency.name.toLowerCase();
+                                          });
+                                          Navigator.pop(context);
+                                        }),
                                       );
                                     },
                                   ),
                                 ),
+                                const SizedBox(height: 20,),
                               ],
                             ),
                           );

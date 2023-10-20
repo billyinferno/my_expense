@@ -20,6 +20,7 @@ import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/chart/budget_bar.dart';
 import 'package:my_expense/widgets/calendar/horizontal_month_calendar.dart';
+import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
 class HomeBudget extends StatefulWidget {
@@ -242,53 +243,32 @@ class _HomeBudgetState extends State<HomeBudget> {
                                       ],
                                     ),
                                   ),
-                                  SizedBox(height: 10,),
                                   Expanded(
                                     child: ListView.builder(
                                       physics: const AlwaysScrollableScrollPhysics(),
                                       controller: _scrollControllerCurrencies,
                                       itemCount: _currencies.length,
                                       itemBuilder: (BuildContext context, int index) {
-                                        return Container(
-                                          height: 60,
-                                          decoration: BoxDecoration(
-                                            border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                                        return SimpleItem(
+                                          color: accentColors[6],
+                                          child: FittedBox(
+                                            child: Text(_currencies[index].symbol.toUpperCase()),
+                                            fit: BoxFit.contain,
                                           ),
-                                          child: ListTile(
-                                            leading: Container(
-                                              height: 40,
-                                              width: 40,
-                                              padding: EdgeInsets.all(5),
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(40),
-                                                color: accentColors[6],
-                                              ),
-                                              child: FittedBox(
-                                                child: Text(_currencies[index].symbol.toUpperCase()),
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                            title: Text(_currencies[index].description),
-                                            trailing: Visibility(
-                                              visible: (_currentCurrencies!.id == _currencies[index].id),
-                                              child: Icon(
-                                                Ionicons.checkmark_circle,
-                                                size: 20,
-                                                color: accentColors[0],
-                                              ),
-                                            ),
-                                            onTap: () {
-                                              setState(() {
-                                                _currentCurrencies = _currencies[index];
-                                                _fetchBudget(true);
-                                              });
-                                              Navigator.pop(context);
-                                            },
-                                          ),
+                                          description: _currencies[index].description,
+                                          isSelected: (_currentCurrencies!.id == _currencies[index].id),
+                                          onTap: (() {
+                                            setState(() {
+                                              _currentCurrencies = _currencies[index];
+                                              _fetchBudget(true);
+                                            });
+                                            Navigator.pop(context);
+                                          }),
                                         );
                                       },
                                     ),
                                   ),
+                                  const SizedBox(height: 20,),
                                 ],
                               ),
                             );
@@ -328,7 +308,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                               height: 15,
                               width: 30,
                               child: Transform.scale(
-                                scale: 0.5,
+                                scale: 0.6,
                                 child: CupertinoSwitch(
                                   value: _showNotInBudget,
                                   onChanged: (value) {
@@ -341,7 +321,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                             ),
                             const SizedBox(width: 11,),
                             Text(
-                              "Show Not In Budget Expense",
+                              "Not In Budget Expense",
                               style: TextStyle(
                                 fontSize: 10,
                                 color: textColor,

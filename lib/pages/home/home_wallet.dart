@@ -7,14 +7,13 @@ import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/currency_model.dart';
 import 'package:my_expense/pages/home/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/themes/color_utils.dart';
 import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
+import 'package:my_expense/widgets/input/wallet.dart';
 import 'package:provider/provider.dart';
 
 class HomeWallet extends StatefulWidget {
@@ -121,7 +120,7 @@ class _HomeWalletState extends State<HomeWallet> {
                 itemBuilder: (BuildContext ctx, int index) {
                   if (index < wallets.length) {
                     WalletModel wallet = wallets[index];
-                    return generateSlidable(wallet, context);
+                    return generateSlidable(wallet);
                   }
                   else {
                     return const SizedBox(height: 30,);
@@ -183,7 +182,7 @@ class _HomeWalletState extends State<HomeWallet> {
     });
   }
 
-  Widget generateSlidable(WalletModel wallet, BuildContext context) {
+  Widget generateSlidable(WalletModel wallet) {
     return Slidable(
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
@@ -278,70 +277,7 @@ class _HomeWalletState extends State<HomeWallet> {
           ),
         ],
       ),
-      child: GestureDetector(
-        onTap: () {
-          //debugPrint("Opening the wallet list of transaction page");
-          Navigator.pushNamed(context, '/wallet/transaction', arguments: wallet);
-        },
-        child: Container(
-          padding: EdgeInsets.all(15),
-          margin: EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            gradient: LinearGradient(
-                colors: <Color>[
-                  (wallet.enabled ? IconList.getColor(wallet.walletType.type) : secondaryDark),
-                  (wallet.enabled ? lighten(IconList.getDarkColor(wallet.walletType.type),0.1) : secondaryBackground),
-                ]
-            ),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 30,
-                    width: 30,
-                    child: IconList.getIcon(wallet.walletType.type),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          wallet.name,
-                          textAlign: TextAlign.left,
-                          style: TextStyle(fontSize: 15),
-                        ),
-                        Text(
-                          wallet.walletType.type,
-                          textAlign: TextAlign.left,
-                          style: TextStyle(fontSize: 10),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children:<Widget> [Text(
-                  wallet.currency.symbol + " " + fCCY.format(wallet.startBalance + wallet.changeBalance),
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                )],
-              ),
-            ],
-          ),
-          width: double.infinity,
-        ),
-      ),
+      child: Wallet(wallet: wallet),
     );
   }
 

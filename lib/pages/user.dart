@@ -31,6 +31,7 @@ import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/switch.dart';
 import 'package:my_expense/widgets/input/user_button.dart';
+import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatefulWidget {
@@ -45,6 +46,8 @@ class _UserPageState extends State<UserPage> {
   final BudgetHTTPService budgetHTTP = BudgetHTTPService();
   final WalletHTTPService walletHTTP = WalletHTTPService();
   final TransactionHTTPService transactionHTTP = TransactionHTTPService();
+  final ScrollController _scrollControllerCurrency = ScrollController();
+  final ScrollController _scrollControllerWallet = ScrollController();
 
   late UsersMeModel userMe;
   late Map<int, CategoryModel> expenseCategory;
@@ -136,6 +139,13 @@ class _UserPageState extends State<UserPage> {
     }
     
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollControllerCurrency.dispose();
+    _scrollControllerWallet.dispose();
+    super.dispose();
   }
 
   @override
@@ -355,52 +365,23 @@ class _UserPageState extends State<UserPage> {
                                     ),
                                     child: Center(child: Text("Currencies")),
                                   ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
                                   Expanded(
                                     child: ListView.builder(
+                                      controller: _scrollControllerCurrency,
                                       itemCount: currencies.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        return Container(
-                                          height: 60,
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              bottom: BorderSide(
-                                                color: primaryLight,
-                                                width: 1.0
-                                              )
-                                            ),
+                                      itemBuilder: (BuildContext context, int index) {
+                                        return SimpleItem(
+                                          color: accentColors[6],
+                                          child: FittedBox(
+                                            child: Text(currencies[index].symbol.toUpperCase()),
+                                            fit: BoxFit.contain,
                                           ),
-                                          child: ListTile(
-                                            leading: Container(
-                                              height: 40,
-                                              width: 40,
-                                              padding: EdgeInsets.all(5),
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(40),
-                                                color: accentColors[6],
-                                              ),
-                                              child: FittedBox(
-                                                child: Text(currencies[index].symbol.toUpperCase()),
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                            title: Text(currencies[index].description),
-                                            trailing: Visibility(
-                                              visible: (selectedCurrency!.id == currencies[index].id),
-                                              child: Icon(
-                                                Ionicons.checkmark_circle,
-                                                size: 20,
-                                                color: accentColors[0],
-                                              ),
-                                            ),
-                                            onTap: () {
-                                              // print("Selected currencies");
-                                              setState(() {
-                                                selectedCurrency = currencies[index];
-                                              });
+                                          description: currencies[index].description,
+                                          isSelected: selectedCurrency!.id == currencies[index].id,
+                                          onTap: (() {
+                                            setState(() {
+                                              selectedCurrency = currencies[index];
+
                                               // check if currency the same or not?
                                               // if not the same then we can perform
                                               // update on the default budget currency.
@@ -408,13 +389,14 @@ class _UserPageState extends State<UserPage> {
                                                 // need to update the currency
                                                 updateBudgetCurrency(currencies[index].id);
                                               }
-                                              Navigator.pop(context);
-                                            },
-                                          ),
+                                            });
+                                            Navigator.pop(context);
+                                          }),
                                         );
                                       },
                                     ),
                                   ),
+                                  const SizedBox(height: 20,),
                                 ],
                               ),
                             );
@@ -458,40 +440,19 @@ class _UserPageState extends State<UserPage> {
                                     ],
                                   ),
                                 ),
-                                SizedBox(height: 10,),
                                 Expanded(
                                   child: ListView.builder(
+                                    controller: _scrollControllerWallet,
                                     itemCount: wallets.length,
                                     itemBuilder: (BuildContext context, int index) {
-                                      return Container(
-                                        height: 60,
-                                        decoration: BoxDecoration(
-                                          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                                        ),
-                                        child: ListTile(
-                                          leading: Container(
-                                            height: 40,
-                                            width: 40,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(40),
-                                              color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-                                            ),
-                                            child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
-                                          ),
-                                          title: Text(wallets[index].name),
-                                          trailing: Visibility(
-                                            visible: (currentWallet!.id == wallets[index].id),
-                                            child: Icon(
-                                              Ionicons.checkmark_circle,
-                                              size: 20,
-                                              color: accentColors[0],
-                                            ),
-                                          ),
-                                          onTap: () {
-                                            // print("Selected wallet");
-                                            setState(() {
-                                              selectedWallet = wallets[index];
-                                            });
+                                      return SimpleItem(
+                                        color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
+                                        child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
+                                        description: wallets[index].name,
+                                        isSelected: (currentWallet!.id == wallets[index].id),
+                                        onTap: (() {
+                                          setState(() {
+                                            selectedWallet = wallets[index];
                                             // check if currency the same or not?
                                             // if not the same then we can perform
                                             // update on the default budget currency.
@@ -499,13 +460,14 @@ class _UserPageState extends State<UserPage> {
                                               // need to update the currency
                                               updateDefaultWallet(wallets[index].id);
                                             }
-                                            Navigator.pop(context);
-                                          },
-                                        ),
+                                          });
+                                          Navigator.pop(context);
+                                        }),
                                       );
                                     },
                                   ),
                                 ),
+                                const SizedBox(height: 20,),
                               ],
                             ),
                           );

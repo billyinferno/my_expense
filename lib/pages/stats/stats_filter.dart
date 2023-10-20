@@ -20,6 +20,7 @@ import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/type_slide.dart';
 import 'package:my_expense/widgets/input/user_button.dart';
 import 'package:my_expense/widgets/item/expand_animation.dart';
+import 'package:my_expense/widgets/item/simple_item.dart';
 
 class StatsFilterPage extends StatefulWidget {
   const StatsFilterPage({ Key? key }) : super(key: key);
@@ -568,50 +569,27 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                 controller: _scrollControllerCurrencies,
                 itemCount: _currencies.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                  return SimpleItem(
+                    color: accentColors[6],
+                    child: FittedBox(
+                      child: Text(_currencies[index].symbol.toUpperCase()),
+                      fit: BoxFit.contain,
                     ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: ListTile(
-                        leading: Container(
-                          height: 40,
-                          width: 40,
-                          padding: EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(40),
-                            color: accentColors[6],
-                          ),
-                          child: FittedBox(
-                            child: Text(_currencies[index].symbol.toUpperCase()),
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        title: Text(_currencies[index].description),
-                        trailing: Visibility(
-                          visible: (_currentCurrencies!.id == _currencies[index].id),
-                          child: Icon(
-                            Ionicons.checkmark_circle,
-                            size: 20,
-                            color: accentColors[0],
-                          ),
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _currentCurrencies = _currencies[index];
-                            _filterWalletList();
-                            //debugPrint("Fetch the statistic for this");
-                          });
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
+                    description: _currencies[index].description,
+                    isSelected: (_currentCurrencies!.id == _currencies[index].id),
+                    onTap: (() {
+                      setState(() {
+                        _currentCurrencies = _currencies[index];
+                        _filterWalletList();
+                        //debugPrint("Fetch the statistic for this");
+                      });
+                      Navigator.pop(context);
+                    }),
                   );
                 },
               ),
             ),
+            const SizedBox(height: 20,),
           ],
         ),
       );
@@ -660,47 +638,22 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                 controller: _scrollControllerWallet,
                 itemCount: _currentWallets.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: ListTile(
-                        leading: Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(40),
-                            color: IconList.getColor(_currentWallets[index].walletType.type.toLowerCase()),
-                          ),
-                          child: IconList.getIcon(_currentWallets[index].walletType.type.toLowerCase()),
-                        ),
-                        title: Text(_currentWallets[index].name),
-                        trailing: Visibility(
-                          visible: (_currentWallet!.id == _currentWallets[index].id),
-                          child: Icon(
-                            Ionicons.checkmark_circle,
-                            size: 20,
-                            color: accentColors[0],
-                          ),
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _currentWallet = _currentWallets[index];
-                          });
-                    
-                          // fetch or filter the statistic data that we have
-                          //debugPrint("fetch data");
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
+                  return SimpleItem(
+                    color: IconList.getColor(_currentWallets[index].walletType.type.toLowerCase()),
+                    child: IconList.getIcon(_currentWallets[index].walletType.type.toLowerCase()),
+                    description: _currentWallets[index].name,
+                    isSelected: (_currentWallet!.id == _currentWallets[index].id),
+                    onTap: (() {
+                      setState(() {
+                        _currentWallet = _currentWallets[index];
+                      });
+                      Navigator.pop(context);
+                    }),
                   );
                 },
               ),
             ),
+            const SizedBox(height: 20,),
           ],
         ),
       );

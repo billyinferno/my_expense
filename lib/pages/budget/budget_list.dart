@@ -19,6 +19,7 @@ import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_box.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
+import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
 class BudgetListPage extends StatefulWidget {
@@ -233,73 +234,48 @@ class _BudgetListPageState extends State<BudgetListPage> {
                               ],
                             ),
                           ),
-                          SizedBox(
-                            height: 10,
-                          ),
                           Expanded(
                             child: ListView.builder(
                               controller: _scrollControllerAddCategory,
                               itemCount: _expenseCategory.length,
                               itemBuilder: (BuildContext context, int index) {
                                 int _key = _expenseCategory.keys.elementAt(index);
-                                return Container(
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(
-                                            color: primaryLight, width: 1.0)),
-                                  ),
-                                  child: ListTile(
-                                    leading: Container(
-                                      height: 40,
-                                      width: 40,
-                                      padding: EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(40),
-                                        color: IconColorList.getExpenseColor(_expenseCategory[_key]!.name),
-                                      ),
-                                      child: IconColorList.getExpenseIcon(_expenseCategory[_key]!.name),
-                                    ),
-                                    title: Text(_expenseCategory[_key]!.name),
-                                    trailing: Visibility(
-                                      visible: (_checkIfCategorySelected(_expenseCategory[_key]!.id)),
-                                      child: Icon(
-                                        Ionicons.checkmark_circle,
-                                        size: 20,
-                                        color: accentColors[0],
-                                      ),
-                                    ),
-                                    onTap: () async {
-                                      // check if this is not already added as budget or not?
-                                      // if not yet then we can add this new budget to the budget list
-                                      if (!_checkIfCategorySelected(_expenseCategory[_key]!.id)) {
-                                        await _addBudget(_expenseCategory[_key]!.id,_currencyID).then((_) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            createSnackBar(
-                                              message: "Success add new category",
-                                              icon: Icon(
-                                                Ionicons.checkmark_circle_outline,
-                                                color: accentColors[6],
-                                              ),
-                                            )
-                                          );
-                                        }).onError((error, stackTrace) {
-                                          // show the snack bar of error
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            createSnackBar(
-                                              message: error.toString(),
-                                            )
-                                          );
-                                        });
-                                      }
-                                      // remove the modal dialog
-                                      Navigator.pop(context);
-                                    },
-                                  ),
+                                return SimpleItem(
+                                  color: IconColorList.getExpenseColor(_expenseCategory[_key]!.name),
+                                  child: IconColorList.getExpenseIcon(_expenseCategory[_key]!.name),
+                                  description: _expenseCategory[_key]!.name,
+                                  isSelected: (_checkIfCategorySelected(_expenseCategory[_key]!.id)),
+                                  onTap: (() async {
+                                    // check if this is not already added as budget or not?
+                                    // if not yet then we can add this new budget to the budget list
+                                    if (!_checkIfCategorySelected(_expenseCategory[_key]!.id)) {
+                                      await _addBudget(_expenseCategory[_key]!.id,_currencyID).then((_) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          createSnackBar(
+                                            message: "Success add new category",
+                                            icon: Icon(
+                                              Ionicons.checkmark_circle_outline,
+                                              color: accentColors[6],
+                                            ),
+                                          )
+                                        );
+                                      }).onError((error, stackTrace) {
+                                        // show the snack bar of error
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          createSnackBar(
+                                            message: error.toString(),
+                                          )
+                                        );
+                                      });
+                                    }
+                                    // remove the modal dialog
+                                    Navigator.pop(context);
+                                  }),
                                 );
                               },
                             ),
                           ),
+                          const SizedBox(height: 20,),
                         ],
                       ),
                     );

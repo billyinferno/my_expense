@@ -17,6 +17,7 @@ import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
+import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
 class WalletEditPage extends StatefulWidget {
@@ -166,49 +167,28 @@ class _WalletEditPageState extends State<WalletEditPage> {
                                 ),
                                 child: Center(child: Text("Account Type")),
                               ),
-                              SizedBox(height: 10,),
                               Expanded(
                                 child: ListView.builder(
                                   controller: _scrollControllerWallet,
                                   itemCount: _walletType.length,
                                   itemBuilder: (BuildContext context, int index) {
-                                    return Container(
-                                      height: 60,
-                                      decoration: BoxDecoration(
-                                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                                      ),
-                                      child: ListTile(
-                                        leading: Container(
-                                          height: 40,
-                                          width: 40,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(40),
-                                            color: IconList.getColor(_walletType[index].type.toLowerCase()),
-                                          ),
-                                          child: IconList.getIcon(_walletType[index].type.toLowerCase()),
-                                        ),
-                                        title: Text(_walletType[index].type),
-                                        trailing: Visibility(
-                                          visible: (_currentWalletTypeID == _walletType[index].id),
-                                          child: Icon(
-                                            Ionicons.checkmark_circle,
-                                            size: 20,
-                                            color: accentColors[0],
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          print("Selected wallet type");
-                                          setState(() {
-                                            _currentWalletTypeID = _walletType[index].id;
-                                            _currentWalletTypeName = _walletType[index].type;
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                      ),
+                                    return SimpleItem(
+                                      color: IconList.getColor(_walletType[index].type.toLowerCase()),
+                                      child: IconList.getIcon(_walletType[index].type.toLowerCase()),
+                                      description: _walletType[index].type,
+                                      isSelected: (_currentWalletTypeID == _walletType[index].id),
+                                      onTap: (() {
+                                        setState(() {
+                                          _currentWalletTypeID = _walletType[index].id;
+                                          _currentWalletTypeName = _walletType[index].type;
+                                        });
+                                        Navigator.pop(context);
+                                      }),
                                     );
                                   },
                                 ),
                               ),
+                              const SizedBox(height: 20,),
                             ],
                           ),
                         );
@@ -344,54 +324,32 @@ class _WalletEditPageState extends State<WalletEditPage> {
                                 ),
                                 child: Center(child: Text("Currencies")),
                               ),
-                              SizedBox(height: 10,),
                               Expanded(
                                 child: ListView.builder(
                                   controller: _scrollControllerCurrency,
                                   itemCount: _currencies.length,
                                   itemBuilder: (BuildContext context, int index) {
-                                    return Container(
-                                      height: 60,
-                                      decoration: BoxDecoration(
-                                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                                    return SimpleItem(
+                                      color: accentColors[6],
+                                      child: FittedBox(
+                                        child: Text(_currencies[index].symbol.toUpperCase()),
+                                        fit: BoxFit.contain,
                                       ),
-                                      child: ListTile(
-                                        leading: Container(
-                                          height: 40,
-                                          width: 40,
-                                          padding: EdgeInsets.all(5),
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(40),
-                                            color: accentColors[6],
-                                          ),
-                                          child: FittedBox(
-                                            child: Text(_currencies[index].symbol.toUpperCase()),
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
-                                        title: Text(_currencies[index].description),
-                                        trailing: Visibility(
-                                          visible: (_currentWalletCurrencyID == _currencies[index].id),
-                                          child: Icon(
-                                            Ionicons.checkmark_circle,
-                                            size: 20,
-                                            color: accentColors[0],
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          print("Selected currencies");
-                                          setState(() {
-                                            _currentWalletCurrencyID = _currencies[index].id;
-                                            _currentWalletCurrencyDescription = _currencies[index].description;
-                                            _currentWalletCurrencySymbol = _currencies[index].symbol.toUpperCase();
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                      ),
+                                      description: _currencies[index].description,
+                                      isSelected: (_currentWalletCurrencyID == _currencies[index].id),
+                                      onTap: (() {
+                                        setState(() {
+                                          _currentWalletCurrencyID = _currencies[index].id;
+                                          _currentWalletCurrencyDescription = _currencies[index].description;
+                                          _currentWalletCurrencySymbol = _currencies[index].symbol.toUpperCase();
+                                        });
+                                        Navigator.pop(context);
+                                      }),
                                     );
                                   },
                                 ),
                               ),
+                              const SizedBox(height: 20,),
                             ],
                           ),
                         );
