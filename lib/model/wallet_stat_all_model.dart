@@ -47,7 +47,7 @@ class Datum {
     final double? expense;
 
     factory Datum.fromJson(Map<String, dynamic> json) => Datum(
-        date: DateTime.parse(json["date"]),
+        date: DateTime.parse(json["date"]).toLocal(),
         balance: (json["balance"] == null ? 0 : json["balance"]?.toDouble()),
         diff: (json["diff"] == null ? 0 : json["diff"]?.toDouble()),
         income: (json["income"] == null ? 0 : json["income"]?.toDouble()),
