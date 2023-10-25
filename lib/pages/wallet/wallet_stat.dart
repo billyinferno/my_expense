@@ -255,21 +255,21 @@ class _WalletStatPageState extends State<WalletStatPage> {
                           children: <Widget>[
                             Text(
                               dt.format(_walletStat[index].date.toLocal()),
+                              style: TextStyle(
+                                fontSize: 11,
+                              ),
                             ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                formatCurrency(
-                                  (_walletStat[index].income ?? 0) - (_walletStat[index].expense ?? 0),
-                                  false,
-                                  true,
-                                  true,
-                                  2
-                                ),
-                                style: TextStyle(
-                                  color: indicator,
-                                  fontSize: 10,
-                                ),
+                            Text(
+                              formatCurrency(
+                                (_walletStat[index].income ?? 0) - (_walletStat[index].expense ?? 0),
+                                true,
+                                true,
+                                true,
+                                2
+                              ),
+                              style: TextStyle(
+                                color: indicator,
+                                fontSize: 10,
                               ),
                             ),
                           ],
