@@ -51,7 +51,7 @@ class _TypeSlideState extends State<TypeSlide> {
     // check this key is number what on map list
     int index = 0;
     for(String key in widget.items.keys) {
-      if(key == _type) {
+      if(key.toLowerCase() == _type.toLowerCase()) {
         _currentContainerPositioned = (_width * index);
         _currentContainerColor = widget.items[key]!;
         break;

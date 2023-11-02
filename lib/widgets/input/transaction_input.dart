@@ -24,6 +24,7 @@ import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/calcbutton.dart';
+import 'package:my_expense/widgets/input/type_slide.dart';
 import 'package:my_expense/widgets/item/expand_animation.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -47,11 +48,6 @@ class _TransactionInputState extends State<TransactionInput> {
   final ScrollController _scrollControllerIncomeExpenseAccount = ScrollController();
   final ScrollController _scrollControllerTransferFromAccount = ScrollController();
   final ScrollController _scrollControllerTransferToAccount = ScrollController();
-
-  // animation variable
-  double _currentContainerPositioned = 0;
-  final _animationDuration = Duration(milliseconds: 150);
-  Color _currentContainerColor = accentColors[2]; // default to expense color
 
   // format variable
   final fCCY = new NumberFormat("0.00", "en_US");
@@ -171,8 +167,6 @@ class _TransactionInputState extends State<TransactionInput> {
           }
         }
         else {
-          _currentContainerPositioned = 100;
-          _currentContainerColor = accentColors[0];
           _currentCategoryID = widget.currentTransaction!.category!.id;
           if(_currentCategoryID <= 0) {
             if(_userMe.defaultCategoryIncome != null) {
@@ -219,8 +213,6 @@ class _TransactionInputState extends State<TransactionInput> {
         _currentWalletFromCCY = "";
       }
       if(_currentType == "transfer") {
-        _currentContainerPositioned = 200;
-        _currentContainerColor = accentColors[4];
         _currentWalletToID = (widget.currentTransaction!.walletTo!.id);
         if(_currentWalletToID > 0) {
           WalletModel _walletTo = _walletList.firstWhere((element) => (element.id == _currentWalletToID));
@@ -394,7 +386,21 @@ class _TransactionInputState extends State<TransactionInput> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 SizedBox(height: 10,),
-                                _generateTypeSlide(),
+                                TypeSlide(
+                                  type: _currentType,
+                                  editable: _isEditable,
+                                  onChange: ((selected) {
+                                    setState(() {
+                                      _currentType = selected.toLowerCase();
+                                      _getDefaultIconAndColor();
+                                    });
+                                  }),
+                                  items: <String, Color>{
+                                    "Expense": accentColors[2],
+                                    "Income": accentColors[0],
+                                    "Transfer": accentColors[4],
+                                  },
+                                ),
                                 SizedBox(height: 20,),
                                 // separate this based on the type
                                 _buildCategoryInput(),
@@ -970,120 +976,6 @@ class _TransactionInputState extends State<TransactionInput> {
         color: textColor,
       );
     }
-  }
-
-  Widget _generateTypeSlide() {
-    return Center(
-      child: Container(
-        width: 300,
-        height: 30,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: secondaryBackground,
-        ),
-        child: Stack(
-          children: <Widget>[
-            AnimatedPositioned(
-              left: _currentContainerPositioned,
-              duration: _animationDuration,
-              child: AnimatedContainer(
-                width: 100,
-                height: 30,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(30),
-                  color: _currentContainerColor,
-                ),
-                duration: _animationDuration,
-              ),
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      if(_isEditable) {
-                        setState(() {
-                          _currentContainerColor = accentColors[2];
-                          _currentContainerPositioned = 0;
-                          _currentType = "expense";
-                          _getDefaultIconAndColor();
-                        });
-                      }
-                    },
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Center(
-                        child: Text(
-                          "Expense",
-                          style: TextStyle(
-                            color: (_isEditable || _currentType == "expense" ? textColor : primaryBackground)
-                          ),
-                        ),
-                      ),
-                      height: 30,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      if(_isEditable) {
-                        setState(() {
-                          _currentContainerColor = accentColors[0];
-                          _currentContainerPositioned = 100;
-                          _currentType = "income";
-                          _getDefaultIconAndColor();
-                        });
-                      }
-                    },
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Center(
-                        child: Text(
-                          "Income",
-                          style: TextStyle(
-                              color: (_isEditable || _currentType == "income" ? textColor : primaryBackground)
-                          ),
-                        ),
-                      ),
-                      height: 30,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      if(_isEditable) {
-                        setState(() {
-                          _currentContainerColor = accentColors[4];
-                          _currentContainerPositioned = 200;
-                          _currentType = "transfer";
-                          _getDefaultIconAndColor();
-                        });
-                      }
-                    },
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Center(
-                        child: Text(
-                          "Transfer",
-                          style: TextStyle(
-                              color: (_isEditable || _currentType == "transfer" ? textColor : primaryBackground)
-                          ),
-                        ),
-                      ),
-                      height: 30,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildCategoryInput() {
