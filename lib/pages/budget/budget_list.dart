@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
@@ -12,13 +10,14 @@ import 'package:my_expense/model/currency_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/misc/decimal_formatter.dart';
+import 'package:my_expense/utils/args/budget_detail_args.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_box.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
+import 'package:my_expense/widgets/item/category_list_item.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
@@ -42,11 +41,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
   bool _isDataChanged = false;
   Map<int, CategoryModel> _expenseCategory = {};
 
-  List<TextEditingController> _budgetController = [];
   late ScrollController _scrollController;
   late ScrollController _scrollControllerAddCategory;
-  
-  int _currentEdit = -1;
 
   @override
   void initState() {
@@ -72,14 +68,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
   @override
   void dispose() {
     super.dispose();
-    
-    // dispose the budget controller
-    if(_budgetController.length > 0) {
-      for(int i = 0; i < _budgetController.length; i++) {
-        _budgetController[i].dispose();
-      }
-      _budgetController.clear();
-    }
 
     _scrollController.dispose();
     _scrollControllerAddCategory.dispose();
@@ -182,7 +170,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
           ),
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
               child: Consumer<HomeProvider>(
                 builder: ((context, homeProvider, child) {
                   return generateListItem(homeProvider.budgetAddList);
@@ -221,15 +209,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
                               children: [
                                 Expanded(
                                   child: Center(child: Text("Categories")),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    //TODO: refresh the category
-                                  },
-                                  icon: Icon(
-                                    Ionicons.refresh,
-                                    size: 20,
-                                  ),
                                 ),
                               ],
                             ),
@@ -300,32 +279,78 @@ class _BudgetListPageState extends State<BudgetListPage> {
         itemCount: budgetList.length,
         itemBuilder: (BuildContext ctx, int index) {
           BudgetModel budget = budgetList[index];
-          if(index == _currentEdit) {
-            return categoryEditItem(
-              index: index,
-              budgetId: budget.id,
-              categoryId: budget.category.id,
-              categoryIcon: IconColorList.getExpenseIcon(budget.category.name),
-              categoryColor: IconColorList.getExpenseColor(budget.category.name),
-              categoryName: budget.category.name,
-              currencyId: budget.currency.id,
-              currencySymbol: budget.currency.symbol,
-              budgetAmount: budget.amount,
-            );
-          }
-          else {
-            return categoryListItem(
-              index: index,
-              budgetId: budget.id,
-              categoryId: budget.category.id,
-              categoryIcon: IconColorList.getExpenseIcon(budget.category.name),
-              categoryColor: IconColorList.getExpenseColor(budget.category.name),
-              categoryName: budget.category.name,
-              currencyId: budget.currency.id,
-              currencySymbol: budget.currency.symbol,
-              budgetAmount: budget.amount,
-            );
-          }
+
+          // generate budget detail arguments
+          BudgetDetailArgs budgetArgs = BudgetDetailArgs(
+            budgetId: budget.id,
+            categoryId: budget.category.id,
+            categoryIcon: IconColorList.getExpenseIcon(budget.category.name),
+            categoryColor: IconColorList.getExpenseColor(budget.category.name),
+            categoryName: budget.category.name,
+            currencyId: budget.currency.id,
+            currencySymbol: budget.currency.symbol,
+            budgetAmount: budget.amount
+          );
+          
+          return CategoryListItem(
+            index: index,
+            budgetId: budget.id,
+            categoryId: budget.category.id,
+            categoryIcon: IconColorList.getExpenseIcon(budget.category.name),
+            categoryColor: IconColorList.getExpenseColor(budget.category.name),
+            categoryName: budget.category.name,
+            currencyId: budget.currency.id,
+            currencySymbol: budget.currency.symbol,
+            budgetAmount: budget.amount,
+            onDelete: (() {
+              if (!_isLoading) {
+                late Future<bool?> result = ShowMyDialog(
+                        dialogTitle: "Delete Budget",
+                        dialogText: "Do you want to delete " + budget.category.name + "?",
+                        confirmText: "Delete",
+                        confirmColor: accentColors[2],
+                        cancelText: "Cancel")
+                    .show(context);
+
+                // check the result of the dialog box
+                result.then((value) {
+                  if (value == true) {
+                    _deleteBudgetList(budget.id, budget.currency.id);
+                  }
+                });
+              }
+            }),
+            onDoubleTap: ((index) {
+              Navigator.pushNamed(context, '/budget/edit', arguments: budgetArgs).then((value) {
+                if (value != null) {
+                  double newBudgetAmount = value as double;
+                  _isDataChanged = true;
+                  List<BudgetModel> _newBudgetList = [];
+                  for(int i=0; i<_budgetList!.budgets.length; i++) {
+                    if(i == index) {
+                      // special treatment
+                      _newBudgetList.add(new BudgetModel(
+                          id: _budgetList!.budgets[i].id,
+                          category: _budgetList!.budgets[i].category,
+                          amount: newBudgetAmount,
+                          used: _budgetList!.budgets[i].used,
+                          status: "in",
+                          currency: _budgetList!.budgets[i].currency,
+                        )
+                      );
+                    }
+                    else {
+                      _newBudgetList.add(_budgetList!.budgets[i]);
+                    }
+                  }
+                  BudgetListModel _newBudgetListModel = BudgetListModel(currency: _budgetList!.currency, budgets: _newBudgetList);
+
+                  setBudgetList(_newBudgetListModel);
+                  Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(_newBudgetListModel.budgets);
+                }
+              });
+            }),
+          );
         },
       );
     }
@@ -370,244 +395,14 @@ class _BudgetListPageState extends State<BudgetListPage> {
     }
   }
 
-  void setEditIndex(int index) {
-    setState(() {
-      _currentEdit = index;
-    });
-  }
-
-  Widget categoryEditItem({required int index,
-      required int budgetId,
-      required int categoryId,
-      required Icon categoryIcon,
-      required Color categoryColor,
-      required String categoryName,
-      required int currencyId,
-      required String currencySymbol,
-      required double budgetAmount}) {
-
-    return Container(
-      margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-      padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(width: 1.0, color: primaryLight)),
-        color: Colors.transparent,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(40),
-              color: categoryColor,
-            ),
-            child: categoryIcon,
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  categoryName,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextFormField(
-                  controller: _budgetController[index],
-                  textAlign: TextAlign.right,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    hintText: "0.00",
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                    isCollapsed: true,
-                  ),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(12),
-                    DecimalTextInputFormatter(decimalRange: 2),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 10,),
-          MaterialButton(
-            height: 40,
-            minWidth: 40,
-            onPressed: (() {
-              // ensure that user input something on the text controller
-              if(_budgetController[index].text.trim().length > 0) {
-                // check if the current amount is the same or not?
-                double _newBudgetAmount = double.parse(_budgetController[index].text);
-                if(_budgetList!.budgets[index].amount != _newBudgetAmount) {
-                  // amount is not the same, we can save this data.
-                  // rebuild the budget list with the new amount being inserted on the
-                  // expense category.
-                  _isDataChanged = true;
-                  List<BudgetModel> _newBudgetList = [];
-                  for(int i=0; i<_budgetList!.budgets.length; i++) {
-                    if(i == index) {
-                      // special treatment
-                      _newBudgetList.add(new BudgetModel(
-                          id: _budgetList!.budgets[i].id,
-                          category: _budgetList!.budgets[i].category,
-                          amount: _newBudgetAmount,
-                          used: _budgetList!.budgets[i].used,
-                          status: "in",
-                          currency: _budgetList!.budgets[i].currency,
-                        )
-                      );
-
-                      // change the budget controller text to new budget amount
-                      _budgetController[index].text = fCCY.format(_newBudgetAmount);
-                    }
-                    else {
-                      _newBudgetList.add(_budgetList!.budgets[i]);
-                    }
-                  }
-                  BudgetListModel _newBudgetListModel = BudgetListModel(currency: _budgetList!.currency, budgets: _newBudgetList);
-
-                  setBudgetList(_newBudgetListModel);
-                  Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(_newBudgetListModel.budgets);
-                }
-              }
-
-              // set the current edit index as -1
-              setEditIndex(-1);
-            }),
-            color: accentColors[6],
-            child: Icon(
-              Ionicons.checkmark_outline,
-              size: 20,
-              color: textColor2,
-            ),
-          ),
-          MaterialButton(
-            height: 40,
-            minWidth: 40,
-            onPressed: (() {
-              setEditIndex(-1);
-            }),
-            color: accentColors[2],
-            child: Icon(
-              Ionicons.close_outline,
-              size: 20,
-              color: textColor2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget categoryListItem(
-      {required int index,
-      required int budgetId,
-      required int categoryId,
-      required Icon categoryIcon,
-      required Color categoryColor,
-      required String categoryName,
-      required int currencyId,
-      required String currencySymbol,
-      required double budgetAmount}) {
-    // format the amount
-    return Slidable(
-      endActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        extentRatio: 0.20,
-        children: <SlidableAction>[
-          SlidableAction(
-            label: 'Delete',
-            padding: const EdgeInsets.all(0),
-            foregroundColor: textColor,
-            backgroundColor: accentColors[2],
-            icon: Ionicons.trash,
-            onPressed: (_) {
-              if (!_isLoading) {
-              late Future<bool?> result = ShowMyDialog(
-                      dialogTitle: "Delete Budget",
-                      dialogText: "Do you want to delete " + categoryName + "?",
-                      confirmText: "Delete",
-                      confirmColor: accentColors[2],
-                      cancelText: "Cancel")
-                  .show(context);
-
-              // check the result of the dialog box
-              result.then((value) {
-                if (value == true) {
-                  _deleteBudgetList(budgetId, currencyId);
-                }
-              });
-            }
-            }
-          ),
-        ],
-      ),
-      child: GestureDetector(
-        onDoubleTap: (() {
-          setEditIndex(index);
-        }),
-        child: Container(
-          margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-          padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
-          decoration: BoxDecoration(
-            border: Border(bottom: BorderSide(width: 1.0, color: primaryLight)),
-            color: Colors.transparent,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(40),
-                  color: categoryColor,
-                ),
-                child: categoryIcon,
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Expanded(child: Text(categoryName)),
-              SizedBox(
-                width: 10,
-              ),
-              Text(currencySymbol + " " + fCCY.format(budgetAmount)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void setBudgetList(BudgetListModel budgetList) {
     setState(() {
-      // clear the budget controller
-      _budgetController.clear();
       _budgetList = budgetList;
 
       _totalAmount = 0.0;
       if (_budgetList!.budgets.length > 0) {
         _budgetList!.budgets.forEach((budget) {
           _totalAmount += budget.amount;
-          // create text editing controller for each _budgetController
-          _budgetController.add(new TextEditingController(text: fCCY.format(budget.amount)));
         });
       }
     });
