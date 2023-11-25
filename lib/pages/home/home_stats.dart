@@ -391,7 +391,7 @@ class _HomeStatsState extends State<HomeStats> {
           SizedBox(height: 10,),
           Container(
             decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: secondaryLight, width: 1.0)),
+              border: Border(top: BorderSide(color: secondaryBackground, width: 1.0)),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,7 +401,7 @@ class _HomeStatsState extends State<HomeStats> {
                   child: Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      border: Border(right: BorderSide(color: secondaryLight, width: 0.5)),
+                      border: Border(right: BorderSide(color: secondaryBackground, width: 0.5)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
