@@ -431,7 +431,6 @@ class _TransactionInputState extends State<TransactionInput> {
       _lastFound.clear();
 
       // check what is the current type so we know which data we need to look for
-      //debugPrint(_currentType);
       if(_currentType == "expense") {
         // look at expense
         _lastExpense.forEach((element) {
@@ -1067,14 +1066,12 @@ class _TransactionInputState extends State<TransactionInput> {
                     _filterAutoComplete(lookup);
                   }),
                   onTap: (() {
-                    //debugPrint("tap on the name");
                     _filterAutoComplete(_nameController.text);
                   }),
                   onFieldSubmitted: ((value) {
                     // ensure that the value got some length, before we focus
                     // on the amount controller
                     if(value.trim().length > 0) {
-                      //debugPrint("Enter pressed");
                       // focus directly to the amount
                       FocusScope.of(context).requestFocus(_amountFocus);
                     }

@@ -133,7 +133,6 @@ class _HomeListState extends State<HomeList> {
 
     _date.then((_newDate) {
       if(_newDate != null) {
-        //debugPrint(_newDate.toString());
         setFocusedDay(DateTime(_newDate.toLocal().year, _newDate.toLocal().month, _newDate.toLocal().day));
         _refreshTransaction(_currentFocusedDay);
       }
@@ -490,7 +489,6 @@ class _HomeListState extends State<HomeList> {
       // ensure that the selectedDate and the refreshDay is the same
       if(isSameDay(_currentFocusedDay, refreshDay)) {
         Provider.of<HomeProvider>(context, listen: false).setTransactionList(value);
-        //debugPrint("Now provider length is : " + Provider.of<HomeProvider>(context, listen: false).transactionList.length.toString());
       }
       setLoading(false);
     }).onError((error, stackTrace) {
@@ -505,7 +503,6 @@ class _HomeListState extends State<HomeList> {
     showLoaderDialog(context);
 
     await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) {
-      //debugPrint(txnDeleted.toJson().toString());
       updateInformation(txnDeleted);
     }).onError((error, stackTrace) {
       debugPrint("Error when delete");
@@ -516,8 +513,6 @@ class _HomeListState extends State<HomeList> {
   }
 
   Future<void> updateInformation(TransactionListModel txnInfo) async {
-    //debugPrint("Updating Information");
-
     _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
     DateTime _from = DateTime(DateTime.now().year, DateTime.now().month, 1);
     DateTime _to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(Duration(days: 1));

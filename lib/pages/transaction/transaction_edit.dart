@@ -63,8 +63,6 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     await _transactionHttp.updateTransaction(context, _txn, paramsData).then((txnUpdate) {
       // update necessary information after we add the transaction
       updateInformation(txnUpdate).then((_) {
-        //debugPrint("Success got the updated information");
-
         // this is success, so we can pop the loader
         Navigator.pop(context);
 

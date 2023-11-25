@@ -12,7 +12,6 @@ class PieChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Offset center = Offset(size.width / 2, size.height / 2);
     double radius = min(size.width / 2, size.height / 2);
-    //debugPrint("Radius are ${radius.toString()}");
 
     Paint paint = Paint()
       ..style = PaintingStyle.fill
@@ -24,8 +23,6 @@ class PieChartPainter extends CustomPainter {
     chartAmount.forEach((amt) { totalAmount += amt; });
 
     for(int index = 0; index < chartAmount.length; index++) {
-      //debugPrint("Color index ${(index % chartAmount.length).toString()}");
-
       // for color we need to see, which one is bigger?
       // if we have less color compare to the amount, then we can use same color
       // for 2 amount.

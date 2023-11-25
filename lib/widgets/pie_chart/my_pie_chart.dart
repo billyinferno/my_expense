@@ -12,7 +12,6 @@ class PieChartView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: LayoutBuilder(builder: (context, constraint) {
-        //debugPrint("Size are ${constraint.maxHeight.toString()}, ${constraint.maxWidth.toString()}");
         return Container(
           color: backgroundColor,
           child: FittedBox(

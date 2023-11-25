@@ -63,8 +63,6 @@ class _RouterPageState extends State<RouterPage> {
         ),
         initialRoute: '/',
         onGenerateRoute: (RouteSettings settings) {
-          //debugPrint("Route to ${settings.name}");
-
           // perform validation whether user already login or not when user
           // want to directly access a page from the web browser URL.
           String _routeName = (settings.name ?? '/');
@@ -76,7 +74,6 @@ class _RouterPageState extends State<RouterPage> {
             case '/login':
             case '/':
               {
-                //debugPrint(_routeName);
                 return MaterialPageRoute(builder: (context) => new LoginPage());
               }
             case '/home':

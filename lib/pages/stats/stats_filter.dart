@@ -378,7 +378,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                   setState(() {
                      _currentFromDate = DateTime(_currentToDate.toLocal().year, value+1, 1);
                     _currentToDate = DateTime(_currentToDate.toLocal().year, value+2, 1).subtract(Duration(days: 1));
-                    //debugPrint(_currentToDate.toString());
                   });
                 },
                 children: List.generate(12, ((index) {
@@ -406,7 +405,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                   setState(() {
                     _currentFromDate = DateTime((_maxDate.toLocal().year-value), _currentToDate.toLocal().month, 1);
                     _currentToDate = DateTime((_maxDate.toLocal().year-value), (_currentToDate.toLocal().month+1), 1).subtract(Duration(days: 1));
-                    //debugPrint(_currentToDate.toString());
                   });
                 },
                 children: List.generate(((_maxDate.toLocal().year - _minDate.toLocal().year) + 1), ((index) {
@@ -437,7 +435,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             setState(() {
               _currentFromDate = DateTime((_maxDate.toLocal().year-value), 1, 1);
               _currentToDate = DateTime((_maxDate.toLocal().year-value)+1, 1, 1).subtract(Duration(days: 1));
-              //debugPrint(_currentToDate.toString());
             });
           },
           children: List.generate(((_maxDate.toLocal().year - _minDate.toLocal().year) + 1), ((index) {
@@ -482,7 +479,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                     setState(() {
                       _currentFromDate = value;
                     });
-                    //debugPrint(_currentToDate.toString());
                   },
                   initialDateTime: _currentFromDate.toLocal(),
                   maximumDate: _maxDate.toLocal(),
@@ -517,7 +513,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                     setState(() {
                       _currentToDate = value;
                     });
-                    //debugPrint(_currentToDate.toString());
                   },
                   initialDateTime: _currentToDate.toLocal(),
                   maximumDate: _maxDate.toLocal(),
@@ -581,7 +576,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                       setState(() {
                         _currentCurrencies = _currencies[index];
                         _filterWalletList();
-                        //debugPrint("Fetch the statistic for this");
                       });
                       Navigator.pop(context);
                     }),

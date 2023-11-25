@@ -77,7 +77,6 @@ class _HomeStatsState extends State<HomeStats> {
           color: (_currencies.length <= 0 ? secondaryDark : textColor),
         ),
         onActionPress: () {
-          //debugPrint("Go to filter stats");
           if (_currencies.length > 0) {
             // navigate to stats filter
             Navigator.pushNamed(context, '/stats/filter');

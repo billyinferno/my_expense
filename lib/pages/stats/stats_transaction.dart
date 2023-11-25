@@ -205,9 +205,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
       _args.walletId,
       _args.fromDate,
       _args.toDate,
-      ).then((result) {
-      //result.forEach((element) {debugPrint(element.toJson().toString());});
-      //debugPrint(_args.fromDate.toString());
+    ).then((result) {
       setTransactions(result);
       setLoading(false);
     }).onError((error, stackTrace) {

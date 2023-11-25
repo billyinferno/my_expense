@@ -15,7 +15,6 @@ class Wallet extends StatelessWidget {
     
     return GestureDetector(
       onTap: () {
-        //debugPrint("Opening the wallet list of transaction page");
         Navigator.pushNamed(context, '/wallet/transaction', arguments: wallet);
       },
       child: Container(

@@ -58,7 +58,6 @@ class ShowMyDialog {
                 ),
                 isDefaultAction: true,
                 onPressed: () {
-                  //debugPrint("Confirmed");
                   Navigator.pop(context, true);
                 },
               ),
@@ -71,7 +70,6 @@ class ShowMyDialog {
                   ),
                 ),
                 onPressed: () {
-                  //debugPrint("Cancelled");
                   Navigator.pop(context, false);
                 },
               ),
