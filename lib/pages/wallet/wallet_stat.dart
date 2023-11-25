@@ -319,9 +319,6 @@ class _WalletStatPageState extends State<WalletStatPage> {
       walletListIncome[dt2.format(data.date)] = (data.income ?? 0);
       walletListExpense[dt2.format(data.date)] = (data.expense ?? 0);
       
-      total += (data.income ?? 0) - (data.expense ?? 0);
-      walletListTotal[dt2.format(data.date)] = total;
-      
       _totalIncome += data.income!;
       _totalExpense += data.expense!;
 
@@ -338,6 +335,12 @@ class _WalletStatPageState extends State<WalletStatPage> {
       if (data.expense! > _maxAmount) {
         _maxAmount = data.expense!;
       }
+    });
+
+    // loop thru _walletDataRange again to calculate the total
+    _walletDateRange.forEach((key, value) {
+      total += walletListIncome[dt2.format(key)]! - walletListExpense[dt2.format(key)]!;
+      walletListTotal[dt2.format(key)] = total;
     });
 
     _dateOffset = walletListTotal.length ~/ 8;
