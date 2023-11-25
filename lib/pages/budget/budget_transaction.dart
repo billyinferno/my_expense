@@ -214,8 +214,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
 
   Widget _createItem({required String itemName, required DateTime itemDate, required String itemSymbol, required double itemAmount}) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-      height: 50,
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
       ),
