@@ -511,7 +511,6 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       _lastDate = DateTime.parse("${_budgetStat.yearly[_budgetStat.yearly.length-1].date}-12-01");
       _yearlyDateRange.clear();
       while (_lastDate.isBefore(_nextDate)) {
-        debugPrint("Last date : ${DateFormat("yyyy").format(_lastDate)}");
         _yearlyDateRange[DateFormat("yyyy").format(_lastDate)] = 0;
         _lastDate = DateTime(_lastDate.year + 1, 12, 1);
       }
