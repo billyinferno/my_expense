@@ -106,7 +106,7 @@ class MultiLineChartPainter extends CustomPainter {
 
     Rect graphRect = Rect.fromLTRB(10, 10, size.width - 10, size.height - 30);
     double xLeft = graphRect.left;
-    double guideW = graphRect.size.width / point.length;
+    double guideW = graphRect.size.width / (point.length - 1);
 
     // check for the date print offset
     int datePrintOffset = (dateOffset ?? 3);
@@ -118,7 +118,7 @@ class MultiLineChartPainter extends CustomPainter {
       Offset p1 = Offset(xLeft, graphRect.bottom);
       Offset p2 = Offset(xLeft, graphRect.top);
 
-      if (i % datePrintOffset == 0 && i > 0) {
+      if (i % datePrintOffset == 0 && i > 0 && i < (point.length - 1)) {
         canvas.drawLine(p1, p2, graphRectBorderWhite);
         _drawText(
             canvas: canvas,

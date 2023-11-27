@@ -8,7 +8,10 @@ class MultiLineChart extends StatelessWidget {
   final List<Color> color;
   final List<String>? legend;
   final int? dateOffset;
-  const MultiLineChart({Key? key, this.height, required this.data, required this.color, this.legend, this.dateOffset}) : super(key: key);
+  final double? min;
+  final double? max;
+  final bool? addBottomPadd;
+  const MultiLineChart({Key? key, this.height, required this.data, required this.color, this.legend, this.dateOffset, this.min, this.max, this.addBottomPadd}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +53,10 @@ class MultiLineChart extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10,),
+        Visibility(
+          visible: (this.addBottomPadd ?? true),
+          child: const SizedBox(height: 10,)
+        ),
       ],
     );
   }
@@ -98,6 +104,21 @@ class MultiLineChart extends StatelessWidget {
           min = value;
         }
       });
+    }
+
+    // check if we need to override min and max?
+    if (this.min != null) {
+      // check and ensure this min is lesser than current min
+      if (this.min! < min) {
+        min = this.min!;
+      }
+    }
+
+    if (this.max != null) {
+      // check and ensure this max is bigger than current max
+      if (this.max! > max) {
+        max = this.max!;
+      }
     }
 
     // add min and max
