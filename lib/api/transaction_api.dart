@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:my_expense/model/budget_stat_model.dart';
 import 'package:my_expense/model/income_expense_category_model.dart';
 import 'package:my_expense/model/income_expense_model.dart';
 import 'package:my_expense/model/last_transaction_model.dart';
@@ -295,6 +296,30 @@ class TransactionHTTPService {
       }
 
       print("Got error <fetchTransactionBudget>");
+      throw Exception("res=" + response.body);
+    } else {
+      throw Exception(
+          'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
+    }
+  }
+
+  Future<BudgetStatModel> fetchTransactionBudgetStat(int categoryId, int currencyId) async {
+    _checkJWT();
+    
+    // check if we got JWT token or not?
+    if (_bearerToken.length > 0) {
+      final response = await http.get(
+          Uri.parse(Globals.apiURL + 'transactions/budget/stat/$categoryId/currency/$currencyId'),
+          headers: {
+            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          });
+
+      if (response.statusCode == 200) {
+        BudgetStatModel _budgetStatModel = BudgetStatModel.fromJson(jsonDecode(response.body));
+        return _budgetStatModel;
+      }
+
+      print("Got error <fetchTransactionBudgetStat>");
       throw Exception("res=" + response.body);
     } else {
       throw Exception(

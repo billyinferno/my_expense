@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_expense/pages/budget/budget_edit.dart';
 import 'package:my_expense/pages/budget/budget_list.dart';
+import 'package:my_expense/pages/budget/budget_stat.dart';
 import 'package:my_expense/pages/budget/budget_transaction.dart';
 import 'package:my_expense/pages/home.dart';
 import 'package:my_expense/pages/login.dart';
@@ -111,6 +112,10 @@ class _RouterPageState extends State<RouterPage> {
             case '/budget/edit':
               {
                 return createAnimationRoute(new BudgetEditPage(args: settings.arguments,));
+              }
+            case '/budget/stat':
+              {
+                return createAnimationRoute(new BudgetStatPage(arguments: settings.arguments,));
               }
             case '/wallet/add':
               {

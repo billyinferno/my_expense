@@ -4,11 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/args/budget_transaction_args.dart';
 import 'package:my_expense/utils/misc/wallet_transaction_class_helper.dart';
 import 'package:my_expense/widgets/chart/budget_bar.dart';
+import 'package:my_expense/widgets/item/budget_transaction_item.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BudgetTransactionPage extends StatefulWidget {
@@ -48,7 +48,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     _selectedDate = _args.selectedDate;
     _categoryId = _args.categoryid;
     _categoryName = _args.categoryName;
-    _categorySymbol = _args.categorySymbol;
+    _categorySymbol = _args.currencySymbol;
     _budgetUsed = _args.budgetUsed;
     _budgetAmount = _args.budgetAmount;
     _currencyId = _args.currencyId;
@@ -164,7 +164,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
             child: RefreshIndicator(
               color: accentColors[6],
               onRefresh: (() async {
-                setLoading(true);
+                _setLoading(true);
                 await _fetchBudget(true);
               }),
               child: ListView.builder(
@@ -195,11 +195,12 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                   }
                   else {
                     TransactionListModel currTxn = _list[index].data as TransactionListModel;
-                    return _createItem(
+                    return BudgetTransactionItem(
                       itemName: currTxn.name,
                       itemDate: currTxn.date,
                       itemSymbol: currTxn.wallet.symbol,
                       itemAmount: currTxn.amount,
+                      categoryName: _categoryName,
                     );
                   }
                 },
@@ -210,57 +211,6 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
         ],
       );
     }
-  }
-
-  Widget _createItem({required String itemName, required DateTime itemDate, required String itemSymbol, required double itemAmount}) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(40),
-              color: IconColorList.getExpenseColor(_categoryName),
-            ),
-            child: IconColorList.getExpenseIcon(_categoryName),
-          ),
-          SizedBox(width: 10,),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  itemName
-                ),
-                Text(
-                  DateFormat('E, dd MMM yyyy').format(itemDate.toLocal()),
-                  style: TextStyle(
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 10,),
-          Text(
-            itemSymbol + " " + fCCY.format(itemAmount),
-            style: TextStyle(
-              color: textColor2,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> setTransactions(List<TransactionListModel> transactions) async {
@@ -334,7 +284,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     });
   }
 
-  void setLoading(bool isLoading) {
+  void _setLoading(bool isLoading) {
     setState(() {
       _isLoading = isLoading;
     });
@@ -348,14 +298,14 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
       await setTransactions(value.reversed.toList());
       _transactions = value.reversed.toList();
 
-      setLoading(false);
+      _setLoading(false);
     }).onError((error, stackTrace) {
       debugPrint("Error when _fetchBudget");
       debugPrint(error.toString());
 
       // assume there are no data
       setTransactions([]);
-      setLoading(false);
+      _setLoading(false);
     });
   }
 }

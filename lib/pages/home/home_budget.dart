@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
@@ -337,7 +338,6 @@ class _HomeBudgetState extends State<HomeBudget> {
                   child: RefreshIndicator(
                     color: accentColors[6],
                     onRefresh: () async {
-                      //debugPrint("Refresh the budget forcefully");
                       _fetchBudget(true, true);
                     },
                     child: ListView.builder(
@@ -346,6 +346,17 @@ class _HomeBudgetState extends State<HomeBudget> {
                       itemCount: _budgetList.length + 1,
                       itemBuilder: ((BuildContext context, int index) {
                         if (index < _budgetList.length) {
+                          // create budget transaction arguments that can be passed to other pages
+                          BudgetTransactionArgs _args = BudgetTransactionArgs(
+                            categoryid: _budgetList[index].category.id,
+                            categoryName: _budgetList[index].category.name,
+                            currencySymbol: _budgetList[index].currency.symbol,
+                            budgetAmount: _budgetList[index].amount,
+                            budgetUsed: _budgetList[index].used,
+                            selectedDate: _selectedDate,
+                            currencyId: _currentCurrencies!.id,
+                          );
+
                           // check whether we will show not in budget or not?
                           if (!_showNotInBudget) {
                             // check current budget, whether this is in or out
@@ -355,31 +366,39 @@ class _HomeBudgetState extends State<HomeBudget> {
                             }
                           }
 
-                          return GestureDetector(
-                            onTap: (() {
-                              //debugPrint("Showed the list of this transaction category " + _budgetList[index].category.id.toString() + " for this date " + selectedDate.toString());
-                              BudgetTransactionArgs _args = BudgetTransactionArgs(
-                                categoryid: _budgetList[index].category.id,
-                                categoryName: _budgetList[index].category.name,
-                                categorySymbol: _budgetList[index].currency.symbol,
-                                budgetAmount: _budgetList[index].amount,
-                                budgetUsed: _budgetList[index].used,
-                                selectedDate: _selectedDate,
-                                currencyId: _currentCurrencies!.id,
-                              );
-                              Navigator.pushNamed(context, '/budget/transaction', arguments: _args);
-                            }),
-                            child: Container(
-                              color: Colors.transparent,
-                              padding: EdgeInsets.all(10),
-                              child: BudgetBar(
-                                icon: IconColorList.getExpenseIcon(_budgetList[index].category.name),
-                                iconColor: IconColorList.getExpenseColor(_budgetList[index].category.name),
-                                title: _budgetList[index].category.name,
-                                symbol: _budgetList[index].currency.symbol,
-                                budgetUsed: _budgetList[index].used,
-                                budgetTotal: _budgetList[index].amount,
-                                type: _budgetList[index].status,
+                          return Slidable(
+                            endActionPane: ActionPane(
+                              motion: const DrawerMotion(),
+                              extentRatio: 0.2,
+                              children: <SlidableAction>[
+                                SlidableAction(
+                                  label: 'Stat',
+                                  padding: const EdgeInsets.all(0),
+                                  foregroundColor: accentColors[3],
+                                  backgroundColor: primaryBackground,
+                                  icon: Ionicons.bar_chart,
+                                  onPressed: ((_) {
+                                    Navigator.pushNamed(context, '/budget/stat', arguments: _args);
+                                  })
+                                ),
+                              ],
+                            ),
+                            child: GestureDetector(
+                              onTap: (() {
+                                Navigator.pushNamed(context, '/budget/transaction', arguments: _args);
+                              }),
+                              child: Container(
+                                color: Colors.transparent,
+                                padding: EdgeInsets.all(10),
+                                child: BudgetBar(
+                                  icon: IconColorList.getExpenseIcon(_budgetList[index].category.name),
+                                  iconColor: IconColorList.getExpenseColor(_budgetList[index].category.name),
+                                  title: _budgetList[index].category.name,
+                                  symbol: _budgetList[index].currency.symbol,
+                                  budgetUsed: _budgetList[index].used,
+                                  budgetTotal: _budgetList[index].amount,
+                                  type: _budgetList[index].status,
+                                ),
                               ),
                             ),
                           );
