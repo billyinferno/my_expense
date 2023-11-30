@@ -10,6 +10,7 @@ import 'package:my_expense/model/last_transaction_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/model/transaction_model.dart';
 import 'package:my_expense/model/transaction_stats_detail_model.dart';
+import 'package:my_expense/model/transaction_wallet_minmax_date_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -529,6 +530,32 @@ class TransactionHTTPService {
       }
 
       print("Got error <fetchMinMaxDate>");
+      throw Exception("res=" + response.body);
+    } else {
+      throw Exception(
+          'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
+    }
+  }
+
+  Future<TransactionWalletMinMaxDateModel> fetchWalletMinMaxDate(int walletId) async {
+    _checkJWT();
+    
+    // check if we got JWT token or not?
+    if (_bearerToken.length > 0) {
+      final response = await http.get(
+          Uri.parse(Globals.apiURL + 'transactions/minmax/wallet/$walletId'),
+          headers: {
+            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          });
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> _jsonData = jsonDecode(response.body);
+        // convert json to get the min and max date
+        TransactionWalletMinMaxDateModel _ret = TransactionWalletMinMaxDateModel.fromJson(_jsonData);
+        return _ret;
+      }
+
+      print("Got error <fetchWalletMinMaxDate>");
       throw Exception("res=" + response.body);
     } else {
       throw Exception(
