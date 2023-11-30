@@ -4,13 +4,14 @@ import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
+import 'package:my_expense/model/transaction_wallet_minmax_date_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/color_utils.dart';
 import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/wallet_transaction_class_helper.dart';
+import 'package:my_expense/widgets/item/card_face_item.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class WalletTransactionPage extends StatefulWidget {
@@ -30,8 +31,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
   late ScrollController _scrollController;
   late WalletModel _wallet;
+  late TransactionWalletMinMaxDateModel _walletMinMaxDate;
 
-  bool _isLoading = true;
   DateTime _currentDate = DateTime.now();
   double _expenseAmount = 0.0;
   double _incomeAmount = 0.0;
@@ -39,6 +40,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   List<WalletTransactionList> _list = [];
   bool _sortAscending = true;
   List<TransactionListModel> _transactions = [];
+  late Future<bool> _getData;
 
   @override
   void initState() {
@@ -48,7 +50,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     _wallet = widget.wallet as WalletModel;
 
     // fetch the transaction
-    _fetchTransactionWallet(_currentDate);
+    _getData = _fetchInitData();
 
     // set the scroll controller
     _scrollController = ScrollController();
@@ -114,14 +116,54 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           ),
         ],
       ),
-      body: _generateBody(),
+      body: FutureBuilder(
+        future: _getData,
+        builder: (context, snapshopt) {
+          if (snapshopt.hasData) {
+            return _generateTransactionList();
+          }
+          else if (snapshopt.hasError) {
+            return Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Error When Fetching Wallet Data",
+                    style: TextStyle(
+                      color: accentColors[2],
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ); 
+          }
+          else {
+            return Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SpinKitFadingCube(
+                    color: accentColors[6],
+                    size: 25,
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "loading...",
+                    style: TextStyle(
+                      color: textColor2,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+        },
+      ),
     );
-  }
-
-  void setLoading(bool isLoading) {
-    setState(() {
-      _isLoading = isLoading;
-    });
   }
 
   Future<void> setTransactions(List<TransactionListModel> transactions) async {
@@ -229,40 +271,20 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       await setTransactions(_txns);
       _transactions = _txns.toList();
 
-      setLoading(false);
     }).onError((error, stackTrace) {
       debugPrint("Error when <_fetchTransactionWallet>");
       debugPrint(error.toString());
     });
   }
 
-  Widget _generateBody() {
-    if(_isLoading) {
-      return Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SpinKitFadingCube(
-              color: accentColors[6],
-              size: 25,
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "loading...",
-              style: TextStyle(
-                color: textColor2,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    else {
-      return _generateTransactionList();
-    }
+  Future<void> _fetchWalletMinMaxDate() async {
+    await _transactionHttp.fetchWalletMinMaxDate(_wallet.id).then((walletTxnDate) async {
+      _walletMinMaxDate = walletTxnDate;
+
+    }).onError((error, stackTrace) {
+      debugPrint("Error when <_fetchWalletMinMaxDate>");
+      debugPrint(error.toString());
+    });
   }
 
   Widget _generateTransactionList() {
@@ -271,71 +293,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         SizedBox(height: 10,),
-        Center(
-          child: Container(
-            height: 150,
-            width: 250,
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              gradient: LinearGradient(
-                  colors: <Color>[
-                    (_wallet.enabled ? IconList.getColor(_wallet.walletType.type) : secondaryDark),
-                    (_wallet.enabled ? lighten(IconList.getDarkColor(_wallet.walletType.type),0.1) : secondaryBackground),
-                  ]
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        height: 30,
-                        width: 30,
-                        child: IconList.getIcon(_wallet.walletType.type),
-                      ),
-                      SizedBox(width: 10,),
-                      Container(
-                        child:Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            Text(_wallet.name),
-                            Text(
-                              _wallet.walletType.type,
-                              style: TextStyle(
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(child: Container(
-                  color: Colors.transparent,
-                )),
-                Container(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      _wallet.currency.symbol + " " + fCCY.format(_wallet.startBalance + _wallet.changeBalance),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+        CardFace(
+          wallet: _wallet,
+          minMaxDate: _walletMinMaxDate,
         ),
         SizedBox(height: 10,),
         Container(
@@ -624,5 +584,14 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     setState(() {
       _currentDate = newDate;
     });
+  }
+
+  Future<bool> _fetchInitData() async {
+    await Future.wait([
+      _fetchTransactionWallet(_currentDate),
+      _fetchWalletMinMaxDate(),
+    ]);
+
+    return true;
   }
 }
