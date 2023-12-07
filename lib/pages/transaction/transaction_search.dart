@@ -22,7 +22,6 @@ class TransactionSearchPage extends StatefulWidget {
   _TransactionSearchPageState createState() => _TransactionSearchPageState();
 }
 
-
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final fCCY = new NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService transactionHttp = TransactionHTTPService();
@@ -67,7 +66,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   ScrollController _scrollControllerIncome = ScrollController();
   ScrollController _scrollControllerExpense = ScrollController();
   ScrollController _scrollControllerTransfer = ScrollController();
-
 
   @override
   void initState() {
