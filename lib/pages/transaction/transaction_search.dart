@@ -31,7 +31,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   String _type = "name";
   int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
   int _start = 0; // start from 0 page
-  int _sliding = 0;
   
   int _resultPage = 1;
   PageName _resultPageName = PageName.all;
