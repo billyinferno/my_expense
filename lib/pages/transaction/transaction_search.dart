@@ -125,42 +125,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Center(
-                  child: CupertinoSlidingSegmentedControl(
-                    onValueChanged: (int? value) {
-                      setState(() {
-                        _sliding = value!;
-                        switch(_sliding) {
-                          case 0: _type = "name"; break;
-                          case 1: _type = "category"; break;
-                          case 2: _type = "both"; break;
-                        }
-                      });
-                    },
-                    groupValue: _sliding,
-                    children: {
-                      0: Text(
-                        "Name",
-                        style: TextStyle(
-                          fontFamily: '--apple-system'
-                        ),
-                      ),
-                      1: Text(
-                        "Category",
-                        style: TextStyle(
-                          fontFamily: '--apple-system'
-                        ),
-                      ),
-                      2: Text(
-                        "Both",
-                        style: TextStyle(
-                          fontFamily: '--apple-system'
-                        ),
-                      ),
-                    },
-                  ),
-                ),
-                SizedBox(height: 10,),
                 _showSearchOrSelectionWidget(),
               ],
             ),
@@ -890,53 +854,74 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   Future <void> _findTransaction(String searchText, String categoryId, String type, int limit, int start) async {
     await transactionHttp.findTransaction(type, searchText, categoryId, limit, start).then((results) {
       setTransactions(results, limit, start);
-    // }).onError((error, stackTrace) {
-    //   debugPrint("error on <_findTransaction>");
-    //   debugPrint(error.toString());
-    //   throw new Exception("Error when searching transaction");
     });
   }
 
   Future <void> _submitSearch() async {
-    // generate the _categoryId based on the list of the category selected
+    // 1 will be text search only
+    // 2 will be category search only
+    // 3 will be both
+    int determineType = 0;
+
+    // default the category id value as empty string
     _categoryId = '';
-    _categorySelected.forEach((key, value) {
-      // if not the first one, then add ,
-      if (_categoryId.isNotEmpty) {
-        _categoryId = _categoryId + ',';
-      }
-      _categoryId = _categoryId + key.toString();
-    });
+    
+    // check if category selected is empty or not?
+    if (_categorySelected.isNotEmpty) {
+      // category selected not empty
+      determineType += 2;
 
-    // now check if this is name, category, or both
-    // all will have different kind of checking
-    if (_type == "name" || _type == "both") {
-      if (_searchController.text.isNotEmpty) {
-        // set the search text as current search controller text
-        _searchText = _searchController.text;
-        _searchText = _searchText.trim();
-
-        // ensure the searchText is more than 3
-        if (_searchText.length < 3) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            createSnackBar(
-              message: "Minimum text search is 3 character",
-            )
-          );
-          return;
+      // generate the _categoryId based on the list of the category selected
+      _categorySelected.forEach((key, value) {
+        // if not the first one, then add ,
+        if (_categoryId.isNotEmpty) {
+          _categoryId = _categoryId + ',';
         }
-      }
+        _categoryId = _categoryId + key.toString();
+      });
     }
 
-    if (_type == "category" || _type == "both") {
-      if (_categoryId.isEmpty) {
+    // check if the text is empty or not?
+    if (_searchController.text.trim().isNotEmpty) {
+      // not empty, add 1 to the determine type
+      determineType += 1;
+      
+      // set the search text as current search controller text
+      _searchText = _searchController.text;
+      _searchText = _searchText.trim();
+
+      // ensure the searchText is more than 3
+      if (_searchText.length < 3) {
         ScaffoldMessenger.of(context).showSnackBar(
           createSnackBar(
-            message: "Please select category",
+            message: "Minimum text search is 3 character",
           )
         );
         return;
       }
+    }
+
+    // ensure that we already determine the type when reaching here
+    if (determineType == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        createSnackBar(
+          message: "Add text or category before searching.",
+        )
+      );
+      return;
+    }
+
+    // now determine the _type
+    switch(determineType) {
+      case 1:
+        _type = "name";
+        break;
+      case 2:
+        _type = "category";
+        break;
+      case 3:
+        _type = "both";
+        break;
     }
 
     // show the loader dialog
@@ -950,17 +935,17 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // try to find the transaction
     await _findTransaction(_searchText, _categoryId, _type, _limit, _start).then((_) {
       Navigator.pop(context);
-    // }).onError((error, stackTrace) {
-    //   debugPrint("Error: ${error.toString()}");
-    //   debugPrintStack(stackTrace: stackTrace);
+    }).onError((error, stackTrace) {
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stackTrace);
 
-    //   Navigator.pop(context);
-    //   // showed error message
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     createSnackBar(
-    //       message: "Error when searching transaction",
-    //     )
-    //   );
+      Navigator.pop(context);
+      // showed error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        createSnackBar(
+          message: "Error when searching transaction",
+        )
+      );
     });
   }
   
@@ -969,189 +954,183 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        (
-          (_sliding == 0 || _sliding == 2) ?
-          CupertinoSearchTextField(
-            controller: _searchController,
-            style: TextStyle(
-              color: textColor2,
-              fontFamily: '--apple-system'
-            ),
-            suffixIcon: Icon(Ionicons.arrow_forward_circle),
-            onSubmitted: ((_) async {
-              await _submitSearch().then((_) {
-                // remove the focus from the text
-                FocusScopeNode _currentFocus = FocusScope.of(context);
-                if(!_currentFocus.hasPrimaryFocus) {
-                  _currentFocus.unfocus();
-                }
-              });
-            }),
-            onSuffixTap: (() async {
-              _submitSearch().then((_) {
-                // remove the focus from the text
-                FocusScopeNode _currentFocus = FocusScope.of(context);
-                if(!_currentFocus.hasPrimaryFocus) {
-                  _currentFocus.unfocus();
-                }
-              });
-            }),
-          ) : const SizedBox.shrink()
+        CupertinoSearchTextField(
+          controller: _searchController,
+          style: TextStyle(
+            color: textColor2,
+            fontFamily: '--apple-system'
+          ),
+          suffixIcon: Icon(Ionicons.arrow_forward_circle),
+          onSubmitted: ((_) async {
+            await _submitSearch().then((_) {
+              // remove the focus from the text
+              FocusScopeNode _currentFocus = FocusScope.of(context);
+              if(!_currentFocus.hasPrimaryFocus) {
+                _currentFocus.unfocus();
+              }
+            });
+          }),
+          onSuffixTap: (() async {
+            _submitSearch().then((_) {
+              // remove the focus from the text
+              FocusScopeNode _currentFocus = FocusScope.of(context);
+              if(!_currentFocus.hasPrimaryFocus) {
+                _currentFocus.unfocus();
+              }
+            });
+          }),
         ),
-        (_sliding == 2 ? const SizedBox(height: 10,) : const SizedBox.shrink()),
-        (
-          (_sliding == 1 || _sliding == 2) ?
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: InkWell(
-                      onTap: (() {
-                        _showCategorySelectionDialog();
-                      }),
-                      child: Container(
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: primaryDark,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10),
+        const SizedBox(height: 10,),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: InkWell(
+                    onTap: (() {
+                      _showCategorySelectionDialog();
+                    }),
+                    child: Container(
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: primaryDark,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          bottomLeft: Radius.circular(10),
+                        ),
+                        border: Border.all(
+                          color: secondaryBackground,
+                          style: BorderStyle.solid,
+                          width: 1.0,
+                        )
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          const SizedBox(width: 10,),
+                          Icon(
+                            Ionicons.add,
+                            size: 20,
+                            color: textColor,
                           ),
-                          border: Border.all(
-                            color: secondaryBackground,
-                            style: BorderStyle.solid,
-                            width: 1.0,
-                          )
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            const SizedBox(width: 10,),
-                            Icon(
-                              Ionicons.add,
-                              size: 20,
-                              color: textColor,
+                          const SizedBox(width: 10,),
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                "Add",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold
+                                ),
+                              )
                             ),
-                            const SizedBox(width: 10,),
-                            Expanded(
-                              child: Center(
-                                child: Text(
-                                  "Add",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold
-                                  ),
-                                )
-                              ),
-                            )
-                          ],
-                        ),
+                          )
+                        ],
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: (() {
-                        setState(() {                      
-                          _categorySelected.clear();
-                        });
-                      }),
-                      child: Container(
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: primaryDark,
-                          border: Border.all(
-                            color: secondaryBackground,
-                            style: BorderStyle.solid,
-                            width: 1.0,
-                          )
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            const SizedBox(width: 10,),
-                            Icon(
-                              Ionicons.trash,
-                              size: 20,
-                              color: textColor,
-                            ),
-                            const SizedBox(width: 10,),
-                            Expanded(
-                              child: Center(
-                                child: Text(
-                                  "Clear",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold
-                                  ),
-                                )
-                              ),
-                            )
-                          ],
-                        ),
+                ),
+                Expanded(
+                  child: InkWell(
+                    onTap: (() {
+                      setState(() {                      
+                        _categorySelected.clear();
+                      });
+                    }),
+                    child: Container(
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: primaryDark,
+                        border: Border.all(
+                          color: secondaryBackground,
+                          style: BorderStyle.solid,
+                          width: 1.0,
+                        )
                       ),
-                    ),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: (() async {
-                        await _submitSearch();
-                      }),
-                      child: Container(
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: primaryDark,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          const SizedBox(width: 10,),
+                          Icon(
+                            Ionicons.trash,
+                            size: 20,
+                            color: textColor,
                           ),
-                          border: Border.all(
-                            color: secondaryBackground,
-                            style: BorderStyle.solid,
-                            width: 1.0,
-                          )
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            const SizedBox(width: 10,),
-                            Icon(
-                              Ionicons.search,
-                              size: 20,
-                              color: textColor,
+                          const SizedBox(width: 10,),
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                "Clear",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold
+                                ),
+                              )
                             ),
-                            const SizedBox(width: 10,),
-                            Expanded(
-                              child: Center(
-                                child: Text(
-                                  "Search",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold
-                                  ),
-                                )
-                              ),
-                            )
-                          ],
-                        ),
+                          )
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 10,),
-              Wrap(
-                spacing: 5,
-                runSpacing: 5,
-                children: _generateChipCategory(),
-              ),
-            ],
-          ) : const SizedBox.shrink()
+                ),
+                Expanded(
+                  child: InkWell(
+                    onTap: (() async {
+                      await _submitSearch();
+                    }),
+                    child: Container(
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: primaryDark,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(10),
+                          bottomRight: Radius.circular(10),
+                        ),
+                        border: Border.all(
+                          color: secondaryBackground,
+                          style: BorderStyle.solid,
+                          width: 1.0,
+                        )
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          const SizedBox(width: 10,),
+                          Icon(
+                            Ionicons.search,
+                            size: 20,
+                            color: textColor,
+                          ),
+                          const SizedBox(width: 10,),
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                "Search",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold
+                                ),
+                              )
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10,),
+            Wrap(
+              spacing: 5,
+              runSpacing: 5,
+              children: _generateChipCategory(),
+            ),
+          ],
         ),
       ],
     );
