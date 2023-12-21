@@ -267,36 +267,35 @@ class _TransactionInputState extends State<TransactionInput> {
             onPressed: () async {
               // call parent save, all the handler on the async call should be
               // coming from the parent instead here.
-              
-              // first check whether we want to save future or what by compare
-              // if the selected date is more than current date
-              if (_currentDate.isAfter(DateTime.now().toLocal())) {
-                // show the dialog to ask user if they want to add future date
-                // transaction or else?
-                
-                late Future<bool?> result = ShowMyDialog(
-                    dialogTitle: "Future Date",
-                    dialogText: "Are you sure want to add a future date?.",
-                    confirmText: "Add",
-                    confirmColor: accentColors[0],
-                    cancelText: "Cancel"
-                ).show(context);
-
-                result.then((value) {
-                  // remove the dialog
-                  Navigator.pop(context);
-
-                  // check whether user press Add or Cancel
-                  if(value == false) {
-                    // if cancel then just return from this call
-                    return;
-                  }
-                });
-              }
-
               try {
                 TransactionModel? gen = _generateTransaction();
-                widget.saveTransaction(gen);
+
+                // if all good then check the date whether this is future date
+                // or not?
+                if (_currentDate.isAfter(DateTime.now().toLocal())) {
+                  // show the dialog to ask user if they want to add future date
+                  // transaction or else?
+                  
+                  late Future<bool?> result = ShowMyDialog(
+                      dialogTitle: "Future Date",
+                      dialogText: "Are you sure want to add a future date?.",
+                      confirmText: "Add",
+                      confirmColor: accentColors[0],
+                      cancelText: "Cancel"
+                  ).show(context);
+
+                  await result.then((value) {
+                    // check whether user press Add or Cancel
+                    if(value == true) {
+                      // user still want to add so add this transaction
+                      widget.saveTransaction(gen);
+                    }
+                  });
+                }
+                else {
+                  // same date, so just save the transaction
+                  widget.saveTransaction(gen);
+                }
               }
               catch(error) {
                 ScaffoldMessenger.of(context).showSnackBar(
