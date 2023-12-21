@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_size/flutter_keyboard_size.dart';
 import 'package:intl/intl.dart';
 import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/api/category_api.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/budget_model.dart';
@@ -12,6 +11,7 @@ import 'package:my_expense/model/transaction_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
+import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
@@ -31,7 +31,6 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
   DateTime selectedDate = DateTime.now();
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
-  final CategoryHTTPService _categoryHttp = CategoryHTTPService();
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final BudgetHTTPService _budgetHttp = BudgetHTTPService();
 
@@ -63,57 +62,22 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
     return KeyboardSizeProvider(
       child: TransactionInput(
         title: "Add Transaction",
-        refreshCategory: refreshCategory,
-        refreshWallet: refreshWallet,
+        type: TransactionInputType.add,
         saveTransaction: (value) {
-          saveTransaction(value);
+          _saveTransaction(value);
         },
         selectedDate: selectedDate.toLocal(),
       ),
     );
   }
 
-  Future<void> refreshWallet() async {
-    print("Refresh the account");
-
-    // fetch again the wallet
-    await _walletHttp.fetchWallets(false).then((wallets) {
-      if (wallets.length > 0) {
-        Provider.of<HomeProvider>(context, listen: false)
-            .setWalletList(wallets);
-      }
-
-      // remove the loader dialog
-      Navigator.pop(context);
-    }).onError((error, stackTrace) {
-      print("Error when fetching wallet");
-      print(error.toString());
-      // remove the loader dialog
-      Navigator.pop(context);
-    });
-  }
-
-  Future<void> refreshCategory() async {
-    print("Refresh the category");
-
-    // fetch again the wallet
-    await _categoryHttp.fetchCategory(true).then((value) {
-      // remove the loader dialog
-      Navigator.pop(context);
-    }).onError((error, stackTrace) {
-      print("Error when refresh category");
-      print(error.toString());
-      // remove the loader dialog
-      Navigator.pop(context);
-    });
-  }
-
-  void saveTransaction(TransactionModel? txn) async {
+  void _saveTransaction(TransactionModel? txn) async {
+    // show the loader
+    showLoaderDialog(context);
     // now we can try to send updated data to the backend
-    TransactionModel _txn = txn!;
-    await _transactionHttp.addTransaction(context, _txn, selectedDate).then((value) {
+    await _transactionHttp.addTransaction(context, txn!, selectedDate).then((value) {
       // update necessary information after we add the transaction
-      updateInformation(value).then((_) {
+      _updateInformation(value).then((_) {
         // finished update information
       }).onError((error, stackTrace) {
         // pop the loader
@@ -139,7 +103,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
     });
   }
 
-  Future<void> updateInformation(TransactionListModel txnAdd) async {
+  Future<void> _updateInformation(TransactionListModel txnAdd) async {
     Future<List<BudgetModel>> _futureBudgets;
     Future<List<WalletModel>> _futureWallets;
     List<BudgetModel> _budgets = [];
@@ -276,7 +240,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
           // now we can set the shared preferences of budget
           BudgetSharedPreferences.setBudget(txnAdd.wallet.currencyId, _refreshDay, _budgets);
 
-          // only update the provider if, the current home budget is showed
+          // only update the provider if, the current home budget is ed
           // the same date as the refresh day
           String _currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
           if (_refreshDay == _currentBudgetDate) {

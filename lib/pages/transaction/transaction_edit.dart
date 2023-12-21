@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_size/flutter_keyboard_size.dart';
 import 'package:intl/intl.dart';
 import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/api/category_api.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/budget_model.dart';
@@ -11,6 +10,7 @@ import 'package:my_expense/model/transaction_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
+import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
@@ -29,7 +29,6 @@ class TransactionEditPage extends StatefulWidget {
 class _TransactionEditPageState extends State<TransactionEditPage> {
   late TransactionListModel paramsData;
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
-  final CategoryHTTPService _categoryHttp = CategoryHTTPService();
   final WalletHTTPService _walletHttp = WalletHTTPService();
   final BudgetHTTPService _budgetHttp = BudgetHTTPService();
 
@@ -44,23 +43,24 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     return KeyboardSizeProvider(
       child: TransactionInput(
         title: "Edit Transaction",
+        type: TransactionInputType.edit,
         saveTransaction: (value) {
-          saveTransaction(value);
+          _saveTransaction(value);
         },
-        refreshCategory: refreshCategory,
-        refreshWallet: refreshWallet,
+        selectedDate: paramsData.date,
         currentTransaction: paramsData,
       ),
     );
   }
 
-  void saveTransaction(TransactionModel? txn) async {
-    // now we can try to send updated data to the backend
-    TransactionModel _txn = txn!;
+  void _saveTransaction(TransactionModel? txn) async {
+    // show loader dialog
+    showLoaderDialog(context);
+    
     // send also the date we got from the parent widget, to see whether there
     // are any changes on the date of the transaction. If there are changes
     // then it means we need to manipulate 2 shared preferences instead of one.
-    await _transactionHttp.updateTransaction(context, _txn, paramsData).then((txnUpdate) {
+    await _transactionHttp.updateTransaction(context, txn!, paramsData).then((txnUpdate) {
       // update necessary information after we add the transaction
       updateInformation(txnUpdate).then((_) {
         // this is success, so we can pop the loader
@@ -208,32 +208,6 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     }).onError((error, stackTrace) {
       debugPrint("Error on <updateInformation>");
       throw new Exception(error.toString());
-    });
-  }
-
-  Future<void> refreshWallet() async {
-    // fetch again the wallet
-    await _walletHttp.fetchWallets(false).then((wallets) {
-      // remove the loader dialog
-      Navigator.pop(context);
-    }).onError((error, stackTrace) {
-      print("Error when <refreshWallet>");
-      print(error.toString());
-      // remove the loader dialog
-      Navigator.pop(context);
-    });
-  }
-
-  Future<void> refreshCategory() async {
-    // fetch again the wallet
-    await _categoryHttp.fetchCategory(true).then((value) {
-      // remove the loader dialog
-      Navigator.pop(context);
-    }).onError((error, stackTrace) {
-      print("Error when <refreshCategory>");
-      print(error.toString());
-      // remove the loader dialog
-      Navigator.pop(context);
     });
   }
 }
