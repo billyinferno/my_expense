@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 class AnimationExpand extends StatefulWidget {
+  final AnimationController? controller;
   final Widget child;
   final bool expand;
   final int? duration;
   final Function(bool)? onExpand;
 
-  const AnimationExpand({ Key? key, required this.child, required this.expand, this.duration, this.onExpand}) : super(key: key);
+  const AnimationExpand({ Key? key, this.controller, required this.child, required this.expand, this.duration, this.onExpand}) : super(key: key);
 
   @override
   _AnimationExpandState createState() => _AnimationExpandState();
@@ -40,10 +41,18 @@ class _AnimationExpandState extends State<AnimationExpand> with SingleTickerProv
   void _prepareAnimation() {
     _duration = (widget.duration ?? 500);
 
-    _expandController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: _duration),
-    );
+    // check whether we have controller being sent from parent or not?
+    // if not then we can create our own controller
+    if (widget.controller != null) {
+      _expandController = widget.controller!;
+    }
+    else {
+      _expandController = AnimationController(
+        vsync: this,
+        duration: Duration(milliseconds: _duration),
+      );
+    }
+
     _animation = CurvedAnimation(parent: _expandController, curve: Curves.fastOutSlowIn);
   }
 
