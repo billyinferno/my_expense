@@ -162,4 +162,22 @@ class IconColorList {
       default: { return accentColors[0]; }
     }
   }
+
+  static Icon getIcon(String name, String type, [double? size]) {
+    if (type == "expense") {
+      return getExpenseIcon(name, (size ?? 20));
+    }
+    else {
+      return getIncomeIcon(name, (size ?? 20));
+    }
+  }
+
+  static Color getColor(String name, String type) {
+    if (type == "expense") {
+      return getExpenseColor(name);
+    }
+    else {
+      return getIncomeColor(name);
+    }
+  }
 }
