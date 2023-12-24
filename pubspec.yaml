@@ -38,10 +38,10 @@ dependencies:
   provider: ^6.0.3
   hive: ^2.0.4
   hive_flutter: ^1.1.0
-  flutter_keyboard_size: ^1.0.0+3
   crypto: ^3.0.1
   flutter_slidable: ^3.0.0
   connectivity_plus: ^5.0.1
+  smooth_page_indicator: ^1.1.0
 
 dev_dependencies:
   hive_generator: ^2.0.0
