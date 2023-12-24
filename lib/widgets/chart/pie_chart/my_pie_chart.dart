@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_expense/widgets/pie_chart/pie_chart_painter.dart';
+import 'package:my_expense/widgets/chart/pie_chart/pie_chart_painter.dart';
 
 class PieChartView extends StatelessWidget {
   final Color backgroundColor;
