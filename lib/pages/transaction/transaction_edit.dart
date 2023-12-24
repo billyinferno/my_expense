@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_keyboard_size/flutter_keyboard_size.dart';
 import 'package:intl/intl.dart';
 import 'package:my_expense/api/budget_api.dart';
 import 'package:my_expense/api/transaction_api.dart';
@@ -16,6 +15,7 @@ import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/transaction_input.dart';
+import 'package:provider/provider.dart';
 
 class TransactionEditPage extends StatefulWidget {
   final Object? params;
@@ -40,16 +40,14 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardSizeProvider(
-      child: TransactionInput(
-        title: "Edit Transaction",
-        type: TransactionInputType.edit,
-        saveTransaction: (value) {
-          _saveTransaction(value);
-        },
-        selectedDate: paramsData.date,
-        currentTransaction: paramsData,
-      ),
+    return TransactionInput(
+      title: "Edit Transaction",
+      type: TransactionInputType.edit,
+      saveTransaction: (value) {
+        _saveTransaction(value);
+      },
+      selectedDate: paramsData.date,
+      currentTransaction: paramsData,
     );
   }
 

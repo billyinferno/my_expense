@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_keyboard_size/flutter_keyboard_size.dart';
 import 'package:intl/intl.dart';
 import 'package:my_expense/api/budget_api.dart';
 import 'package:my_expense/api/transaction_api.dart';
@@ -17,6 +16,7 @@ import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/transaction_input.dart';
+import 'package:provider/provider.dart';
 
 class TransactionAddPage extends StatefulWidget {
   final Object? params;
@@ -53,21 +53,14 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return KeyboardSizeProvider(
-      child: TransactionInput(
-        title: "Add Transaction",
-        type: TransactionInputType.add,
-        saveTransaction: (value) {
-          _saveTransaction(value);
-        },
-        selectedDate: selectedDate.toLocal(),
-      ),
+    return TransactionInput(
+      title: "Add Transaction",
+      type: TransactionInputType.add,
+      saveTransaction: (value) {
+        _saveTransaction(value);
+      },
+      selectedDate: selectedDate.toLocal(),
     );
   }
 
