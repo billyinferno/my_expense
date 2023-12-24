@@ -7,7 +7,8 @@ import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/args/stats_detail_args.dart';
 import 'package:my_expense/utils/args/stats_transaction_args.dart';
 import 'package:my_expense/widgets/chart/budget_bar.dart';
-import 'package:my_expense/widgets/pie_chart/my_pie_chart.dart';
+import 'package:my_expense/widgets/chart/pie_chart/my_pie_chart.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class StatsDetailPage extends StatefulWidget {
   final Object? args;
@@ -27,19 +28,30 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
   ScrollController _incomeController = ScrollController();
   ScrollController _expenseController = ScrollController();
 
+  late int _totalPage;
+
   @override
   void initState() {
     super.initState();
     _stats = widget.args as StatsDetailArgs;
+
+    // get the total page we will showed
+    _totalPage = 0;
+    if(_stats.incomeExpenseCategory.income.length > 0) {
+      _totalPage += 1;
+    }
+    if(_stats.incomeExpenseCategory.expense.length > 0) {
+      _totalPage += 1;
+    }
     _getMaxAmount();
   }
 
   @override
   void dispose() {
-    super.dispose();
     _pageController.dispose();
     _incomeController.dispose();
     _expenseController.dispose();
+    super.dispose();
   }
 
   @override
@@ -73,6 +85,23 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
               child: Center(child: Text(_getTitleText())),
             ),
             _generatePieChart(),
+            SizedBox(height: 10,),
+            Visibility(
+              visible: (_totalPage > 0),
+              child: Center(
+                child: SmoothPageIndicator(
+                  controller: _pageController,
+                  count: _totalPage,
+                  effect: WormEffect(
+                    dotHeight: 10,
+                    dotWidth: 10,
+                    type: WormType.normal,
+                    activeDotColor: primaryDark,
+                    dotColor: secondaryBackground,
+                  ),
+                ),
+              ),
+            ),
             SizedBox(height: 10,),
             Container(
               child: Expanded(
