@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
@@ -11,6 +12,7 @@ import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/args/budget_detail_args.dart';
+import 'package:my_expense/utils/misc/decimal_formatter.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
@@ -31,9 +33,13 @@ class BudgetListPage extends StatefulWidget {
 
 class _BudgetListPageState extends State<BudgetListPage> {
   final BudgetHTTPService _budgetHttp = BudgetHTTPService();
+  final TextEditingController _amountController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollControllerAddCategory = ScrollController();
   final fCCY = new NumberFormat("#,##0.00", "en_US");
 
   late BudgetListModel? _budgetList;
+  late double? _budgetAmount;
 
   int _currencyID = -1;
   double _totalAmount = 0.0;
@@ -41,8 +47,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
   bool _isDataChanged = false;
   Map<int, CategoryModel> _expenseCategory = {};
 
-  late ScrollController _scrollController;
-  late ScrollController _scrollControllerAddCategory;
 
   @override
   void initState() {
@@ -50,6 +54,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
     // initialize value
     _budgetList = null;
+    _budgetAmount = 0;
 
     // get the currency ID being sent from the home budget page
     _currencyID = widget.currencyId as int;
@@ -59,18 +64,15 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
     // fetch the current budget
     _fetchBudget(true);
-
-    // set the scroll controller
-    _scrollController = ScrollController();
-    _scrollControllerAddCategory = ScrollController();
   }
 
   @override
   void dispose() {
-    super.dispose();
-
     _scrollController.dispose();
     _scrollControllerAddCategory.dispose();
+    _amountController.dispose();
+    
+    super.dispose();
   }
 
   @override
@@ -320,35 +322,207 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 });
               }
             }),
-            onDoubleTap: ((index) {
-              Navigator.pushNamed(context, '/budget/edit', arguments: budgetArgs).then((value) {
-                if (value != null) {
-                  double newBudgetAmount = value as double;
-                  _isDataChanged = true;
-                  List<BudgetModel> _newBudgetList = [];
-                  for(int i=0; i<_budgetList!.budgets.length; i++) {
-                    if(i == index) {
-                      // special treatment
-                      _newBudgetList.add(new BudgetModel(
-                          id: _budgetList!.budgets[i].id,
-                          category: _budgetList!.budgets[i].category,
-                          amount: newBudgetAmount,
-                          used: _budgetList!.budgets[i].used,
-                          status: "in",
-                          currency: _budgetList!.budgets[i].currency,
-                        )
-                      );
-                    }
-                    else {
-                      _newBudgetList.add(_budgetList!.budgets[i]);
-                    }
-                  }
-                  BudgetListModel _newBudgetListModel = BudgetListModel(currency: _budgetList!.currency, budgets: _newBudgetList);
+            onTap: ((index) {
+              showDialog(
+                context: context,
+                builder: ((context) {
+                  // set the amount controller with the current budget
+                  _amountController.text = fCCY.format(budgetArgs.budgetAmount);
+                  _budgetAmount= budgetArgs.budgetAmount;
 
-                  setBudgetList(_newBudgetListModel);
-                  Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(_newBudgetListModel.budgets);
-                }
-              });
+                  return AlertDialog(
+                    content: Container(
+                      width: 300,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: budgetArgs.categoryColor,
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            child: budgetArgs.categoryIcon,
+                          ),
+                          const SizedBox(width: 10,),
+                          Expanded(
+                            child: Container(
+                              height: 60,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Text("Edit ${budgetArgs.categoryName}"),
+                                  const SizedBox(height: 5,),
+                                  TextField(
+                                    controller: _amountController,
+                                    showCursor: true,
+                                    textAlign: TextAlign.right,
+                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                    decoration: InputDecoration(
+                                      hintText: "0.00",
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding: EdgeInsets.zero,
+                                      isCollapsed: true,
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 25,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(12),
+                                      DecimalTextInputFormatter(decimalRange: 3),
+                                    ],
+                                    onChanged: ((value) {
+                                      if (value.isNotEmpty) {
+                                        try {
+                                          _budgetAmount = double.tryParse(value);
+                                          if (_budgetAmount == null) {
+                                            // wrong amount set budget amount as
+                                            // budget args
+                                            _budgetAmount = budgetArgs.budgetAmount;
+                                          }
+                                        }
+                                        catch(ex) {
+                                          // defaulted to budget amount from parent
+                                          _budgetAmount = budgetArgs.budgetAmount;
+                                        }
+                                      }
+                                    }),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    actions: <Widget>[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: (() {
+                              // don't care with data changes, if user press
+                              // cancel then just pop.
+                              Navigator.pop(context);
+                            }),
+                            child: Container(
+                              width: 100,
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10)
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Icon(
+                                    Ionicons.close,
+                                    size: 15,
+                                  ),
+                                  const SizedBox(width: 10,),
+                                  Expanded(child: Center(child: Text("Cancel"))),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10,),
+                          GestureDetector(
+                            onTap: (() {
+                              if (_budgetAmount != null) {
+                                _isDataChanged = true;
+                                List<BudgetModel> _newBudgetList = [];
+                                for(int i=0; i<_budgetList!.budgets.length; i++) {
+                                  if(i == index) {
+                                    // special treatment
+                                    _newBudgetList.add(new BudgetModel(
+                                        id: _budgetList!.budgets[i].id,
+                                        category: _budgetList!.budgets[i].category,
+                                        amount: (_budgetAmount ?? budgetArgs.budgetAmount),
+                                        used: _budgetList!.budgets[i].used,
+                                        status: "in",
+                                        currency: _budgetList!.budgets[i].currency,
+                                      )
+                                    );
+                                  }
+                                  else {
+                                    _newBudgetList.add(_budgetList!.budgets[i]);
+                                  }
+                                }
+
+                                // create the new budget list model
+                                BudgetListModel _newBudgetListModel = BudgetListModel(currency: _budgetList!.currency, budgets: _newBudgetList);
+
+                                // set the new budget and announce
+                                setBudgetList(_newBudgetListModel);
+                                Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(_newBudgetListModel.budgets);
+
+                                // remove the dialog
+                                Navigator.pop(context);
+                              }
+                            }),
+                            child: Container(
+                              width: 100,
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(10)
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Icon(
+                                    Ionicons.checkbox,
+                                    size: 15,
+                                  ),
+                                  const SizedBox(width: 10,),
+                                  Expanded(child: Center(child: Text("Save"))),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  );
+                })
+              );
+              // Navigator.pushNamed(context, '/budget/edit', arguments: budgetArgs).then((value) {
+              //   if (value != null) {
+              //     double newBudgetAmount = value as double;
+              //     _isDataChanged = true;
+              //     List<BudgetModel> _newBudgetList = [];
+              //     for(int i=0; i<_budgetList!.budgets.length; i++) {
+              //       if(i == index) {
+              //         // special treatment
+              //         _newBudgetList.add(new BudgetModel(
+              //             id: _budgetList!.budgets[i].id,
+              //             category: _budgetList!.budgets[i].category,
+              //             amount: newBudgetAmount,
+              //             used: _budgetList!.budgets[i].used,
+              //             status: "in",
+              //             currency: _budgetList!.budgets[i].currency,
+              //           )
+              //         );
+              //       }
+              //       else {
+              //         _newBudgetList.add(_budgetList!.budgets[i]);
+              //       }
+              //     }
+              //     BudgetListModel _newBudgetListModel = BudgetListModel(currency: _budgetList!.currency, budgets: _newBudgetList);
+
+              //     setBudgetList(_newBudgetListModel);
+              //     Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(_newBudgetListModel.budgets);
+              //   }
+              // });
             }),
           );
         },
