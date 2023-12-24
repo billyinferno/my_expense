@@ -328,6 +328,30 @@ class TransactionHTTPService {
     }
   }
 
+  Future<BudgetStatModel> fetchTransactionBudgetStatSummary(int currencyId) async {
+    _checkJWT();
+    
+    // check if we got JWT token or not?
+    if (_bearerToken.length > 0) {
+      final response = await http.get(
+          Uri.parse(Globals.apiURL + 'transactions/budget/stat/currency/$currencyId'),
+          headers: {
+            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          });
+
+      if (response.statusCode == 200) {
+        BudgetStatModel _budgetStatModel = BudgetStatModel.fromJson(jsonDecode(response.body));
+        return _budgetStatModel;
+      }
+
+      print("Got error <fetchTransactionBudgetStatSummary>");
+      throw Exception("res=" + response.body);
+    } else {
+      throw Exception(
+          'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
+    }
+  }
+
   Future<List<TransactionListModel>> fetchTransactionWallet(int walletId, String date, [bool? force]) async {
     bool _force = (force ?? false);
 
