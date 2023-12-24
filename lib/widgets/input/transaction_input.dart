@@ -527,7 +527,10 @@ class _TransactionInputState extends State<TransactionInput> {
                               color: textColor,
                             ),
                             SizedBox(width: 10,),
-                            Text("Description"),
+                            Text(
+                              (_descriptionController.text.trim().isEmpty ? "Description" : _descriptionController.text),
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ],
                         ),
                       ),
@@ -868,22 +871,25 @@ class _TransactionInputState extends State<TransactionInput> {
                   );
                 });
               },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
-                      color: (_currentWalletFromType.length > 0 ? IconList.getColor(_currentWalletFromType) : accentColors[4]),
+              child: Container(
+                color: Colors.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(40),
+                        color: (_currentWalletFromType.length > 0 ? IconList.getColor(_currentWalletFromType) : accentColors[4]),
+                      ),
+                      child: _getTransferOutIcon(_currentWalletFromType),
                     ),
-                    child: _getTransferOutIcon(_currentWalletFromType),
-                  ),
-                  SizedBox(height: 5,),
-                  Text((_currentWalletFromName.length > 0 ? _currentWalletFromName : "From Account")),
-                ],
+                    SizedBox(height: 5,),
+                    Text((_currentWalletFromName.length > 0 ? _currentWalletFromName : "From Account")),
+                  ],
+                ),
               ),
             ),
           ),
@@ -917,22 +923,25 @@ class _TransactionInputState extends State<TransactionInput> {
                   );
                 });
               },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(40),
-                      color: (_currentWalletToType.length > 0 ? IconList.getColor(_currentWalletToType) : accentColors[5]),
+              child: Container(
+                color: Colors.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(40),
+                        color: (_currentWalletToType.length > 0 ? IconList.getColor(_currentWalletToType) : accentColors[5]),
+                      ),
+                      child: _getTransferInIcon(_currentWalletToType),
                     ),
-                    child: _getTransferInIcon(_currentWalletToType),
-                  ),
-                  SizedBox(height: 5,),
-                  Text((_currentWalletToName.length > 0 ? _currentWalletToName : "To Account")),
-                ],
+                    SizedBox(height: 5,),
+                    Text((_currentWalletToName.length > 0 ? _currentWalletToName : "To Account")),
+                  ],
+                ),
               ),
             ),
           ),
