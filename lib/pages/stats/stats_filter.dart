@@ -51,12 +51,10 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   late CurrencyModel? _currentCurrencies;
   late WalletModel? _currentWallet;
   IncomeExpenseCategoryModel _currentIncomeExpenseCategory = IncomeExpenseCategoryModel(expense: [], income: []);
-  // late PageController _monthController;
   final TextEditingController _nameController = TextEditingController();
   late ScrollController _scrollControllerCurrencies;
   late ScrollController _scrollControllerWallet;
-  // late ScrollController _yearSelectorController;
-
+  
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
 
   @override
@@ -111,13 +109,10 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   @override
   void dispose() {
-    super.dispose();
-    
-    // _monthController.dispose();
     _nameController.dispose();
     _scrollControllerCurrencies.dispose();
     _scrollControllerWallet.dispose();
-    // _yearSelectorController.dispose();
+    super.dispose();
   }
 
   @override

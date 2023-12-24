@@ -69,11 +69,11 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
   @override
   void dispose() {
-    super.dispose();
     _amountController.dispose();
     _nameController.dispose();
     _scrollControllerWallet.dispose();
     _scrollControllerCurrencies.dispose();
+    super.dispose();
   }
 
   @override
