@@ -25,6 +25,8 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
 
   late BudgetTransactionArgs _budgetTransaction;
   late BudgetStatModel _budgetStat;
+  late List<BudgetStatDetail> _budgetMonthly;
+  late List<BudgetStatDetail> _budgetYearly;
   late Map<String, double> _monthlyDateRange;
   late Map<String, double> _yearlyDateRange;
   late List<Map<String, double>> _monthlyData;
@@ -88,6 +90,23 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
             Navigator.pop(context);
           }),
         ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Ionicons.git_compare,
+              color: textColor,
+              size: 15,
+            ),
+            onPressed: (() {
+              // sort the list
+              setState(() {
+                _budgetMonthly = _budgetMonthly.reversed.toList();
+                _budgetYearly = _budgetYearly.reversed.toList();
+              });
+            }),
+          ),
+          const SizedBox(width: 5,),
+        ],
       ),
       body: FutureBuilder(
         future: _getData,
@@ -265,7 +284,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
               Expanded(
                 child: ListView.builder(
                   controller: _monthlyScroller,
-                  itemCount: _budgetStat.monthly.length,
+                  itemCount: _budgetMonthly.length,
                   itemBuilder: ((context, index) {
                     return Container(
                       width: double.infinity,
@@ -276,14 +295,14 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                         children: <Widget>[
                           SizedBox(
                             width: 80,
-                            child: Center(child: Text(_budgetStat.monthly[index].date)),
+                            child: Center(child: Text(_budgetMonthly[index].date)),
                           ),
                           Expanded(
                             child: SizedBox(
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetStat.monthly[index].totalAmount, false, true, true, 2)}"
+                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetMonthly[index].totalAmount, false, true, true, 2)}"
                                 )
                               ),
                             ),
@@ -293,7 +312,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetStat.monthly[index].averageAmount, false, true, true, 2)}"
+                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetMonthly[index].averageAmount, false, true, true, 2)}"
                                 )
                               ),
                             ),
@@ -435,7 +454,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
               Expanded(
                 child: ListView.builder(
                   controller: _yearlyScroller,
-                  itemCount: _budgetStat.yearly.length,
+                  itemCount: _budgetYearly.length,
                   itemBuilder: ((context, index) {
                     return Container(
                       width: double.infinity,
@@ -446,14 +465,14 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                         children: <Widget>[
                           SizedBox(
                             width: 80,
-                            child: Center(child: Text(_budgetStat.yearly[index].date)),
+                            child: Center(child: Text(_budgetYearly[index].date)),
                           ),
                           Expanded(
                             child: SizedBox(
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetStat.yearly[index].totalAmount, false, true, true, 2)}"
+                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetYearly[index].totalAmount, false, true, true, 2)}"
                                 )
                               ),
                             ),
@@ -463,7 +482,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                               child: Align(
                                 alignment: Alignment.centerRight,
                                 child: Text(
-                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetStat.yearly[index].averageAmount, false, true, true, 2)}"
+                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetYearly[index].averageAmount, false, true, true, 2)}"
                                 )
                               ),
                             ),
@@ -483,7 +502,15 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
 
   Future<bool> _getBudgetStatData() async {
     try {
-      _budgetStat = await _transactionHttp.fetchTransactionBudgetStat(_budgetTransaction.categoryid, _budgetTransaction.currencyId);
+      // check if this is to get all data or specificy category
+      if (_budgetTransaction.categoryid < 0) {
+        // this is get all the data
+        _budgetStat = await _transactionHttp.fetchTransactionBudgetStatSummary(_budgetTransaction.currencyId);
+      }
+      else {
+        // this will get specific category
+        _budgetStat = await _transactionHttp.fetchTransactionBudgetStat(_budgetTransaction.categoryid, _budgetTransaction.currencyId);
+      }
 
       // generate the monthly and yearly data
       // as API will not return all the date range, we will need to fill the void
@@ -545,6 +572,10 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       _averageYearlyAmount = _totalYearlyAmount / _yearlyDateRange.length;
       _averageYearlyDailyAmount = _totalYearlyDailyAmount / _yearlyDateRange.length;
       _yearlyData.add(_yearlyDateRange);
+
+      // put on different list so we can manipulate it as this is not final one
+      _budgetMonthly = _budgetStat.monthly.toList();
+      _budgetYearly = _budgetStat.yearly.toList();
 
       return true;
     }

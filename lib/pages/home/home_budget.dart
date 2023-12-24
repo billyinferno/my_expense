@@ -212,89 +212,119 @@ class _HomeBudgetState extends State<HomeBudget> {
                         ),
                       ),
                       SizedBox(height: 15,),
-                      GestureDetector(
-                        onTap: () {
-                          showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                            return Container(
-                              height: 300,
-                              color: secondaryDark,
-                              child: Column(
-                                children: <Widget>[
-                                  Container(
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          child: Center(child: Text("Currencies")),
-                                        ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            await _refreshUserCurrencies(true);
-                                          },
-                                          icon: Icon(
-                                            Ionicons.refresh,
-                                            size: 20,
+                      Slidable(
+                        endActionPane: ActionPane(
+                          motion: const DrawerMotion(),
+                          extentRatio: 0.2,
+                          children: <SlidableAction>[
+                            SlidableAction(
+                              label: 'Stat',
+                              padding: const EdgeInsets.all(0),
+                              foregroundColor: accentColors[3],
+                              backgroundColor: Colors.transparent,
+                              icon: Ionicons.bar_chart,
+                              onPressed: ((_) {
+                                // create budget transaction arguments that can be passed to other pages
+                                BudgetTransactionArgs _args = BudgetTransactionArgs(
+                                  categoryid: -1,
+                                  categoryName: _currentCurrencies!.description,
+                                  currencySymbol: _currentCurrencies!.symbol,
+                                  budgetAmount: -1,
+                                  budgetUsed: -1,
+                                  selectedDate: _selectedDate,
+                                  currencyId: _currentCurrencies!.id,
+                                );
+
+                                Navigator.pushNamed(context, '/budget/stat', arguments: _args);
+                              })
+                            ),
+                          ],
+                        ),
+                        child: GestureDetector(
+                          onTap: () {
+                            showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+                              return Container(
+                                height: 300,
+                                color: secondaryDark,
+                                child: Column(
+                                  children: <Widget>[
+                                    Container(
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: Center(child: Text("Currencies")),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: ListView.builder(
-                                      physics: const AlwaysScrollableScrollPhysics(),
-                                      controller: _scrollControllerCurrencies,
-                                      itemCount: _currencies.length,
-                                      itemBuilder: (BuildContext context, int index) {
-                                        return SimpleItem(
-                                          color: accentColors[6],
-                                          child: FittedBox(
-                                            child: Text(_currencies[index].symbol.toUpperCase()),
-                                            fit: BoxFit.contain,
+                                          IconButton(
+                                            onPressed: () async {
+                                              await _refreshUserCurrencies(true);
+                                            },
+                                            icon: Icon(
+                                              Ionicons.refresh,
+                                              size: 20,
+                                            ),
                                           ),
-                                          description: _currencies[index].description,
-                                          isSelected: (_currentCurrencies!.id == _currencies[index].id),
-                                          onTap: (() {
-                                            setState(() {
-                                              _currentCurrencies = _currencies[index];
-                                              _fetchBudget(true);
-                                            });
-                                            Navigator.pop(context);
-                                          }),
-                                        );
-                                      },
+                                        ],
+                                      ),
                                     ),
+                                    Expanded(
+                                      child: ListView.builder(
+                                        physics: const AlwaysScrollableScrollPhysics(),
+                                        controller: _scrollControllerCurrencies,
+                                        itemCount: _currencies.length,
+                                        itemBuilder: (BuildContext context, int index) {
+                                          return SimpleItem(
+                                            color: accentColors[6],
+                                            child: FittedBox(
+                                              child: Text(_currencies[index].symbol.toUpperCase()),
+                                              fit: BoxFit.contain,
+                                            ),
+                                            description: _currencies[index].description,
+                                            isSelected: (_currentCurrencies!.id == _currencies[index].id),
+                                            onTap: (() {
+                                              setState(() {
+                                                _currentCurrencies = _currencies[index];
+                                                _fetchBudget(true);
+                                              });
+                                              Navigator.pop(context);
+                                            }),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20,),
+                                  ],
+                                ),
+                              );
+                            });
+                          },
+                          child: Container(
+                            height: 50,
+                            color: Colors.transparent ,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: BudgetBar(
+                                    title: _currentCurrencies!.description,
+                                    budgetTotal: computeTotalAmount(_budgetList),
+                                    budgetUsed: computeTotalUsed(_budgetList),
+                                    symbol: _currentCurrencies!.symbol,
                                   ),
-                                  const SizedBox(height: 20,),
-                                ],
-                              ),
-                            );
-                          });
-                        },
-                        child: Container(
-                          color: Colors.transparent ,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: BudgetBar(
-                                  title: _currentCurrencies!.description,
-                                  budgetTotal: computeTotalAmount(_budgetList),
-                                  budgetUsed: computeTotalUsed(_budgetList),
-                                  symbol: _currentCurrencies!.symbol,
                                 ),
-                              ),
-                              SizedBox(width: 10,),
-                              Container(
-                                height: 20,
-                                child: Icon(
-                                    Ionicons.chevron_down_circle
+                                SizedBox(width: 10,),
+                                Container(
+                                  height: 20,
+                                  child: Icon(
+                                      Ionicons.chevron_down_circle
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
