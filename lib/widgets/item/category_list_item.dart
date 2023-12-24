@@ -14,6 +14,7 @@ class CategoryListItem extends StatelessWidget {
   final int currencyId;
   final String currencySymbol;
   final double budgetAmount;
+  final Function(int)? onTap;
   final Function(int)? onDoubleTap;
   final Function? onDelete;
   const CategoryListItem({Key? key,
@@ -26,6 +27,7 @@ class CategoryListItem extends StatelessWidget {
     required this.currencyId,
     required this.currencySymbol,
     required this.budgetAmount,
+    this.onTap,
     this.onDoubleTap,
     this.onDelete}) : super(key: key);
 
@@ -58,6 +60,11 @@ class CategoryListItem extends StatelessWidget {
           ],
         ),
         child: GestureDetector(
+          onTap: (() {
+            if (this.onTap != null) {
+              this.onTap!(this.index);
+            }
+          }),
           onDoubleTap: (() {
             if (this.onDoubleTap != null) {
               this.onDoubleTap!(this.index);
