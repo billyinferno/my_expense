@@ -41,6 +41,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
   late double _totalYearlyDailyAmount;
   late double _averageYearlyAmount;
   late double _averageYearlyDailyAmount;
+  late bool _sortAscending;
   
   int monthDateOffset = 12;
   int yearlyDateOffset = 12;
@@ -64,6 +65,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
     _averageMonthlyDailyAmount = 0;
     _averageYearlyAmount = 0;
     _averageYearlyDailyAmount = 0;
+    _sortAscending = true;
 
     // get the budget stat data from backend
     _getData = _getBudgetStatData();
@@ -91,19 +93,48 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           }),
         ),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Ionicons.git_compare,
-              color: textColor,
-              size: 15,
-            ),
-            onPressed: (() {
-              // sort the list
+          InkWell(
+            onTap: (() async {
+              // reversed the monthly and yearly ydata
               setState(() {
                 _budgetMonthly = _budgetMonthly.reversed.toList();
                 _budgetYearly = _budgetYearly.reversed.toList();
+                _sortAscending = !_sortAscending;
               });
             }),
+            child: Container(
+              width: 50,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    (_sortAscending ? Ionicons.arrow_up : Ionicons.arrow_down),
+                    color: textColor,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        (_sortAscending ? "A" : "Z"),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: textColor,
+                        ),
+                      ),
+                      Text(
+                        (_sortAscending ? "Z" : "A"),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: textColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(width: 5,),
         ],
@@ -242,88 +273,180 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         ),
         const SizedBox(height: 10,),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              // header
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                decoration: BoxDecoration(
-                  color: secondaryDark,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: secondaryBackground,
-                      width: 1.0,
-                      style: BorderStyle.solid,
-                    )
-                  )
-                ),
-                child: Row(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                // header
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    SizedBox(
+                    Container(
+                      height: 35,
                       width: 80,
-                      child: Center(child: Text("Date")),
-                    ),
-                    Expanded(
-                      child: SizedBox(
-                        child: Center(child: Text("Monthly Amount")),
+                      decoration: BoxDecoration(
+                        color: secondaryDark,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                        ),
+                        border: Border.all(
+                          color: secondaryBackground,
+                          width: 1.0,
+                          style: BorderStyle.solid 
+                        )
+                      ),
+                      child: Center(
+                        child: Text("Date"),
                       ),
                     ),
                     Expanded(
-                      child: SizedBox(
-                        child: Center(child: Text("Average Daily")),
+                      child: Container(
+                        height: 35,
+                        decoration: BoxDecoration(
+                          color: secondaryDark,
+                          border: Border(
+                            top: BorderSide(
+                              color: secondaryBackground,
+                              width: 1.0,
+                              style: BorderStyle.solid
+                            ),
+                            bottom: BorderSide(
+                              color: secondaryBackground,
+                              width: 1.0,
+                              style: BorderStyle.solid
+                            ),
+                          )
+                        ),
+                        child: Center(
+                          child: Text("Monthly Amount"),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 35,
+                        decoration: BoxDecoration(
+                          color: secondaryDark,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                          ),
+                          border: Border.all(
+                            color: secondaryBackground,
+                            width: 1.0,
+                            style: BorderStyle.solid 
+                          )
+                        ),
+                        child: Center(
+                          child: Text("Average Daily"),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  controller: _monthlyScroller,
-                  itemCount: _budgetMonthly.length,
-                  itemBuilder: ((context, index) {
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 80,
-                            child: Center(child: Text(_budgetMonthly[index].date)),
-                          ),
-                          Expanded(
-                            child: SizedBox(
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetMonthly[index].totalAmount, false, true, true, 2)}"
-                                )
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: SizedBox(
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetMonthly[index].averageAmount, false, true, true, 2)}"
-                                )
-                              ),
-                            ),
-                          ),
-                        ],
+                Container(
+                  height: 5,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      left: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
                       ),
-                    );
-                  })
+                      right: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                    )
+                  ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: secondaryBackground,
+                          width: 1.0,
+                          style: BorderStyle.solid,
+                        ),
+                        right: BorderSide(
+                          color: secondaryBackground,
+                          width: 1.0,
+                          style: BorderStyle.solid,
+                        )
+                      ),
+                    ),
+                    child: ListView.builder(
+                      controller: _monthlyScroller,
+                      itemCount: _budgetMonthly.length,
+                      itemBuilder: ((context, index) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(
+                              width: 80,
+                              child: Center(child: Text(_budgetMonthly[index].date)),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetMonthly[index].totalAmount, false, true, true, 2)}"
+                                  )
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetMonthly[index].averageAmount, false, true, true, 2)}"
+                                  )
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      })
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 10,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10,)
+                    ),
+                    border: Border(
+                      left: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      bottom: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      right: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                    )
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -412,88 +535,180 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         ),
         const SizedBox(height: 10,),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              // header
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                decoration: BoxDecoration(
-                  color: secondaryDark,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: secondaryBackground,
-                      width: 1.0,
-                      style: BorderStyle.solid,
-                    )
-                  )
-                ),
-                child: Row(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                // header
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
-                    SizedBox(
+                    Container(
+                      height: 35,
                       width: 80,
-                      child: Center(child: Text("Date")),
-                    ),
-                    Expanded(
-                      child: SizedBox(
-                        child: Center(child: Text("Yearly Amount")),
+                      decoration: BoxDecoration(
+                        color: secondaryDark,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                        ),
+                        border: Border.all(
+                          color: secondaryBackground,
+                          width: 1.0,
+                          style: BorderStyle.solid 
+                        )
+                      ),
+                      child: Center(
+                        child: Text("Date"),
                       ),
                     ),
                     Expanded(
-                      child: SizedBox(
-                        child: Center(child: Text("Average Daily")),
+                      child: Container(
+                        height: 35,
+                        decoration: BoxDecoration(
+                          color: secondaryDark,
+                          border: Border(
+                            top: BorderSide(
+                              color: secondaryBackground,
+                              width: 1.0,
+                              style: BorderStyle.solid
+                            ),
+                            bottom: BorderSide(
+                              color: secondaryBackground,
+                              width: 1.0,
+                              style: BorderStyle.solid
+                            ),
+                          )
+                        ),
+                        child: Center(
+                          child: Text("Yearly Amount"),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 35,
+                        decoration: BoxDecoration(
+                          color: secondaryDark,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                          ),
+                          border: Border.all(
+                            color: secondaryBackground,
+                            width: 1.0,
+                            style: BorderStyle.solid 
+                          )
+                        ),
+                        child: Center(
+                          child: Text("Average Daily"),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  controller: _yearlyScroller,
-                  itemCount: _budgetYearly.length,
-                  itemBuilder: ((context, index) {
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 80,
-                            child: Center(child: Text(_budgetYearly[index].date)),
-                          ),
-                          Expanded(
-                            child: SizedBox(
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetYearly[index].totalAmount, false, true, true, 2)}"
-                                )
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: SizedBox(
-                              child: Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetYearly[index].averageAmount, false, true, true, 2)}"
-                                )
-                              ),
-                            ),
-                          ),
-                        ],
+                Container(
+                  height: 5,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      left: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
                       ),
-                    );
-                  })
+                      right: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                    )
+                  ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: secondaryBackground,
+                          width: 1.0,
+                          style: BorderStyle.solid,
+                        ),
+                        right: BorderSide(
+                          color: secondaryBackground,
+                          width: 1.0,
+                          style: BorderStyle.solid,
+                        )
+                      ),
+                    ),
+                    child: ListView.builder(
+                      controller: _yearlyScroller,
+                      itemCount: _budgetYearly.length,
+                      itemBuilder: ((context, index) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(
+                              width: 80,
+                              child: Center(child: Text(_budgetYearly[index].date)),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetYearly[index].totalAmount, false, true, true, 2)}"
+                                  )
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetYearly[index].averageAmount, false, true, true, 2)}"
+                                  )
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      })
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 10,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10,)
+                    ),
+                    border: Border(
+                      left: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      bottom: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      right: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                    )
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
