@@ -6,6 +6,7 @@ class BudgetBar extends StatelessWidget {
   final Icon? icon;
   final Color? iconColor;
   final String title;
+  final String? subTitle;
   final String symbol;
   final double budgetUsed;
   final double budgetTotal;
@@ -20,6 +21,7 @@ class BudgetBar extends StatelessWidget {
       this.showLeftText,
       this.barColor,
       required this.title,
+      this.subTitle,
       required this.symbol,
       required this.budgetUsed,
       required this.budgetTotal,
@@ -38,7 +40,7 @@ class BudgetBar extends StatelessWidget {
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Visibility(
             visible: (icon == null ? false : true),
@@ -65,29 +67,41 @@ class BudgetBar extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: SizedBox(
-                          child: Text(
-                            title,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              title,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
+                            Visibility(
+                              visible: (subTitle != null),
+                              child: Text(
+                                (subTitle ?? ''),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: textColor2,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                        child: Visibility(
-                          visible: (showLeftText == null ? true : showLeftText!),
-                          child: Text(
-                            symbol +
-                                " " +
-                                _fCCY.format(budgetTotal - budgetUsed) +
-                                (budgetTotal >= budgetUsed ? " left" : " over"),
-                            textAlign: TextAlign.right,
-                          ),
+                      Visibility(
+                        visible: (showLeftText == null ? true : showLeftText!),
+                        child: Text(
+                          symbol +
+                              " " +
+                              _fCCY.format(budgetTotal - budgetUsed) +
+                              (budgetTotal >= budgetUsed ? " left" : " over"),
+                          textAlign: TextAlign.right,
                         ),
                       )
                     ],

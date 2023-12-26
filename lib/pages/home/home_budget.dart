@@ -102,7 +102,10 @@ class _HomeBudgetState extends State<HomeBudget> {
 
       // now fetch budget based on the _currentCurrencies
       BudgetSharedPreferences.setBudgetCurrent(_selectedDate);
-      _fetchBudget();
+      
+      // always force to get budget when load the home page, so when user
+      // got the new format it will not causing null error.
+      _fetchBudget(false, true);
     }
     else {
       // nothing to fetch, set this into true
@@ -424,6 +427,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                                   icon: IconColorList.getExpenseIcon(_budgetList[index].category.name),
                                   iconColor: IconColorList.getExpenseColor(_budgetList[index].category.name),
                                   title: _budgetList[index].category.name,
+                                  subTitle: "${_budgetList[index].totalTransaction} transaction${_budgetList[index].totalTransaction > 1 ? 's' : ''}",
                                   symbol: _budgetList[index].currency.symbol,
                                   budgetUsed: _budgetList[index].used,
                                   budgetTotal: _budgetList[index].amount,

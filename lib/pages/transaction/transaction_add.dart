@@ -217,10 +217,11 @@ class _TransactionAddPageState extends State<TransactionAddPage> with TickerProv
           // now loops thru budget, and see if the current category fits or not?
           for (int i = 0; i < _budgets.length; i++) {
             if (txnAdd.category!.id == _budgets[i].category.id) {
-              // as this is expense, add the used for this budget
+              // as this is expense, add the total transaction and used for this
               BudgetModel _newBudget = BudgetModel(
                   id: _budgets[i].id,
                   category: _budgets[i].category,
+                  totalTransaction: (_budgets[i].totalTransaction + 1),
                   amount: _budgets[i].amount,
                   used: _budgets[i].used + txnAdd.amount,
                   status: _budgets[i].status,

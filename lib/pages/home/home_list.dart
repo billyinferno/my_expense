@@ -87,58 +87,6 @@ class _HomeListState extends State<HomeList> {
     _scrollController.dispose();
   }
 
-  void getInitialTransactionList() async {
-    Future.wait([
-      _refreshTransaction(_currentFocusedDay, true),
-    ]).then((_) {
-      debugPrint("💯 Initialized Home List Finished");
-    }).onError((error, stackTrace) {
-      print("Error when perform <fetchTransaction>");
-      print(error.toString());
-    });
-  }
-
-  Future<void> _showCalendarPicker() async {
-    Future<DateTime?> _date = showDatePicker(
-      context: context,
-      initialDate: _currentFocusedDay,
-      firstDate: _firstDay,
-      lastDate: _lastDay,
-      initialEntryMode: DatePickerEntryMode.calendarOnly,
-      builder: ((BuildContext context, Widget? child) {
-        return Theme(
-          data: Globals.themeData.copyWith(
-            textTheme: TextTheme(
-              headlineMedium: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              headlineSmall: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            colorScheme: ColorScheme.dark(
-              primary: accentColors[6],
-              onPrimary: textColor,
-              surface: secondaryDark,
-              onSurface: textColor2,
-            ),
-            dialogBackgroundColor:secondaryBackground,
-          ),
-          child: child!,
-        );
-      }),
-    );
-
-    _date.then((_newDate) {
-      if(_newDate != null) {
-        setFocusedDay(DateTime(_newDate.toLocal().year, _newDate.toLocal().month, _newDate.toLocal().day));
-        _refreshTransaction(_currentFocusedDay);
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -300,6 +248,58 @@ class _HomeListState extends State<HomeList> {
         ],
       ),
     );
+  }
+
+  void getInitialTransactionList() async {
+    Future.wait([
+      _refreshTransaction(_currentFocusedDay, true),
+    ]).then((_) {
+      debugPrint("💯 Initialized Home List Finished");
+    }).onError((error, stackTrace) {
+      print("Error when perform <fetchTransaction>");
+      print(error.toString());
+    });
+  }
+
+  Future<void> _showCalendarPicker() async {
+    Future<DateTime?> _date = showDatePicker(
+      context: context,
+      initialDate: _currentFocusedDay,
+      firstDate: _firstDay,
+      lastDate: _lastDay,
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      builder: ((BuildContext context, Widget? child) {
+        return Theme(
+          data: Globals.themeData.copyWith(
+            textTheme: TextTheme(
+              headlineMedium: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              headlineSmall: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            colorScheme: ColorScheme.dark(
+              primary: accentColors[6],
+              onPrimary: textColor,
+              surface: secondaryDark,
+              onSurface: textColor2,
+            ),
+            dialogBackgroundColor:secondaryBackground,
+          ),
+          child: child!,
+        );
+      }),
+    );
+
+    _date.then((_newDate) {
+      if(_newDate != null) {
+        setFocusedDay(DateTime(_newDate.toLocal().year, _newDate.toLocal().month, _newDate.toLocal().day));
+        _refreshTransaction(_currentFocusedDay);
+      }
+    });
   }
 
   Widget generateView() {
@@ -543,10 +543,11 @@ class _HomeListState extends State<HomeList> {
           // now loops thru budget, and see if the current category fits or not?
           for (int i = 0; i < _budgets.length; i++) {
             if (txnInfo.category!.id == _budgets[i].category.id) {
-              // as this is expense, add the used for this budget
+              // as this is expense, subtract total transaction and the amount
               BudgetModel _newBudget = BudgetModel(
                   id: _budgets[i].id,
                   category: _budgets[i].category,
+                  totalTransaction: (_budgets[i].totalTransaction - 1),
                   amount: _budgets[i].amount,
                   used: _budgets[i].used - txnInfo.amount,
                   status: _budgets[i].status,

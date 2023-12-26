@@ -445,6 +445,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                     _newBudgetList.add(new BudgetModel(
                                         id: _budgetList!.budgets[i].id,
                                         category: _budgetList!.budgets[i].category,
+                                        totalTransaction: _budgetList!.budgets[i].totalTransaction,
                                         amount: (_budgetAmount ?? budgetArgs.budgetAmount),
                                         used: _budgetList!.budgets[i].used,
                                         status: "in",
@@ -495,34 +496,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
                   );
                 })
               );
-              // Navigator.pushNamed(context, '/budget/edit', arguments: budgetArgs).then((value) {
-              //   if (value != null) {
-              //     double newBudgetAmount = value as double;
-              //     _isDataChanged = true;
-              //     List<BudgetModel> _newBudgetList = [];
-              //     for(int i=0; i<_budgetList!.budgets.length; i++) {
-              //       if(i == index) {
-              //         // special treatment
-              //         _newBudgetList.add(new BudgetModel(
-              //             id: _budgetList!.budgets[i].id,
-              //             category: _budgetList!.budgets[i].category,
-              //             amount: newBudgetAmount,
-              //             used: _budgetList!.budgets[i].used,
-              //             status: "in",
-              //             currency: _budgetList!.budgets[i].currency,
-              //           )
-              //         );
-              //       }
-              //       else {
-              //         _newBudgetList.add(_budgetList!.budgets[i]);
-              //       }
-              //     }
-              //     BudgetListModel _newBudgetListModel = BudgetListModel(currency: _budgetList!.currency, budgets: _newBudgetList);
-
-              //     setBudgetList(_newBudgetListModel);
-              //     Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(_newBudgetListModel.budgets);
-              //   }
-              // });
             }),
           );
         },
@@ -757,6 +730,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 BudgetModel(
                   id: element.id,
                   category: element.category,
+                  totalTransaction: element.totalTransaction,
                   amount: element.amount,
                   used: _used,
                   status: "in",
