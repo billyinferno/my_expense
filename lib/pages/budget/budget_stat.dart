@@ -735,7 +735,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       // last date of the data
 
       // first generate the monthly date range
-      DateTime _nextDate = DateTime.parse("${DateTime.now().year}-${DateTime.now().month + 1}-01");
+      DateTime _nextDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 1);
       DateTime _lastDate = DateTime.parse("${_budgetStat.monthly[_budgetStat.monthly.length-1].date}-01");
       _monthlyDateRange.clear();
       while (_lastDate.isBefore(_nextDate)) {
@@ -749,7 +749,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         monthDateOffset = 1;
       }
 
-      _nextDate = DateTime.parse("${DateTime.now().year + 1}-12-01");
+      _nextDate = DateTime(DateTime.now().year + 1, 12, 1);
       _lastDate = DateTime.parse("${_budgetStat.yearly[_budgetStat.yearly.length-1].date}-12-01");
       _yearlyDateRange.clear();
       while (_lastDate.isBefore(_nextDate)) {
