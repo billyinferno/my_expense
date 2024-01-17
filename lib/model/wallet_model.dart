@@ -7,6 +7,7 @@ class WalletModel {
   final String name;
   final double startBalance;
   final double changeBalance;
+  final double futureAmount;
   final bool useForStats;
   final bool enabled;
   final WalletTypeModel walletType;
@@ -18,6 +19,7 @@ class WalletModel {
       this.name,
       this.startBalance,
       this.changeBalance,
+      this.futureAmount,
       this.useForStats,
       this.enabled,
       this.walletType,
@@ -34,6 +36,7 @@ class WalletModel {
         json['name'],
         json['startBalance'],
         (json['changeBalance'] ?? 0.00),
+        (json['futureAmount'] ?? 0.00),
         json['useForStats'],
         json['enabled'],
         _walletType,
@@ -47,6 +50,7 @@ class WalletModel {
     'name': name,
     'startBalance': startBalance,
     'changeBalance': changeBalance,
+    'futureAmount': futureAmount,
     'useForStats': useForStats,
     'enabled': enabled,
     'wallet_type': walletType.toJson(),

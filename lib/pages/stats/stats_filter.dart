@@ -87,7 +87,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     }
 
     // get all user wallet information (defaulted the 1st selected as all account)
-    _wallets = [(WalletModel(-1, "All Account", 0.0, 0.0, true, true, WalletTypeModel(-1,""), CurrencyModel(-1, "", "", ""), UserPermissionModel(-1,"",""))), ...WalletSharedPreferences.getWallets(false)];
+    _wallets = [(WalletModel(-1, "All Account", 0.0, 0.0, 0.0, true, true, WalletTypeModel(-1,""), CurrencyModel(-1, "", "", ""), UserPermissionModel(-1,"",""))), ...WalletSharedPreferences.getWallets(false)];
     _filterWalletList();
 
     // get the minimum and maximum date of the transaction we have

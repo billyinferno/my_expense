@@ -498,6 +498,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
         _nameController.text,
         _currentStartBalance,
         0,
+        0,
         _currentUseForStats,
         _currentEnabled,
         walletType,

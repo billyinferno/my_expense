@@ -477,6 +477,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
         _nameController.text,
         _currentStartBalance,
         0,
+        0,
         _currentUseForStats,
         _currentEnabled,
         walletType,
