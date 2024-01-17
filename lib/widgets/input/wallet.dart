@@ -59,11 +59,20 @@ class Wallet extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 5),
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
-                wallet.currency.symbol + " " + fCCY.format(wallet.startBalance + wallet.changeBalance),
+                (wallet.futureAmount == 0 ? "" : wallet.currency.symbol + " " + fCCY.format(wallet.futureAmount)),
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontSize: 10,
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Text(
+                wallet.currency.symbol + " " + fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1)),
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,

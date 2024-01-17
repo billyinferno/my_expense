@@ -65,11 +65,23 @@ class CardFace extends StatelessWidget {
             Expanded(child: Container(
               color: Colors.transparent,
             )),
+            Visibility(
+              visible: (wallet.futureAmount != 0),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  wallet.currency.symbol + " " + fCCY.format(wallet.futureAmount),
+                  style: TextStyle(
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ),
             Container(
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  wallet.currency.symbol + " " + fCCY.format(wallet.startBalance + wallet.changeBalance),
+                  wallet.currency.symbol + " " + fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1)),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
