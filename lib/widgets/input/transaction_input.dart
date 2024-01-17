@@ -213,6 +213,13 @@ class _TransactionInputState extends State<TransactionInput> {
     // set the current amount
     _amountController.text = fCCY.format(widget.currentTransaction!.amount);
 
+    // set the current amount font size based on the current value
+    if(_amountController.text.length > 6) {
+      // change the font size
+      // target is 15 when 12 is filled
+      _currentAmountFontSize = 25 - ((10/6) * (_amountController.text.length - 6));
+    }
+
     // set the selected date based on the current transaction date
     _currentDate = widget.currentTransaction!.date;
 
@@ -622,35 +629,47 @@ class _TransactionInputState extends State<TransactionInput> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              TextFormField(
-                controller: _nameController,
-                focusNode: _nameFocus,
-                enableSuggestions: false,
-                keyboardType: TextInputType.name,
-                decoration: InputDecoration(
-                  hintText: "Item name",
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
+              Visibility(
+                visible: (_currentType != 'transfer'),
+                child: TextFormField(
+                  controller: _nameController,
+                  focusNode: _nameFocus,
+                  enableSuggestions: false,
+                  keyboardType: TextInputType.name,
+                  decoration: InputDecoration(
+                    hintText: "Item name",
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: EdgeInsets.zero,
+                    isCollapsed: true,
                   ),
-                  contentPadding: EdgeInsets.zero,
-                  isCollapsed: true,
+                  onChanged: ((lookup) {
+                    // generate the auto complete
+                    _filterAutoComplete(lookup);
+                  }),
+                  onTap: (() {
+                    _filterAutoComplete(_nameController.text);
+                  }),
+                  onFieldSubmitted: ((value) {
+                    // ensure that the value got some length, before we focus
+                    // on the amount controller
+                    if(value.trim().length > 0) {
+                      // focus directly to the amount
+                      FocusScope.of(context).requestFocus(_amountFocus);
+                    }
+                  }),
+                  textInputAction: TextInputAction.done,
                 ),
-                onChanged: ((lookup) {
-                  // generate the auto complete
-                  _filterAutoComplete(lookup);
-                }),
-                onTap: (() {
-                  _filterAutoComplete(_nameController.text);
-                }),
-                onFieldSubmitted: ((value) {
-                  // ensure that the value got some length, before we focus
-                  // on the amount controller
-                  if(value.trim().length > 0) {
-                    // focus directly to the amount
-                    FocusScope.of(context).requestFocus(_amountFocus);
-                  }
-                }),
-                textInputAction: TextInputAction.done,
+              ),
+              Visibility(
+                visible: (_currentType == 'transfer'),
+                child: Text(
+                  "Transfer",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               const SizedBox(height: 5,),
               Visibility(
