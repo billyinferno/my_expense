@@ -118,8 +118,18 @@ class _TransactionInputState extends State<TransactionInput> {
     // get ME
     _userMe = UserSharedPreferences.getUserMe();
 
-    // check the selected date
-    _currentDate = (widget.selectedDate ?? DateTime.now().toLocal());
+    // check whether selected date is null or not?
+    if (widget.selectedDate == null) {
+      // if null then use current date
+      _currentDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    }
+    else {
+      // if not set the current date as per selected date give by the parent
+      // widget.
+      _currentDate = (DateTime(widget.selectedDate!.year, widget.selectedDate!.month, widget.selectedDate!.day));
+    }
+    // once we got the date, convert the current date to local here
+    _currentDate = _currentDate.toLocal();
 
     // text field variable
     // default font size of the amount text field to 25
