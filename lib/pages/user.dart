@@ -553,6 +553,24 @@ class _UserPageState extends State<UserPage> {
                       }),
                     ),
                     UserButton(
+                      icon: Ionicons.information,
+                      iconColor: accentColors[7],
+                      label: "Flutter SDK",
+                      value: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          Globals.flutterVersion,
+                          //textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: textColor,
+                          ),
+                        ),
+                      ),
+                      callback: (() {
+                        // do nothing
+                      }),
+                    ),
+                    UserButton(
                       icon: Ionicons.log_out_outline,
                       iconColor: accentColors[2],
                       label: "",
