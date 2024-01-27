@@ -75,6 +75,7 @@ class _TransactionInputState extends State<TransactionInput> {
   late UsersMeModel _userMe;
 
   late DateTime _currentDate;
+  final DateTime _todayDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day); 
 
   late Map<int, CategoryModel> _currentCategoryList;
 
@@ -121,7 +122,7 @@ class _TransactionInputState extends State<TransactionInput> {
     // check whether selected date is null or not?
     if (widget.selectedDate == null) {
       // if null then use current date
-      _currentDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      _currentDate = _todayDate;
     }
     else {
       // if not set the current date as per selected date give by the parent
@@ -289,7 +290,7 @@ class _TransactionInputState extends State<TransactionInput> {
 
                 // if all good then check the date whether this is future date
                 // or not?
-                if (_currentDate.isAfter(DateTime.now().toLocal())) {
+                if (_currentDate.isAfter(_todayDate.toLocal())) {
                   // show the dialog to ask user if they want to add future date
                   // transaction or else?
                   
