@@ -25,10 +25,16 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
   void initState() {
     _diffMonths = _computeTotalMonths(widget.firstDay, widget.lastDay);
 
-    // now compute the page that we will need to be used
-    _totalPages = _diffMonths ~/ 3;
-    if(_totalPages * 3 < _diffMonths) {
-      _totalPages += 1;
+    // check if this is the same month, then we can just showed 1 page
+    if (_diffMonths <= 0) {
+      _totalPages = 1;
+    }
+    else {
+      // now compute the page that we will need to be used
+      _totalPages = _diffMonths ~/ 3;
+      if(_totalPages * 3 < _diffMonths) {
+        _totalPages += 1;
+      }
     }
 
     int _initialPages = _initialPage ~/ 3;
