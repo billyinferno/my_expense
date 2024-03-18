@@ -30,7 +30,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   table_calendar: ^3.0.0
   ionicons: ^0.2.2
-  intl: ^0.18.0
+  intl: ^0.19.0
   http: ^1.1.0
   flutter_spinkit: ^5.0.0
   flutter_dotenv: ^5.0.0
