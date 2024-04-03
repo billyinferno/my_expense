@@ -5,14 +5,18 @@ import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/model/category_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
+import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/pages/transaction/transaction_edit.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/color_utils.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/anim/page_transition.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
+import 'package:my_expense/utils/prefs/shared_wallet.dart';
+import 'package:my_expense/widgets/item/simple_item.dart';
 enum PageName { summary, all, income, expense, transfer }
 
 class TransactionSearchPage extends StatefulWidget {
@@ -43,6 +47,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   };
 
   List<TransactionListModel> _transactions = [];
+  List<TransactionListModel> _filterTransactions = [];
   List<TransactionListModel> _income = [];
   List<TransactionListModel> _expense = [];
   List<TransactionListModel> _transfer = [];
@@ -59,18 +64,25 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   Map<int, CategoryModel> _categoryIncomeList = {};
   Map<int, CategoryModel> _categoryList = {};
 
+  List<WalletModel> _walletList = [];
+  Map<int, bool> _selectedWalletList = {};
+
   TextEditingController _searchController = TextEditingController();
   ScrollController _scrollController = ScrollController();
   ScrollController _scrollControllerSummary = ScrollController();
   ScrollController _scrollControllerIncome = ScrollController();
   ScrollController _scrollControllerExpense = ScrollController();
   ScrollController _scrollControllerTransfer = ScrollController();
+  ScrollController _walletController = ScrollController();
 
   @override
   void initState() {
     // get the category expense and income list from shared preferences
     _categoryExpenseList = CategorySharedPreferences.getCategory('expense');
     _categoryIncomeList = CategorySharedPreferences.getCategory('income');
+
+    // get the wallet list
+    _walletList = WalletSharedPreferences.getWallets(false);
 
     // generate category list
     _categoryExpenseList.forEach((key, value) {
@@ -92,6 +104,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _scrollControllerIncome.dispose();
     _scrollControllerExpense.dispose();
     _scrollControllerTransfer.dispose();
+    _walletController.dispose();
     super.dispose();
   }
 
@@ -137,7 +150,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   Widget _getResultPage() {
     // check if we got transactions or not?
-    if (_transactions.isEmpty) {
+    if (_filterTransactions.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -147,63 +160,175 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Container(
-            padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
-            child: Center(
-              child: CupertinoSlidingSegmentedControl(
-                onValueChanged: (int? value) {
-                  setState(() {
-                    _resultPage = value!;
-                    switch(_resultPage) {
-                      case 0: _resultPageName = PageName.summary; break;
-                      case 1: _resultPageName = PageName.all; break;
-                      case 2: _resultPageName = PageName.income; break;
-                      case 3: _resultPageName = PageName.expense; break;
-                      case 4: _resultPageName = PageName.transfer; break;
-                    }
-                  });
-                },
-                groupValue: _resultPage,
-                thumbColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
-                children: {
-                  0: Text(
-                      "Summary",
-                      style: TextStyle(
-                        fontFamily: '--apple-system',
-                        fontSize: 11,
-                      ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
+                  child: Center(
+                    child: CupertinoSlidingSegmentedControl(
+                      onValueChanged: (int? value) {
+                        setState(() {
+                          _resultPage = value!;
+                          switch(_resultPage) {
+                            case 0: _resultPageName = PageName.summary; break;
+                            case 1: _resultPageName = PageName.all; break;
+                            case 2: _resultPageName = PageName.income; break;
+                            case 3: _resultPageName = PageName.expense; break;
+                            case 4: _resultPageName = PageName.transfer; break;
+                          }
+                        });
+                      },
+                      groupValue: _resultPage,
+                      thumbColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
+                      children: {
+                        0: Text(
+                            "Summary",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
+                            ),
+                          ),
+                        1: Text(
+                            "All",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
+                            ),
+                          ),
+                        2: Text(
+                            "Income",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
+                            ),
+                          ),
+                        3: Text(
+                            "Expense",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
+                            ),
+                          ),
+                        4: Text(
+                            "Transfer",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
+                            ),
+                          ),
+                      },
                     ),
-                  1: Text(
-                      "All",
-                      style: TextStyle(
-                        fontFamily: '--apple-system',
-                        fontSize: 11,
-                      ),
-                    ),
-                  2: Text(
-                      "Income",
-                      style: TextStyle(
-                        fontFamily: '--apple-system',
-                        fontSize: 11,
-                      ),
-                    ),
-                  3: Text(
-                      "Expense",
-                      style: TextStyle(
-                        fontFamily: '--apple-system',
-                        fontSize: 11,
-                      ),
-                    ),
-                  4: Text(
-                      "Transfer",
-                      style: TextStyle(
-                        fontFamily: '--apple-system',
-                        fontSize: 11,
-                      ),
-                    ),
-                },
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 5,),
+              InkWell(
+                onTap: (() {
+                  showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+                    return Container(
+                      height: 300,
+                      color: secondaryDark,
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                              border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      "Account"
+                                    )
+                                  )
+                                ),
+                                InkWell(
+                                  onTap: (() {
+                                    if (_selectedWalletList.isNotEmpty) {
+                                      setState(() {
+                                        // clear the selected wallet list
+                                        _selectedWalletList.clear();
+
+                                        // filter and group the transaction
+                                        _filterTheTransaction();
+                                        _groupTransactions();
+
+                                      });
+                                      
+                                      // close the modal dialog
+                                      Navigator.pop(context);
+                                    }
+                                  }),
+                                  child: SizedBox(
+                                    child: Icon(
+                                      Ionicons.close_circle,
+                                      size: 20,
+                                      color: textColor,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10,),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              controller: _walletController,
+                              itemCount: _walletList.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SimpleItem(
+                                  color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
+                                  child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
+                                  description: _walletList[index].name,
+                                  isSelected: (_selectedWalletList[_walletList[index].id] ?? false),
+                                  onTap: (() {
+                                    setState(() {
+                                      // check if this ID previously selected or not?
+                                      if (_selectedWalletList.containsKey(_walletList[index].id)) {
+                                        // delete this data
+                                        _selectedWalletList.remove(_walletList[index].id);
+                                      }
+                                      else {
+                                        // new data, set this as true
+                                        _selectedWalletList[_walletList[index].id] = true;
+                                      }
+
+                                      // once finished call filter the transaction
+                                      // to filter the transactions that listed
+                                      _filterTheTransaction();
+
+                                      // group the transactions
+                                      _groupTransactions();
+                                    });
+                                    Navigator.pop(context);
+                                  }),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 20,),
+                        ],
+                      ),
+                    );
+                  });
+                }),
+                child: SizedBox(
+                  child: Icon(
+                    Ionicons.funnel,
+                    size: 15,
+                    color: (_selectedWalletList.isEmpty ? textColor : accentColors[1]),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10,),
+            ],
           ),
           Expanded(
             child: _getResultChild(),
@@ -220,9 +345,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
           child: ListView.builder(
             controller: _scrollController,
-            itemCount: _transactions.length,
+            itemCount: _filterTransactions.length,
             itemBuilder: (context, index) {
-              return _createItem(_transactions[index], true);
+              return _createItem(_filterTransactions[index], true);
             },
           ),
         );
@@ -366,10 +491,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       // convert result to transaction list mode
       TransactionListModel txnUpdate = result as TransactionListModel;
       // update the current transaction list based on the updated transaction
-      for(int i=0; i<_transactions.length; i++) {
+      for(int i=0; i<_filterTransactions.length; i++) {
         // check which transaction is being updated
-        if(_transactions[i].id == txnUpdate.id) {
-          _transactions[i] = txnUpdate;
+        if(_filterTransactions[i].id == txnUpdate.id) {
+          _filterTransactions[i] = txnUpdate;
           break;
         }
       }
@@ -404,61 +529,61 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // now compute the summary data so we can showed it on the summary page
     // based on the income, and expense
-    for(int i=0; i<_transactions.length; i++) {
+    for(int i=0; i<_filterTransactions.length; i++) {
       // generate the summary key
-      if (_transactions[i].type == 'expense' || _transactions[i].type == 'income') {
-        summaryKey = _transactions[i].type.toLowerCase() + "_" + (_transactions[i].category != null ? _transactions[i].category!.name : '') + "_" + _transactions[i].name + "_" + _transactions[i].wallet.currency;
+      if (_filterTransactions[i].type == 'expense' || _filterTransactions[i].type == 'income') {
+        summaryKey = _filterTransactions[i].type.toLowerCase() + "_" + (_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : '') + "_" + _filterTransactions[i].name + "_" + _filterTransactions[i].wallet.currency;
       }
       else {
-        summaryKey = _transactions[i].type.toLowerCase() + "_" + _transactions[i].wallet.name + "_" + _transactions[i].wallet.currency;
+        summaryKey = _filterTransactions[i].type.toLowerCase() + "_" + _filterTransactions[i].wallet.name + "_" + _filterTransactions[i].wallet.currency;
       }
 
       // check which transaction is being updated
-      switch(_transactions[i].type.toLowerCase()) {
+      switch(_filterTransactions[i].type.toLowerCase()) {
         case 'income':
           // check if summary key exists or not?
           if (!_summaryIncome.containsKey(summaryKey)) {
             _summaryIncome[summaryKey] = [];
           }
-          _summaryIncome[summaryKey]!.add(_transactions[i]);
+          _summaryIncome[summaryKey]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
-          if (!_totalAmountIncome.containsKey(_transactions[i].wallet.currency)) {
-            _totalAmountIncome[_transactions[i].wallet.currency] = 0;
+          if (!_totalAmountIncome.containsKey(_filterTransactions[i].wallet.currency)) {
+            _totalAmountIncome[_filterTransactions[i].wallet.currency] = 0;
           }
-          _totalAmountIncome[_transactions[i].wallet.currency] = _totalAmountIncome[_transactions[i].wallet.currency]! + _transactions[i].amount;
+          _totalAmountIncome[_filterTransactions[i].wallet.currency] = _totalAmountIncome[_filterTransactions[i].wallet.currency]! + _filterTransactions[i].amount;
 
-          _income.add(_transactions[i]);
+          _income.add(_filterTransactions[i]);
           break;
         case 'expense':
           // check if summary key exists or not?
           if (!_summaryExpense.containsKey(summaryKey)) {
             _summaryExpense[summaryKey] = [];
           }
-          _summaryExpense[summaryKey]!.add(_transactions[i]);
+          _summaryExpense[summaryKey]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
-          if (!_totalAmountExpense.containsKey(_transactions[i].wallet.currency)) {
-            _totalAmountExpense[_transactions[i].wallet.currency] = 0;
+          if (!_totalAmountExpense.containsKey(_filterTransactions[i].wallet.currency)) {
+            _totalAmountExpense[_filterTransactions[i].wallet.currency] = 0;
           }
-          _totalAmountExpense[_transactions[i].wallet.currency] = _totalAmountExpense[_transactions[i].wallet.currency]! + _transactions[i].amount;
+          _totalAmountExpense[_filterTransactions[i].wallet.currency] = _totalAmountExpense[_filterTransactions[i].wallet.currency]! + _filterTransactions[i].amount;
 
-          _expense.add(_transactions[i]);
+          _expense.add(_filterTransactions[i]);
           break;
         case 'transfer':
           // check if summary key exists or not?
           if (!_summaryTransfer.containsKey(summaryKey)) {
             _summaryTransfer[summaryKey] = [];
           }
-          _summaryTransfer[summaryKey]!.add(_transactions[i]);
+          _summaryTransfer[summaryKey]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
-          if (!_totalAmountTransfer.containsKey(_transactions[i].wallet.currency)) {
-            _totalAmountTransfer[_transactions[i].wallet.currency] = 0;
+          if (!_totalAmountTransfer.containsKey(_filterTransactions[i].wallet.currency)) {
+            _totalAmountTransfer[_filterTransactions[i].wallet.currency] = 0;
           }
-          _totalAmountTransfer[_transactions[i].wallet.currency] = _totalAmountTransfer[_transactions[i].wallet.currency]! + _transactions[i].amount;
+          _totalAmountTransfer[_filterTransactions[i].wallet.currency] = _totalAmountTransfer[_filterTransactions[i].wallet.currency]! + _filterTransactions[i].amount;
 
-          _transfer.add(_transactions[i]);
+          _transfer.add(_filterTransactions[i]);
           break;
       }
     }
@@ -842,12 +967,46 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     setState(() {
       _transactions.clear();
       _transactions.addAll(transactions);
+
       // set also the start for the next transaction we need to fetch
       _start = start + limit;
+      
+      // filter the transaction
+      _filterTheTransaction();
 
       // group the transactions
       _groupTransactions();
     });
+  }
+
+  void _filterTheTransaction() {
+    // clear the filter transaction first
+    _filterTransactions.clear();
+
+    // check if we have filter enabled or not?
+    if (_selectedWalletList.isEmpty) {
+      _filterTransactions.addAll(_transactions);
+    }
+    else {
+      // loop thru transactions and see if the wallet from and to is on the
+      // selected wallet or not?
+      for(int i=0; i < _transactions.length; i++) {
+        // check if the wallet from and to id is in the selected wallet list
+        // or not?
+        if (_selectedWalletList[_transactions[i].wallet.id] ?? false) {
+          _filterTransactions.add(_transactions[i]);
+        } 
+        else {
+          // check if wallet to is not null
+          if (_transactions[i].walletTo != null) {
+            // check if the wallet to id is on the selected wallet list or not?
+            if (_selectedWalletList[_transactions[i].walletTo!.id] ?? false) {
+              _filterTransactions.add(_transactions[i]);
+            }
+          }
+        }
+      }
+    }
   }
 
   Future <void> _findTransaction(String searchText, String categoryId, String type, int limit, int start) async {
@@ -1036,8 +1195,16 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                 Expanded(
                   child: InkWell(
                     onTap: (() {
-                      setState(() {                      
+                      setState(() {               
+                        // clear the category       
                         _categorySelected.clear();
+
+                        // clear also the filter
+                        _selectedWalletList.clear();
+
+                        // then filter the transaction and group it again
+                        _filterTheTransaction();
+                        _groupTransactions();
                       });
                     }),
                     child: Container(
