@@ -38,10 +38,8 @@ class Globals {
           letterSpacing: 1.0,
         ),
       ), colorScheme: ColorScheme(
-        background: primaryBackground,
         brightness: Brightness.dark,
         error: Colors.red,
-        onBackground: textColor,
         onError: textColor,
         onPrimary: textColor,
         onSecondary: textColor2,
