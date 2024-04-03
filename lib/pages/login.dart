@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
   
   String _bearerToken = "";
   bool _isTokenExpired = false;
-  ConnectivityResult connectivityResult = ConnectivityResult.wifi; // default as already have wifi connection
+  List<ConnectivityResult> connectivityResult = [ConnectivityResult.wifi]; // default as already have wifi connection
   bool _isLoading = true;
   bool _isConnect = true;
 
@@ -404,13 +404,25 @@ class _LoginPageState extends State<LoginPage> {
     // check for internet connection
     try {
       connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
-        _isConnect = false;
+      if (connectivityResult.isEmpty) {
         debugPrint("⛔ No connection");
       }
       else {
+        // check if got connectivity result none or not?
         _isConnect = true;
-        debugPrint("🌏 Got internet connection");
+        connectivityResult.forEach((result) {
+          if (result == ConnectivityResult.none) {
+            _isConnect = false;
+          }
+        });
+
+        // check whether we have connection or not?
+        if (!_isConnect) {
+          debugPrint("⛔ No connection");
+        }
+        else {
+          debugPrint("🌏 Got internet connection");
+        }
       }
     } on PlatformException {
       _isConnect = true;
