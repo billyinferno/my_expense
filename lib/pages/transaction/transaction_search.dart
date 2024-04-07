@@ -1,3 +1,4 @@
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -150,7 +151,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   Widget _getResultPage() {
     // check if we got transactions or not?
-    if (_filterTransactions.isEmpty) {
+    if (_transactions.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -226,6 +227,18 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               ),
               const SizedBox(width: 5,),
               InkWell(
+                onDoubleTap: (() {
+                  // clear the wallet
+                  setState(() {
+                    // clear the selected wallet list
+                    _selectedWalletList.clear();
+
+                    // filter and group the transaction
+                    _filterTheTransaction();
+                    _groupTransactions();
+
+                  });
+                }),
                 onTap: (() {
                   showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
                     return Container(
@@ -261,7 +274,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                                         _groupTransactions();
 
                                       });
-                                      
+
                                       // close the modal dialog
                                       Navigator.pop(context);
                                     }
@@ -320,14 +333,27 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   });
                 }),
                 child: SizedBox(
-                  child: Icon(
-                    Ionicons.funnel,
-                    size: 15,
-                    color: (_selectedWalletList.isEmpty ? textColor : accentColors[1]),
+                  width: 35,
+                  child: badges.Badge(
+                    position: badges.BadgePosition.topEnd(end: 5),
+                    badgeStyle: badges.BadgeStyle (
+                      badgeColor: accentColors[2]
+                    ),
+                    badgeContent: Text(
+                      _selectedWalletList.length.toString(),
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 10
+                      ),
+                    ),
+                    child: Icon(
+                      Ionicons.wallet,
+                      size: 15,
+                      color: textColor,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: 10,),
             ],
           ),
           Expanded(
