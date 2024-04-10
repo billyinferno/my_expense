@@ -1,4 +1,4 @@
-const List wallet_data = [
+const List walletData = [
   {
     "id": 1,
     "name": "Dompet IDR",

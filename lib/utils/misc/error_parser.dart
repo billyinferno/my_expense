@@ -10,9 +10,9 @@ ErrorModel parseErrorMessage(String errorMessage) {
     String actualErrorString = errorMessage.substring(resLoc+4);
 
     // decode the error message to JSON
-    ErrorModel errModel = new ErrorModel.fromJson(jsonDecode(actualErrorString));
+    ErrorModel errModel = ErrorModel.fromJson(jsonDecode(actualErrorString));
     return errModel;
   }
-  ErrorModel invalidErrorMessage = new ErrorModel(-1, "Error", errorMessage);
+  ErrorModel invalidErrorMessage = ErrorModel(-1, "Error", errorMessage);
   return invalidErrorMessage;
 }

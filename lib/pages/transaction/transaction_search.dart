@@ -7,12 +7,10 @@ import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/model/category_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/pages/transaction/transaction_edit.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/color_utils.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
-import 'package:my_expense/utils/anim/page_transition.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
@@ -21,25 +19,25 @@ import 'package:my_expense/widgets/item/simple_item.dart';
 enum PageName { summary, all, income, expense, transfer }
 
 class TransactionSearchPage extends StatefulWidget {
-  const TransactionSearchPage({Key? key}) : super(key: key);
+  const TransactionSearchPage({super.key});
 
   @override
-  _TransactionSearchPageState createState() => _TransactionSearchPageState();
+  State<TransactionSearchPage> createState() => _TransactionSearchPageState();
 }
 
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
-  final fCCY = new NumberFormat("#,##0.00", "en_US");
+  final fCCY = NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService transactionHttp = TransactionHTTPService();
+  final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
 
   String _searchText = "";
   String _categoryId = "";
   String _type = "name";
-  int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
   int _start = 0; // start from 0 page
   
   int _resultPage = 1;
   PageName _resultPageName = PageName.all;
-  Map<PageName, Color> _resultPageColor = {
+  final Map<PageName, Color> _resultPageColor = {
     PageName.summary: accentColors[1],
     PageName.all: accentColors[3],
     PageName.income: accentColors[6],
@@ -48,33 +46,33 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   };
 
   List<TransactionListModel> _transactions = [];
-  List<TransactionListModel> _filterTransactions = [];
-  List<TransactionListModel> _income = [];
-  List<TransactionListModel> _expense = [];
-  List<TransactionListModel> _transfer = [];
-  Map<String, List<TransactionListModel>> _summaryIncome = {};
-  Map<String, List<TransactionListModel>> _summaryExpense = {};
-  Map<String, List<TransactionListModel>> _summaryTransfer = {};
+  final List<TransactionListModel> _filterTransactions = [];
+  final List<TransactionListModel> _income = [];
+  final List<TransactionListModel> _expense = [];
+  final List<TransactionListModel> _transfer = [];
+  final Map<String, List<TransactionListModel>> _summaryIncome = {};
+  final Map<String, List<TransactionListModel>> _summaryExpense = {};
+  final Map<String, List<TransactionListModel>> _summaryTransfer = {};
   Map<String, double> _totalAmountIncome = {};
   Map<String, double> _totalAmountExpense = {};
-  Map<String, double> _totalAmountTransfer = {};
-  List<Widget> _summaryList = [];
+  final Map<String, double> _totalAmountTransfer = {};
+  final List<Widget> _summaryList = [];
 
-  Map<int, CategoryModel> _categorySelected = {};
+  final Map<int, CategoryModel> _categorySelected = {};
   Map<int, CategoryModel> _categoryExpenseList = {};
   Map<int, CategoryModel> _categoryIncomeList = {};
-  Map<int, CategoryModel> _categoryList = {};
+  final Map<int, CategoryModel> _categoryList = {};
 
   List<WalletModel> _walletList = [];
-  Map<int, bool> _selectedWalletList = {};
+  final Map<int, bool> _selectedWalletList = {};
 
-  TextEditingController _searchController = TextEditingController();
-  ScrollController _scrollController = ScrollController();
-  ScrollController _scrollControllerSummary = ScrollController();
-  ScrollController _scrollControllerIncome = ScrollController();
-  ScrollController _scrollControllerExpense = ScrollController();
-  ScrollController _scrollControllerTransfer = ScrollController();
-  ScrollController _walletController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollControllerSummary = ScrollController();
+  final ScrollController _scrollControllerIncome = ScrollController();
+  final ScrollController _scrollControllerExpense = ScrollController();
+  final ScrollController _scrollControllerTransfer = ScrollController();
+  final ScrollController _walletController = ScrollController();
 
   @override
   void initState() {
@@ -113,12 +111,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text("Search")),
+        title: const Center(child: Text("Search")),
         leading: IconButton(
           onPressed: () {
             Navigator.maybePop(context, false);
           },
-          icon: Icon(
+          icon: const Icon(
             Ionicons.close,
           ),
         ),
@@ -132,7 +130,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         children: <Widget>[
           Container(
             width: double.infinity,
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             color: secondaryDark,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,7 +182,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                       },
                       groupValue: _resultPage,
                       thumbColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
-                      children: {
+                      children: const {
                         0: Text(
                             "Summary",
                             style: TextStyle(
@@ -248,14 +246,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                         children: <Widget>[
                           Container(
                             height: 40,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Expanded(
+                                const Expanded(
                                   child: Center(
                                     child: Text(
                                       "Account"
@@ -279,7 +277,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                                       Navigator.pop(context);
                                     }
                                   }),
-                                  child: SizedBox(
+                                  child: const SizedBox(
                                     child: Icon(
                                       Ionicons.close_circle,
                                       size: 20,
@@ -298,7 +296,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                               itemBuilder: (BuildContext context, int index) {
                                 return SimpleItem(
                                   color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                                  child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
                                   description: _walletList[index].name,
                                   isSelected: (_selectedWalletList[_walletList[index].id] ?? false),
                                   onTap: (() {
@@ -322,6 +319,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                                     });
                                     Navigator.pop(context);
                                   }),
+                                  child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
                                 );
                               },
                             ),
@@ -341,12 +339,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     ),
                     badgeContent: Text(
                       _selectedWalletList.length.toString(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: textColor,
                         fontSize: 10
                       ),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Ionicons.wallet,
                       size: 15,
                       color: textColor,
@@ -474,7 +472,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            transaction.wallet.currency + " " + fCCY.format(transaction.amount),
+            "${transaction.wallet.currency} ${fCCY.format(transaction.amount)}",
             style: TextStyle(
               color: (transaction.type == "expense" ? accentColors[2] : accentColors[0]),
             ),
@@ -488,7 +486,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            transaction.wallet.currency + " " + fCCY.format(transaction.amount),
+            "${transaction.wallet.currency} ${fCCY.format(transaction.amount)}",
             style: TextStyle(
               color: accentColors[5],
             ),
@@ -497,7 +495,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           Visibility(
             visible: (transaction.walletTo != null),
             child: Text(
-              (transaction.walletTo != null ? transaction.walletTo!.currency : '') + " " + fCCY.format(transaction.amount * transaction.exchangeRate),
+              "${transaction.walletTo != null ? transaction.walletTo!.currency : ''} ${fCCY.format(transaction.amount * transaction.exchangeRate)}",
               style: TextStyle(
                 color: lighten(accentColors[5], 0.25),
               ),
@@ -511,27 +509,27 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   Future<void> _showTransactionEditScreen(TransactionListModel txn) async {
     // go to the transaction edit for this txn
-    final result = await Navigator.push(context, createAnimationRoute(new TransactionEditPage(txn)));
-    String resultType = result.runtimeType.toString();
-    if(resultType == "TransactionListModel") {
-      // convert result to transaction list mode
-      TransactionListModel txnUpdate = result as TransactionListModel;
-      // update the current transaction list based on the updated transaction
-      for(int i=0; i<_filterTransactions.length; i++) {
-        // check which transaction is being updated
-        if(_filterTransactions[i].id == txnUpdate.id) {
-          _filterTransactions[i] = txnUpdate;
-          break;
-        }
-      }
-
-      // after that we will perform grouping of the transactions to income, expense, and transfer
-      _groupTransactions();
-
-      setState(() {
+    await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((result) async {
+      // check if we got return
+      if (result != null) {
         // set state to rebuild the widget
-      });
-    }
+        setState(() {
+          // convert result to transaction list mode
+          TransactionListModel txnUpdate = result as TransactionListModel;
+          // update the current transaction list based on the updated transaction
+          for(int i=0; i<_filterTransactions.length; i++) {
+            // check which transaction is being updated
+            if(_filterTransactions[i].id == txnUpdate.id) {
+              _filterTransactions[i] = txnUpdate;
+              break;
+            }
+          }
+
+          // after that we will perform grouping of the transactions to income, expense, and transfer
+          _groupTransactions();
+        });
+      }
+    });
   }
 
   void _groupTransactions() {
@@ -558,10 +556,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     for(int i=0; i<_filterTransactions.length; i++) {
       // generate the summary key
       if (_filterTransactions[i].type == 'expense' || _filterTransactions[i].type == 'income') {
-        summaryKey = _filterTransactions[i].type.toLowerCase() + "_" + (_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : '') + "_" + _filterTransactions[i].name + "_" + _filterTransactions[i].wallet.currency;
+        summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : ''}_${_filterTransactions[i].name}_${_filterTransactions[i].wallet.currency}";
       }
       else {
-        summaryKey = _filterTransactions[i].type.toLowerCase() + "_" + _filterTransactions[i].wallet.name + "_" + _filterTransactions[i].wallet.currency;
+        summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].wallet.name}_${_filterTransactions[i].wallet.currency}";
       }
 
       // check which transaction is being updated
@@ -657,7 +655,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       endDate = null;
       count = 0;
 
-      value.forEach((data) {
+      for (TransactionListModel data in value) {
         if (startDate == null) {
           startDate = data.date;
         }
@@ -678,7 +676,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
         amount += data.amount;
         count++;
-      });
+      }
       
       // create TransactionModel based on the value
       TransactionListModel txn = TransactionListModel(
@@ -733,7 +731,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       endDate = null;
       count = 0;
 
-      value.forEach((data) {
+      for (TransactionListModel data in value) {
         if (startDate == null) {
           startDate = data.date;
         }
@@ -754,7 +752,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
         amount += data.amount;
         count++;
-      });
+      }
       
       // create TransactionModel based on the value
       TransactionListModel txn = TransactionListModel(
@@ -809,7 +807,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       endDate = null;
       count = 0;
 
-      value.forEach((data) {
+      for (TransactionListModel data in value) {
         if (startDate == null) {
           startDate = data.date;
         }
@@ -830,7 +828,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
         amount += data.amount;
         count++;
-      });
+      }
       
       // create TransactionModel based on the value
       TransactionListModel txn = TransactionListModel(
@@ -857,14 +855,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     data.forEach((key, value) {
       ret.add(
-        Container(
+        SizedBox(
           width: double.infinity,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Text(
-                "Total " + key,
+                "Total $key",
                 style: TextStyle(
                   color: color,
                 ),
@@ -893,7 +891,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   Widget _createSummaryItem({required TransactionListModel txn, required DateTime startDate, required DateTime endDate, required int count}){
     return Container(
       padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
       ),
       child: Row(
@@ -901,7 +899,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           _categoryIcon(name: (txn.category != null ? txn.category!.name : ''), type: txn.type),
-          SizedBox(width: 10,),
+          const SizedBox(width: 10,),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -912,28 +910,28 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  DateFormat('dd/MM/yyyy').format(startDate.toLocal()) + " - " + DateFormat('dd/MM/yyyy').format(endDate.toLocal()),
-                  style: TextStyle(
+                  "${DateFormat('dd/MM/yyyy').format(startDate.toLocal())} - ${DateFormat('dd/MM/yyyy').format(endDate.toLocal())}",
+                  style: const TextStyle(
                     fontSize: 10,
                   ),
                 ),
                 Text(
                   (txn.category != null ? txn.category!.name : ''),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 10,
                   ),
                 ),
                 const SizedBox(height: 5,),
                 Text(
                   "${count.toString()} time${(count > 1 ? 's' : '')}",
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 10,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(width: 10,),
+          const SizedBox(width: 10,),
           _getAmount(txn),
         ],
       ),
@@ -954,7 +952,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       }),
       child: Container(
         height: 50,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
         ),
         child: Row(
@@ -962,7 +960,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             _categoryIcon(name: name, type: txn.type),
-            SizedBox(width: 10,),
+            const SizedBox(width: 10,),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -974,14 +972,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   ),
                   Text(
                     DateFormat('E, dd MMM yyyy').format(txn.date.toLocal()),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 10,
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(width: 10,),
+            const SizedBox(width: 10,),
             _getAmount(txn),
           ],
         ),
@@ -1059,7 +1057,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       _categorySelected.forEach((key, value) {
         // if not the first one, then add ,
         if (_categoryId.isNotEmpty) {
-          _categoryId = _categoryId + ',';
+          _categoryId = '$_categoryId,';
         }
         _categoryId = _categoryId + key.toString();
       });
@@ -1140,26 +1138,26 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       children: <Widget>[
         CupertinoSearchTextField(
           controller: _searchController,
-          style: TextStyle(
+          style: const TextStyle(
             color: textColor2,
             fontFamily: '--apple-system'
           ),
-          suffixIcon: Icon(Ionicons.arrow_forward_circle),
+          suffixIcon: const Icon(Ionicons.arrow_forward_circle),
           onSubmitted: ((_) async {
             await _submitSearch().then((_) {
               // remove the focus from the text
-              FocusScopeNode _currentFocus = FocusScope.of(context);
-              if(!_currentFocus.hasPrimaryFocus) {
-                _currentFocus.unfocus();
+              FocusScopeNode currentFocus = FocusScope.of(context);
+              if(!currentFocus.hasPrimaryFocus) {
+                currentFocus.unfocus();
               }
             });
           }),
           onSuffixTap: (() async {
             _submitSearch().then((_) {
               // remove the focus from the text
-              FocusScopeNode _currentFocus = FocusScope.of(context);
-              if(!_currentFocus.hasPrimaryFocus) {
-                _currentFocus.unfocus();
+              FocusScopeNode currentFocusSuffix = FocusScope.of(context);
+              if(!currentFocusSuffix.hasPrimaryFocus) {
+                currentFocusSuffix.unfocus();
               }
             });
           }),
@@ -1182,7 +1180,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                       height: 30,
                       decoration: BoxDecoration(
                         color: primaryDark,
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(10),
                           bottomLeft: Radius.circular(10),
                         ),
@@ -1192,17 +1190,17 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           width: 1.0,
                         )
                       ),
-                      child: Row(
+                      child: const Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          const SizedBox(width: 10,),
+                          SizedBox(width: 10,),
                           Icon(
                             Ionicons.add,
                             size: 20,
                             color: textColor,
                           ),
-                          const SizedBox(width: 10,),
+                          SizedBox(width: 10,),
                           Expanded(
                             child: Center(
                               child: Text(
@@ -1243,17 +1241,17 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           width: 1.0,
                         )
                       ),
-                      child: Row(
+                      child: const Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          const SizedBox(width: 10,),
+                          SizedBox(width: 10,),
                           Icon(
                             Ionicons.trash,
                             size: 20,
                             color: textColor,
                           ),
-                          const SizedBox(width: 10,),
+                          SizedBox(width: 10,),
                           Expanded(
                             child: Center(
                               child: Text(
@@ -1278,7 +1276,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                       height: 30,
                       decoration: BoxDecoration(
                         color: primaryDark,
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(10),
                           bottomRight: Radius.circular(10),
                         ),
@@ -1288,17 +1286,17 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           width: 1.0,
                         )
                       ),
-                      child: Row(
+                      child: const Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          const SizedBox(width: 10,),
+                          SizedBox(width: 10,),
                           Icon(
                             Ionicons.search,
                             size: 20,
                             color: textColor,
                           ),
-                          const SizedBox(width: 10,),
+                          SizedBox(width: 10,),
                           Expanded(
                             child: Center(
                               child: Text(
@@ -1337,10 +1335,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           children: <Widget>[
             Container(
               height: 40,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
               ),
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -1350,7 +1348,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                 ],
               ),
             ),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             Expanded(
               child: GridView.count(
                 crossAxisCount: 4,
@@ -1364,27 +1362,27 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   List<Widget> _generateIconCategory() {
-    List<Widget> _ret = [];
+    List<Widget> ret = [];
 
     // loop thru all the _currentCategoryList, and generate the category icon
     _categoryList.forEach((key, value) {
-      _ret.add(_iconCategory(value));
+      ret.add(_iconCategory(value));
     });
 
-    return _ret;
+    return ret;
   }
 
   Widget _iconCategory(CategoryModel category) {
     // check if this is expense or income
-    Color _iconColor;
-    Icon _icon;
+    Color iconColor;
+    Icon icon;
 
     if(category.type.toLowerCase() == "expense") {
-      _iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
-      _icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
+      iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
+      icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
     } else {
-      _iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
-      _icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
+      iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
+      icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
     }
 
     return GestureDetector(
@@ -1402,49 +1400,47 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Maximum selected category is 10"));
         }
       },
-      child: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: _iconColor,
-                  border: Border.all(
-                    color: (_categorySelected.containsKey(category.id) ? accentColors[4] : Colors.transparent),
-                    width: 2.0,
-                    style: BorderStyle.solid,
-                  )
-                ),
-                child: _icon,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Center(
+            child: Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: iconColor,
+                border: Border.all(
+                  color: (_categorySelected.containsKey(category.id) ? accentColors[4] : Colors.transparent),
+                  width: 2.0,
+                  style: BorderStyle.solid,
+                )
               ),
+              child: icon,
             ),
-            const SizedBox(height: 10,),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      category.name,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: textColor,
-                      ),
-                      softWrap: true,
-                      textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10,),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Center(
+                  child: Text(
+                    category.name,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: textColor,
                     ),
+                    softWrap: true,
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -1466,7 +1462,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             avatar: _categoryIcon(type: value.type, name: value.name, height: 20, width: 20, size: 15),
             label: Text(value.name),
             backgroundColor: (value.type == 'expense' ? IconColorList.getExpenseColor(value.name) : IconColorList.getIncomeColor(value.name)),
-            padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
           ),
         )
       );  

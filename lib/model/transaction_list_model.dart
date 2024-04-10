@@ -31,20 +31,20 @@ class TransactionListModel {
 
   factory TransactionListModel.fromJson(Map<String, dynamic> json) {
     //print(json.toString());
-    CategoryTransactionModel? _cat;
+    CategoryTransactionModel? cat;
     if(json["category"] != null) {
-      _cat = CategoryTransactionModel.fromJson(json["category"]);
+      cat = CategoryTransactionModel.fromJson(json["category"]);
     }
     else {
-      _cat = null;
+      cat = null;
     }
 
-    WalletTransactionModel? _walletTo;
+    WalletTransactionModel? walletTo;
     if(json["walletTo"] != null) {
-      _walletTo = WalletTransactionModel.fromJson(json["walletTo"]);
+      walletTo = WalletTransactionModel.fromJson(json["walletTo"]);
     }
     else {
-      _walletTo = null;
+      walletTo = null;
     }
 
     // print(json["date"]);
@@ -58,9 +58,9 @@ class TransactionListModel {
       json["type"],
       DateTime.parse(json["date"]).toLocal(),
       json["description"],
-      _cat,
+      cat,
       WalletTransactionModel.fromJson(json["wallet"]),
-      _walletTo,
+      walletTo,
       UserPermissionModel.fromJson(json["users_permissions_user"]),
       json["cleared"],
       json["amount"],
@@ -74,8 +74,10 @@ class TransactionListModel {
     "type": type,
     "date": date.toIso8601String(),
     "description": description,
+    // ignore: prefer_null_aware_operators
     "category": (category == null ? null : category!.toJson()),
     "wallet": wallet.toJson(),
+    // ignore: prefer_null_aware_operators
     "walletTo": (walletTo == null ? null : walletTo!.toJson()),
     "users_permissions_user": usersPermissionsUser.toJson(),
     "cleared": cleared,

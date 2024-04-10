@@ -25,21 +25,20 @@ class UserHTTPService {
     //print("<fetchMe>" + _bearerToken);
 
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response =
-          await http.get(Uri.parse(Globals.apiURL + 'users/me'), headers: {
-        HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          await http.get(Uri.parse('${Globals.apiURL}users/me'), headers: {
+        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
       });
 
       if (response.statusCode == 200) {
-        UsersMeModel _userModel =
+        UsersMeModel userModel =
             UsersMeModel.fromJson(jsonDecode(response.body));
-        await UserSharedPreferences.setUserMe(_userModel);
-        return _userModel;
+        await UserSharedPreferences.setUserMe(userModel);
+        return userModel;
       }
 
-      print("Got error <fetchMe>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token when fetch user data"}');
@@ -48,7 +47,7 @@ class UserHTTPService {
 
   Future<LoginModel> login(String identifier, String password) async {
     final response = await http.post(
-      Uri.parse(Globals.apiURL + 'auth/local'),
+      Uri.parse('${Globals.apiURL}auth/local'),
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -57,13 +56,12 @@ class UserHTTPService {
 
     if (response.statusCode == 200) {
       // parse the login data and get the login model
-      LoginModel _loginModel = LoginModel.fromJson(jsonDecode(response.body));
+      LoginModel loginModel = LoginModel.fromJson(jsonDecode(response.body));
 
-      return _loginModel;
+      return loginModel;
     }
 
-    print("Got error <login>");
-    throw Exception("res=" + response.body);
+    throw Exception("res=${response.body}");
   }
 
   Future<void> updatePassword(
@@ -71,33 +69,32 @@ class UserHTTPService {
     _checkJWT();
 
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       //await Future.delayed(Duration(seconds: 3));
 
-      var _data = {
+      var data = {
         "username": userName,
         "password": oldPassword,
         "newPassword": newPassword,
         "confirmPassword": newPassword
       };
 
-      final response = await http.post(Uri.parse(Globals.apiURL + 'password'),
+      final response = await http.post(Uri.parse('${Globals.apiURL}password'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: jsonEncode(_data));
+          body: jsonEncode(data));
 
       // check the response from the password update
       if (response.statusCode == 200) {
         // this will response back our JWT token
-        LoginModel _loginModel = LoginModel.fromJson(jsonDecode(response.body));
+        LoginModel loginModel = LoginModel.fromJson(jsonDecode(response.body));
 
         // replace the login model on shared preferences
-        await UserSharedPreferences.setUserLogin(_loginModel);
+        await UserSharedPreferences.setUserLogin(loginModel);
       } else {
-        print("Got error <updatePassword>");
-        throw Exception("res=" + response.body);
+        throw Exception("res=${response.body}");
       }
 
       /*print("Got error <fetchMe>");

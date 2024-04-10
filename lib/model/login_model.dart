@@ -5,8 +5,8 @@ class LoginModel {
   LoginModel(this.jwt, this.user);
 
   factory LoginModel.fromJson(Map<String, dynamic> json) {
-    LoginUserModel _user = LoginUserModel.fromJson(json['user']);
-    return LoginModel(json['jwt'], _user);
+    LoginUserModel user = LoginUserModel.fromJson(json['user']);
+    return LoginModel(json['jwt'], user);
   }
 
   Map<String, dynamic> toJson() => {

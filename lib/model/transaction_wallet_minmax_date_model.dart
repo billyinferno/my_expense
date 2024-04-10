@@ -23,7 +23,9 @@ class TransactionWalletMinMaxDateModel {
     );
 
     Map<String, dynamic> toJson() => {
+        // ignore: prefer_null_aware_operators
         "min_date": (minDate == null ? null : minDate!.toIso8601String()),
+        // ignore: prefer_null_aware_operators
         "max_date": (maxDate == null ? null : maxDate!.toIso8601String()),
     };
 }

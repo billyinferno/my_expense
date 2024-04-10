@@ -1,4 +1,4 @@
-import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class MyBox {
@@ -6,7 +6,7 @@ class MyBox {
   static Box<dynamic>? encryptedBox;
 
   static Future<void> init() async {
-    print("⌛ Init Box");
+    debugPrint("⌛ Init Box");
 
     // generate hive box for stored the jwt token
     if (keyBox == null) {
@@ -14,28 +14,28 @@ class MyBox {
     }
     else {
       // we already have keyBox, so we can compact it, close and re-open it?
-      print("🗜 Compacting Box on init");
+      debugPrint("🗜 Compacting Box on init");
       await keyBox!.compact();
     }
 
     // check if we already have key or not?
-    var _key;
-    var _keyInt;
+    List<int> key;
+    Uint8List keyInt;
     if (!keyBox!.containsKey('key')) {
       //print("HIVE : key not exists");
-      _key = Hive.generateSecureKey();
-      _keyInt = _key as Uint8List;
-      keyBox!.put('key', _key);
+      key = Hive.generateSecureKey();
+      keyInt = key as Uint8List;
+      keyBox!.put('key', key);
     } else {
       //print("HIVE : key exists");
-      _key = keyBox!.get('key');
-      _keyInt = _key as Uint8List;
+      key = keyBox!.get('key');
+      keyInt = key as Uint8List;
     }
 
     // open the encrypted box based on the key we put on the storage
     encryptedBox = await Hive.openBox(
       'vault',
-      encryptionCipher: HiveAesCipher(_keyInt),
+      encryptionCipher: HiveAesCipher(keyInt),
     );
     await encryptedBox!.compact();
   }
@@ -114,32 +114,32 @@ class MyBox {
   }
 
   static List<String> getKeys(String key) {
-    List<String> _result = [];
-    String _key = "";
-    var _keys = keyBox!.keys;
-    if(_keys.length > 0) {
-      _keys.forEach((_keyDynamic) {
-        _key = _keyDynamic.toString();
-        if(_key.contains(key)) {
-          _result.add(_key);
+    List<String> result = [];
+    String key0 = "";
+    var keys = keyBox!.keys;
+    if(keys.isNotEmpty) {
+      for (var keyDynamic in keys) {
+        key0 = keyDynamic.toString();
+        if(key0.contains(key)) {
+          result.add(key0);
         }
-      });
+      }
     }
-    return _result;
+    return result;
   }
 
   static Future<void> clear() async {
     if(keyBox != null) {
       // clear the keyBox
       var keys = keyBox!.keys;
-      keys.forEach((key) {
+      for (var key in keys) {
         // skip the "key" as this is hold the encryption key for our encryptedBox
         // if we removed the key, it will got error during logon as we cannot re-open the
         // encrypted box and need to recreate it.
         if(key.toString().toLowerCase() != "key") {
           keyBox!.delete(key);
         }
-      });
+      }
       await keyBox!.compact();
       
       // delete the jwt from encrypted box
@@ -153,9 +153,9 @@ class MyBox {
   }
 
   static Future<void> delete(String key, [bool? exact]) async {
-    bool _exact = (exact ?? false);
+    bool isExact = (exact ?? false);
 
-    if(_exact) {
+    if(isExact) {
       // check if got key on the key box or not?
       if(keyBox!.containsKey(key)) {
         // can be deleted
@@ -164,14 +164,14 @@ class MyBox {
     }
     else {
       // get all the keys and find if the key string is on the key or not?
-      var _keys = keyBox!.keys;
-      _keys.forEach((keyDynamic) {
+      var keys = keyBox!.keys;
+      for (var keyDynamic in keys) {
         String key = keyDynamic.toString();
         if(key.contains(key)) {
           // delete this data
           keyBox!.delete(key);
         }
-      });
+      }
     }
   }
 }

@@ -35,7 +35,7 @@ import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatefulWidget {
-  const UserPage({Key? key}) : super(key: key);
+  const UserPage({super.key});
 
   @override
   State<UserPage> createState() => _UserPageState();
@@ -104,7 +104,7 @@ class _UserPageState extends State<UserPage> {
 
     // get user default currency
     currencies = WalletSharedPreferences.getWalletUserCurrency();
-    if(currencies.length > 0) {
+    if(currencies.isNotEmpty) {
       for (int i = 0; i < currencies.length; i++) {
         if (userMe.defaultBudgetCurrency == currencies[i].id) {
           currentCurrency = currencies[i];
@@ -120,7 +120,7 @@ class _UserPageState extends State<UserPage> {
 
     // get list of wallets from shared preferences
     wallets = WalletSharedPreferences.getWallets(false);
-    if(userMe.defaultWallet != null && wallets.length > 0) {
+    if(userMe.defaultWallet != null && wallets.isNotEmpty) {
       for (int i=0; i<wallets.length; i++) {
         if(userMe.defaultWallet == wallets[i].id) {
           currentWallet = wallets[i];
@@ -152,7 +152,7 @@ class _UserPageState extends State<UserPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text("User")),
+        title: const Center(child: Text("User")),
         actions: <Widget>[
           IconButton(
             onPressed: () {
@@ -170,25 +170,25 @@ class _UserPageState extends State<UserPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(25),
+            padding: const EdgeInsets.all(25),
             color: secondaryDark,
             width: double.infinity,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
+                const Text(
                   "Hello,",
                   style: TextStyle(
                     color: textColor2,
                     fontSize: 15,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Text(
                   userMe.username,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: textColor,
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
@@ -201,7 +201,7 @@ class _UserPageState extends State<UserPage> {
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: Container(
-                padding: EdgeInsets.fromLTRB(25, 0, 25, 0),
+                padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -215,7 +215,7 @@ class _UserPageState extends State<UserPage> {
                         child: Text(
                           selectedExpenseCategory!.name.toString(),
                           //textAlign: TextAlign.right,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: textColor,
                           ),
                         ),
@@ -231,7 +231,7 @@ class _UserPageState extends State<UserPage> {
                                 children: <Widget>[
                                   Container(
                                     height: 40,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       border: Border(
                                         bottom: BorderSide(
                                           color: primaryLight,
@@ -239,7 +239,7 @@ class _UserPageState extends State<UserPage> {
                                         )
                                       ),
                                     ),
-                                    child: Row(
+                                    child: const Row(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
@@ -251,7 +251,7 @@ class _UserPageState extends State<UserPage> {
                                       ],
                                     ),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 10,
                                   ),
                                   Expanded(
@@ -275,8 +275,7 @@ class _UserPageState extends State<UserPage> {
                         alignment: Alignment.centerRight,
                         child: Text(
                           selectedIncomeCategory!.name.toString(),
-                          //textAlign: TextAlign.right,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: textColor,
                           ),
                         ),
@@ -292,33 +291,20 @@ class _UserPageState extends State<UserPage> {
                                 children: <Widget>[
                                   Container(
                                     height: 40,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       border: Border(
-                                          bottom: BorderSide(
-                                              color: primaryLight, width: 1.0)),
+                                        bottom: BorderSide(
+                                          color: primaryLight,
+                                          width: 1.0
+                                        )
+                                      ),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          child: Center(
-                                              child: Text("Income Category")),
-                                        ),
-                                        IconButton(
-                                          onPressed: () {
-                                            //refreshCategory();
-                                          },
-                                          icon: Icon(
-                                            Ionicons.refresh,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ],
+                                    child: const Expanded(
+                                      child: Center(
+                                          child: Text("Income Category")),
                                     ),
                                   ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 10,
                                   ),
                                   Expanded(
@@ -342,7 +328,7 @@ class _UserPageState extends State<UserPage> {
                         child: Text(
                           selectedCurrency!.symbol.toString(),
                           //textAlign: TextAlign.right,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: textColor,
                           ),
                         ),
@@ -358,12 +344,15 @@ class _UserPageState extends State<UserPage> {
                                 children: <Widget>[
                                   Container(
                                     height: 40,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       border: Border(
-                                          bottom: BorderSide(
-                                              color: primaryLight, width: 1.0)),
+                                        bottom: BorderSide(
+                                          color: primaryLight,
+                                          width: 1.0
+                                        )
+                                      ),
                                     ),
-                                    child: Center(child: Text("Currencies")),
+                                    child: const Center(child: Text("Currencies")),
                                   ),
                                   Expanded(
                                     child: ListView.builder(
@@ -372,10 +361,6 @@ class _UserPageState extends State<UserPage> {
                                       itemBuilder: (BuildContext context, int index) {
                                         return SimpleItem(
                                           color: accentColors[6],
-                                          child: FittedBox(
-                                            child: Text(currencies[index].symbol.toUpperCase()),
-                                            fit: BoxFit.contain,
-                                          ),
                                           description: currencies[index].description,
                                           isSelected: selectedCurrency!.id == currencies[index].id,
                                           onTap: (() {
@@ -392,6 +377,10 @@ class _UserPageState extends State<UserPage> {
                                             });
                                             Navigator.pop(context);
                                           }),
+                                          child: FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: Text(currencies[index].symbol.toUpperCase()),
+                                          ),
                                         );
                                       },
                                     ),
@@ -412,8 +401,7 @@ class _UserPageState extends State<UserPage> {
                         alignment: Alignment.centerRight,
                         child: Text(
                           selectedWallet!.name.toString(),
-                          //textAlign: TextAlign.right,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: textColor,
                           ),
                         ),
@@ -427,10 +415,15 @@ class _UserPageState extends State<UserPage> {
                               children: <Widget>[
                                 Container(
                                   height: 40,
-                                  decoration: BoxDecoration(
-                                    border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: primaryLight,
+                                        width: 1.0
+                                      ),
+                                    ),
                                   ),
-                                  child: Row(
+                                  child: const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
@@ -447,7 +440,6 @@ class _UserPageState extends State<UserPage> {
                                     itemBuilder: (BuildContext context, int index) {
                                       return SimpleItem(
                                         color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-                                        child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
                                         description: wallets[index].name,
                                         isSelected: (currentWallet!.id == wallets[index].id),
                                         onTap: (() {
@@ -463,6 +455,7 @@ class _UserPageState extends State<UserPage> {
                                           });
                                           Navigator.pop(context);
                                         }),
+                                        child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
                                       );
                                     },
                                   ),
@@ -478,7 +471,7 @@ class _UserPageState extends State<UserPage> {
                       icon: Ionicons.pricetag_outline,
                       iconColor: accentColors[4],
                       label: "",
-                      value: Align(
+                      value: const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Refresh Transaction Tags",
@@ -500,7 +493,7 @@ class _UserPageState extends State<UserPage> {
                       icon: Ionicons.lock_closed_outline,
                       iconColor: accentColors[1],
                       label: "",
-                      value: Align(
+                      value: const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Change Password",
@@ -542,8 +535,7 @@ class _UserPageState extends State<UserPage> {
                         alignment: Alignment.centerRight,
                         child: Text(
                           Globals.appVersion,
-                          //textAlign: TextAlign.right,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: textColor,
                           ),
                         ),
@@ -560,8 +552,7 @@ class _UserPageState extends State<UserPage> {
                         alignment: Alignment.centerRight,
                         child: Text(
                           Globals.flutterVersion,
-                          //textAlign: TextAlign.right,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: textColor,
                           ),
                         ),
@@ -574,7 +565,7 @@ class _UserPageState extends State<UserPage> {
                       icon: Ionicons.log_out_outline,
                       iconColor: accentColors[2],
                       label: "",
-                      value: Align(
+                      value: const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Logout",
@@ -611,7 +602,7 @@ class _UserPageState extends State<UserPage> {
     // check the result of the dialog box
     result.then((value) async {
       if (value == true) {
-        print("logout user");
+        debugPrint("logout user");
         await logout();
       }
     });
@@ -631,15 +622,15 @@ class _UserPageState extends State<UserPage> {
 
   Widget iconCategory(CategoryModel category) {
     // check if this is expense or income
-    Color _iconColor;
-    Icon _icon;
+    Color iconColor;
+    Icon icon;
 
     if (category.type.toLowerCase() == "expense") {
-      _iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
-      _icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
+      iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
+      icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
     } else {
-      _iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
-      _icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
+      iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
+      icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
     }
 
     return GestureDetector(
@@ -670,7 +661,7 @@ class _UserPageState extends State<UserPage> {
         }
       },
       child: Container(
-        padding: EdgeInsets.all(5),
+        padding: const EdgeInsets.all(5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -681,15 +672,15 @@ class _UserPageState extends State<UserPage> {
                 width: 40,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(40),
-                  color: _iconColor,
+                  color: iconColor,
                 ),
-                child: _icon,
+                child: icon,
               ),
             ),
             Center(
               child: Text(
                 category.name,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 10,
                   color: textColor,
                 ),
@@ -704,25 +695,25 @@ class _UserPageState extends State<UserPage> {
   }
 
   List<Widget> generateExpenseCategory() {
-    List<Widget> _ret = [];
+    List<Widget> ret = [];
 
     // loop thru all the _currentCategoryList, and generate the category icon
     expenseCategory.forEach((key, value) {
-      _ret.add(iconCategory(value));
+      ret.add(iconCategory(value));
     });
 
-    return _ret;
+    return ret;
   }
 
   List<Widget> generateIncomeCategory() {
-    List<Widget> _ret = [];
+    List<Widget> ret = [];
 
     // loop thru all the _currentCategoryList, and generate the category icon
     incomeCategory.forEach((key, value) {
-      _ret.add(iconCategory(value));
+      ret.add(iconCategory(value));
     });
 
-    return _ret;
+    return ret;
   }
 
   bool compareCategory(CategoryModel cat1, CategoryModel cat2) {
@@ -773,8 +764,9 @@ class _UserPageState extends State<UserPage> {
         )
       );
     }).onError((error, stackTrace) {
-      print("Got error when update default category!");
-      print(error.toString());
+      debugPrint("Got error when update default category!");
+      debugPrint(error.toString());
+      debugPrintStack(stackTrace: stackTrace);
 
       Navigator.pop(context);
 
@@ -791,11 +783,11 @@ class _UserPageState extends State<UserPage> {
     showLoaderDialog(context);
 
     // get the current date of the budget that we need to load
-    String _currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
+    String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
 
     Future.wait([
       budgetHTTP.updateBudgetCurrency(currencyID),
-      futureBudgetList = budgetHTTP.fetchBudgetDate(currencyID, _currentBudgetDate),
+      futureBudgetList = budgetHTTP.fetchBudgetDate(currencyID, currentBudgetDate),
     ]).then((_) {
       refreshUserMe();
       currentCurrency = selectedCurrency!;
@@ -803,7 +795,7 @@ class _UserPageState extends State<UserPage> {
       // update the budget provider and budget shared preferences
       // now we can set the shared preferences of budget
       futureBudgetList.then((value) {
-        BudgetSharedPreferences.setBudget(currencyID, _currentBudgetDate, value);
+        BudgetSharedPreferences.setBudget(currencyID, currentBudgetDate, value);
       });
 
       Navigator.pop(context);
@@ -818,8 +810,9 @@ class _UserPageState extends State<UserPage> {
         )
       );
     }).onError((error, stackTrace) {
-      print("Got error when update default budget currency!");
-      print(error.toString());
+      debugPrint("Got error when update default budget currency!");
+      debugPrint(error.toString());
+      debugPrintStack(stackTrace: stackTrace);
 
       selectedCurrency = currentCurrency;
       Navigator.pop(context);
@@ -854,8 +847,9 @@ class _UserPageState extends State<UserPage> {
         )
       );
     }).onError((error, stackTrace) {
-      print("Got error when update default wallet!");
-      print(error.toString());
+      debugPrint("Got error when update default wallet!");
+      debugPrint(error.toString());
+      debugPrintStack(stackTrace: stackTrace);
 
       selectedWallet = currentWallet;
       Navigator.pop(context);
@@ -900,22 +894,24 @@ class _UserPageState extends State<UserPage> {
     result.then((value) async {
       if (value == true) {
         // navigate to the remove pin screen.
-        final result = await Navigator.push(context, createAnimationRoute(new PinRemovePage()));
+        final result = await Navigator.push(context, createAnimationRoute(const PinRemovePage()));
         if(result) {
           // set the pin as disabled
           setIsPinEnabled(false);
           // refresh the pin model value
           pinUser = PinSharedPreferences.getPin();
 
-          ScaffoldMessenger.of(context).showSnackBar(
-          createSnackBar(
-            message: "PIN is removed",
-            icon: Icon(
-              Ionicons.checkmark_circle_outline,
-              color: accentColors[6],
-            )
-          )
-        );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              createSnackBar(
+                message: "PIN is removed",
+                icon: Icon(
+                  Ionicons.checkmark_circle_outline,
+                  color: accentColors[6],
+                )
+              )
+            );
+          }
         }
       }
     });
@@ -923,22 +919,24 @@ class _UserPageState extends State<UserPage> {
 
   void showSetupPin() async {
     // navigate to the remove pin screen.
-    final result = await Navigator.push(context, createAnimationRoute(new PinSetupPage()));
+    final result = await Navigator.push(context, createAnimationRoute(const PinSetupPage()));
     if(result) {
       // set the pin as disabled
       setIsPinEnabled(true);
       // refresh the pin model value
       pinUser = PinSharedPreferences.getPin();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "PIN is set",
-          icon: Icon(
-            Ionicons.checkmark_circle_outline,
-            color: accentColors[6],
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "PIN is set",
+            icon: Icon(
+              Ionicons.checkmark_circle_outline,
+              color: accentColors[6],
+            )
           )
-        )
-      );
+        );
+      }
     }
   }
 }

@@ -17,13 +17,15 @@ import 'package:my_expense/widgets/input/wallet.dart';
 import 'package:provider/provider.dart';
 
 class HomeWallet extends StatefulWidget {
+  const HomeWallet({super.key});
+
   @override
-  _HomeWalletState createState() => _HomeWalletState();
+  State<HomeWallet> createState() => _HomeWalletState();
 }
 
 class _HomeWalletState extends State<HomeWallet> {
-  final fCCY = new NumberFormat("#,##0.00", "en_US");
-  final walletHttpService = new WalletHTTPService();
+  final fCCY = NumberFormat("#,##0.00", "en_US");
+  final walletHttpService = WalletHTTPService();
   bool isLoading = false;
 
   late ScrollController _scrollControllerWallet;
@@ -49,9 +51,9 @@ class _HomeWalletState extends State<HomeWallet> {
 
   Future<void> initWallet() async {
     setLoading(true);
-    await walletHttpService.fetchWallets(true, true).then((_wallets) {
-      if(_wallets.length > 0) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletList(_wallets);
+    await walletHttpService.fetchWallets(true, true).then((wallets) {
+      if(wallets.isNotEmpty) {
+        Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
       }
       setLoading(false);
     }).onError((error, stackTrace) {
@@ -65,7 +67,7 @@ class _HomeWalletState extends State<HomeWallet> {
     return Scaffold(
       appBar: HomeAppBar(
         title: const Center(child: Text("Account")),
-        iconItem: Icon(
+        iconItem: const Icon(
           Ionicons.create,
           size: 20,
         ),
@@ -88,9 +90,9 @@ class _HomeWalletState extends State<HomeWallet> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(child: SpinKitFadingCube(color: accentColors[6],)),
-              SizedBox(height: 20,),
-              Text(
+              SpinKitFadingCube(color: accentColors[6],),
+              const SizedBox(height: 20,),
+              const Text(
                 "Loading Wallet",
                 style: TextStyle(
                   color: textColor2,
@@ -107,7 +109,7 @@ class _HomeWalletState extends State<HomeWallet> {
         builder: (context, homeProvider, child) {
           wallets = homeProvider.walletList;
           return (Container(
-            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             child: RefreshIndicator(
               color: accentColors[6],
               onRefresh: () async {
@@ -135,20 +137,20 @@ class _HomeWalletState extends State<HomeWallet> {
   }
 
   Future<void> _deleteWallet(int id) async {
-    Future <List<CurrencyModel>> _walletCurrencyList;
-    Future <List<WalletModel>> _walletList;
+    Future <List<CurrencyModel>> walletCurrencyList;
+    Future <List<WalletModel>> walletList;
 
     showLoaderDialog(context);
 
     Future.wait([
-      _walletList = walletHttpService.deleteWallets(id),
-      _walletCurrencyList = walletHttpService.fetchWalletCurrencies(true),
+      walletList = walletHttpService.deleteWallets(id),
+      walletCurrencyList = walletHttpService.fetchWalletCurrencies(true),
     ]).then((_) {
       // set the provider so it can tell the consumer to update/build the widget.
-      _walletList.then((wallets) {
+      walletList.then((wallets) {
         Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
       });
-      _walletCurrencyList.then((walletsCurrency) {
+      walletCurrencyList.then((walletsCurrency) {
         Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
       });
     }).onError((error, stackTrace) {
@@ -158,18 +160,18 @@ class _HomeWalletState extends State<HomeWallet> {
   }
 
   Future<void> _refreshWallet() async {
-    Future<List<WalletModel>> _futureWallets;
+    Future<List<WalletModel>> futureWallets;
 
     // set that this is loading, so it will not load the listview builder
     setLoading(true);
 
     // fetch the new wallet data from API
     await Future.wait([
-      _futureWallets = walletHttpService.fetchWallets(true, true),
+      futureWallets = walletHttpService.fetchWallets(true, true),
     ]).then((_) {
-      _futureWallets.then((_wallets) {
-        if(_wallets.length > 0) {
-          Provider.of<HomeProvider>(context, listen: false).setWalletList(_wallets);
+      futureWallets.then((wallets) {
+        if(wallets.isNotEmpty) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
         }
       });
 
@@ -208,7 +210,7 @@ class _HomeWalletState extends State<HomeWallet> {
               if(!isLoading) {
                 late Future<bool?> result = ShowMyDialog(
                   dialogTitle: "Delete Wallet",
-                  dialogText: "Do you want to delete " + wallet.name + "?\nThis will also delete all related transaction to this wallet.",
+                  dialogText: "Do you want to delete ${wallet.name}?\nThis will also delete all related transaction to this wallet.",
                   confirmText: "Delete",
                   confirmColor: accentColors[2],
                   cancelText: "Cancel"
@@ -249,8 +251,8 @@ class _HomeWalletState extends State<HomeWallet> {
             icon: (wallet.enabled ? Ionicons.alert : Ionicons.checkmark),
             onPressed: ((_) {
               late Future<bool?> result = ShowMyDialog(
-                dialogTitle: (wallet.enabled ? 'Disable' : 'Enable') + " Wallet",
-                dialogText: "Do you want to " + (wallet.enabled ? 'Disable' : 'Enable') + " " + wallet.name + "?",
+                dialogTitle: "${wallet.enabled ? 'Disable' : 'Enable'} Wallet",
+                dialogText: "Do you want to ${wallet.enabled ? 'Disable' : 'Enable'} ${wallet.name}?",
                 confirmText: (wallet.enabled ? 'Disable' : 'Enable'),
                 confirmColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
                 cancelText: "Cancel")
@@ -284,19 +286,19 @@ class _HomeWalletState extends State<HomeWallet> {
   Future<void> _enableWallet(WalletModel wallet) async {
     setLoading(true);
 
-    Future <List<WalletModel>> _walletList;
-    Future <List<CurrencyModel>> _walletCurrencyList;
+    Future <List<WalletModel>> walletList;
+    Future <List<CurrencyModel>> walletCurrencyList;
 
     Future.wait([
-      _walletList = walletHttpService.enableWallet(wallet, !wallet.enabled),
-      _walletCurrencyList = walletHttpService.fetchWalletCurrencies(true),
+      walletList = walletHttpService.enableWallet(wallet, !wallet.enabled),
+      walletCurrencyList = walletHttpService.fetchWalletCurrencies(true),
     ]).then((_) {
       // set the provider with the new wallets we got
-      _walletList.then((wallets) {
+      walletList.then((wallets) {
         Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
       });
 
-      _walletCurrencyList.then((walletsCurrency) {
+      walletCurrencyList.then((walletsCurrency) {
         Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
       });
 

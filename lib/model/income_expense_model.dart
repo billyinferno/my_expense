@@ -8,38 +8,38 @@ class IncomeExpenseModel {
     });
 
     factory IncomeExpenseModel.fromJson(Map<String, dynamic> json) {
-      Map<DateTime, double> _expense = {};
+      Map<DateTime, double> expense = {};
       json["expense"].forEach((value) {
-        IncomeExpense _exp = IncomeExpense.fromJson(value);
-        _expense[_exp.date.toLocal()] = _exp.amount;
+        IncomeExpense exp = IncomeExpense.fromJson(value);
+        expense[exp.date.toLocal()] = exp.amount;
       });
 
-      Map<DateTime, double> _income = {};
+      Map<DateTime, double> income = {};
       json["income"].forEach((value) {
-        IncomeExpense _inc = IncomeExpense.fromJson(value);
-        _income[_inc.date.toLocal()] = _inc.amount;
+        IncomeExpense inc = IncomeExpense.fromJson(value);
+        income[inc.date.toLocal()] = inc.amount;
       });
 
-      return IncomeExpenseModel(expense: _expense, income: _income);
+      return IncomeExpenseModel(expense: expense, income: income);
     }
 
     Map<String, dynamic> toJson() {
-      List<IncomeExpense> _expense = [];
-      List<IncomeExpense> _income = [];
+      List<IncomeExpense> expense = [];
+      List<IncomeExpense> income = [];
 
       this.expense.forEach((key, value) {
-        IncomeExpense _exp = IncomeExpense(date: key.toLocal(), amount: value);
-        _expense.add(_exp);
+        IncomeExpense exp = IncomeExpense(date: key.toLocal(), amount: value);
+        expense.add(exp);
       });
 
       this.income.forEach((key, value) {
-        IncomeExpense _inc = IncomeExpense(date: key.toLocal(), amount: value);
-        _income.add(_inc);
+        IncomeExpense inc = IncomeExpense(date: key.toLocal(), amount: value);
+        income.add(inc);
       });
 
       return {
-        "expense": List<dynamic>.from(_expense.map((x) => x.toJson())),
-        "income": List<dynamic>.from(_income.map((x) => x.toJson()))
+        "expense": List<dynamic>.from(expense.map((x) => x.toJson())),
+        "income": List<dynamic>.from(income.map((x) => x.toJson()))
       };
     }
 }

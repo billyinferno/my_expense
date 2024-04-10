@@ -13,15 +13,15 @@ import 'package:table_calendar/table_calendar.dart';
 
 class BudgetTransactionPage extends StatefulWidget {
   final Object? arguments;
-  const BudgetTransactionPage({ Key? key, required this.arguments }) : super(key: key);
+  const BudgetTransactionPage({ super.key, required this.arguments });
 
   @override
-  _BudgetTransactionPageState createState() => _BudgetTransactionPageState();
+  State<BudgetTransactionPage> createState() => _BudgetTransactionPageState();
 }
 
 class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   final ScrollController _scrollController = ScrollController();
-  final fCCY = new NumberFormat("#,##0.00", "en_US");
+  final fCCY = NumberFormat("#,##0.00", "en_US");
   final DateFormat _dtDayMonthYear = DateFormat("dd MMM yyyy");
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   
@@ -34,8 +34,8 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   int _currencyId = -1;
   bool _isLoading = true;
   bool _sortAscending = true;
-  Map<DateTime, WalletTransactionExpenseIncome> _totalDate = {};
-  List<WalletTransactionList> _list = [];
+  final Map<DateTime, WalletTransactionExpenseIncome> _totalDate = {};
+  final List<WalletTransactionList> _list = [];
   List<TransactionListModel> _transactions = [];
 
 
@@ -44,14 +44,14 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     super.initState();
     
     // convert the parameter being sent from main
-    BudgetTransactionArgs _args = widget.arguments as BudgetTransactionArgs;
-    _selectedDate = _args.selectedDate;
-    _categoryId = _args.categoryid;
-    _categoryName = _args.categoryName;
-    _categorySymbol = _args.currencySymbol;
-    _budgetUsed = _args.budgetUsed;
-    _budgetAmount = _args.budgetAmount;
-    _currencyId = _args.currencyId;
+    BudgetTransactionArgs args = widget.arguments as BudgetTransactionArgs;
+    _selectedDate = args.selectedDate;
+    _categoryId = args.categoryid;
+    _categoryName = args.categoryName;
+    _categorySymbol = args.currencySymbol;
+    _budgetUsed = args.budgetUsed;
+    _budgetAmount = args.budgetAmount;
+    _currencyId = args.currencyId;
 
     _fetchBudget(true);
   }
@@ -68,7 +68,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
       appBar: AppBar(
         title: Center(child: Text(_categoryName)),
         leading: IconButton(
-          icon: Icon(Ionicons.close_outline, color: textColor),
+          icon: const Icon(Ionicons.close_outline, color: textColor),
           onPressed: (() {
             // check if got data changed already or not?
             Navigator.maybePop(context);
@@ -81,7 +81,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
               _sortAscending = !_sortAscending;
               await setTransactions(_transactions);
             }),
-            child: Container(
+            child: SizedBox(
               width: 50,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -97,14 +97,14 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                     children: <Widget>[
                       Text(
                         (_sortAscending ? "A" : "Z"),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: textColor,
                         ),
                       ),
                       Text(
                         (_sortAscending ? "Z" : "A"),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: textColor,
                         ),
@@ -123,26 +123,24 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
 
   Widget _createBody() {
     if(_isLoading) {
-      return Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SpinKitFadingCube(
-              color: accentColors[6],
-              size: 25,
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SpinKitFadingCube(
+            color: accentColors[6],
+            size: 25,
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          const Text(
+            "loading...",
+            style: TextStyle(
+              color: textColor2,
+              fontSize: 10,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "loading...",
-              style: TextStyle(
-                color: textColor2,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     }
     else {
@@ -152,7 +150,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
         children: <Widget>[
           Container(
             color: secondaryDark,
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(10),
             child: BudgetBar(
               title: _categoryName,
               symbol: _categorySymbol,
@@ -171,7 +169,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                 controller: _scrollController,
                 itemCount: _list.length,
                 itemBuilder: (context, index) {
-                  if (_list[index].type == 'header') {
+                  if (_list[index].type == WalletListType.header) {
                     WalletTransactionExpenseIncome header = _list[index].data as WalletTransactionExpenseIncome;
                     return Container(
                       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
@@ -186,14 +184,14 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                             ),
                           ),
                           Text(
-                            "(" + fCCY.format(header.expense) + ")",
+                            "(${fCCY.format(header.expense)})",
                             style: TextStyle(color: accentColors[2])
                           ),
                         ],
                       ),
                     );
                   }
-                  else {
+                  else if(_list[index].type == WalletListType.item) {
                     TransactionListModel currTxn = _list[index].data as TransactionListModel;
                     return BudgetTransactionItem(
                       itemName: currTxn.name,
@@ -202,6 +200,10 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                       itemAmount: currTxn.amount,
                       categoryName: _categoryName,
                     );
+                  }
+                  else {
+                    // if not header or item, then just showed shrink sized box
+                    return const SizedBox.shrink();
                   }
                 },
               ),
@@ -231,14 +233,14 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
 
       // clear the _totalDate before loop
       _totalDate.clear();
-      txnList.forEach((txn) {
+      for (TransactionListModel txn in txnList) {
         if (txn.type == "expense") {
           currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
           if (_totalDate.containsKey(currDate)) {
             walletExpenseIncome = _totalDate[currDate]!;
           }
           else {
-            walletExpenseIncome = new WalletTransactionExpenseIncome();
+            walletExpenseIncome = WalletTransactionExpenseIncome();
             walletExpenseIncome.date = currDate;
           }
 
@@ -248,7 +250,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
           // add this walletExpenseIcon to the _totalDate
           _totalDate[currDate] = walletExpenseIncome;
         }
-      });
+      }
 
       // clear before we loop the total date we have
       _list.clear();
@@ -258,7 +260,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
       _totalDate.forEach((key, value) {
         // add the header for this
         WalletTransactionList header = WalletTransactionList();
-        header.type = 'header';
+        header.type = WalletListType.header;
         header.data = value;
         _list.add(header);
 
@@ -268,7 +270,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
           if (isSameDay(txnList[idx].date.toLocal(), key.toLocal())) {
             // add to the transaction list
             WalletTransactionList data = WalletTransactionList();
-            data.type = 'item';
+            data.type = WalletListType.item;
             data.data = txnList[idx];
             _list.add(data);
             
@@ -291,10 +293,10 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   }
 
   Future<void> _fetchBudget([bool? force]) async {
-    bool _force = (force ?? false);
+    bool isForce = (force ?? false);
 
     String date = DateFormat('yyyy-MM-dd').format(_selectedDate.toLocal());
-    await _transactionHttp.fetchTransactionBudget(_categoryId, date, _currencyId, _force).then((value) async {
+    await _transactionHttp.fetchTransactionBudget(_categoryId, date, _currencyId, isForce).then((value) async {
       await setTransactions(value.reversed.toList());
       _transactions = value.reversed.toList();
 

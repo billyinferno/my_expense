@@ -9,17 +9,17 @@ import 'package:my_expense/themes/icon_list.dart';
 class CardFace extends StatelessWidget {
   final WalletModel wallet;
   final TransactionWalletMinMaxDateModel? minMaxDate;
-  const CardFace({Key? key, required this.wallet, this.minMaxDate}) : super(key: key);
+  const CardFace({super.key, required this.wallet, this.minMaxDate});
 
   @override
   Widget build(BuildContext context) {
-    final fCCY = new NumberFormat("#,##0.00", "en_US");
+    final fCCY = NumberFormat("#,##0.00", "en_US");
     
     return Center(
       child: Container(
         height: 150,
         width: 250,
-        padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
+        padding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           gradient: LinearGradient(
@@ -33,34 +33,30 @@ class CardFace extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Container(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                    height: 30,
-                    width: 30,
-                    child: IconList.getIcon(wallet.walletType.type),
-                  ),
-                  SizedBox(width: 10,),
-                  Container(
-                    child:Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Text(wallet.name),
-                        Text(
-                          wallet.walletType.type,
-                          style: TextStyle(
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                SizedBox(
+                  height: 30,
+                  width: 30,
+                  child: IconList.getIcon(wallet.walletType.type),
+                ),
+                const SizedBox(width: 10,),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Text(wallet.name),
+                    Text(
+                      wallet.walletType.type,
+                      style: const TextStyle(
+                        fontSize: 10,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
             Expanded(child: Container(
               color: Colors.transparent,
@@ -70,22 +66,20 @@ class CardFace extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  wallet.currency.symbol + " " + fCCY.format(wallet.futureAmount),
-                  style: TextStyle(
+                  "${wallet.currency.symbol} ${fCCY.format(wallet.futureAmount)}",
+                  style: const TextStyle(
                     fontSize: 10,
                   ),
                 ),
               ),
             ),
-            Container(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  wallet.currency.symbol + " " + fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1)),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                "${wallet.currency.symbol} ${fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1))}",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -101,9 +95,9 @@ class CardFace extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       _dateText(minMaxDate!.minDate),
-                      Text(
+                      const Text(
                         "•••",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
                         ),
                       ),

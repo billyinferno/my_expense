@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:my_expense/themes/color_utils.dart';
 
 class RadiantGradientMask extends StatelessWidget {
-  RadiantGradientMask({required this.child, required this.color, this.endColor, this.align, this.radius, this.tileMode});
+  const RadiantGradientMask({super.key, required this.child, required this.color, this.endColor, this.align, this.radius, this.tileMode});
   final Widget child;
   final Color color;
   final Color? endColor;

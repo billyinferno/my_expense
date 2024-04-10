@@ -27,9 +27,9 @@ class WalletModel {
       this.userPermissionUsers);
 
   factory WalletModel.fromJson(Map<String, dynamic> json) {
-    WalletTypeModel _walletType = WalletTypeModel.fromJson(json['wallet_type']);
-    CurrencyModel _currency = CurrencyModel.fromJson(json['currency']);
-    UserPermissionModel _userPermissionUsers = UserPermissionModel.fromJson(json['users_permissions_user']);
+    WalletTypeModel walletType = WalletTypeModel.fromJson(json['wallet_type']);
+    CurrencyModel currency = CurrencyModel.fromJson(json['currency']);
+    UserPermissionModel userPermissionUsers = UserPermissionModel.fromJson(json['users_permissions_user']);
 
     return WalletModel(
         json['id'],
@@ -39,9 +39,9 @@ class WalletModel {
         (json['futureAmount'] ?? 0.00),
         json['useForStats'],
         json['enabled'],
-        _walletType,
-        _currency,
-        _userPermissionUsers
+        walletType,
+        currency,
+        userPermissionUsers
     );
   }
 

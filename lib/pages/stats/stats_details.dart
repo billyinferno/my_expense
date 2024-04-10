@@ -12,21 +12,21 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class StatsDetailPage extends StatefulWidget {
   final Object? args;
-  const StatsDetailPage({ Key? key, required this.args }) : super(key: key);
+  const StatsDetailPage({ super.key, required this.args });
 
   @override
-  _StatsDetailPageState createState() => _StatsDetailPageState();
+  State<StatsDetailPage> createState() => _StatsDetailPageState();
 }
 
 class _StatsDetailPageState extends State<StatsDetailPage> {
   late StatsDetailArgs _stats;
-  final fCCY = new NumberFormat("#,##0.00", "en_US");
+  final fCCY = NumberFormat("#,##0.00", "en_US");
   double _maxExpense = 0.0;
   double _maxIncome = 0.0;
 
-  PageController _pageController = PageController();
-  ScrollController _incomeController = ScrollController();
-  ScrollController _expenseController = ScrollController();
+  final PageController _pageController = PageController();
+  final ScrollController _incomeController = ScrollController();
+  final ScrollController _expenseController = ScrollController();
 
   late int _totalPage;
 
@@ -37,10 +37,10 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
 
     // get the total page we will showed
     _totalPage = 0;
-    if(_stats.incomeExpenseCategory.income.length > 0) {
+    if(_stats.incomeExpenseCategory.income.isNotEmpty) {
       _totalPage += 1;
     }
-    if(_stats.incomeExpenseCategory.expense.length > 0) {
+    if(_stats.incomeExpenseCategory.expense.isNotEmpty) {
       _totalPage += 1;
     }
     _getMaxAmount();
@@ -60,7 +60,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
       appBar: AppBar(
         title: Center(child: Text(_getAppBarTitle())),
         leading: IconButton(
-          icon: Icon(Ionicons.close_outline, color: textColor),
+          icon: const Icon(Ionicons.close_outline, color: textColor),
           onPressed: (() {
             Navigator.pop(context);
           }),
@@ -70,72 +70,66 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
           Container(width: 50, color: Colors.transparent,),
         ],
       ),
-      body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: secondaryDark,
-                border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
-              ),
-              child: Center(child: Text(_getTitleText())),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(10),
+            decoration: const BoxDecoration(
+              color: secondaryDark,
+              border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
             ),
-            _generatePieChart(),
-            SizedBox(height: 10,),
-            Visibility(
-              visible: (_totalPage > 0),
-              child: Center(
-                child: SmoothPageIndicator(
-                  controller: _pageController,
-                  count: _totalPage,
-                  effect: WormEffect(
-                    dotHeight: 10,
-                    dotWidth: 10,
-                    type: WormType.normal,
-                    activeDotColor: primaryDark,
-                    dotColor: secondaryBackground,
-                  ),
+            child: Center(child: Text(_getTitleText())),
+          ),
+          _generatePieChart(),
+          const SizedBox(height: 10,),
+          Visibility(
+            visible: (_totalPage > 0),
+            child: Center(
+              child: SmoothPageIndicator(
+                controller: _pageController,
+                count: _totalPage,
+                effect: const WormEffect(
+                  dotHeight: 10,
+                  dotWidth: 10,
+                  type: WormType.normal,
+                  activeDotColor: primaryDark,
+                  dotColor: secondaryBackground,
                 ),
               ),
             ),
-            SizedBox(height: 10,),
-            Container(
-              child: Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  children:_generatePageView(),
-                ),
-              ),
+          ),
+          const SizedBox(height: 10,),
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              children:_generatePageView(),
             ),
-            SizedBox(height: 20,),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20,),
+        ],
       ),
     );
   }
 
   List<Widget> _generatePageView() {
-    List<Widget> _page = [];
+    List<Widget> page = [];
 
-    if(_stats.incomeExpenseCategory.income.length > 0) {
-      _page.add(_generateListView("income", _stats.currency.symbol, _stats.incomeExpenseCategory.income, _incomeController));
+    if(_stats.incomeExpenseCategory.income.isNotEmpty) {
+      page.add(_generateListView("income", _stats.currency.symbol, _stats.incomeExpenseCategory.income, _incomeController));
     }
-    if(_stats.incomeExpenseCategory.expense.length > 0) {
-      _page.add(_generateListView("expense", _stats.currency.symbol, _stats.incomeExpenseCategory.expense, _expenseController));
+    if(_stats.incomeExpenseCategory.expense.isNotEmpty) {
+      page.add(_generateListView("expense", _stats.currency.symbol, _stats.incomeExpenseCategory.expense, _expenseController));
     }
 
-    if(_page.length <= 0) {
+    if(page.isEmpty) {
       // nothing to add? then showed no data
-      _page.add(Container(
-        child: Center(child: Text("No Data")),
-      ));
+      page.add(const Center(child: Text("No Data")));
     }
 
-    return _page;
+    return page;
   }
 
   Widget _generateListView(String type, String ccy, List<CategoryStatsModel> data, ScrollController controller) {
@@ -145,7 +139,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
       itemCount: data.length,
       itemBuilder: ((context, index) {
         return Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           color: Colors.transparent,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -154,7 +148,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
               Expanded(
                 child: GestureDetector(
                   onTap: (() {
-                    StatsTransactionArgs _statsTransactionArgs = StatsTransactionArgs(
+                    StatsTransactionArgs statsTransactionArgs = StatsTransactionArgs(
                       type: type,
                       categoryId: data[index].categoryId,
                       categoryName: data[index].categoryName,
@@ -169,7 +163,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                     );
 
                     // go to stats transaction 
-                    Navigator.pushNamed(context, '/stats/detail/transaction', arguments: _statsTransactionArgs);
+                    Navigator.pushNamed(context, '/stats/detail/transaction', arguments: statsTransactionArgs);
                   }),
                   child: Container(
                     color: Colors.transparent,
@@ -193,50 +187,48 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
     );
   }
 
-  List<double> _generateDataMap(List<CategoryStatsModel> _data) {
-    List<double> _ret = [];
-    _data.forEach((dt) {
-      _ret.add(dt.amount);
-    });
+  List<double> _generateDataMap(List<CategoryStatsModel> data) {
+    List<double> ret = [];
+    for (CategoryStatsModel dt in data) {
+      ret.add(dt.amount);
+    }
 
-    return _ret;
+    return ret;
   }
 
-  List<Color> _generateColor(String type, List<CategoryStatsModel> _data) {
-    List<Color> _ret = [];
+  List<Color> _generateColor(String type, List<CategoryStatsModel> data) {
+    List<Color> ret = [];
     if(type == "expense") {
-      _data.forEach((dt) {
-        _ret.add(IconColorList.getExpenseColor(dt.categoryName));
-      });
+      for (CategoryStatsModel dt in data) {
+        ret.add(IconColorList.getExpenseColor(dt.categoryName));
+      }
     }
     else {
-      _data.forEach((dt) {
-        _ret.add(IconColorList.getIncomeColor(dt.categoryName));
-      });
+      for (CategoryStatsModel dt in data) {
+        ret.add(IconColorList.getIncomeColor(dt.categoryName));
+      }
     }
 
-    return _ret;
+    return ret;
   }
 
   Widget _generatePieChart() {
-    List<double> _incomeDataMap = _generateDataMap(_stats.incomeExpenseCategory.income);
-    List<double> _expenseDataMap = _generateDataMap(_stats.incomeExpenseCategory.expense);
+    List<double> incomeDataMap = _generateDataMap(_stats.incomeExpenseCategory.income);
+    List<double> expenseDataMap = _generateDataMap(_stats.incomeExpenseCategory.expense);
 
     // check if both data map is empty?
     // if both empty, then we need to showed there are no data for this month
-    if(_incomeDataMap.length <= 0 && _expenseDataMap.length <= 0) {
-      return Expanded(
-        child: Container(
-          child: Center(
-            child: Text("No data"),
-          ),
+    if(incomeDataMap.isEmpty && expenseDataMap.isEmpty) {
+      return const Expanded(
+        child: Center(
+          child: Text("No data"),
         ),
       );
     }
 
     // set the visibility of each chart based on the data
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
       ),
       child: Row(
@@ -244,7 +236,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Visibility(
-            visible: (_incomeDataMap.length > 0),
+            visible: (incomeDataMap.isNotEmpty),
             child: Expanded(
               child: GestureDetector(
                 onTap: (() {
@@ -253,8 +245,8 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                   changePageViewPostion(0);
                 }),
                 child: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
                     border: Border(right: BorderSide(color: secondaryBackground, width: 0.5)),
                     color: Colors.transparent,
                   ),
@@ -263,10 +255,10 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       _createPieChart(
-                        dataMap: _incomeDataMap,
+                        dataMap: incomeDataMap,
                         colorList: _generateColor("income", _stats.incomeExpenseCategory.income),
                       ),
-                      SizedBox(height: 5,),
+                      const SizedBox(height: 5,),
                       Text(
                         "Income",
                         style: TextStyle(
@@ -287,13 +279,13 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
             ),
           ),
           Visibility(
-            visible: (_expenseDataMap.length > 0),
+            visible: (expenseDataMap.isNotEmpty),
             child: Expanded(
               child: GestureDetector(
                 onTap: (() {
                   // for expense, we need to see whether we have income data or not?
                   // if got income data, then it means that the page will be 2
-                  if(_incomeDataMap.length > 0) {
+                  if(incomeDataMap.isNotEmpty) {
                     changePageViewPostion(1);
                   }
                   else {
@@ -302,8 +294,8 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                   }
                 }),
                 child: Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
                     border: Border(left: BorderSide(color: secondaryBackground, width: 0.5)),
                     color: Colors.transparent,
                   ),
@@ -312,10 +304,10 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       _createPieChart(
-                        dataMap: _expenseDataMap,
+                        dataMap: expenseDataMap,
                         colorList: _generateColor("expense", _stats.incomeExpenseCategory.expense),
                       ),
-                      SizedBox(height: 5,),
+                      const SizedBox(height: 5,),
                       Text(
                         "Expense",
                         style: TextStyle(
@@ -341,20 +333,18 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
   }
 
   Widget _createPieChart({required List<double> dataMap, required List<Color> colorList, double? height, double? width}) {
-    double _height = (height ?? 200);
-    double _width = (width ?? 200);
+    double currentHeight = (height ?? 200);
+    double currentWidth = (width ?? 200);
 
     return Container(
       color: Colors.transparent,
       child: SizedBox(
-        height: _height,
-        width: _width,
-        child: Container(
-          child: PieChartView(
-            backgroundColor: primaryBackground,
-            chartAmount: dataMap,
-            chartColors: colorList,
-          ),
+        height: currentHeight,
+        width: currentWidth,
+        child: PieChartView(
+          backgroundColor: primaryBackground,
+          chartAmount: dataMap,
+          chartColors: colorList,
         ),
       ),
     );
@@ -379,42 +369,42 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
       return DateFormat("yyyy").format(_stats.toDate.toLocal());
     }
     else {
-      return DateFormat("dd MMM yyyy").format(_stats.fromDate.toLocal()) + " - " + DateFormat("dd MMM yyyy").format(_stats.toDate.toLocal());
+      return "${DateFormat("dd MMM yyyy").format(_stats.fromDate.toLocal())} - ${DateFormat("dd MMM yyyy").format(_stats.toDate.toLocal())}";
     }
   }
 
-  String _totalAmount(String symbol, List<CategoryStatsModel> _data) {
-    double _total = 0.0;
-    _data.forEach((dt) {
-      _total += dt.amount;
-    });
+  String _totalAmount(String symbol, List<CategoryStatsModel> data) {
+    double total = 0.0;
+    for (CategoryStatsModel dt in data) {
+      total += dt.amount;
+    }
 
-    if(_total < 0) {
-      _total = _total * (-1);
+    if(total < 0) {
+      total = total * (-1);
     }
 
     // return the formated CCY
-    return symbol + " " + fCCY.format(_total);
+    return "$symbol ${fCCY.format(total)}";
   }
 
   void _getMaxAmount() {
-    _stats.incomeExpenseCategory.expense.forEach((exp) {
+    for (CategoryStatsModel exp in _stats.incomeExpenseCategory.expense) {
       _maxExpense += exp.amount;
-    });
+    }
     if(_maxExpense < 0) {
       _maxExpense = _maxExpense * (-1);
     }
-    _stats.incomeExpenseCategory.income.forEach((inc) {
+    for (CategoryStatsModel inc in _stats.incomeExpenseCategory.income) {
       _maxIncome += inc.amount;
-    });
+    }
   }
 
   void changePageViewPostion(int whichPage) {
     int itemCount = 0;
-    if(_stats.incomeExpenseCategory.income.length > 0) {
+    if(_stats.incomeExpenseCategory.income.isNotEmpty) {
       itemCount++;
     }
-    if(_stats.incomeExpenseCategory.expense.length > 0) {
+    if(_stats.incomeExpenseCategory.expense.isNotEmpty) {
       itemCount++;
     }
 

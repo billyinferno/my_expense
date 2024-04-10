@@ -43,13 +43,13 @@ class TransactionInput extends StatefulWidget {
   final DateTime? selectedDate;
   
   const TransactionInput({
-    Key? key,
+    super.key,
     required this.title,
     required this.type,
     required this.saveTransaction,
     this.currentTransaction,
     this.selectedDate
-  }) : super(key: key);
+  });
 
   @override
   State<TransactionInput> createState() => _TransactionInputState();
@@ -70,7 +70,7 @@ class _TransactionInputState extends State<TransactionInput> {
   final FocusNode _nameFocus = FocusNode();
   final FocusNode _amountFocus = FocusNode();
   
-  final fCCY = new NumberFormat("0.00", "en_US");
+  final fCCY = NumberFormat("0.00", "en_US");
 
   late UsersMeModel _userMe;
 
@@ -250,7 +250,7 @@ class _TransactionInputState extends State<TransactionInput> {
       // default the category icon and color as transfer
       _currentCategoryName = "";
       _currentCategoryColor = accentColors[4];
-      _currentCategoryIcon = Icon(
+      _currentCategoryIcon = const Icon(
         Ionicons.repeat,
         color: textColor,
       );
@@ -276,7 +276,7 @@ class _TransactionInputState extends State<TransactionInput> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: Icon(
+          icon: const Icon(
             Ionicons.close,
           ),
         ),
@@ -316,18 +316,20 @@ class _TransactionInputState extends State<TransactionInput> {
                 }
               }
               catch(error) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  createSnackBar(
-                    message: error.toString().replaceAll('Exception: ', ''),
-                  )
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    createSnackBar(
+                      message: error.toString().replaceAll('Exception: ', ''),
+                    )
+                  );
+                }
               }
             },
-            icon: Icon(
+            icon: const Icon(
               Ionicons.checkmark,
             ),
           ),
-          SizedBox(width: 10,),
+          const SizedBox(width: 10,),
         ],
       ),
       body: Column(
@@ -399,38 +401,36 @@ class _TransactionInputState extends State<TransactionInput> {
                       ),
                       child: Container(
                         height: 50,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Ionicons.swap_horizontal_sharp,
                               size: 20,
                               color: textColor,
                             ),
-                            SizedBox(width: 10,),
+                            const SizedBox(width: 10,),
                             Expanded(
-                              child: Container(
-                                child: TextFormField(
-                                  controller: _exchangeController,
-                                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                  decoration: InputDecoration(
-                                    hintText: "1.00",
-                                    border: OutlineInputBorder(
-                                      borderSide: BorderSide.none,
-                                    ),
-                                    contentPadding: EdgeInsets.zero,
-                                    isCollapsed: true,
+                              child: TextFormField(
+                                controller: _exchangeController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                decoration: const InputDecoration(
+                                  hintText: "1.00",
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
                                   ),
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                  ),
-                                  inputFormatters: [
-                                    LengthLimitingTextInputFormatter(12),
-                                    DecimalTextInputFormatter(decimalRange: 11),
-                                  ],
+                                  contentPadding: EdgeInsets.zero,
+                                  isCollapsed: true,
                                 ),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                ),
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(12),
+                                  DecimalTextInputFormatter(decimalRange: 11),
+                                ],
                               ),
                             ),
                           ],
@@ -448,27 +448,28 @@ class _TransactionInputState extends State<TransactionInput> {
                       },
                       child: Container(
                         height: 50,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Ionicons.calendar_outline,
                               size: 20,
                               color: textColor,
                             ),
-                            SizedBox(width: 10,),
+                            const SizedBox(width: 10,),
                             Text(_calendarText()),
                           ],
                         ),
                       ),
                     ),
                     AnimationExpand(
-                      child: Container(
+                      expand: _showCalendar,
+                      child: SizedBox(
                         height: 200,
                         child: CupertinoTheme(
-                          data: CupertinoThemeData(
+                          data: const CupertinoThemeData(
                             brightness: Brightness.dark,
                             textTheme: CupertinoTextThemeData(
                               textStyle: TextStyle(
@@ -492,7 +493,6 @@ class _TransactionInputState extends State<TransactionInput> {
                           ),
                         ),
                       ),
-                      expand: _showCalendar,
                     ),
                     Visibility(
                       visible: (_currentType != 'transfer'),
@@ -500,18 +500,18 @@ class _TransactionInputState extends State<TransactionInput> {
                     ),
                     Container(
                       height: 50,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                       ),
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Ionicons.checkbox_outline,
                             size: 20,
                             color: textColor,
                           ),
-                          SizedBox(width: 10,),
-                          Expanded(child: Text("Cleared")),
+                          const SizedBox(width: 10,),
+                          const Expanded(child: Text("Cleared")),
                           CupertinoSwitch(
                             value: _currentClear,
                             onChanged: (value) {
@@ -534,17 +534,17 @@ class _TransactionInputState extends State<TransactionInput> {
                       },
                       child: Container(
                         height: 50,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                         ),
                         child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Ionicons.newspaper_outline,
                               size: 20,
                               color: textColor,
                             ),
-                            SizedBox(width: 10,),
+                            const SizedBox(width: 10,),
                             Text(
                               (_descriptionController.text.trim().isEmpty ? "Description" : _descriptionController.text),
                               overflow: TextOverflow.ellipsis,
@@ -554,19 +554,19 @@ class _TransactionInputState extends State<TransactionInput> {
                       ),
                     ),
                     AnimationExpand(
+                      expand: _showDescription,
                       child: Container(
-                        padding: EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(10),
                         child: TextFormField(
                           controller: _descriptionController,
                           keyboardType: TextInputType.multiline,
                           maxLines: 8,
                           maxLength: 250,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: "Input description",
                           ),
                         ),
-                      ),
-                      expand: _showDescription
+                      )
                     ),
                   ],
                 ),
@@ -607,20 +607,20 @@ class _TransactionInputState extends State<TransactionInput> {
                     children: <Widget>[
                       Container(
                         height: 40,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
+                          children: <Widget>[
                             Expanded(
                               child: Center(child: Text("Category Tab")),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 10,),
+                      const SizedBox(height: 10,),
                       Expanded(
                         child: GridView.count(
                           crossAxisCount: 4,
@@ -647,7 +647,7 @@ class _TransactionInputState extends State<TransactionInput> {
                   focusNode: _nameFocus,
                   enableSuggestions: false,
                   keyboardType: TextInputType.name,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: "Item name",
                     border: OutlineInputBorder(
                       borderSide: BorderSide.none,
@@ -665,7 +665,7 @@ class _TransactionInputState extends State<TransactionInput> {
                   onFieldSubmitted: ((value) {
                     // ensure that the value got some length, before we focus
                     // on the amount controller
-                    if(value.trim().length > 0) {
+                    if(value.trim().isNotEmpty) {
                       // focus directly to the amount
                       FocusScope.of(context).requestFocus(_amountFocus);
                     }
@@ -675,7 +675,7 @@ class _TransactionInputState extends State<TransactionInput> {
               ),
               Visibility(
                 visible: (_currentType == 'transfer'),
-                child: Text(
+                child: const Text(
                   "Transfer",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -698,10 +698,10 @@ class _TransactionInputState extends State<TransactionInput> {
             focusNode: _amountFocus,
             showCursor: true,
             textAlign: TextAlign.right,
-            keyboardType: TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             // showCursor: true,
             // readOnly: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: "0.00",
               border: OutlineInputBorder(
                 borderSide: BorderSide.none,
@@ -808,17 +808,12 @@ class _TransactionInputState extends State<TransactionInput> {
             child: Column(
               children: <Widget>[
                 Container(
+                  width: double.infinity,
                   height: 40,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Center(child: Text("Account")),
-                    ],
-                  ),
+                  child: const Center(child: Text("Account")),
                 ),
                 Expanded(
                   child: ListView.builder(
@@ -827,7 +822,6 @@ class _TransactionInputState extends State<TransactionInput> {
                     itemBuilder: (BuildContext context, int index) {
                       return SimpleItem(
                         color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                        child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
                         description: _walletList[index].name,
                         isSelected: (_currentWalletFromID == _walletList[index].id),
                         onTap: (() {
@@ -839,6 +833,7 @@ class _TransactionInputState extends State<TransactionInput> {
                           });
                           Navigator.pop(context);
                         }),
+                        child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
                       );
                     },
                   ),
@@ -851,17 +846,17 @@ class _TransactionInputState extends State<TransactionInput> {
       },
       child: Container(
         height: 50,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
         ),
         child: Row(
           children: [
-            Icon(
+            const Icon(
               Ionicons.wallet_outline,
               size: 20,
               color: textColor,
             ),
-            SizedBox(width: 10,),
+            const SizedBox(width: 10,),
             Text(_currentWalletFromName),
           ],
         ),
@@ -873,7 +868,7 @@ class _TransactionInputState extends State<TransactionInput> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(0, 20, 0, 20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
       ),
       child: Row(
@@ -912,19 +907,19 @@ class _TransactionInputState extends State<TransactionInput> {
                       width: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(40),
-                        color: (_currentWalletFromType.length > 0 ? IconList.getColor(_currentWalletFromType) : accentColors[4]),
+                        color: (_currentWalletFromType.isNotEmpty ? IconList.getColor(_currentWalletFromType) : accentColors[4]),
                       ),
                       child: _getTransferOutIcon(_currentWalletFromType),
                     ),
-                    SizedBox(height: 5,),
-                    Text((_currentWalletFromName.length > 0 ? _currentWalletFromName : "From Account")),
+                    const SizedBox(height: 5,),
+                    Text((_currentWalletFromName.isNotEmpty ? _currentWalletFromName : "From Account")),
                   ],
                 ),
               ),
             ),
           ),
           const SizedBox(width: 10,),
-          Container(
+          const SizedBox(
             height: 40,
             child: Icon(
               Ionicons.git_compare_sharp,
@@ -964,12 +959,12 @@ class _TransactionInputState extends State<TransactionInput> {
                       width: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(40),
-                        color: (_currentWalletToType.length > 0 ? IconList.getColor(_currentWalletToType) : accentColors[5]),
+                        color: (_currentWalletToType.isNotEmpty ? IconList.getColor(_currentWalletToType) : accentColors[5]),
                       ),
                       child: _getTransferInIcon(_currentWalletToType),
                     ),
-                    SizedBox(height: 5,),
-                    Text((_currentWalletToName.length > 0 ? _currentWalletToName : "To Account")),
+                    const SizedBox(height: 5,),
+                    Text((_currentWalletToName.isNotEmpty ? _currentWalletToName : "To Account")),
                   ],
                 ),
               ),
@@ -995,7 +990,7 @@ class _TransactionInputState extends State<TransactionInput> {
         children: <Widget>[
           Container(
             height: 40,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
             ),
             child: Row(
@@ -1013,13 +1008,13 @@ class _TransactionInputState extends State<TransactionInput> {
               itemBuilder: (BuildContext context, int index) {
                 return SimpleItem(
                   color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-                  child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
                   description: wallets[index].name,
                   isSelected: (selectedId == wallets[index].id),
                   onTap: (() {
                     onTap(index);
                     Navigator.pop(context);
                   }),
+                  child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
                 );
               },
             ),
@@ -1031,11 +1026,11 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   Widget _getTransferInIcon(String name) {
-    if(name.length > 0) {
+    if(name.isNotEmpty) {
       return IconList.getIcon(name.toLowerCase());
     }
     else {
-      return Icon(
+      return const Icon(
         Ionicons.download,
         size: 20,
         color: textColor,
@@ -1044,11 +1039,11 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   Widget _getTransferOutIcon(String name) {
-    if(name.length > 0) {
+    if(name.isNotEmpty) {
       return IconList.getIcon(name.toLowerCase());
     }
     else {
-      return Icon(
+      return const Icon(
         Ionicons.push,
         size: 20,
         color: textColor,
@@ -1070,14 +1065,14 @@ class _TransactionInputState extends State<TransactionInput> {
 
   Widget _buildAutoComplete() {
     // if we don't have filter list then just return sized box shrink.
-    if (_filterList.length <= 0) {
+    if (_filterList.isEmpty) {
       return const SizedBox.shrink();
     }
 
     // other than that we can generate the auto complete
     return Container(
       height: 35,
-      padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+      padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
       width: MediaQuery.of(context).size.width,
       color: secondaryDark,
       child: TextFieldTapRegion(
@@ -1098,8 +1093,8 @@ class _TransactionInputState extends State<TransactionInput> {
                 });
               }),
               child: Container(
-                margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+                margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(35),
                   color: IconColorList.getColor(_filterList[index].category.name, _currentType),
@@ -1116,7 +1111,7 @@ class _TransactionInputState extends State<TransactionInput> {
   Widget _buildCalculator() {
     return Container(
       height: 55,
-      padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+      padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
       width: MediaQuery.of(context).size.width,
       color: Colors.grey[850],
       child: TextFieldTapRegion(
@@ -1125,16 +1120,6 @@ class _TransactionInputState extends State<TransactionInput> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             CalcButton(
-              child: Center(
-                child: Text(
-                  "AC",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: primaryBackground,
-                  ),
-                )
-              ),
               color: Colors.white,
               onTap: (() {
                 // clear the calc memory
@@ -1149,9 +1134,23 @@ class _TransactionInputState extends State<TransactionInput> {
                   _calcOperand = CalculatorOperation.none;
                 });
               }),
+              child: const Center(
+                child: Text(
+                  "AC",
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    color: primaryBackground,
+                  ),
+                )
+              ),
             ),
             CalcButton(
-              child: Center(
+              color: Colors.orange,
+              onTap: (() {
+                _performCalculation(CalculatorOperation.add);
+              }),
+              child: const Center(
                 child: Text(
                   "+",
                   style: TextStyle(
@@ -1160,13 +1159,13 @@ class _TransactionInputState extends State<TransactionInput> {
                   ),
                 )
               ),
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.add);
-              }),
             ),
             CalcButton(
-              child: Center(
+              color: Colors.orange,
+              onTap: (() {
+                _performCalculation(CalculatorOperation.subtract);
+              }),
+              child: const Center(
                 child: Text(
                   "-",
                   style: TextStyle(
@@ -1175,13 +1174,13 @@ class _TransactionInputState extends State<TransactionInput> {
                   ),
                 )
               ),
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.subtract);
-              }),
             ),
             CalcButton(
-              child: Center(
+              color: Colors.orange,
+              onTap: (() {
+                _performCalculation(CalculatorOperation.multiply);
+              }),
+              child: const Center(
                 child: Text(
                   "×",
                   style: TextStyle(
@@ -1190,13 +1189,13 @@ class _TransactionInputState extends State<TransactionInput> {
                   ),
                 )
               ),
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.multiply);
-              }),
             ),
             CalcButton(
-              child: Center(
+              color: Colors.orange,
+              onTap: (() {
+                _performCalculation(CalculatorOperation.divide);
+              }),
+              child: const Center(
                 child: Text(
                   "÷",
                   style: TextStyle(
@@ -1205,13 +1204,13 @@ class _TransactionInputState extends State<TransactionInput> {
                   ),
                 )
               ),
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.divide);
-              }),
             ),
             CalcButton(
-              child: Center(
+              color: Colors.orange,
+              onTap: (() {
+                _performCalculation(CalculatorOperation.percentage);
+              }),
+              child: const Center(
                 child: Text(
                   "%",
                   style: TextStyle(
@@ -1220,13 +1219,13 @@ class _TransactionInputState extends State<TransactionInput> {
                   ),
                 )
               ),
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.percentage);
-              }),
             ),
             CalcButton(
-              child: Center(
+              color: Colors.orange,
+              onTap: (() {
+                _performCalculation(CalculatorOperation.equal);
+              }),
+              child: const Center(
                 child: Text(
                   "=",
                   style: TextStyle(
@@ -1235,10 +1234,6 @@ class _TransactionInputState extends State<TransactionInput> {
                   ),
                 )
               ),
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.equal);
-              }),
             ),
           ],
         ),
@@ -1249,7 +1244,7 @@ class _TransactionInputState extends State<TransactionInput> {
   void _performCalculation(CalculatorOperation operand) {
     // ensure that we have length on the controller before we perform any
     // calculation.
-    if (_amountController.text.trim().length > 0) {
+    if (_amountController.text.trim().isNotEmpty) {
       // we have amount data in the amount controller, try to parse it and see
       // if this is more than 0 or not?
       double? currentAmount = double.tryParse(_amountController.text.trim());
@@ -1374,27 +1369,27 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   List<Widget> _generateIconCategory() {
-    List<Widget> _ret = [];
+    List<Widget> ret = [];
 
     // loop thru all the _currentCategoryList, and generate the category icon
     _currentCategoryList.forEach((key, value) {
-      _ret.add(_iconCategory(value));
+      ret.add(_iconCategory(value));
     });
 
-    return _ret;
+    return ret;
   }
 
   Widget _iconCategory(CategoryModel category) {
     // check if this is expense or income
-    Color _iconColor;
-    Icon _icon;
+    Color iconColor;
+    Icon icon;
 
     if(category.type.toLowerCase() == "expense") {
-      _iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
-      _icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
+      iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
+      icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
     } else {
-      _iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
-      _icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
+      iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
+      icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
     }
 
     return GestureDetector(
@@ -1403,46 +1398,44 @@ class _TransactionInputState extends State<TransactionInput> {
         setState(() {
           _currentCategoryID = category.id;
           _currentCategoryName = category.name;
-          _currentCategoryColor = _iconColor;
-          _currentCategoryIcon = _icon;
+          _currentCategoryColor = iconColor;
+          _currentCategoryIcon = icon;
         });
         Navigator.pop(context);
       },
-      child: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Center(
-              child: Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: _iconColor,
-                ),
-                child: _icon,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Center(
+            child: Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(50),
+                color: iconColor,
               ),
+              child: icon,
             ),
-            Center(
-              child: Text(
-                category.name,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: textColor,
-                ),
-                softWrap: true,
-                textAlign: TextAlign.center,
+          ),
+          Center(
+            child: Text(
+              category.name,
+              style: const TextStyle(
+                fontSize: 10,
+                color: textColor,
               ),
+              softWrap: true,
+              textAlign: TextAlign.center,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   void _filterAutoComplete(String lookup) {
-    List<LastTransactionModel> _filter = [];
+    List<LastTransactionModel> filter = [];
 
     // clear the last found
     _filterList.clear();
@@ -1450,24 +1443,24 @@ class _TransactionInputState extends State<TransactionInput> {
     // check what is the current type so we know which data we need to look for
     if(_currentType == "expense") {
       // look at expense
-      _lastExpense.forEach((element) {
+      for (LastTransactionModel element in _lastExpense) {
         if(element.name.toLowerCase().contains(lookup.toLowerCase())) {
           // add this element to _lastFound
-          _filter.add(element);
+          filter.add(element);
         }
-      });
+      }
     }
     else {
-      _lastIncome.forEach((element) {
+      for (LastTransactionModel element in _lastIncome) {
         if(element.name.toLowerCase().contains(lookup.toLowerCase())) {
           // add this element to _lastFound
-          _filter.add(element);
+          filter.add(element);
         }
-      });
+      }
     }
 
     setState(() {
-      _filterList = _filter;
+      _filterList = filter;
     });
   }
 
@@ -1475,7 +1468,7 @@ class _TransactionInputState extends State<TransactionInput> {
     if (_currentType == 'transfer') {
       _currentCategoryName = "";
       _currentCategoryColor = accentColors[4];
-      _currentCategoryIcon = Icon(
+      _currentCategoryIcon = const Icon(
         Ionicons.repeat,
         color: textColor,
       );
@@ -1513,7 +1506,7 @@ class _TransactionInputState extends State<TransactionInput> {
       else {
         _currentCategoryName = "Select Category";
         _currentCategoryColor = textColor2;
-        _currentCategoryIcon = Icon(
+        _currentCategoryIcon = const Icon(
           Ionicons.file_tray_full,
           color: Colors.black,
         );
@@ -1583,7 +1576,7 @@ class _TransactionInputState extends State<TransactionInput> {
     double? currentAmount;
     WalletCategoryTransactionModel? category;
     WalletCategoryTransactionModel walletFrom;
-    WalletCategoryTransactionModel? walletTo = null;
+    WalletCategoryTransactionModel? walletTo;
     WalletCategoryTransactionModel usersPermissionsUser = WalletCategoryTransactionModel(_userMe.id);
 
     // if this is expense or income, check for name and category

@@ -12,23 +12,23 @@ class BudgetSharedPreferences {
 
   static Future setBudget(int currencyID, String date, List<BudgetModel> budgets) async {
     // convert both expense and income into List<String>
-    List<String> _jsonBudget = [];
+    List<String> jsonBudget = [];
 
-    if(budgets.length > 0) {
-      _jsonBudget = budgets.map((e) => jsonEncode(e.toJson())).toList();
+    if(budgets.isNotEmpty) {
+      jsonBudget = budgets.map((e) => jsonEncode(e.toJson())).toList();
     }
 
-    await MyBox.putStringList(_keyBudgetModel + currencyID.toString() + "_" + date, _jsonBudget);
+    await MyBox.putStringList("$_keyBudgetModel${currencyID}_$date", jsonBudget);
     //await _pref!.setStringList(_keyBudgetModel + currencyID.toString() + "_" + date, _jsonBudget);
   }
 
   static List<BudgetModel>? getBudget(int currencyID, String date) {
-    List<String>? _data = MyBox.getStringList(_keyBudgetModel + currencyID.toString() + "_" + date);
+    List<String>? data = MyBox.getStringList("$_keyBudgetModel${currencyID}_$date");
     //List<String>? _data = _pref!.getStringList(_keyBudgetModel + currencyID.toString() + "_" + date);
 
-    if(_data != null) {
-      List<BudgetModel> _listBudgetModel = _data.map((e) => BudgetModel.fromJson(jsonDecode(e))).toList();
-      return _listBudgetModel;
+    if(data != null) {
+      List<BudgetModel> listBudgetModel = data.map((e) => BudgetModel.fromJson(jsonDecode(e))).toList();
+      return listBudgetModel;
     }
     else {
       return null;
@@ -36,17 +36,17 @@ class BudgetSharedPreferences {
   }
 
   static Future setBudgetCurrent(DateTime date) async {
-    String _date = DateFormat('yyyy-MM-dd').format(DateTime(date.toLocal().year, date.toLocal().month, 1));
-    await MyBox.putString(_keyCurrentBudgetDate, _date);
+    String strDate = DateFormat('yyyy-MM-dd').format(DateTime(date.toLocal().year, date.toLocal().month, 1));
+    await MyBox.putString(_keyCurrentBudgetDate, strDate);
     //await _pref!.setString(_keyCurrentBudgetDate, _date);
   }
 
   static String getBudgetCurrent() {
-    String? _date = MyBox.getString(_keyCurrentBudgetDate);
+    String? date = MyBox.getString(_keyCurrentBudgetDate);
     //String? _date = _pref!.getString(_keyCurrentBudgetDate);
 
-    if(_date != null) {
-      return _date;
+    if(date != null) {
+      return date;
     }
     else {
       return DateFormat('yyyy-MM-dd').format(DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1));
@@ -59,12 +59,12 @@ class BudgetSharedPreferences {
   }
 
   static BudgetListModel? getBudgetList(int currencyID) {
-    String? _data = MyBox.getString(_keyBudgetList + currencyID.toString());
+    String? data = MyBox.getString(_keyBudgetList + currencyID.toString());
     //String? _data = _pref!.getString(_keyBudgetList + currencyID.toString());
 
-    if(_data != null) {
-      BudgetListModel _listBudgetListModel = BudgetListModel.fromJson(jsonDecode(_data));
-      return _listBudgetListModel;
+    if(data != null) {
+      BudgetListModel listBudgetListModel = BudgetListModel.fromJson(jsonDecode(data));
+      return listBudgetListModel;
     }
     else {
       return null;
@@ -73,12 +73,12 @@ class BudgetSharedPreferences {
 
   static Future<void> clearBudget() async {
     final keys = MyBox.keyBox!.keys;
-    keys.forEach((key) async {
+    for(var key in keys) {
       // check if this key is trx?
       if(key.toLowerCase().startsWith('budget_')) {
         // this is transaction key, we can clear this shared preferences
         await MyBox.keyBox!.delete(key);
       }
-    });
+    }
   }
 }

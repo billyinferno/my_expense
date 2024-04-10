@@ -23,10 +23,10 @@ import 'package:my_expense/widgets/item/expand_animation.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 
 class StatsFilterPage extends StatefulWidget {
-  const StatsFilterPage({ Key? key }) : super(key: key);
+  const StatsFilterPage({ super.key });
 
   @override
-  _StatsFilterPageState createState() => _StatsFilterPageState();
+  State<StatsFilterPage> createState() => _StatsFilterPageState();
 }
 
 class _StatsFilterPageState extends State<StatsFilterPage> {
@@ -34,11 +34,11 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   // double _currentContainerPositioned = 0;
 
   DateTime _minDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1);
-  DateTime _maxDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1).subtract(Duration(days: 1));
+  DateTime _maxDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1).subtract(const Duration(days: 1));
 
   String _currentType = "month";
   DateTime _currentFromDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1);
-  DateTime _currentToDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1).subtract(Duration(days: 1));
+  DateTime _currentToDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1).subtract(const Duration(days: 1));
   
   bool _showCalendar = false;
   late String _name;
@@ -67,7 +67,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     _userMe = UserSharedPreferences.getUserMe();
 
     _currencies = WalletSharedPreferences.getWalletUserCurrency();
-    if(_userMe.defaultBudgetCurrency != null && _currencies.length > 0) {
+    if(_userMe.defaultBudgetCurrency != null && _currencies.isNotEmpty) {
       // defaulted to the first currency first
       _currentCurrencies = _currencies[0];
 
@@ -98,7 +98,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     // if _maxDate is lesser, then change the _maxDate with current date
     if(_maxDate.isBefore(DateTime.now().toLocal())) {
       // change the maxDate
-      _maxDate = DateTime(DateTime.now().toLocal().year + 1, 1, 1).subtract(Duration(days: 1));
+      _maxDate = DateTime(DateTime.now().toLocal().year + 1, 1, 1).subtract(const Duration(days: 1));
     }
     // set the minimum date as the 1 day of the minimum transaction date
     _minDate = DateTime(_minDate.year, 1, 1);
@@ -119,9 +119,9 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text("Filter Stats")),
+        title: const Center(child: Text("Filter Stats")),
         leading: IconButton(
-          icon: Icon(Ionicons.close_outline, color: textColor),
+          icon: const Icon(Ionicons.close_outline, color: textColor),
           onPressed: (() {
             Navigator.pop(context);
           }),
@@ -131,7 +131,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             onPressed: (() async {
               await _filterStats();
             }),
-            icon: Icon(Ionicons.caret_forward_circle_outline, color: textColor),
+            icon: const Icon(Ionicons.caret_forward_circle_outline, color: textColor),
           )
         ],
       ),
@@ -142,14 +142,14 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           children: <Widget>[
             Container(
               height: 50,
-              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-              decoration: BoxDecoration(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+              decoration: const BoxDecoration(
                 color: secondaryDark,
               ),
               child: Container(
                 width: double.infinity,
                 height: 50,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   border: Border(bottom: BorderSide(color: secondaryLight, width: 1.0)),
                 ),
                 child: Container(
@@ -161,8 +161,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                         Ionicons.pencil,
                         color: accentColors[1],
                       ),
-                      SizedBox(width: 10,),
-                      Text(
+                      const SizedBox(width: 10,),
+                      const Text(
                         "Name",
                         style: TextStyle(
                           color: textColor2,
@@ -206,14 +206,14 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                                 child: Center(
                                   child: Text(
                                     _name,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 5,),
-                              Icon(
+                              const Icon(
                                 Ionicons.chevron_down,
                                 color: secondaryLight,
                                 size: 15,
@@ -230,7 +230,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                           enableSuggestions: false,
                           keyboardType: TextInputType.name,
                           textAlign: TextAlign.right,
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             hintText: "Transaction name",
                             border: OutlineInputBorder(
                               borderSide: BorderSide.none,
@@ -251,14 +251,14 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             _generateCalendar(),
             _generateAccountSelector(),
             Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: MaterialButton(
-                child: Center(child: Text("Filter Statistics"),),
                 onPressed: (() async {
                   await _filterStats();
                 }),
                 color: accentColors[6],
                 height: 50,
+                child: const Center(child: Text("Filter Statistics"),),
               ),
             ),
           ],
@@ -270,8 +270,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   Widget _generateCalendarDisplay() {
     return Container(
       height: 50,
-      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      decoration: const BoxDecoration(
         color: secondaryDark,
       ),
       child: UserButton(
@@ -283,7 +283,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           child: Text(
             _getTitleText(),
             //textAlign: TextAlign.right,
-            style: TextStyle(
+            style: const TextStyle(
               color: textColor,
             ),
           ),
@@ -305,7 +305,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         color: secondaryDark,
         height: (_currentType == "custom" ? 400 : 200),
         width: double.infinity,
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -322,7 +322,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                 "Custom": accentColors[6],
               },
             ),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             Expanded(child:
               Container(
                 color: Colors.transparent,
@@ -339,19 +339,19 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     if(_currentType == "month") {
       // set the _currentToDate as the last day of the month
       _currentFromDate = DateTime(_currentToDate.toLocal().year, _currentToDate.toLocal().month, 1);
-      _currentToDate = DateTime(_currentToDate.toLocal().year, _currentToDate.toLocal().month + 1, 1).subtract(Duration(days: 1));
+      _currentToDate = DateTime(_currentToDate.toLocal().year, _currentToDate.toLocal().month + 1, 1).subtract(const Duration(days: 1));
       return _generateMonthCalendar();
     }
     else if(_currentType == "year") {
       // set the _currentToDate as the last day of the year
       _currentFromDate = DateTime(_currentToDate.toLocal().year, 1, 1);
-      _currentToDate = DateTime(_currentToDate.toLocal().year + 1, 1, 1).subtract(Duration(days: 1));
+      _currentToDate = DateTime(_currentToDate.toLocal().year + 1, 1, 1).subtract(const Duration(days: 1));
       return _generateYearCalendar();
     }
     else {
       // check if the _currentTo < _currentFrom, if so, then set _currentTo equal to _currentFrom
       if(_currentToDate.toLocal().isBefore(_currentFromDate.toLocal())) {
-        _currentToDate = DateTime(_currentFromDate.toLocal().year, _currentFromDate.toLocal().month + 1, 1).subtract(Duration(days: 1));
+        _currentToDate = DateTime(_currentFromDate.toLocal().year, _currentFromDate.toLocal().month + 1, 1).subtract(const Duration(days: 1));
       }
       return _generateCustomCalendar();
     }
@@ -365,54 +365,50 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         Expanded(
           flex: 1,
           child: Center(
-            child: Container(
-              child: CupertinoPicker(
-                scrollController: FixedExtentScrollController(initialItem: (_currentToDate.toLocal().month-1)),
-                itemExtent: 25,
-                onSelectedItemChanged: (int value) {
-                  setState(() {
-                     _currentFromDate = DateTime(_currentToDate.toLocal().year, value+1, 1);
-                    _currentToDate = DateTime(_currentToDate.toLocal().year, value+2, 1).subtract(Duration(days: 1));
-                  });
-                },
-                children: List.generate(12, ((index) {
-                  return Text(
-                    DateFormat("MMM").format(DateTime(_currentToDate.toLocal().year, index+1, 1)),
-                    style: TextStyle(
-                      color: textColor2,
-                      fontSize: 20,
-                      fontFamily: '--apple-system'
-                    ),
-                  );
-                })),
-              ),
+            child: CupertinoPicker(
+              scrollController: FixedExtentScrollController(initialItem: (_currentToDate.toLocal().month-1)),
+              itemExtent: 25,
+              onSelectedItemChanged: (int value) {
+                setState(() {
+                   _currentFromDate = DateTime(_currentToDate.toLocal().year, value+1, 1);
+                  _currentToDate = DateTime(_currentToDate.toLocal().year, value+2, 1).subtract(const Duration(days: 1));
+                });
+              },
+              children: List.generate(12, ((index) {
+                return Text(
+                  DateFormat("MMM").format(DateTime(_currentToDate.toLocal().year, index+1, 1)),
+                  style: const TextStyle(
+                    color: textColor2,
+                    fontSize: 20,
+                    fontFamily: '--apple-system'
+                  ),
+                );
+              })),
             ),
           ),
         ),
         Expanded(
           flex: 1,
           child: Center(
-            child: Container(
-              child: CupertinoPicker(
-                scrollController: FixedExtentScrollController(initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)),
-                itemExtent: 25,
-                onSelectedItemChanged: (int value) {
-                  setState(() {
-                    _currentFromDate = DateTime((_maxDate.toLocal().year-value), _currentToDate.toLocal().month, 1);
-                    _currentToDate = DateTime((_maxDate.toLocal().year-value), (_currentToDate.toLocal().month+1), 1).subtract(Duration(days: 1));
-                  });
-                },
-                children: List.generate(((_maxDate.toLocal().year - _minDate.toLocal().year) + 1), ((index) {
-                  return Text(
-                    (_maxDate.year-index).toString(),
-                    style: TextStyle(
-                      color: textColor2,
-                      fontSize: 20,
-                      fontFamily: '--apple-system'
-                    ),
-                  );
-                })),
-              ),
+            child: CupertinoPicker(
+              scrollController: FixedExtentScrollController(initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)),
+              itemExtent: 25,
+              onSelectedItemChanged: (int value) {
+                setState(() {
+                  _currentFromDate = DateTime((_maxDate.toLocal().year-value), _currentToDate.toLocal().month, 1);
+                  _currentToDate = DateTime((_maxDate.toLocal().year-value), (_currentToDate.toLocal().month+1), 1).subtract(const Duration(days: 1));
+                });
+              },
+              children: List.generate(((_maxDate.toLocal().year - _minDate.toLocal().year) + 1), ((index) {
+                return Text(
+                  (_maxDate.year-index).toString(),
+                  style: const TextStyle(
+                    color: textColor2,
+                    fontSize: 20,
+                    fontFamily: '--apple-system'
+                  ),
+                );
+              })),
             ),
           ),
         )
@@ -422,27 +418,25 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   Widget _generateYearCalendar() {
     return Center(
-      child: Container(
-        child: CupertinoPicker(
-          scrollController: FixedExtentScrollController(initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)),
-          itemExtent: 25,
-          onSelectedItemChanged: (int value) {
-            setState(() {
-              _currentFromDate = DateTime((_maxDate.toLocal().year-value), 1, 1);
-              _currentToDate = DateTime((_maxDate.toLocal().year-value)+1, 1, 1).subtract(Duration(days: 1));
-            });
-          },
-          children: List.generate(((_maxDate.toLocal().year - _minDate.toLocal().year) + 1), ((index) {
-            return Text(
-              (_maxDate.year-index).toString(),
-              style: TextStyle(
-                color: textColor2,
-                fontSize: 20,
-                fontFamily: '--apple-system'
-              ),
-            );
-          })),
-        ),
+      child: CupertinoPicker(
+        scrollController: FixedExtentScrollController(initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)),
+        itemExtent: 25,
+        onSelectedItemChanged: (int value) {
+          setState(() {
+            _currentFromDate = DateTime((_maxDate.toLocal().year-value), 1, 1);
+            _currentToDate = DateTime((_maxDate.toLocal().year-value)+1, 1, 1).subtract(const Duration(days: 1));
+          });
+        },
+        children: List.generate(((_maxDate.toLocal().year - _minDate.toLocal().year) + 1), ((index) {
+          return Text(
+            (_maxDate.year-index).toString(),
+            style: const TextStyle(
+              color: textColor2,
+              fontSize: 20,
+              fontFamily: '--apple-system'
+            ),
+          );
+        })),
       ),
     );
   }
@@ -452,69 +446,61 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Container(
-          child: Text("From Date"),
-        ),
+        const Text("From Date"),
         Expanded(
           child: Center(
-            child: Container(
-              child: CupertinoTheme(
-                data: CupertinoThemeData(
-                  brightness: Brightness.dark,
-                  textTheme: CupertinoTextThemeData(
-                    dateTimePickerTextStyle: TextStyle(
-                      color: textColor2,
-                      fontSize: 20,
-                      fontFamily: '--apple-system'
-                    ),
+            child: CupertinoTheme(
+              data: const CupertinoThemeData(
+                brightness: Brightness.dark,
+                textTheme: CupertinoTextThemeData(
+                  dateTimePickerTextStyle: TextStyle(
+                    color: textColor2,
+                    fontSize: 20,
+                    fontFamily: '--apple-system'
                   ),
                 ),
-                child: CupertinoDatePicker(
-                  onDateTimeChanged: (DateTime value) {
-                    setState(() {
-                      _currentFromDate = value;
-                    });
-                  },
-                  initialDateTime: _currentFromDate.toLocal(),
-                  maximumDate: _maxDate.toLocal(),
-                  minimumDate: _minDate.toLocal(),
-                  dateOrder: DatePickerDateOrder.dmy,
-                  mode: CupertinoDatePickerMode.date,
-                ),
+              ),
+              child: CupertinoDatePicker(
+                onDateTimeChanged: (DateTime value) {
+                  setState(() {
+                    _currentFromDate = value;
+                  });
+                },
+                initialDateTime: _currentFromDate.toLocal(),
+                maximumDate: _maxDate.toLocal(),
+                minimumDate: _minDate.toLocal(),
+                dateOrder: DatePickerDateOrder.dmy,
+                mode: CupertinoDatePickerMode.date,
               ),
             ),
           ),
         ),
-        Divider(height: 10,),
-        Container(
-          child: Text("To Date"),
-        ),
+        const Divider(height: 10,),
+        const Text("To Date"),
         Expanded(
           child: Center(
-            child: Container(
-              child: CupertinoTheme(
-                data: CupertinoThemeData(
-                  brightness: Brightness.dark,
-                  textTheme: CupertinoTextThemeData(
-                    dateTimePickerTextStyle: TextStyle(
-                      color: textColor2,
-                      fontSize: 20,
-                      fontFamily: '--apple-system'
-                    ),
+            child: CupertinoTheme(
+              data: const CupertinoThemeData(
+                brightness: Brightness.dark,
+                textTheme: CupertinoTextThemeData(
+                  dateTimePickerTextStyle: TextStyle(
+                    color: textColor2,
+                    fontSize: 20,
+                    fontFamily: '--apple-system'
                   ),
                 ),
-                child: CupertinoDatePicker(
-                  onDateTimeChanged: (DateTime value) {
-                    setState(() {
-                      _currentToDate = value;
-                    });
-                  },
-                  initialDateTime: _currentToDate.toLocal(),
-                  maximumDate: _maxDate.toLocal(),
-                  minimumDate: _currentFromDate.toLocal(),
-                  dateOrder: DatePickerDateOrder.dmy,
-                  mode: CupertinoDatePickerMode.date,
-                ),
+              ),
+              child: CupertinoDatePicker(
+                onDateTimeChanged: (DateTime value) {
+                  setState(() {
+                    _currentToDate = value;
+                  });
+                },
+                initialDateTime: _currentToDate.toLocal(),
+                maximumDate: _maxDate.toLocal(),
+                minimumDate: _currentFromDate.toLocal(),
+                dateOrder: DatePickerDateOrder.dmy,
+                mode: CupertinoDatePickerMode.date,
               ),
             ),
           ),
@@ -532,21 +518,21 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           children: <Widget>[
             Container(
               height: 40,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: Center(child: Text("Currencies")),
                   ),
                   IconButton(
                     onPressed: () async {
                       debugPrint("Refresh currency");
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Ionicons.refresh,
                       size: 20,
                     ),
@@ -561,10 +547,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                 itemBuilder: (BuildContext context, int index) {
                   return SimpleItem(
                     color: accentColors[6],
-                    child: FittedBox(
-                      child: Text(_currencies[index].symbol.toUpperCase()),
-                      fit: BoxFit.contain,
-                    ),
                     description: _currencies[index].description,
                     isSelected: (_currentCurrencies!.id == _currencies[index].id),
                     onTap: (() {
@@ -574,6 +556,10 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                       });
                       Navigator.pop(context);
                     }),
+                    child: FittedBox(
+                      fit: BoxFit.contain,
+                      child: Text(_currencies[index].symbol.toUpperCase()),
+                    ),
                   );
                 },
               ),
@@ -600,21 +586,21 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           children: <Widget>[
             Container(
               height: 40,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
+                children: <Widget>[
+                  const Expanded(
                     child: Center(child: Text("Account")),
                   ),
                   IconButton(
                     onPressed: () {
                       debugPrint("Refresh wallet");
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Ionicons.refresh,
                       size: 20,
                     ),
@@ -629,7 +615,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                 itemBuilder: (BuildContext context, int index) {
                   return SimpleItem(
                     color: IconList.getColor(_currentWallets[index].walletType.type.toLowerCase()),
-                    child: IconList.getIcon(_currentWallets[index].walletType.type.toLowerCase()),
                     description: _currentWallets[index].name,
                     isSelected: (_currentWallet!.id == _currentWallets[index].id),
                     onTap: (() {
@@ -638,6 +623,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                       });
                       Navigator.pop(context);
                     }),
+                    child: IconList.getIcon(_currentWallets[index].walletType.type.toLowerCase()),
                   );
                 },
               ),
@@ -652,8 +638,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   Widget _generateAccountSelector() {
     return Container(
       height: 50,
-      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      decoration: const BoxDecoration(
         color: secondaryDark,
       ),
       child: UserButton(
@@ -665,7 +651,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           child: Text(
             _currentWallet!.name,
             //textAlign: TextAlign.right,
-            style: TextStyle(
+            style: const TextStyle(
               color: textColor,
             ),
           ),
@@ -681,8 +667,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   Widget _generateCurrencySelector() {
     return Container(
       height: 50,
-      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      decoration: const BoxDecoration(
         color: secondaryDark,
       ),
       child: UserButton(
@@ -694,7 +680,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           child: Text(
             _currentCurrencies!.description,
             //textAlign: TextAlign.right,
-            style: TextStyle(
+            style: const TextStyle(
               color: textColor,
             ),
           ),
@@ -709,7 +695,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   Widget _nameButton({required String value}) {
     return Container(
       height: 60,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
       ),
       child: InkWell(
@@ -764,7 +750,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       return DateFormat("yyyy").format(_currentToDate.toLocal());
     }
     else {
-      return DateFormat("dd/MM/yyyy").format(_currentFromDate.toLocal()) + " - " + DateFormat("dd/MM/yyyy").format(_currentToDate.toLocal());
+      return "${DateFormat("dd/MM/yyyy").format(_currentFromDate.toLocal())} - ${DateFormat("dd/MM/yyyy").format(_currentToDate.toLocal())}";
     }
   }
 
@@ -772,7 +758,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     // loop to get all the account that related with this currencies
     _currentWallets.clear();
     if(_currentCurrencies!.id > 0) {
-      _wallets.forEach((wallet) {
+      for (WalletModel wallet in _wallets) {
         if(wallet.id == -1) {
           _currentWallets.add(wallet);
         }
@@ -781,7 +767,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             _currentWallets.add(wallet);
           }
         }
-      });
+      }
     }
     else {
       _currentWallets = [_wallets[0]];
@@ -830,7 +816,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       _currentIncomeExpenseCategory = incomeExpenseCategory;
     }).onError((error, stackTrace) {
       debugPrint("Error when <_fetchStats>");
-      throw new Exception("Error when trying to fetch statistics");
+      throw Exception("Error when trying to fetch statistics");
     });
   }
 }

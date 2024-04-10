@@ -20,7 +20,7 @@ class PieChartPainter extends CustomPainter {
     double startRadian = -pi / 2;
 
     double totalAmount = 0;
-    chartAmount.forEach((amt) { totalAmount += amt; });
+    for (double amt in chartAmount) { totalAmount += amt; }
 
     for(int index = 0; index < chartAmount.length; index++) {
       // for color we need to see, which one is bigger?

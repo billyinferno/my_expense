@@ -10,20 +10,20 @@ class SimpleItem extends StatelessWidget {
   final Color? checkmarkColor;
   final Function? onTap;
   const SimpleItem({
-    Key? key,
+    super.key,
     required this.color,
     required this.child,
     required this.description,
     this.isSelected,
     this.checkmarkColor,
     this.onTap
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 60,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
       ),
       child: Align(
@@ -32,7 +32,7 @@ class SimpleItem extends StatelessWidget {
           leading: Container(
             height: 40,
             width: 40,
-            padding: EdgeInsets.all(5),
+            padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(40),
               color: color,

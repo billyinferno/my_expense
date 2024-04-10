@@ -9,10 +9,10 @@ class HorizontalMonthCalendar extends StatefulWidget {
   final DateTime selectedDate;
   final MyDateTimeCallback? onDateSelected;
 
-  HorizontalMonthCalendar({required this.firstDay, required this.lastDay, required this.selectedDate, this.onDateSelected});
+  const HorizontalMonthCalendar({super.key, required this.firstDay, required this.lastDay, required this.selectedDate, this.onDateSelected});
 
   @override
-  _HorizontalMonthCalendarState createState() => _HorizontalMonthCalendarState();
+  State<HorizontalMonthCalendar> createState() => _HorizontalMonthCalendarState();
 }
 
 class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
@@ -37,8 +37,8 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
       }
     }
 
-    int _initialPages = _initialPage ~/ 3;
-    _controller = PageController(initialPage: _initialPages);
+    int initialPages = _initialPage ~/ 3;
+    _controller = PageController(initialPage: initialPages);
 
     super.initState();
   }
@@ -49,14 +49,14 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
   }
 
   int _computeTotalMonths(DateTime start, DateTime end) {
-    DateTime _start = start;
+    DateTime startDate = start;
     int total = 0;
-    while(_start.year != end.year || _start.month != end.month) {
-      _start = DateTime(start.year, start.month + total);
+    while(startDate.year != end.year || startDate.month != end.month) {
+      startDate = DateTime(start.year, start.month + total);
       //print(_start.toString() + " - " + end.toString());
 
       // check if this is the same as today year and month
-      if(_start.year == DateTime.now().year && _start.month == DateTime.now().month) {
+      if(startDate.year == DateTime.now().year && startDate.month == DateTime.now().month) {
         _initialPage = total;
       }
 
@@ -96,9 +96,9 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
                   ),
                 ),
               ),
-              SizedBox(height: 5,),
+              const SizedBox(height: 5,),
               Container(
-                margin: EdgeInsets.only(left: 10, right: 10),
+                margin: const EdgeInsets.only(left: 10, right: 10),
                 height: 5,
                 decoration: BoxDecoration(
                   color: (_isSameDate(dt, widget.selectedDate) ? selectedPrimary : Colors.transparent),
@@ -113,7 +113,7 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
   }
 
   Widget _buildHorizontalCalendar() {
-    return Container(
+    return SizedBox(
       height: 35,
       child: PageView.builder(
         controller: _controller,
@@ -123,7 +123,7 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
           DateTime firstDate = DateTime(widget.firstDay.year, (widget.firstDay.month + ((index * 3) + 0)), widget.firstDay.day);
           DateTime secondDate = DateTime(widget.firstDay.year, (widget.firstDay.month + ((index * 3) + 1)), widget.firstDay.day);
           DateTime thirdDate = DateTime(widget.firstDay.year, (widget.firstDay.month + ((index * 3) + 2)), widget.firstDay.day);
-          return Container(
+          return SizedBox(
             height: 20,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,

@@ -18,7 +18,7 @@ import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -111,10 +111,10 @@ class _LoginPageState extends State<LoginPage> {
             color: accentColors[6],
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 25,
         ),
-        Center(
+        const Center(
           child: Text(
             "myExpense",
             style: TextStyle(
@@ -126,8 +126,8 @@ class _LoginPageState extends State<LoginPage> {
         ),
         Center(
           child: Text(
-            'version - ' + Globals.appVersion,
-            style: TextStyle(
+            'version - ${Globals.appVersion}',
+            style: const TextStyle(
               color: textColor2,
               fontSize: 10,
               fontStyle: FontStyle.italic,
@@ -153,7 +153,7 @@ class _LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(
+                  const Text(
                     "my",
                     style: TextStyle(
                       color: textColor2,
@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                             Ionicons.person,
                             color: (_usernameFocus.hasFocus ? accentColors[6] : textColor2),
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(
                               color: textColor,
                               width: 1.0,
@@ -251,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
                             Ionicons.key,
                             color: (_passwordFocus.hasFocus ? accentColors[6] : textColor2),
                           ),
-                          enabledBorder: UnderlineInputBorder(
+                          enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(
                               color: textColor,
                               width: 1.0,
@@ -338,15 +338,15 @@ class _LoginPageState extends State<LoginPage> {
         debugPrint("⏳ Fetch Wallet User Currency");
       }),
       _transactionHTTP.fetchLastTransaction("expense").then((value) {
-        debugPrint("⏳ Fetch Expense Last Transaction : " + value.length.toString());
+        debugPrint("⏳ Fetch Expense Last Transaction : ${value.length}");
       }),
       _transactionHTTP.fetchLastTransaction("income").then((value) {
-        debugPrint("⏳ Fetch Income Last Transaction : " + value.length.toString());
+        debugPrint("⏳ Fetch Income Last Transaction : ${value.length}");
       }),
       _transactionHTTP.fetchMinMaxDate().then((_) {
         debugPrint("⏳ Fetch min max transaction date");
       }),
-      _pinHTTP.getPin(true).then((_pin) {
+      _pinHTTP.getPin(true).then((pin) {
         debugPrint("⏳ Fetch user PIN");
       }),
     ]).then((_) {
@@ -372,7 +372,7 @@ class _LoginPageState extends State<LoginPage> {
       debugPrint("🔑 Checking User Login");
       // check if user already login or not?
       await _userHTTP.fetchMe().then((user) async {
-        debugPrint("👨🏻 User " + user.username + " already login");
+        debugPrint("👨🏻 User ${user.username} already login");
       }).onError((error, stackTrace) {
         // set loading into false, it will rebuild the widget, which
         // by right should show the login screen.
@@ -395,7 +395,9 @@ class _LoginPageState extends State<LoginPage> {
       // set loading into false.
       res = false;
       _setLoading(false);
-      ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "No internet connection"));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "No internet connection"));
+      }
     }
     return res;
   }
@@ -410,11 +412,11 @@ class _LoginPageState extends State<LoginPage> {
       else {
         // check if got connectivity result none or not?
         _isConnect = true;
-        connectivityResult.forEach((result) {
+        for (ConnectivityResult result in connectivityResult) {
           if (result == ConnectivityResult.none) {
             _isConnect = false;
           }
-        });
+        }
 
         // check whether we have connection or not?
         if (!_isConnect) {
@@ -433,10 +435,10 @@ class _LoginPageState extends State<LoginPage> {
     await UserSharedPreferences.setUserConnection(_isConnect);
   }
 
-  Future<void> _storeCredentials(LoginModel _loginModel) async {
+  Future<void> _storeCredentials(LoginModel loginModel) async {
     // ensure we finished storing the credentials before we actually get the
     // additional information and navigate to home
-    await UserSharedPreferences.setUserLogin(_loginModel).then((value) async {
+    await UserSharedPreferences.setUserLogin(loginModel).then((value) async {
       // when user is login, check whether this is due to token expired or not?
       // if due to token expired, then we will need to refresh the JWT token that
       // being used by each API call that we have before we call _getAdditionalInfo
@@ -477,13 +479,15 @@ class _LoginPageState extends State<LoginPage> {
     // check if connected or not?
     if (_isConnect) {
       // all good, showed the loading
-      showLoaderDialog(context);
+      if (mounted) {
+        showLoaderDialog(context);
+      }
 
       // try to fetch users/me endpoint to check if we have credentials to access
       // this page or not?
-      await _userHTTP.login(username, password).then((_loginModel) {
+      await _userHTTP.login(username, password).then((loginModel) {
         // login success, now we can just store this on the shared preferences
-        _storeCredentials(_loginModel);
+        _storeCredentials(loginModel);
       }).onError((error, stackTrace) {
         // check if we got "res=" on the result or not?
         // if got, it means that we got response from server, if not it's due
@@ -504,7 +508,9 @@ class _LoginPageState extends State<LoginPage> {
     }
     else {
       // showed connection error
-      ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "No internet connection"));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "No internet connection"));
+      }
     }
 
     return isError;

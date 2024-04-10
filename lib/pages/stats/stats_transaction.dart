@@ -11,18 +11,18 @@ import 'package:my_expense/widgets/chart/budget_bar.dart';
 
 class StatsTransactionPage extends StatefulWidget {
   final Object? args;
-  const StatsTransactionPage({ Key? key, required this.args}) : super(key: key);
+  const StatsTransactionPage({ super.key, required this.args});
 
   @override
-  _StatsTransactionPageState createState() => _StatsTransactionPageState();
+  State<StatsTransactionPage> createState() => _StatsTransactionPageState();
 }
 
 class _StatsTransactionPageState extends State<StatsTransactionPage> {
-  final fCCY = new NumberFormat("#,##0.00", "en_US");
+  final fCCY = NumberFormat("#,##0.00", "en_US");
   final transactionHttp = TransactionHTTPService();
 
   bool _isLoading = true;
-  ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
   late List<TransactionStatsDetailModel> _transactions;
   late StatsTransactionArgs _args;
 
@@ -48,7 +48,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
           onPressed: () {
             Navigator.maybePop(context, false);
           },
-          icon: Icon(
+          icon: const Icon(
             Ionicons.close,
           ),
         ),
@@ -62,26 +62,24 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
 
   Widget _getBody() {
     if(_isLoading) {
-      return Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SpinKitFadingCube(
-              color: accentColors[6],
-              size: 25,
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SpinKitFadingCube(
+            color: accentColors[6],
+            size: 25,
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          const Text(
+            "loading...",
+            style: TextStyle(
+              color: textColor2,
+              fontSize: 10,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              "loading...",
-              style: TextStyle(
-                color: textColor2,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     }
     else {
@@ -91,8 +89,8 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
         children: <Widget>[
           Container(
             width: double.infinity,
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
+            padding: const EdgeInsets.all(10),
+            decoration: const BoxDecoration(
               color: secondaryDark,
               border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
             ),
@@ -107,7 +105,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
           ),
           Expanded(
             child: Container(
-              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 controller: _scrollController,
@@ -119,7 +117,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
               ),
             ),
           ),
-          SizedBox(height: 25,),
+          const SizedBox(height: 25,),
         ],
       );
     }
@@ -129,22 +127,27 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     return Container(
       height: 60,
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-      decoration: BoxDecoration(
-          border:
-              Border(bottom: BorderSide(width: 1.0, color: primaryLight))),
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            width: 1.0,
+            color: primaryLight
+          )
+        )
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
-            child: (_args.type == "expense" ? IconColorList.getExpenseIcon(txn.categoriesName) : IconColorList.getIncomeIcon(txn.categoriesName)),
             height: 40,
             width: 40,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: (_args.type == "expense" ? IconColorList.getExpenseColor(txn.categoriesName) : IconColorList.getIncomeColor(txn.categoriesName)),
             ),
-            margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
+            margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+            child: (_args.type == "expense" ? IconColorList.getExpenseIcon(txn.categoriesName) : IconColorList.getIncomeIcon(txn.categoriesName)),
           ),
           Expanded(
             child: Column(
@@ -156,8 +159,8 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  "(" + txn.walletName + ") " + DateFormat('dd/MM/yy').format(txn.date.toLocal()),
-                  style: TextStyle(
+                  "(${txn.walletName}) ${DateFormat('dd/MM/yy').format(txn.date.toLocal())}",
+                  style: const TextStyle(
                     fontSize: 12,
                     color: textColor2,
                   ),
@@ -169,9 +172,9 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
+            children: <Widget>[
               Text(
-                _args.currency.symbol + " " + fCCY.format(txn.amount),
+                "${_args.currency.symbol} ${fCCY.format(txn.amount)}",
                 style: TextStyle(
                   color: (_args.type == "expense" ? accentColors[2] : accentColors[6]),
                 ),

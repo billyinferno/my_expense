@@ -18,23 +18,20 @@ class TransactionSharedPreferences {
   static const _transactionListCurrentDate = "trx_list_current_date";
 
   static Future setTransaction(String date, List<TransactionListModel> model) async {
-    String _key = _transactionKey + "_" + date;
-    List<String> _data = model.map((e) => jsonEncode(e.toJson())).toList();
+    String key = "${_transactionKey}_$date";
+    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
 
-    // print("setTransaction (${date}): " + _data.toString());
-    await MyBox.putStringList(_key, _data);
-    //await _pref!.setStringList(_key, _data);
+    await MyBox.putStringList(key, data);
   }
 
   static List<TransactionListModel>? getTransaction(String date) {
-    String _key = _transactionKey + "_" + date;
+    String key = "${_transactionKey}_$date";
 
-    List<String>? _data = MyBox.getStringList(_key);
-    // List<String>? _data = _pref!.getStringList(_key);
+    List<String>? data = MyBox.getStringList(key);
 
-    if(_data != null) {
-      List<TransactionListModel> _transaction = _data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
-      return _transaction;
+    if(data != null) {
+      List<TransactionListModel> transaction = data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
+      return transaction;
     }
     else {
       return null;
@@ -42,35 +39,32 @@ class TransactionSharedPreferences {
   }
 
   static Future setLastTransaction(String type, List<LastTransactionModel> model) async {
-    String _key = "";
+    String key = "";
     if(type == "expense") {
-      _key = _transactionLastExpenseKey;
+      key = _transactionLastExpenseKey;
     }
     else {
-      _key = _transactionLastIncomeKey;
+      key = _transactionLastIncomeKey;
     }
-    List<String> _data = model.map((e) => jsonEncode(e.toJson())).toList();
+    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
 
-    // print("setTransaction (${date}): " + _data.toString());
-    await MyBox.putStringList(_key, _data);
-    //await _pref!.setStringList(_key, _data);
+    await MyBox.putStringList(key, data);
   }
 
   static List<LastTransactionModel>? getLastTransaction(String type) {
-    String _key = "";
+    String key = "";
     if(type == "expense") {
-      _key = _transactionLastExpenseKey;
+      key = _transactionLastExpenseKey;
     }
     else {
-      _key = _transactionLastIncomeKey;
+      key = _transactionLastIncomeKey;
     }
 
-    List<String>? _data = MyBox.getStringList(_key);
-    // List<String>? _data = _pref!.getStringList(_key);
+    List<String>? data = MyBox.getStringList(key);
 
-    if(_data != null) {
-      List<LastTransactionModel> _transaction = _data.map((e) => LastTransactionModel.fromJson(jsonDecode(e))).toList();
-      return _transaction;
+    if(data != null) {
+      List<LastTransactionModel> transaction = data.map((e) => LastTransactionModel.fromJson(jsonDecode(e))).toList();
+      return transaction;
     }
     else {
       return null;
@@ -78,21 +72,20 @@ class TransactionSharedPreferences {
   }
 
   static Future setTransactionBudget(int categoryId, String date, List<TransactionListModel> model) async {
-    String _key = _transactionBudget + "_" + categoryId.toString() + "_" + date;
-    List<String> _data = model.map((e) => jsonEncode(e.toJson())).toList();
+    String key = "${_transactionBudget}_${categoryId}_$date";
+    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
 
-    await MyBox.putStringList(_key, _data);
+    await MyBox.putStringList(key, data);
   }
 
   static List<TransactionListModel>? getTransactionBudget(int categoryId, String date) {
-    String _key = _transactionBudget + "_" + categoryId.toString() + "_" + date;
+    String key = "${_transactionBudget}_${categoryId}_$date";
 
-    List<String>? _data = MyBox.getStringList(_key);
-    // List<String>? _data = _pref!.getStringList(_key);
+    List<String>? data = MyBox.getStringList(key);
 
-    if(_data != null) {
-      List<TransactionListModel> _transaction = _data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
-      return _transaction;
+    if(data != null) {
+      List<TransactionListModel> transaction = data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
+      return transaction;
     }
     else {
       return null;
@@ -104,12 +97,11 @@ class TransactionSharedPreferences {
   }
 
   static DateTime getTransactionMinDate() {
-    String? _data = MyBox.getString(_transactionMinDate);
-    // List<String>? _data = _pref!.getStringList(_key);
+    String? data = MyBox.getString(_transactionMinDate);
 
-    if(_data != null) {
-      DateTime _date = DateTime.parse(_data);
-      return _date;
+    if(data != null) {
+      DateTime date = DateTime.parse(data);
+      return date;
     }
     else {
       return DateTime(DateTime.now().year, DateTime.now().month, 1);
@@ -121,33 +113,32 @@ class TransactionSharedPreferences {
   }
 
   static DateTime getTransactionMaxDate() {
-    String? _data = MyBox.getString(_transactionMaxDate);
-    // List<String>? _data = _pref!.getStringList(_key);
+    String? data = MyBox.getString(_transactionMaxDate);
 
-    if(_data != null) {
-      DateTime _date = DateTime.parse(_data);
-      return _date;
+    if(data != null) {
+      DateTime date = DateTime.parse(data);
+      return date;
     }
     else {
-      return DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(Duration(days: 1));
+      return DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
     }
   }
 
   static Future setTransactionWallet(int walletId, String date, List<TransactionListModel> model) async {
-    String _key = _transactionWallet + "_" + walletId.toString() + "_" + date;
-    List<String> _data = model.map((e) => jsonEncode(e.toJson())).toList();
+    String key = "${_transactionWallet}_${walletId}_$date";
+    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
 
-    await MyBox.putStringList(_key, _data);
+    await MyBox.putStringList(key, data);
   }
 
   static List<TransactionListModel>? getTransactionWallet(int walletId, String date) {
-    String _key = _transactionWallet + "_" + walletId.toString() + "_" + date;
+    String key = "${_transactionWallet}_${walletId}_$date";
 
-    List<String>? _data = MyBox.getStringList(_key);
+    List<String>? data = MyBox.getStringList(key);
 
-    if(_data != null) {
-      List<TransactionListModel> _transaction = _data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
-      return _transaction;
+    if(data != null) {
+      List<TransactionListModel> transaction = data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
+      return transaction;
     }
     else {
       return null;
@@ -155,13 +146,13 @@ class TransactionSharedPreferences {
   }
 
   static Future<void> deleteTransactionWallet(int walletId, String date, TransactionListModel txn) async {
-    String _key = _transactionWallet + "_" + walletId.toString() + "_" + date;
+    String key = "${_transactionWallet}_${walletId}_$date";
     
-    List<String>? _data = MyBox.getStringList(_key);
+    List<String>? data = MyBox.getStringList(key);
 
-    List<TransactionListModel> _transaction;
-    if(_data != null) {
-      _transaction = _data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
+    List<TransactionListModel> transaction;
+    if(data != null) {
+      transaction = data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
     }
     else {
       // means we don't have the data, no need to add this, as we will fetch it
@@ -171,8 +162,8 @@ class TransactionSharedPreferences {
     }
 
     int index = -1;
-    for(int i=0;i<_transaction.length;i++) {
-      if(_transaction[i].id == txn.id) {
+    for(int i=0;i<transaction.length;i++) {
+      if(transaction[i].id == txn.id) {
         index = i;
         break;
       }
@@ -180,21 +171,21 @@ class TransactionSharedPreferences {
 
     // remove the transaction
     if(index > -1) {
-      _transaction.removeAt(index);
+      transaction.removeAt(index);
     }
 
     // set the wallet transaction after we delete the transaction
-    await setTransactionWallet(walletId, date, _transaction);
+    await setTransactionWallet(walletId, date, transaction);
   }
 
   static Future<void> updateTransactionWallet(int walletId, String date, TransactionListModel txn) async {
-    String _key = _transactionWallet + "_" + walletId.toString() + "_" + date;
+    String key = "${_transactionWallet}_${walletId}_$date";
     
-    List<String>? _data = MyBox.getStringList(_key);
+    List<String>? data = MyBox.getStringList(key);
 
-    List<TransactionListModel> _transaction;
-    if(_data != null) {
-      _transaction = _data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
+    List<TransactionListModel> transaction;
+    if(data != null) {
+      transaction = data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
     }
     else {
       // means we don't have the data, no need to add this, as we will fetch it
@@ -203,26 +194,26 @@ class TransactionSharedPreferences {
       return;
     }
 
-    for(int i=0;i<_transaction.length;i++) {
-      if(_transaction[i].id == txn.id) {
-        _transaction[i] = txn;
+    for(int i=0;i<transaction.length;i++) {
+      if(transaction[i].id == txn.id) {
+        transaction[i] = txn;
         break;
       }
     }
 
     // set the wallet transaction after we delete the transaction
-    await setTransactionWallet(walletId, date, _transaction);
+    await setTransactionWallet(walletId, date, transaction);
   }
 
   static Future<void> addTransactionWallet(int walletId, String date, TransactionListModel txn) async {
-    String _key = _transactionWallet + "_" + walletId.toString() + "_" + date;
+    String key = "${_transactionWallet}_${walletId}_$date";
     
-    List<String>? _data = MyBox.getStringList(_key);
+    List<String>? data = MyBox.getStringList(key);
 
-    List<TransactionListModel> _transaction;
-    if(_data != null) {
-      _transaction = _data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
-      _transaction.add(txn);
+    List<TransactionListModel> transaction;
+    if(data != null) {
+      transaction = data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
+      transaction.add(txn);
     }
     else {
       // means we don't have the data, no need to add this, as we will fetch it
@@ -234,22 +225,22 @@ class TransactionSharedPreferences {
     // in case user insert the transaction in the middle (not current date), then we need to
     // sorted the transaction
     TransactionListModel swp;
-    for(int i=0; i<_transaction.length - 1; i++) {
-      for(int j=(i+1); j<_transaction.length; j++) {
-        if(_transaction[j].date.toLocal().isBefore(_transaction[i].date.toLocal())) {
+    for(int i=0; i<transaction.length - 1; i++) {
+      for(int j=(i+1); j<transaction.length; j++) {
+        if(transaction[j].date.toLocal().isBefore(transaction[i].date.toLocal())) {
           // swap the data
-          swp = _transaction[i];
-          _transaction[i] = _transaction[j];
-          _transaction[j] = swp;
+          swp = transaction[i];
+          transaction[i] = transaction[j];
+          transaction[j] = swp;
         }
         else {
-          if(isSameDay(_transaction[i].date.toLocal(), _transaction[j].date.toLocal())) {
+          if(isSameDay(transaction[i].date.toLocal(), transaction[j].date.toLocal())) {
             // check which ID is bigger
-            if(_transaction[i].id > _transaction[j].id) {
+            if(transaction[i].id > transaction[j].id) {
               // swap the data
-              swp = _transaction[i];
-              _transaction[i] = _transaction[j];
-              _transaction[j] = swp;
+              swp = transaction[i];
+              transaction[i] = transaction[j];
+              transaction[j] = swp;
             }
           }
         }
@@ -257,37 +248,35 @@ class TransactionSharedPreferences {
     }
 
     // set the transaction wallet after we sort it out
-    await setTransactionWallet(walletId, date, _transaction);
+    await setTransactionWallet(walletId, date, transaction);
   }
 
   static Future<void> clearTransaction() async {
     final keys = MyBox.keyBox!.keys;
-    //final keys = _pref!.getKeys();
-    keys.forEach((key) async {
+    for(var key in keys) {
       // check if this key is trx?
       if(key.toLowerCase().startsWith('trx')) {
         // this is transaction key, we can clear this shared preferences
         await MyBox.keyBox!.delete(key);
       }
-    });
+    }
   }
 
   static Future<void> setIncomeExpense(int ccyId, String dateFrom, String dateTo, IncomeExpenseModel incomeExpense) async {
-    String _key = _transactionIncomeExpense + "_" + ccyId.toString() + "_" + dateFrom + "_" + dateTo;
-    String? _incomeExpense = jsonEncode(incomeExpense.toJson());
-    //print("Income Expense : " + _incomeExpense);
+    String key = "${_transactionIncomeExpense}_${ccyId}_${dateFrom}_$dateTo";
+    String? incomeExpense0 = jsonEncode(incomeExpense.toJson());
 
-    await MyBox.putString(_key, _incomeExpense);
+    await MyBox.putString(key, incomeExpense0);
   }
 
   static IncomeExpenseModel? getIncomeExpense(int ccyId, String dateFrom, String dateTo) {
-    String _key = _transactionIncomeExpense + "_" + ccyId.toString() + "_" + dateFrom + "_" + dateTo;
+    String key = "${_transactionIncomeExpense}_${ccyId}_${dateFrom}_$dateTo";
 
-    String? _data = MyBox.getString(_key);
+    String? data = MyBox.getString(key);
 
-    if(_data != null) {
-      IncomeExpenseModel _incomeExpense = IncomeExpenseModel.fromJson(jsonDecode(_data));
-      return _incomeExpense;
+    if(data != null) {
+      IncomeExpenseModel incomeExpense = IncomeExpenseModel.fromJson(jsonDecode(data));
+      return incomeExpense;
     }
     else {
       return null;
@@ -295,66 +284,63 @@ class TransactionSharedPreferences {
   }
 
   static Future<IncomeExpenseModel> addIncomeExpense(int ccyId, String dateFrom, String dateTo, TransactionListModel txn) async {
-    IncomeExpenseModel? _incomeExpense = getIncomeExpense(ccyId, dateFrom, dateTo);
-    if(_incomeExpense == null) {
-      _incomeExpense = IncomeExpenseModel(income: {}, expense: {});
-    }
+    IncomeExpenseModel? incomeExpense = (getIncomeExpense(ccyId, dateFrom, dateTo) ?? IncomeExpenseModel(income: {}, expense: {}));
 
     // now check what transaction is this?
-    SplayTreeMap<DateTime, double> _sortedMap = SplayTreeMap<DateTime, double>();
+    SplayTreeMap<DateTime, double> sortedMap = SplayTreeMap<DateTime, double>();
     if(txn.type == "expense") {
       // check if this ccy exists or not in expense
-      if(_incomeExpense.expense.containsKey(txn.date)) {
-        _incomeExpense.expense[txn.date] = _incomeExpense.expense[txn.date]! + (txn.amount * -1);
+      if(incomeExpense.expense.containsKey(txn.date)) {
+        incomeExpense.expense[txn.date] = incomeExpense.expense[txn.date]! + (txn.amount * -1);
       }
       else {
-        _incomeExpense.expense[txn.date] = (txn.amount * -1);
+        incomeExpense.expense[txn.date] = (txn.amount * -1);
       }
 
       // put the expense on the SplayTreeMap
-      _incomeExpense.expense.forEach((key, value) {
-        _sortedMap[key] = value;
+      incomeExpense.expense.forEach((key, value) {
+        sortedMap[key] = value;
       });
 
       // create new variable for expense
-      Map<DateTime, double> _expense = {};
-      _sortedMap.forEach((key, value) {
-        _expense[key] = value;
+      Map<DateTime, double> expense = {};
+      sortedMap.forEach((key, value) {
+        expense[key] = value;
       });
 
       // put the new expense to new income expense model
-      IncomeExpenseModel _newIncomeExpense = IncomeExpenseModel(income: _incomeExpense.income, expense: _expense);
-      await setIncomeExpense(ccyId, dateFrom, dateTo, _newIncomeExpense);
-      return _newIncomeExpense;
+      IncomeExpenseModel newIncomeExpense = IncomeExpenseModel(income: incomeExpense.income, expense: expense);
+      await setIncomeExpense(ccyId, dateFrom, dateTo, newIncomeExpense);
+      return newIncomeExpense;
     }
     else if(txn.type == "income") {
       // check if this ccy exists or not in expense
-      if(_incomeExpense.income.containsKey(txn.date)) {
-        _incomeExpense.income[txn.date] = _incomeExpense.income[txn.date]! + txn.amount;
+      if(incomeExpense.income.containsKey(txn.date)) {
+        incomeExpense.income[txn.date] = incomeExpense.income[txn.date]! + txn.amount;
       }
       else {
-        _incomeExpense.income[txn.date] = txn.amount;
+        incomeExpense.income[txn.date] = txn.amount;
       }
 
       // put the income on the SplayTreeMap
-      _incomeExpense.income.forEach((key, value) {
-        _sortedMap[key] = value;
+      incomeExpense.income.forEach((key, value) {
+        sortedMap[key] = value;
       });
 
       // create new variable for income
-      Map<DateTime, double> _income = {};
-      _sortedMap.forEach((key, value) {
-        _income[key] = value;
+      Map<DateTime, double> income = {};
+      sortedMap.forEach((key, value) {
+        income[key] = value;
       });
 
       // put the new expense to new income expense model
-      IncomeExpenseModel _newIncomeExpense = IncomeExpenseModel(income: _income, expense: _incomeExpense.expense);
-      await setIncomeExpense(ccyId, dateFrom, dateTo, _newIncomeExpense);
-      return _newIncomeExpense; 
+      IncomeExpenseModel newIncomeExpense0 = IncomeExpenseModel(income: income, expense: incomeExpense.expense);
+      await setIncomeExpense(ccyId, dateFrom, dateTo, newIncomeExpense0);
+      return newIncomeExpense0; 
     }
 
     // return current value
-    return _incomeExpense;
+    return incomeExpense;
   }
 
   static Future<void> setTransactionListCurrentDate(DateTime date) async {
@@ -362,12 +348,11 @@ class TransactionSharedPreferences {
   }
 
   static DateTime? getTransactionListCurrentDate() {
-    String? _data = MyBox.getString(_transactionListCurrentDate);
-    // List<String>? _data = _pref!.getStringList(_key);
-
-    if(_data != null) {
-      DateTime _date = DateTime.parse(_data);
-      return _date;
+    String? data = MyBox.getString(_transactionListCurrentDate);
+    
+    if(data != null) {
+      DateTime date = DateTime.parse(data);
+      return date;
     }
     else {
       return null;

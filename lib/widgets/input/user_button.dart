@@ -9,15 +9,15 @@ class UserButton extends StatelessWidget {
   final Widget value;
   final VoidCallback callback;
 
-  UserButton({required this.icon, required this.iconColor, required this.label, required this.value, required this.callback});
+  const UserButton({super.key, required this.icon, required this.iconColor, required this.label, required this.value, required this.callback});
 
   @override
   Widget build(BuildContext context) {
-    double _sizedBoxMargin = (this.label.length > 0 ? 10 : 0);
+    double sizedBoxMargin = (label.isNotEmpty ? 10 : 0);
     return Container(
       width: double.infinity,
       height: 50,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: secondaryLight, width: 1.0)),
       ),
       child: GestureDetector(
@@ -31,14 +31,14 @@ class UserButton extends StatelessWidget {
                 icon,
                 color: iconColor,
               ),
-              SizedBox(width: 10,),
+              const SizedBox(width: 10,),
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   color: textColor2,
                 ),
               ),
-              SizedBox(width: _sizedBoxMargin,),
+              SizedBox(width: sizedBoxMargin,),
               Expanded(
                 child: Container(
                   height: 50,
@@ -47,8 +47,8 @@ class UserButton extends StatelessWidget {
                   child: value,
                 ),
               ),
-              SizedBox(width: 10,),
-              Icon(
+              const SizedBox(width: 10,),
+              const Icon(
                 Ionicons.chevron_forward_outline,
                 color: primaryLight,
               ),

@@ -49,17 +49,17 @@ class UserSharedPreferences {
     String? userMeData = MyBox.getString(_userMeModel);
     //String? userMeData = _pref!.getString(_userMeModel);
 
-    UsersMeModel _userModel;
+    UsersMeModel userModel;
     if (userMeData != null) {
       // convert the data into json
-      dynamic _userJson = jsonDecode(userMeData);
-      _userModel = new UsersMeModel.fromJson(_userJson);
+      dynamic userJson = jsonDecode(userMeData);
+      userModel = UsersMeModel.fromJson(userJson);
     } else {
       // initialize with blank data
-      _userModel = new UsersMeModel(-1, "", "", false, true, -1, -1, -1, -1);
+      userModel = UsersMeModel(-1, "", "", false, true, -1, -1, -1, -1);
     }
 
-    return _userModel;
+    return userModel;
   }
 
   static Future<void> setUserConnection(bool isConnect) async {

@@ -10,7 +10,7 @@ class BarButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const BarButton({Key? key, required this.index, required this.currentIndex, required this.icon, this.activeColor, this.inactiveColor, required this.text, required this.onTap}) : super(key: key);
+  const BarButton({super.key, required this.index, required this.currentIndex, required this.icon, this.activeColor, this.inactiveColor, required this.text, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +28,13 @@ class BarButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Icon(
                 icon,
                 size: 20,
                 color: (currentIndex == index ? currActiveColor : currInactiveColor),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
@@ -46,7 +46,7 @@ class BarButton extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 13),
+              const SizedBox(height: 13),
             ],
           ),
         ),

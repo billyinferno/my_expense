@@ -8,22 +8,22 @@ class BudgetListModel {
   BudgetListModel({required this.currency, required this.budgets});
 
   factory BudgetListModel.fromJson(Map<String, dynamic> json) {
-    List<BudgetModel> _budgets = [];
+    List<BudgetModel> budgets = [];
 
     json["budgets"].forEach((value) {
-      BudgetModel _budget = BudgetModel.fromJson(value);
-      _budgets.add(_budget);
+      BudgetModel budget = BudgetModel.fromJson(value);
+      budgets.add(budget);
     });
     return BudgetListModel(
       currency: CurrencyModel.fromJson(json["currency"]),
-      budgets: _budgets,
+      budgets: budgets,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "currency": this.currency.toJson(),
-      "budgets": List<dynamic>.from(this.budgets.map((e) => e.toJson()))
+      "currency": currency.toJson(),
+      "budgets": List<dynamic>.from(budgets.map((e) => e.toJson()))
     };
   }
 }

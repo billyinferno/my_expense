@@ -12,8 +12,10 @@ import 'package:my_expense/widgets/input/bar_button.dart';
 import 'package:my_expense/widgets/input/pin_pad.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -46,9 +48,9 @@ class _HomePageState extends State<HomePage> {
         setSelectedDate(value);
       },
     ));
-    pages.add(HomeStats());
-    pages.add(HomeBudget());
-    pages.add(HomeWallet());
+    pages.add(const HomeStats());
+    pages.add(const HomeBudget());
+    pages.add(const HomeWallet());
   }
 
   Widget _showPinScreen() {
@@ -58,15 +60,15 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Text(
+          const Text(
             "Enter Passcode",
             style: TextStyle(
               fontSize: 25,
             ),
           ),
-          SizedBox(height: 5,),
-          Text("Your passcode is required"),
-          SizedBox(height: 25,),
+          const SizedBox(height: 5,),
+          const Text("Your passcode is required"),
+          const SizedBox(height: 25,),
           PinPad(
             hashPin: (pin!.hashPin ?? ''),
             hashKey: (pin!.hashKey ?? ''),
@@ -134,7 +136,7 @@ class _HomePageState extends State<HomePage> {
                 });
               }),
             ),
-            Expanded(child: SizedBox()),
+            const Expanded(child: SizedBox(),),
             BarButton(
               index: 2,
               currentIndex: currentIndex,
@@ -179,7 +181,7 @@ class _HomePageState extends State<HomePage> {
           color: accentColors[0],
           borderRadius: BorderRadius.circular(75)
         ),
-        child: Icon(
+        child: const Icon(
           Ionicons.add,
           size: 25,
           color: textColor,

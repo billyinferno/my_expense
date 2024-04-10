@@ -10,7 +10,7 @@ class PinPad extends StatefulWidget {
   final VoidCallback? onSuccess;
   final Function(String)? getPin;
 
-  const PinPad({ Key? key, required this.hashKey, required this.hashPin, this.onError, this.onSuccess, this.getPin }) : super(key: key);
+  const PinPad({ super.key, required this.hashKey, required this.hashPin, this.onError, this.onSuccess, this.getPin });
 
   @override
   PinPadState createState() => PinPadState();
@@ -27,14 +27,15 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
 
     _wrongInputAnimationController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
     )
       ..addListener(() {
         setState(() {});
       })
       ..addStatusListener((status) {
-        if (status == AnimationStatus.completed)
+        if (status == AnimationStatus.completed) {
           _wrongInputAnimationController.reverse();
+        }
       });
 
     _wiggleAnimation = Tween<double>(begin: 0.0, end: 24.0).animate(
@@ -65,14 +66,14 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(6, (index) {
                   return AnimatedContainer(
-                    duration: Duration(milliseconds: 100),
+                    duration: const Duration(milliseconds: 100),
                     height: 25,
                     width: 25,
                     decoration: BoxDecoration(
                       color: (index < _pinInput.length ? Colors.green : Colors.white),
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    margin: EdgeInsets.all(10),
+                    margin: const EdgeInsets.all(10),
                     onEnd: (() {
                       // check pin, if user already input all the pin
                       _checkPin();
@@ -82,8 +83,8 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
               ),
             ),
           ),
-          SizedBox(height: 25,),
-          Container(
+          const SizedBox(height: 25,),
+          SizedBox(
             width: 300,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -93,7 +94,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                   children: <Widget>[
                     _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "1",
                           style: TextStyle(
@@ -108,7 +109,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                     ),
                      _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "2",
                           style: TextStyle(
@@ -123,7 +124,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                     ),
                      _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "3",
                           style: TextStyle(
@@ -142,7 +143,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                   children: <Widget>[
                     _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "4",
                           style: TextStyle(
@@ -157,7 +158,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                     ),
                      _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "5",
                           style: TextStyle(
@@ -172,7 +173,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                     ),
                      _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "6",
                           style: TextStyle(
@@ -191,7 +192,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                   children: <Widget>[
                     _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "7",
                           style: TextStyle(
@@ -206,7 +207,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                     ),
                      _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "8",
                           style: TextStyle(
@@ -221,7 +222,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                     ),
                      _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "9",
                           style: TextStyle(
@@ -240,7 +241,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                   children: <Widget>[
                     _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "",
                           style: TextStyle(
@@ -252,7 +253,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                     ),
                      _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Text(
                           "0",
                           style: TextStyle(
@@ -267,7 +268,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                     ),
                      _button(
                       height: 80,
-                      value: Center(
+                      value: const Center(
                         child: Icon(
                           CupertinoIcons.delete_left,
                           color: Colors.white,
@@ -323,7 +324,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
       else {
         // if we got call for onSuccess
         if(widget.onSuccess != null) {
-          await Future.delayed(Duration(milliseconds: 300));
+          await Future.delayed(const Duration(milliseconds: 300));
           widget.onSuccess!();
         }
       }
@@ -331,7 +332,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
   }
 
   void deleteCurrentText() {
-    if(_pinInput.length > 0) {
+    if(_pinInput.isNotEmpty) {
       setState(() {
         _pinInput = _pinInput.substring(0, _pinInput.length - 1);
       });
@@ -353,12 +354,12 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
   }
 
   Widget _button({required Widget value, Color? color, double? height, int? flex, VoidCallback? onPress}) {
-    Color _color = (color ?? Colors.transparent);
-    double _height = (height ?? 30);
-    int _flex = (flex ?? 1);
+    Color currentColor = (color ?? Colors.transparent);
+    double currentHeight = (height ?? 30);
+    int flexNum = (flex ?? 1);
 
     return Expanded(
-      flex: _flex,
+      flex: flexNum,
       child: GestureDetector(
         onTap: (() {
           if(onPress != null) {
@@ -367,8 +368,8 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
           };
         }),
         child: Container(
-          height: _height,
-          color: _color,
+          height: currentHeight,
+          color: currentColor,
           child: value,
         ),
       ),

@@ -20,14 +20,14 @@ class PinHTTPService {
   }
 
   Future<PinModel> getPin([bool? force]) async {
-    bool _force = (force ?? false);
+    bool isForce = (force ?? false);
 
     // check if we got data on the sharedPreferences or not?
-    if (!_force) {
-      PinModel? _pinPref = PinSharedPreferences.getPin();
-      if (_pinPref != null) {
+    if (!isForce) {
+      PinModel? pinPref = PinSharedPreferences.getPin();
+      if (pinPref != null) {
         // check if we got data on the pin or not?
-        return _pinPref;
+        return pinPref;
       }
     }
 
@@ -35,9 +35,9 @@ class PinHTTPService {
     // in case user not set the pin, it will be filled with both null.
     _checkJWT();
     final response = await http.get(
-      Uri.parse(Globals.apiURL + 'pins'),
+      Uri.parse('${Globals.apiURL}pins'),
       headers: {
-        HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
@@ -45,16 +45,15 @@ class PinHTTPService {
     // print("AAA " + response.body);
     if (response.statusCode == 200) {
       // parse the login data and get the login model
-      PinModel _pin = PinModel.fromJson(jsonDecode(response.body));
+      PinModel pin = PinModel.fromJson(jsonDecode(response.body));
       // print("BBB " + _pin.hashKey!);
       // print("CCC " + _pin.hashPin!);
       // stored pin on the shared preferences
-      PinSharedPreferences.setPin(_pin);
-      return _pin;
+      PinSharedPreferences.setPin(pin);
+      return pin;
     }
 
-    print("Got error <getPin>");
-    throw Exception("res=" + response.body);
+    throw Exception("res=${response.body}");
   }
 
   Future<PinModel> setPin(String pinNumber) async {
@@ -62,9 +61,9 @@ class PinHTTPService {
     // in case user not set the pin, it will be filled with both null.
     _checkJWT();
     final response = await http.post(
-      Uri.parse(Globals.apiURL + 'pins'),
+      Uri.parse('${Globals.apiURL}pins'),
       headers: {
-        HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode({"pin": pinNumber})
@@ -72,14 +71,13 @@ class PinHTTPService {
 
     if (response.statusCode == 200) {
       // parse the login data and get the login model
-      PinModel _pin = PinModel.fromJson(jsonDecode(response.body));
+      PinModel pin = PinModel.fromJson(jsonDecode(response.body));
       // stored pin on the shared preferences
-      PinSharedPreferences.setPin(_pin);
-      return _pin;
+      PinSharedPreferences.setPin(pin);
+      return pin;
     }
 
-    print("Got error <setPin>");
-    throw Exception("res=" + response.body);
+    throw Exception("res=${response.body}");
   }
 
   Future<PinModel> updatePin(String pinNumber) async {
@@ -87,9 +85,9 @@ class PinHTTPService {
     // in case user not set the pin, it will be filled with both null.
     _checkJWT();
     final response = await http.put(
-      Uri.parse(Globals.apiURL + 'pins'),
+      Uri.parse('${Globals.apiURL}pins'),
       headers: {
-        HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode({"pin": pinNumber})
@@ -97,14 +95,13 @@ class PinHTTPService {
 
     if (response.statusCode == 200) {
       // parse the login data and get the login model
-      PinModel _pin = PinModel.fromJson(jsonDecode(response.body));
+      PinModel pin = PinModel.fromJson(jsonDecode(response.body));
       // stored pin on the shared preferences
-      PinSharedPreferences.setPin(_pin);
-      return _pin;
+      PinSharedPreferences.setPin(pin);
+      return pin;
     }
 
-    print("Got error <updatePin>");
-    throw Exception("res=" + response.body);
+    throw Exception("res=${response.body}");
   }
 
   Future<void> deletePin() async {
@@ -112,26 +109,25 @@ class PinHTTPService {
     // in case user not set the pin, it will be filled with both null.
     _checkJWT();
     final response = await http.delete(
-      Uri.parse(Globals.apiURL + 'pins'),
+      Uri.parse('${Globals.apiURL}pins'),
       headers: {
-        HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
 
     if (response.statusCode == 200) {
       // set the pin as NULL
-      PinModel _pin = PinModel(hashKey: null, hashPin: null);
-      PinSharedPreferences.setPin(_pin);
+      PinModel pin = PinModel(hashKey: null, hashPin: null);
+      PinSharedPreferences.setPin(pin);
       return;
     }
 
-    print("Got error <deletePin>");
-    throw Exception("res=" + response.body);
+    throw Exception("res=${response.body}");
   }
 
   void _checkJWT() {
-    if (_bearerToken.length <= 0) {
+    if (_bearerToken.isEmpty) {
       _bearerToken = UserSharedPreferences.getJWT();
     }
   }

@@ -10,7 +10,7 @@ import 'package:my_expense/widgets/chart/summary_box.dart';
 
 class StatsAllPage extends StatefulWidget {
   final Object? ccy;
-  const StatsAllPage({Key? key, this.ccy}) : super(key: key);
+  const StatsAllPage({super.key, this.ccy});
 
   @override
   State<StatsAllPage> createState() => _StatsAllPageState();
@@ -58,7 +58,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
     // default the min and max date for the multiline chart data
     _walletDateRange = {};
-    _minDate = DateTime.now().add(Duration(days: -1));
+    _minDate = DateTime.now().add(const Duration(days: -1));
     _maxDate = DateTime.now();
 
     // get the data from API
@@ -77,7 +77,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
       future: _getData,
       builder: ((context, snapshot) {
         if (snapshot.hasError) {
-          return Scaffold(
+          return const Scaffold(
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -89,8 +89,8 @@ class _StatsAllPageState extends State<StatsAllPage> {
                     size: 25,
                   ),
                 ),
-                const SizedBox(height: 5,),
-                const Center(
+                SizedBox(height: 5,),
+                Center(
                   child: Text("Unable to load data from API"),
                 )
               ],
@@ -102,7 +102,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
             appBar: AppBar(
               title: Center(child: Text("Stat For ${_walletStatAll[0].ccy}")),
               leading: IconButton(
-                icon: Icon(Ionicons.close_outline, color: textColor),
+                icon: const Icon(Ionicons.close_outline, color: textColor),
                 onPressed: (() {
                   Navigator.pop(context);
                 }),
@@ -114,7 +114,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                     _sortAscending = !_sortAscending;
                     _sortWalletStat();
                   }),
-                  child: Container(
+                  child: SizedBox(
                     width: 50,
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -130,14 +130,14 @@ class _StatsAllPageState extends State<StatsAllPage> {
                           children: <Widget>[
                             Text(
                               (_sortAscending ? "A" : "Z"),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: textColor,
                               ),
                             ),
                             Text(
                               (_sortAscending ? "Z" : "A"),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: textColor,
                               ),
@@ -154,7 +154,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
           );
         }
         else {
-          return Scaffold(
+          return const Scaffold(
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -244,7 +244,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                         height: 65,
                         decoration: BoxDecoration(
                           color: indicator,
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(5),
                             bottomLeft: Radius.circular(5),
                           )
@@ -305,8 +305,8 @@ class _StatsAllPageState extends State<StatsAllPage> {
       walletListTotal[dt2.format(key)] = 0;
     });
 
-    _walletStatAll.forEach((ccy) {
-      ccy.data.forEach((data) {
+    for (WalletStatAllModel ccy in _walletStatAll) {
+      for (Datum data in ccy.data) {
         // generate the wallet list income, expense, and total
         walletListIncome[dt2.format(data.date)] = (data.income ?? 0);
         walletListExpense[dt2.format(data.date)] = (data.expense ?? 0);
@@ -333,8 +333,8 @@ class _StatsAllPageState extends State<StatsAllPage> {
         if (data.balance! > _maxAmount) {
           _maxAmount = data.balance!;
         }
-      });
-    });
+      }
+    }
 
     _dateOffset = walletListTotal.length ~/ 8;
 
@@ -353,7 +353,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
         _walletStatAll = resp;
         _origWalletStatAll.addAll(resp);
 
-        if (_origWalletStatAll[0].data.length > 0) {
+        if (_origWalletStatAll[0].data.isNotEmpty) {
           _minDate = DateTime(_origWalletStatAll[0].data[0].date.year, _origWalletStatAll[0].data[0].date.month, 1);
           _maxDate = DateTime(_origWalletStatAll[0].data[_origWalletStatAll[0].data.length - 1].date.year, _origWalletStatAll[0].data[_origWalletStatAll[0].data.length - 1].date.month, 1);
 

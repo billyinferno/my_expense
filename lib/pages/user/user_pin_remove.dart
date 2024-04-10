@@ -9,13 +9,13 @@ import 'package:my_expense/utils/prefs/shared_pin.dart';
 import 'package:my_expense/widgets/input/pin_pad.dart';
 
 class PinRemovePage extends StatefulWidget {
-  const PinRemovePage({ Key? key }) : super(key: key);
+  const PinRemovePage({ super.key });
 
   @override
-  PinRemovePageState createState() => PinRemovePageState();
+  State<PinRemovePage> createState() => _PinRemovePageState();
 }
 
-class PinRemovePageState extends State<PinRemovePage> {
+class _PinRemovePageState extends State<PinRemovePage> {
   late PinModel? pin;
   final PinHTTPService pinHttp = PinHTTPService();
 
@@ -42,8 +42,8 @@ class PinRemovePageState extends State<PinRemovePage> {
               width: 50,
               height: 50,
               color: Colors.transparent,
-              padding: EdgeInsets.all(10),
-              child: Center(
+              padding: const EdgeInsets.all(10),
+              child: const Center(
                 child: Icon(
                   Ionicons.close_circle_outline,
                   color: textColor2,
@@ -56,15 +56,15 @@ class PinRemovePageState extends State<PinRemovePage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(
+                const Text(
                   "Enter Passcode",
                   style: TextStyle(
                     fontSize: 25,
                   ),
                 ),
-                SizedBox(height: 5,),
-                Text("Your passcode is required"),
-                SizedBox(height: 25,),
+                const SizedBox(height: 5,),
+                const Text("Your passcode is required"),
+                const SizedBox(height: 25,),
                 PinPad(
                   hashPin: (pin!.hashPin ?? ''),
                   hashKey: (pin!.hashKey ?? ''),

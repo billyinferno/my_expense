@@ -10,16 +10,16 @@ class TypeSlide extends StatefulWidget {
   final String? type;
   final Color? textActive;
   final Color? textInactive;
-  const TypeSlide({ Key? key, required this.onChange, required this.items, this.height, this.width, this.editable, this.type, this.textActive, this.textInactive }) : super(key: key);
+  const TypeSlide({ super.key, required this.onChange, required this.items, this.height, this.width, this.editable, this.type, this.textActive, this.textInactive });
 
   @override
-  _TypeSlideState createState() => _TypeSlideState();
+  State<TypeSlide> createState() => _TypeSlideState();
 }
 
 class _TypeSlideState extends State<TypeSlide> {
   // animation variable
   double _currentContainerPositioned = 0;
-  final _animationDuration = Duration(milliseconds: 150);
+  final _animationDuration = const Duration(milliseconds: 150);
   Color _currentContainerColor = accentColors[2]; // default to expense color
 
   late double _height;
@@ -68,18 +68,18 @@ class _TypeSlideState extends State<TypeSlide> {
   }
 
   List<Widget> _generateTabs() {
-    List<Widget> _tabs = [];
+    List<Widget> tabs = [];
     double index = 0;
 
     widget.items.forEach((key, color) {
-      double _position = index * _width;
-      Widget _tab = Expanded(
+      double position = index * _width;
+      Widget tab = Expanded(
         child: GestureDetector(
           onTap: () {
             if(_editable) {
               setState(() {
                 _currentContainerColor = color;
-                _currentContainerPositioned = _position;
+                _currentContainerPositioned = position;
                 _type = key.toLowerCase();
                 widget.onChange(key.toLowerCase());
               });
@@ -87,6 +87,7 @@ class _TypeSlideState extends State<TypeSlide> {
           },
           child: Container(
             color: Colors.transparent,
+            height: _height,
             child: Center(
               child: Text(
                 key,
@@ -95,16 +96,15 @@ class _TypeSlideState extends State<TypeSlide> {
                 ),
               ),
             ),
-            height: _height,
           ),
         ),
       );
 
-      _tabs.add(_tab);
+      tabs.add(tab);
       index = index + 1;
     });
 
-    return _tabs;
+    return tabs;
   }
 
   @override

@@ -5,7 +5,7 @@ class SummaryBox extends StatelessWidget {
   final String text;
   final String value;
   final int count;
-  const SummaryBox({Key? key, required this.color, required this.text, required this.value, required this.count}) : super(key: key);
+  const SummaryBox({super.key, required this.color, required this.text, required this.value, required this.count});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class SummaryBox extends StatelessWidget {
               ),
               Text(
                 "Total $count",
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 10,
                 ),
               ),

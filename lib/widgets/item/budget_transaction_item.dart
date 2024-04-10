@@ -9,15 +9,15 @@ class BudgetTransactionItem extends StatelessWidget {
   final String itemSymbol;
   final double itemAmount;
   final String categoryName;
-  const BudgetTransactionItem({Key? key, required this.itemName, required this.itemDate, required this.itemSymbol, required this.itemAmount, required this.categoryName}) : super(key: key);
+  const BudgetTransactionItem({super.key, required this.itemName, required this.itemDate, required this.itemSymbol, required this.itemAmount, required this.categoryName});
 
   @override
   Widget build(BuildContext context) {
-    final fCCY = new NumberFormat("#,##0.00", "en_US");
+    final fCCY = NumberFormat("#,##0.00", "en_US");
     
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
       ),
       child: Row(
@@ -33,7 +33,7 @@ class BudgetTransactionItem extends StatelessWidget {
             ),
             child: IconColorList.getExpenseIcon(categoryName),
           ),
-          SizedBox(width: 10,),
+          const SizedBox(width: 10,),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,17 +44,17 @@ class BudgetTransactionItem extends StatelessWidget {
                 ),
                 Text(
                   DateFormat('E, dd MMM yyyy').format(itemDate.toLocal()),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 10,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(width: 10,),
+          const SizedBox(width: 10,),
           Text(
-            itemSymbol + " " + fCCY.format(itemAmount),
-            style: TextStyle(
+            "$itemSymbol ${fCCY.format(itemAmount)}",
+            style: const TextStyle(
               color: textColor2,
               fontWeight: FontWeight.bold,
               fontSize: 16,

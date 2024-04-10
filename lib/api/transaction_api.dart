@@ -11,12 +11,10 @@ import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/model/transaction_model.dart';
 import 'package:my_expense/model/transaction_stats_detail_model.dart';
 import 'package:my_expense/model/transaction_wallet_minmax_date_model.dart';
-import 'package:my_expense/provider/home_provider.dart';
+import 'package:my_expense/utils/function/date_utils.dart';
 import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
-import 'package:provider/provider.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class TransactionHTTPService {
   //late LoginModel _loginModel;
@@ -32,7 +30,7 @@ class TransactionHTTPService {
   }
 
   Future<TransactionListModel> updateTransaction(BuildContext context, TransactionModel txn, TransactionListModel prevTxn) async {
-    bool _sameDate = isSameDay(txn.date.toLocal(), prevTxn.date.toLocal());
+    bool sameDate = isSameDay(txn.date.toLocal(), prevTxn.date.toLocal());
     _checkJWT();
 
     // in case there are date change on the transaction it means that we need
@@ -40,11 +38,11 @@ class TransactionHTTPService {
     // data from the txn.date.
 
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.put(
-          Uri.parse(Globals.apiURL + 'transactions/' + prevTxn.id.toString()),
+          Uri.parse('${Globals.apiURL}transactions/${prevTxn.id}'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(txn.toJson()));
@@ -53,28 +51,28 @@ class TransactionHTTPService {
         String date = DateFormat('yyyy-MM-dd').format(prevTxn.date.toLocal());
 
         // fetch the added data and put it into TransactionListModel
-        TransactionListModel _txnUpdate =
+        TransactionListModel txnUpdate =
             TransactionListModel.fromJson(jsonDecode(response.body));
 
         // get the list of previous transaction date from shared preferences
-        List<TransactionListModel>? _txnListShared = TransactionSharedPreferences.getTransaction(date);
+        List<TransactionListModel>? txnListShared = TransactionSharedPreferences.getTransaction(date);
 
         // the transaction list shouldn't be NULL, since we update it
         // in case null, then we just add this transaction to the transaction
         // list? (don't want to throw any unnecessary error to GUI).
-        if (_txnListShared == null) {
-          _txnListShared = [];
-          _txnListShared.add(_txnUpdate);
+        if (txnListShared == null) {
+          txnListShared = [];
+          txnListShared.add(txnUpdate);
         } else {
           // now we can check if this is still the same date or not?
           // if same date, then it will be an easy job, since we just need to
           // update the transaction by forLoop it, and then just replace when
           // we find the matching id
-          if (_sameDate) {
-            for (int idx = 0; idx < _txnListShared.length; idx++) {
-              if (_txnListShared[idx].id == _txnUpdate.id) {
+          if (sameDate) {
+            for (int idx = 0; idx < txnListShared.length; idx++) {
+              if (txnListShared[idx].id == txnUpdate.id) {
                 // this is the transaction we need to change
-                _txnListShared[idx] = _txnUpdate;
+                txnListShared[idx] = txnUpdate;
                 // break from the for-loop
                 break;
               }
@@ -84,48 +82,33 @@ class TransactionHTTPService {
             // we need to remove the previous transaction on the _prevDate,
             // then after that we will need to fetch the data on the current
             // txn.date
-            List<TransactionListModel> _removeTxnList = _txnListShared;
-            for (int idx = 0; idx < _txnListShared.length; idx++) {
+            List<TransactionListModel> removeTxnList = txnListShared;
+            for (int idx = 0; idx < txnListShared.length; idx++) {
               // check if the id is the same or not?
-              if (_txnListShared[idx].id == prevTxn.id) {
-                _removeTxnList.removeAt(idx);
+              if (txnListShared[idx].id == prevTxn.id) {
+                removeTxnList.removeAt(idx);
               }
             }
             
             // set the _txnListShared with the _removeTxnList
-            _txnListShared = _removeTxnList;
+            txnListShared = removeTxnList;
             
             // fetch the date that we got from then _txnUpdate
-            String _txnUpdateDate = DateFormat('yyyy-MM-dd').format(_txnUpdate.date.toLocal());
+            String txnUpdateDate = DateFormat('yyyy-MM-dd').format(txnUpdate.date.toLocal());
             
             // ensure to force fetch the transaction
-            await fetchTransaction(_txnUpdateDate, true);
+            await fetchTransaction(txnUpdateDate, true);
           }
         }
 
         // once all the manipulation finished
-        await TransactionSharedPreferences.setTransaction(date, _txnListShared);
-
-        // for transaction that actually add on the different date, we cannot notify the home list
-        // to show this transaction, because currently we are in a different date between the transaction
-        // being add and the date being selected on the home list
-        DateTime? currentListTxnDate = TransactionSharedPreferences.getTransactionListCurrentDate();
-        if (currentListTxnDate == null) {
-          currentListTxnDate = DateTime.now();
-        }
-
-        if (isSameDay(txn.date.toLocal(), currentListTxnDate.toLocal())) {
-          // once add on the shared preferences, we can change the
-          // TransactionListModel provider so it will update the home list page
-          Provider.of<HomeProvider>(context, listen: false).setTransactionList(_txnListShared);
-        }
+        await TransactionSharedPreferences.setTransaction(date, txnListShared);
 
         // return from the proc
-        return _txnUpdate;
+        return txnUpdate;
       }
 
-      print("Got error <updateTransaction>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token when adding transaction"}');
@@ -136,11 +119,11 @@ class TransactionHTTPService {
     _checkJWT();
 
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response =
-          await http.post(Uri.parse(Globals.apiURL + 'transactions/add'),
+          await http.post(Uri.parse('${Globals.apiURL}transactions/add'),
               headers: {
-                HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+                HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
                 'Content-Type': 'application/json; charset=UTF-8',
               },
               body: jsonEncode(txn.toJson()));
@@ -149,37 +132,26 @@ class TransactionHTTPService {
         String date = DateFormat('yyyy-MM-dd').format(txn.date.toLocal());
 
         // fetch the added data and put it into TransactionListModel
-        TransactionListModel _txnAdd =
+        TransactionListModel txnAdd =
             TransactionListModel.fromJson(jsonDecode(response.body));
 
         // now we get the information of the transaction we add, we can directly
         // get the data from the sharedPreferences, add the new one and then
         // store back to the sharedPreferences
-        List<TransactionListModel>? _txnListShared =
-            TransactionSharedPreferences.getTransaction(date);
+        List<TransactionListModel>? txnListShared =
+            (TransactionSharedPreferences.getTransaction(date) ?? []);
 
         // add the new transaction that we add
-        if (_txnListShared == null) {
-          _txnListShared = [];
-        }
-        _txnListShared.add(_txnAdd);
+        txnListShared.add(txnAdd);
 
         // and set back this shared preferences
-        await TransactionSharedPreferences.setTransaction(date, _txnListShared);
-
-        // for transaction that actually add on the different date, we cannot notify the home list
-        // to show this transaction, because currently we are in a different date between the transaction
-        // being add and the date being selected on the home list
-        if (isSameDay(txn.date.toLocal(), selectedDate.toLocal())) {
-          Provider.of<HomeProvider>(context, listen: false).setTransactionList(_txnListShared);
-        }
+        await TransactionSharedPreferences.setTransaction(date, txnListShared);
 
         // return from the proc
-        return _txnAdd;
+        return txnAdd;
       }
 
-      print("Got error <addTransaction>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token when adding transaction"}');
@@ -188,38 +160,36 @@ class TransactionHTTPService {
 
   Future<List<TransactionListModel>> fetchTransaction(String date,
       [bool? force]) async {
-    bool _force = (force ?? false);
+    bool force0 = (force ?? false);
 
     // check if we got data on the sharedPreferences or not?
-    if (!_force) {
-      List<TransactionListModel>? _transactionPref =
+    if (!force0) {
+      List<TransactionListModel>? transactionPref =
           TransactionSharedPreferences.getTransaction(date);
-      if (_transactionPref != null) {
-        return _transactionPref;
+      if (transactionPref != null) {
+        return transactionPref;
       }
     }
 
     _checkJWT();
-    //print("<fetchTransaction> : " + _bearerToken);
 
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL + 'transactions/date/' + date),
+          Uri.parse('${Globals.apiURL}transactions/date/$date'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
           });
 
       if (response.statusCode == 200) {
-        List<dynamic> _jsonData = jsonDecode(response.body);
-        List<TransactionListModel> _transactionModel =
-            _jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
-        TransactionSharedPreferences.setTransaction(date, _transactionModel);
-        return _transactionModel;
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<TransactionListModel> transactionModel =
+            jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
+        TransactionSharedPreferences.setTransaction(date, transactionModel);
+        return transactionModel;
       }
 
-      print("Got error <fetchTransaction>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -227,16 +197,16 @@ class TransactionHTTPService {
   }
 
   Future<List<LastTransactionModel>> fetchLastTransaction(String type, [bool? force]) async {
-    bool _force = (force ?? false);
+    bool force0 = (force ?? false);
 
     // check if we got data on the sharedPreferences or not?
-    if (!_force) {
-      List<LastTransactionModel>? _transactionPref = TransactionSharedPreferences.getLastTransaction(type);
-      if (_transactionPref != null) {
+    if (!force0) {
+      List<LastTransactionModel>? transactionPref = TransactionSharedPreferences.getLastTransaction(type);
+      if (transactionPref != null) {
         // check if the transaction preference got data or not?
         // if not data, then we just continue the request to the server
-        if(_transactionPref.length > 0) {
-          return _transactionPref;
+        if(transactionPref.isNotEmpty) {
+          return transactionPref;
         }
       }
     }
@@ -244,23 +214,22 @@ class TransactionHTTPService {
     _checkJWT();
 
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL + 'transactions/last/' + type),
+          Uri.parse('${Globals.apiURL}transactions/last/$type'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
           });
       
       if (response.statusCode == 200) {
-        List<dynamic> _jsonData = jsonDecode(response.body);
-        List<LastTransactionModel> _transactionModel =
-            _jsonData.map((e) => LastTransactionModel.fromJson(e)).toList();
-        TransactionSharedPreferences.setLastTransaction(type, _transactionModel);
-        return _transactionModel;
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<LastTransactionModel> transactionModel =
+            jsonData.map((e) => LastTransactionModel.fromJson(e)).toList();
+        TransactionSharedPreferences.setLastTransaction(type, transactionModel);
+        return transactionModel;
       }
 
-      print("Got error <fetchLastTransaction>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -268,36 +237,35 @@ class TransactionHTTPService {
   }
 
   Future<List<TransactionListModel>> fetchTransactionBudget(int categoryId, String date, int currencyId, [bool? force]) async {
-    bool _force = (force ?? false);
+    bool isForce = (force ?? false);
 
     // check if we got data on the sharedPreferences or not?
-    if (!_force) {
-      List<TransactionListModel>? _transactionPref = TransactionSharedPreferences.getTransactionBudget(categoryId, date);
-      if (_transactionPref != null) {
-        return _transactionPref;
+    if (!isForce) {
+      List<TransactionListModel>? transactionPref = TransactionSharedPreferences.getTransactionBudget(categoryId, date);
+      if (transactionPref != null) {
+        return transactionPref;
       }
     }
 
     _checkJWT();
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL + 'transactions/budget/' + categoryId.toString() + "/date/" + date + "/currency/" + currencyId.toString()),
+          Uri.parse('${Globals.apiURL}transactions/budget/${categoryId.toString()}/date/$date/currency/${currencyId.toString()}'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
           });
 
       if (response.statusCode == 200) {
-        List<dynamic> _jsonData = jsonDecode(response.body);
-        List<TransactionListModel> _transactionModel =
-            _jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
-        TransactionSharedPreferences.setTransactionBudget(categoryId, date, _transactionModel);
-        return _transactionModel;
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<TransactionListModel> transactionModel =
+            jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
+        TransactionSharedPreferences.setTransactionBudget(categoryId, date, transactionModel);
+        return transactionModel;
       }
 
-      print("Got error <fetchTransactionBudget>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -308,20 +276,19 @@ class TransactionHTTPService {
     _checkJWT();
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL + 'transactions/budget/stat/$categoryId/currency/$currencyId'),
+          Uri.parse('${Globals.apiURL}transactions/budget/stat/$categoryId/currency/$currencyId'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
           });
 
       if (response.statusCode == 200) {
-        BudgetStatModel _budgetStatModel = BudgetStatModel.fromJson(jsonDecode(response.body));
-        return _budgetStatModel;
+        BudgetStatModel budgetStatModel = BudgetStatModel.fromJson(jsonDecode(response.body));
+        return budgetStatModel;
       }
 
-      print("Got error <fetchTransactionBudgetStat>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -332,20 +299,19 @@ class TransactionHTTPService {
     _checkJWT();
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL + 'transactions/budget/stat/currency/$currencyId'),
+          Uri.parse('${Globals.apiURL}transactions/budget/stat/currency/$currencyId'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
           });
 
       if (response.statusCode == 200) {
-        BudgetStatModel _budgetStatModel = BudgetStatModel.fromJson(jsonDecode(response.body));
-        return _budgetStatModel;
+        BudgetStatModel budgetStatModel = BudgetStatModel.fromJson(jsonDecode(response.body));
+        return budgetStatModel;
       }
 
-      print("Got error <fetchTransactionBudgetStatSummary>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -353,36 +319,35 @@ class TransactionHTTPService {
   }
 
   Future<List<TransactionListModel>> fetchTransactionWallet(int walletId, String date, [bool? force]) async {
-    bool _force = (force ?? false);
+    bool isForce = (force ?? false);
 
     // check if we got data on the sharedPreferences or not?
-    if (!_force) {
-      List<TransactionListModel>? _transactionPref = TransactionSharedPreferences.getTransactionWallet(walletId, date);
-      if (_transactionPref != null) {
-        return _transactionPref;
+    if (!isForce) {
+      List<TransactionListModel>? transactionPref = TransactionSharedPreferences.getTransactionWallet(walletId, date);
+      if (transactionPref != null) {
+        return transactionPref;
       }
     }
 
     _checkJWT();
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL + 'transactions/wallet/' + walletId.toString() + "/date/" + date),
+          Uri.parse('${Globals.apiURL}transactions/wallet/${walletId.toString()}/date/$date'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
           });
 
       if (response.statusCode == 200) {
-        List<dynamic> _jsonData = jsonDecode(response.body);
-        List<TransactionListModel> _transactionModel =
-            _jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
-        TransactionSharedPreferences.setTransactionWallet(walletId, date, _transactionModel);
-        return _transactionModel;
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<TransactionListModel> transactionModel =
+            jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
+        TransactionSharedPreferences.setTransactionWallet(walletId, date, transactionModel);
+        return transactionModel;
       }
 
-      print("Got error <fetchTransactionWallet>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -392,33 +357,32 @@ class TransactionHTTPService {
   Future<List<TransactionListModel>> findTransaction(String type, String name, String category, int limit, int start) async {
     _checkJWT();
 
-    String url = Globals.apiURL + 'transactions/search/type/' + type;
+    String url = '${Globals.apiURL}transactions/search/type/$type';
     
     // check the type, if both then add both name and category, if name then only name, if category then only category
     if (type == "name" || type == "both") {
-      url = url + "/search/" + name;
+      url = "$url/search/$name";
     }
     if (type == "category" || type == "both") {
-      url = url + "/category/" + category;
+      url = "$url/category/$category";
     }
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-        Uri.parse(url + "?_limit=" + limit.toString() + "&_start=" + start.toString()),
+        Uri.parse("$url?_limit=$limit&_start=$start"),
         headers: {
-          HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
         }
       );
 
       if (response.statusCode == 200) {
-        List<dynamic> _jsonData = jsonDecode(response.body);
-        List<TransactionListModel> _transactionModel = _jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
-        return _transactionModel;
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<TransactionListModel> transactionModel = jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
+        return transactionModel;
       }
 
-      print("Got error <findTransaction>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -426,98 +390,93 @@ class TransactionHTTPService {
   }
 
   Future<IncomeExpenseModel> fetchIncomeExpense(int ccyId, DateTime from, DateTime to, [bool? force]) async {
-    bool _force = (force ?? false);
-    String _dateFrom = DateFormat('yyyy-MM-dd').format(from.toLocal());
-    String _dateTo = DateFormat('yyyy-MM-dd').format(to.toLocal());
+    bool isForce = (force ?? false);
+    String dateFrom = DateFormat('yyyy-MM-dd').format(from.toLocal());
+    String dateTo = DateFormat('yyyy-MM-dd').format(to.toLocal());
 
     // check if we got data on the sharedPreferences or not?
-    if (!_force) {
-      IncomeExpenseModel? _transactionPref = TransactionSharedPreferences.getIncomeExpense(ccyId, _dateFrom, _dateTo);
-      if (_transactionPref != null) {
-        return _transactionPref;
+    if (!isForce) {
+      IncomeExpenseModel? transactionPref = TransactionSharedPreferences.getIncomeExpense(ccyId, dateFrom, dateTo);
+      if (transactionPref != null) {
+        return transactionPref;
       }
     }
 
     _checkJWT();
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-        Uri.parse(Globals.apiURL + 'transactions/incomeexpense/ccy/' + ccyId.toString() + '/from/' + _dateFrom + "/to/" + _dateTo),
+        Uri.parse('${Globals.apiURL}transactions/incomeexpense/ccy/${ccyId.toString()}/from/$dateFrom/to/$dateTo'),
         headers: {
-          HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
         }
       );
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> _jsonData = jsonDecode(response.body);
-        IncomeExpenseModel _incomeExpense = IncomeExpenseModel.fromJson(_jsonData);
+        Map<String, dynamic> jsonData = jsonDecode(response.body);
+        IncomeExpenseModel incomeExpense = IncomeExpenseModel.fromJson(jsonData);
         
-        String _dateFrom = DateFormat("yyyy-MM-dd").format(from.toLocal());
-        String _dateTo = DateFormat("yyyy-MM-dd").format(to.toLocal());
-        TransactionSharedPreferences.setIncomeExpense(ccyId, _dateFrom, _dateTo, _incomeExpense);
+        TransactionSharedPreferences.setIncomeExpense(ccyId, dateFrom, dateTo, incomeExpense);
         
-        return _incomeExpense;
+        return incomeExpense;
       }
 
-      print("Got error <fetchIncomeExpense>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception('res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
     }
   }
 
   Future<IncomeExpenseCategoryModel> fetchIncomeExpenseCategory(String name, String search, int ccyId, int walletId, DateTime from, DateTime to) async {
-    String _dateFrom = DateFormat('yyyy-MM-dd').format(from.toLocal());
-    String _dateTo = DateFormat('yyyy-MM-dd').format(to.toLocal());
+    String dateFrom = DateFormat('yyyy-MM-dd').format(from.toLocal());
+    String dateTo = DateFormat('yyyy-MM-dd').format(to.toLocal());
 
     _checkJWT();
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-        Uri.parse(Globals.apiURL + 'transactions/stats/ccy/' + ccyId.toString() + '/wallet/' + walletId.toString() + '/from/' + _dateFrom + "/to/" + _dateTo + '/name/' + (name.isEmpty ? '*' : name) + '/search/' + search.toLowerCase()),
+        Uri.parse('${Globals.apiURL}transactions/stats/ccy/${ccyId.toString()}/wallet/${walletId.toString()}/from/$dateFrom/to/$dateTo/name/${(name.isEmpty ? '*' : name)}/search/${search.toLowerCase()}'),
         headers: {
-          HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
         }
       );
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> _jsonData = jsonDecode(response.body);
-        IncomeExpenseCategoryModel _incomeExpenseCategory = IncomeExpenseCategoryModel.fromJson(_jsonData);
-        return _incomeExpenseCategory;
+        Map<String, dynamic> jsonData = jsonDecode(response.body);
+        IncomeExpenseCategoryModel incomeExpenseCategory = IncomeExpenseCategoryModel.fromJson(jsonData);
+        return incomeExpenseCategory;
       }
 
-      print("Got error <fetchIncomeExpenseCategory>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception('res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
     }
   }
 
   Future<List<TransactionStatsDetailModel>> fetchIncomeExpenseCategoryDetail(String name, String search, String type, int categoryId, int ccyId, int walletId, DateTime from, DateTime to) async {
-    String _dateFrom = DateFormat('yyyy-MM-dd').format(from.toLocal());
-    String _dateTo = DateFormat('yyyy-MM-dd').format(to.toLocal());
+    String dateFrom = DateFormat('yyyy-MM-dd').format(from.toLocal());
+    String dateTo = DateFormat('yyyy-MM-dd').format(to.toLocal());
 
     _checkJWT();
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-        Uri.parse(Globals.apiURL + 'transactions/detailstats/type/' + type + '/category/' + categoryId.toString() + '/ccy/' + ccyId.toString() + '/wallet/' + walletId.toString() + '/from/' + _dateFrom + "/to/" + _dateTo + '/name/' + (name.isEmpty ? '*' : name) + '/search/' + search.toLowerCase()),
+        Uri.parse('${Globals.apiURL}transactions/detailstats/type/$type/category/${categoryId.toString()}/ccy/${ccyId.toString()}/wallet/${walletId.toString()}/from/$dateFrom/to/$dateTo/name/${(name.isEmpty ? '*' : name)}/search/${search.toLowerCase()}'),
         headers: {
-          HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
         }
       );
 
       if (response.statusCode == 200) {
-        List<dynamic> _jsonData = jsonDecode(response.body);
-        List<TransactionStatsDetailModel> _transactionStatsDetail = _jsonData.map((e) => TransactionStatsDetailModel.fromJson(e)).toList();
-        return _transactionStatsDetail;
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<TransactionStatsDetailModel> transactionStatsDetail = jsonData.map((e) => TransactionStatsDetailModel.fromJson(e)).toList();
+        return transactionStatsDetail;
       }
 
-      print("Got error <fetchIncomeExpenseCategoryDetail>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception('res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
     }
@@ -527,34 +486,33 @@ class TransactionHTTPService {
     _checkJWT();
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL + 'transactions/minmax'),
+          Uri.parse('${Globals.apiURL}transactions/minmax'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
           });
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> _jsonData = jsonDecode(response.body);
+        Map<String, dynamic> jsonData = jsonDecode(response.body);
         // get the data
-        if(_jsonData["min"] == null) {
+        if(jsonData["min"] == null) {
           TransactionSharedPreferences.setTransactionMinDate(DateTime(DateTime.now().year, DateTime.now().month, 1));
         }
         else {
-          TransactionSharedPreferences.setTransactionMinDate(DateTime.parse(_jsonData["min"]));
+          TransactionSharedPreferences.setTransactionMinDate(DateTime.parse(jsonData["min"]));
         }
         
-        if(_jsonData["max"] == null) {
-          TransactionSharedPreferences.setTransactionMaxDate(DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(Duration(days: 1)));
+        if(jsonData["max"] == null) {
+          TransactionSharedPreferences.setTransactionMaxDate(DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1)));
         }
         else {
-          TransactionSharedPreferences.setTransactionMaxDate(DateTime.parse(_jsonData["max"]));
+          TransactionSharedPreferences.setTransactionMaxDate(DateTime.parse(jsonData["max"]));
         }
         return;
       }
 
-      print("Got error <fetchMinMaxDate>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -565,22 +523,21 @@ class TransactionHTTPService {
     _checkJWT();
     
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL + 'transactions/minmax/wallet/$walletId'),
+          Uri.parse('${Globals.apiURL}transactions/minmax/wallet/$walletId'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
           });
 
       if (response.statusCode == 200) {
-        Map<String, dynamic> _jsonData = jsonDecode(response.body);
+        Map<String, dynamic> jsonData = jsonDecode(response.body);
         // convert json to get the min and max date
-        TransactionWalletMinMaxDateModel _ret = TransactionWalletMinMaxDateModel.fromJson(_jsonData);
-        return _ret;
+        TransactionWalletMinMaxDateModel ret = TransactionWalletMinMaxDateModel.fromJson(jsonData);
+        return ret;
       }
 
-      print("Got error <fetchWalletMinMaxDate>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -592,31 +549,21 @@ class TransactionHTTPService {
     _checkJWT();
 
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.delete(
-          Uri.parse(Globals.apiURL + 'transactions/' + txn.id.toString()),
+          Uri.parse('${Globals.apiURL}transactions/${txn.id}'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
             'Content-Type': 'application/json; charset=UTF-8',
           });
 
       if (response.statusCode == 200) {
-        // pop the transaction from the provider
-        Provider.of<HomeProvider>(context, listen: false)
-            .popTransactionList(txn);
-
-        // get the current transaction on the provider
-        List<TransactionListModel> _txnListModel =
-            Provider.of<HomeProvider>(context, listen: false).transactionList;
-
-        // save the current transaction on the provider to the shared preferences
-        String date = DateFormat('yyyy-MM-dd').format(txn.date.toLocal());
-        TransactionSharedPreferences.setTransaction(date, _txnListModel);
+        // all good just return from the API, we will perform the update to
+        // listener on the caller widget instead.
         return;
       }
 
-      print("Got error <deleteTransaction>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token when adding transaction"}');
@@ -624,7 +571,7 @@ class TransactionHTTPService {
   }
 
   void _checkJWT() {
-    if (_bearerToken.length <= 0) {
+    if (_bearerToken.isEmpty) {
       _bearerToken = UserSharedPreferences.getJWT();
     }
   }

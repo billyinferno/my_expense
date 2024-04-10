@@ -28,19 +28,19 @@ class ShowMyDialog {
           return CupertinoAlertDialog(
             title: Text(
               dialogTitle ?? "Confirmation",
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: '--apple-system',
               ),
             ),
             content: SingleChildScrollView(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
                     dialogText ?? "Are your sure?",
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: '--apple-system',
                     ),
                   ),
@@ -49,6 +49,10 @@ class ShowMyDialog {
             ),
             actions: <Widget>[
               CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
                 child: Text(
                   confirmText ?? "Confirm",
                   style: TextStyle(
@@ -56,10 +60,6 @@ class ShowMyDialog {
                     color: (confirmColor ?? accentColors[0]),
                   ),
                 ),
-                isDefaultAction: true,
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
               ),
               CupertinoDialogAction(
                 child: Text(

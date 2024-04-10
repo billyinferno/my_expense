@@ -30,26 +30,26 @@ class HomeList extends StatefulWidget {
   final VoidCallback userIconPress;
   final MyDateTimeCallback userDateSelect;
 
-  HomeList(
-      {required this.userIconPress,
+  const HomeList(
+      {super.key, required this.userIconPress,
       required this.userDateSelect});
 
   @override
-  _HomeListState createState() => _HomeListState();
+  State<HomeList> createState() => _HomeListState();
 }
 
 class _HomeListState extends State<HomeList> {
   bool _isLoading = false;
 
-  DateTime _firstDay = DateTime(2010, 1, 1);
-  DateTime _lastDay = DateTime(DateTime.now().year + 1, 12, 31);
+  final DateTime _firstDay = DateTime(2010, 1, 1);
+  final DateTime _lastDay = DateTime(DateTime.now().year + 1, 12, 31);
   DateTime _currentFocusedDay = DateTime.now();
 
   String _appTitleMonth = "";
   String _appTitleYear = "";
   String _refreshDay = "";
   CalendarFormat _currentCalendarFormat = CalendarFormat.week;
-  Icon _currentCalendarIcon = Icon(Ionicons.caret_down, size: 10);
+  Icon _currentCalendarIcon = const Icon(Ionicons.caret_down, size: 10);
   
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final WalletHTTPService _walletHTTP = WalletHTTPService();
@@ -64,7 +64,7 @@ class _HomeListState extends State<HomeList> {
   List<BudgetModel> _budgets = [];
   late UsersMeModel _userMe;
 
-  final fCCY = new NumberFormat("#,##0.00", "en_US");
+  final fCCY = NumberFormat("#,##0.00", "en_US");
 
   @override
   void initState() {
@@ -105,13 +105,13 @@ class _HomeListState extends State<HomeList> {
             child: Container(
               color: Colors.transparent,
               child: Text(
-                _appTitleMonth + " " + _appTitleYear,
+                "$_appTitleMonth $_appTitleYear",
                 textAlign: TextAlign.right,
               ),
             ),
           ),
         ),
-        iconItem: Icon(
+        iconItem: const Icon(
           Ionicons.search,
           size: 20,
         ),
@@ -124,19 +124,19 @@ class _HomeListState extends State<HomeList> {
         children: [
           GestureDetector(
             onVerticalDragEnd: ((DragEndDetails details) {
-              double _velocity = (details.primaryVelocity ?? 0);
-              debugPrint(_velocity.toString());
-              if(_velocity != 0) {
-                if(_velocity > 0) {
+              double velocity = (details.primaryVelocity ?? 0);
+              debugPrint(velocity.toString());
+              if(velocity != 0) {
+                if(velocity > 0) {
                   debugPrint("Up");
                 }
-                else if(_velocity < 0) {
+                else if(velocity < 0) {
                   debugPrint("Down");
                 }
               }
             }),
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: primaryDark,
               ),
               child: TableCalendar(
@@ -144,17 +144,17 @@ class _HomeListState extends State<HomeList> {
                 firstDay: _firstDay,
                 lastDay: _lastDay,
                 calendarFormat: _currentCalendarFormat,
-                onPageChanged: (_focusedDay) {
-                  setFocusedDay(_focusedDay);
-                  _refreshTransaction(_focusedDay);
+                onPageChanged: (focusedDay) {
+                  setFocusedDay(focusedDay);
+                  _refreshTransaction(focusedDay);
                 },
                 selectedDayPredicate: (day) {
                   return isSameDay(day, _currentFocusedDay);
                 },
-                onDaySelected: (_selectedDay, _focusedDay) {
-                  if (!(isSameDay(_selectedDay, _currentFocusedDay))) {
-                    setFocusedDay(_selectedDay);
-                    _refreshTransaction(_selectedDay);
+                onDaySelected: (selectedDay, focusedDay) {
+                  if (!(isSameDay(selectedDay, _currentFocusedDay))) {
+                    setFocusedDay(selectedDay);
+                    _refreshTransaction(selectedDay);
                   }
                 },
                 headerVisible: false,
@@ -182,17 +182,17 @@ class _HomeListState extends State<HomeList> {
               setState(() {
                 if (_currentCalendarFormat == CalendarFormat.week) {
                   _currentCalendarFormat = CalendarFormat.month;
-                  _currentCalendarIcon = Icon(Ionicons.caret_up, size: 10);
+                  _currentCalendarIcon = const Icon(Ionicons.caret_up, size: 10);
                 } else {
                   _currentCalendarFormat = CalendarFormat.week;
-                  _currentCalendarIcon = Icon(Ionicons.caret_down, size: 10);
+                  _currentCalendarIcon = const Icon(Ionicons.caret_down, size: 10);
                 }
               });
             },
             child: Container(
               width: double.infinity,
               height: 15,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: secondaryDark,
               ),
               child: Column(
@@ -207,12 +207,12 @@ class _HomeListState extends State<HomeList> {
           Container(
             height: 36,
             width: double.infinity,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 border: Border(
               bottom: BorderSide(width: 1.0, color: primaryLight),
             )),
             child: Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -221,7 +221,7 @@ class _HomeListState extends State<HomeList> {
                     (isSameDay(_currentFocusedDay, DateTime.now())
                         ? "Today"
                         : DateFormat('dd MMMM yyyy').format(_currentFocusedDay.toLocal())),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                     ),
                   ),
@@ -256,13 +256,13 @@ class _HomeListState extends State<HomeList> {
     ]).then((_) {
       debugPrint("💯 Initialized Home List Finished");
     }).onError((error, stackTrace) {
-      print("Error when perform <fetchTransaction>");
-      print(error.toString());
+      debugPrint("Error when perform <fetchTransaction>");
+      debugPrint(error.toString());
     });
   }
 
   Future<void> _showCalendarPicker() async {
-    Future<DateTime?> _date = showDatePicker(
+    Future<DateTime?> date = showDatePicker(
       context: context,
       initialDate: _currentFocusedDay,
       firstDate: _firstDay,
@@ -271,7 +271,7 @@ class _HomeListState extends State<HomeList> {
       builder: ((BuildContext context, Widget? child) {
         return Theme(
           data: Globals.themeData.copyWith(
-            textTheme: TextTheme(
+            textTheme: const TextTheme(
               headlineMedium: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -294,9 +294,9 @@ class _HomeListState extends State<HomeList> {
       }),
     );
 
-    _date.then((_newDate) {
-      if(_newDate != null) {
-        setFocusedDay(DateTime(_newDate.toLocal().year, _newDate.toLocal().month, _newDate.toLocal().day));
+    date.then((newDate) {
+      if(newDate != null) {
+        setFocusedDay(DateTime(newDate.toLocal().year, newDate.toLocal().month, newDate.toLocal().day));
         _refreshTransaction(_currentFocusedDay);
       }
     });
@@ -304,24 +304,22 @@ class _HomeListState extends State<HomeList> {
 
   Widget generateView() {
     if (_isLoading) {
-      return Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SpinKitFadingCube(
-              color: accentColors[6],
-              size: 25,
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SpinKitFadingCube(
+            color: accentColors[6],
+            size: 25,
+          ),
+          const SizedBox(height: 10,),
+          const Text(
+            "loading...",
+            style: TextStyle(
+              color: textColor2,
+              fontSize: 10,
             ),
-            SizedBox(height: 10,),
-            Text(
-              "loading...",
-              style: TextStyle(
-                color: textColor2,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     } else {
       return Consumer<HomeProvider>(
@@ -329,22 +327,22 @@ class _HomeListState extends State<HomeList> {
           _transactionData = homeProvider.transactionList;
           return GestureDetector(
             onHorizontalDragEnd: ((DragEndDetails details) {
-              double _velocity = (details.primaryVelocity ?? 0);
-              if(_velocity != 0) {
-                if(_velocity > 0) {
+              double velocity = (details.primaryVelocity ?? 0);
+              if(velocity != 0) {
+                if(velocity > 0) {
                   // go to the previous day
-                  setFocusedDay(_currentFocusedDay.subtract(Duration(days: 1)));
+                  setFocusedDay(_currentFocusedDay.subtract(const Duration(days: 1)));
                   _refreshTransaction(_currentFocusedDay);
                 }
-                else if(_velocity < 0) {
+                else if(velocity < 0) {
                   // go to the next day
-                  setFocusedDay(_currentFocusedDay.add(Duration(days: 1)));
+                  setFocusedDay(_currentFocusedDay.add(const Duration(days: 1)));
                   _refreshTransaction(_currentFocusedDay);
                 }
               }
             }),
             child: (Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
               child: RefreshIndicator(
                 color: accentColors[6],
                 onRefresh: () async {
@@ -372,9 +370,9 @@ class _HomeListState extends State<HomeList> {
     }
   }
 
-  void setFocusedDay(DateTime _focusedDay) {
+  void setFocusedDay(DateTime focusedDay) {
     setState(() {
-      _currentFocusedDay = _focusedDay;
+      _currentFocusedDay = focusedDay;
       _appTitleMonth = DateFormat('MMMM').format(_currentFocusedDay.toLocal());
       _appTitleYear = DateFormat('yyyy').format(_currentFocusedDay.toLocal());
 
@@ -399,7 +397,7 @@ class _HomeListState extends State<HomeList> {
               if (!_isLoading) {
                 late Future<bool?> result = ShowMyDialog(
                         dialogTitle: "Delete Item",
-                        dialogText: "Do you want to delete " + txn.name + "?",
+                        dialogText: "Do you want to delete ${txn.name}?",
                         confirmText: "Delete",
                         confirmColor: accentColors[2],
                         cancelText: "Cancel")
@@ -467,14 +465,14 @@ class _HomeListState extends State<HomeList> {
     }
   }
 
-  void setLoading(bool _loading) {
+  void setLoading(bool loading) {
     setState(() {
-      _isLoading = _loading;
+      _isLoading = loading;
     });
   }
 
   Future<void> _refreshTransaction(DateTime refreshDay, [bool? force]) async {
-    bool _force = (force ?? false);
+    bool isForce = (force ?? false);
 
     // fetch the new wallet data from API
     setLoading(true);
@@ -484,8 +482,8 @@ class _HomeListState extends State<HomeList> {
     // as the current transaction list date, we don't need to refresh the provider.
     await TransactionSharedPreferences.setTransactionListCurrentDate(refreshDay.toLocal());
 
-    String _refreshDay = DateFormat('yyyy-MM-dd').format(refreshDay.toLocal());
-    await _transactionHttp.fetchTransaction(_refreshDay, _force).then((value) {
+    String strRefreshDay = DateFormat('yyyy-MM-dd').format(refreshDay.toLocal());
+    await _transactionHttp.fetchTransaction(strRefreshDay, isForce).then((value) {
       // ensure that the selectedDate and the refreshDay is the same
       if(isSameDay(_currentFocusedDay, refreshDay)) {
         Provider.of<HomeProvider>(context, listen: false).setTransactionList(value);
@@ -493,9 +491,9 @@ class _HomeListState extends State<HomeList> {
       setLoading(false);
     }).onError((error, stackTrace) {
       setLoading(false);
-      print(error.toString());
-      print(stackTrace.toString());
-      throw new Exception("Error when refresh transaction");
+      debugPrint(error.toString());
+      debugPrintStack(stackTrace: stackTrace);
+      throw Exception("Error when refresh transaction");
     });
   }
 
@@ -503,6 +501,19 @@ class _HomeListState extends State<HomeList> {
     showLoaderDialog(context);
 
     await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) {
+      // pop the transaction from the provider
+      Provider.of<HomeProvider>(context, listen: false)
+          .popTransactionList(txnDeleted);
+
+      // get the current transaction on the provider
+      List<TransactionListModel> txnListModel =
+          Provider.of<HomeProvider>(context, listen: false).transactionList;
+
+      // save the current transaction on the provider to the shared preferences
+      String date = DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
+      TransactionSharedPreferences.setTransaction(date, txnListModel);
+
+      // update information for txn delete
       updateInformation(txnDeleted);
     }).onError((error, stackTrace) {
       debugPrint("Error when delete");
@@ -514,8 +525,8 @@ class _HomeListState extends State<HomeList> {
 
   Future<void> updateInformation(TransactionListModel txnInfo) async {
     _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
-    DateTime _from = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    DateTime _to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(Duration(days: 1));
+    DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
 
     // delete the transaction from wallet transaction
     await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.wallet.id, _refreshDay, txnInfo);
@@ -529,7 +540,7 @@ class _HomeListState extends State<HomeList> {
     await Future.wait([
       _futureWallets = _walletHTTP.fetchWallets(true, true),
       _futureBudgets = _budgetHTTP.fetchBudgetDate(txnInfo.wallet.currencyId, _refreshDay),
-      _futureIncomeExpense = _transactionHttp.fetchIncomeExpense(txnInfo.wallet.currencyId, _from, _to, true),
+      _futureIncomeExpense = _transactionHttp.fetchIncomeExpense(txnInfo.wallet.currencyId, from, to, true),
     ]).then((_) {
       // update the wallets
       _futureWallets.then((wallets) {
@@ -544,7 +555,7 @@ class _HomeListState extends State<HomeList> {
           for (int i = 0; i < _budgets.length; i++) {
             if (txnInfo.category!.id == _budgets[i].category.id) {
               // as this is expense, subtract total transaction and the amount
-              BudgetModel _newBudget = BudgetModel(
+              BudgetModel newBudget = BudgetModel(
                   id: _budgets[i].id,
                   category: _budgets[i].category,
                   totalTransaction: (_budgets[i].totalTransaction - 1),
@@ -552,7 +563,7 @@ class _HomeListState extends State<HomeList> {
                   used: _budgets[i].used - txnInfo.amount,
                   status: _budgets[i].status,
                   currency: _budgets[i].currency);
-              _budgets[i] = _newBudget;
+              _budgets[i] = newBudget;
               // break from for loop
               break;
             }
@@ -561,8 +572,8 @@ class _HomeListState extends State<HomeList> {
           BudgetSharedPreferences.setBudget(txnInfo.wallet.currencyId, _refreshDay, _budgets);
 
           // only set the provider if only the current budget date is the same as the refresh day
-          String _currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-          if(_currentBudgetDate == _refreshDay) {
+          String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
+          if(currentBudgetDate == _refreshDay) {
             Provider.of<HomeProvider>(context, listen: false).setBudgetList(_budgets);
           }
         });
@@ -581,53 +592,53 @@ class _HomeListState extends State<HomeList> {
       Navigator.pop(context);
 
       debugPrint("Error on update information");
-      throw new Exception(error.toString());
+      throw Exception(error.toString());
     });
   }
 
-  Widget _getTotalIncomeExpense(List<TransactionListModel> _transactionData) {
-    String _totalIncomeExpense = "";
-    String _currencySymbol = "";
-    double _totalAmount = 0;
-    Color _textColor = textColor2;
+  Widget _getTotalIncomeExpense(List<TransactionListModel> transactionData) {
+    String totalIncomeExpense = "";
+    String currencySymbol = "";
+    double totalAmount = 0;
+    Color textColor = textColor2;
 
     if(_userMe.defaultBudgetCurrency != null) {
-      if(_transactionData.length > 0) {
+      if(transactionData.isNotEmpty) {
         // compute the total amount
-        _transactionData.forEach((_txn) {
+        for (TransactionListModel txn in transactionData) {
           // if current wallet currency same as the default budget currectr
-          if(_txn.wallet.currencyId == _userMe.defaultBudgetCurrency) {
+          if(txn.wallet.currencyId == _userMe.defaultBudgetCurrency) {
             // check the transaction type
-            if(_txn.type == "expense") {
-              _totalAmount -= _txn.amount;
+            if(txn.type == "expense") {
+              totalAmount -= txn.amount;
             }
-            else if(_txn.type == "income") {
-              _totalAmount += _txn.amount;
+            else if(txn.type == "income") {
+              totalAmount += txn.amount;
             }
 
             // set the current currency symbol
-            _currencySymbol = _txn.wallet.symbol;
+            currencySymbol = txn.wallet.symbol;
           }
-        });
+        }
 
         // format the amount
-        _totalIncomeExpense = _currencySymbol + " " + fCCY.format(_totalAmount);
+        totalIncomeExpense = "$currencySymbol ${fCCY.format(totalAmount)}";
 
         // get the color
-        if(_totalAmount < 0) {
-          _textColor = accentColors[2];
+        if(totalAmount < 0) {
+          textColor = accentColors[2];
         }
-        else if (_totalAmount > 0) {
-          _textColor = accentColors[6];
+        else if (totalAmount > 0) {
+          textColor = accentColors[6];
         }
       }
     }
 
     return Text(
-      _totalIncomeExpense,
+      totalIncomeExpense,
       style: TextStyle(
         fontSize: 12,
-        color: _textColor,
+        color: textColor,
       )
     );
   }

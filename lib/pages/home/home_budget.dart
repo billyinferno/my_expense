@@ -25,8 +25,10 @@ import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
 class HomeBudget extends StatefulWidget {
+  const HomeBudget({super.key});
+
   @override
-  _HomeBudgetState createState() => _HomeBudgetState();
+  State<HomeBudget> createState() => _HomeBudgetState();
 }
 
 class _HomeBudgetState extends State<HomeBudget> {
@@ -85,7 +87,7 @@ class _HomeBudgetState extends State<HomeBudget> {
     _lastDay = DateTime(userMaxDate.year, userMaxDate.month, 1);
 
     // now check which currencies is being used by the user
-    if(_currencies.length > 0) {
+    if(_currencies.isNotEmpty) {
       // defaulted to first currency, in case user default currency is different
       // with the one that user has on their wallet
       _currentCurrencies = _currencies[0];
@@ -118,7 +120,7 @@ class _HomeBudgetState extends State<HomeBudget> {
     return Scaffold(
       appBar: HomeAppBar(
         title: const Center(child: Text("Budget")),
-        iconItem: Icon(
+        iconItem: const Icon(
           Ionicons.options_outline,
           size: 20,
         ),
@@ -134,7 +136,7 @@ class _HomeBudgetState extends State<HomeBudget> {
   }
 
   Widget _buildHomeBudgetPage() {
-    if(_currencies.length <= 0) {
+    if(_currencies.isEmpty) {
       // if currencies is null, means that user haven't setup anything?
       // just throw a container with center text, that there are nothing here
       // and ask user to setup wallet first
@@ -149,13 +151,13 @@ class _HomeBudgetState extends State<HomeBudget> {
                 color: accentColors[4],
                 borderRadius: BorderRadius.circular(50),
               ),
-              child: Icon(
+              child: const Icon(
                 Ionicons.file_tray_outline,
                 color: textColor2,
               ),
             ),
-            SizedBox(height: 10,),
-            Text("Add wallet, and then refresh the budget page"),
+            const SizedBox(height: 10,),
+            const Text("Add wallet, and then refresh the budget page"),
           ],
         ),
       );
@@ -167,9 +169,9 @@ class _HomeBudgetState extends State<HomeBudget> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(child: SpinKitFadingCube(color: accentColors[6],)),
-              SizedBox(height: 20,),
-              Text(
+              SpinKitFadingCube(color: accentColors[6],),
+              const SizedBox(height: 20,),
+              const Text(
                 "Loading Budget",
                 style: TextStyle(
                   color: textColor2,
@@ -191,12 +193,15 @@ class _HomeBudgetState extends State<HomeBudget> {
                 Container(
                   width: double.infinity,
                   color: secondaryDark,
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       Container(
+                        decoration: const BoxDecoration(
+                          border: Border(bottom: BorderSide(width: 1.0, color: secondaryBackground)),
+                        ),
                         child: HorizontalMonthCalendar(
                           firstDay: _firstDay,
                           lastDay: _lastDay,
@@ -210,11 +215,8 @@ class _HomeBudgetState extends State<HomeBudget> {
                             });
                           }),
                         ),
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(width: 1.0, color: secondaryBackground)),
-                        ),
                       ),
-                      SizedBox(height: 15,),
+                      const SizedBox(height: 15,),
                       Slidable(
                         endActionPane: ActionPane(
                           motion: const DrawerMotion(),
@@ -228,7 +230,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                               icon: Ionicons.bar_chart,
                               onPressed: ((_) {
                                 // create budget transaction arguments that can be passed to other pages
-                                BudgetTransactionArgs _args = BudgetTransactionArgs(
+                                BudgetTransactionArgs args = BudgetTransactionArgs(
                                   categoryid: -1,
                                   categoryName: _currentCurrencies!.description,
                                   currencySymbol: _currentCurrencies!.symbol,
@@ -238,7 +240,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                                   currencyId: _currentCurrencies!.id,
                                 );
 
-                                Navigator.pushNamed(context, '/budget/stat', arguments: _args);
+                                Navigator.pushNamed(context, '/budget/stat', arguments: args);
                               })
                             ),
                           ],
@@ -253,21 +255,21 @@ class _HomeBudgetState extends State<HomeBudget> {
                                   children: <Widget>[
                                     Container(
                                       height: 40,
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                                       ),
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          Expanded(
+                                          const Expanded(
                                             child: Center(child: Text("Currencies")),
                                           ),
                                           IconButton(
                                             onPressed: () async {
                                               await _refreshUserCurrencies(true);
                                             },
-                                            icon: Icon(
+                                            icon: const Icon(
                                               Ionicons.refresh,
                                               size: 20,
                                             ),
@@ -283,10 +285,6 @@ class _HomeBudgetState extends State<HomeBudget> {
                                         itemBuilder: (BuildContext context, int index) {
                                           return SimpleItem(
                                             color: accentColors[6],
-                                            child: FittedBox(
-                                              child: Text(_currencies[index].symbol.toUpperCase()),
-                                              fit: BoxFit.contain,
-                                            ),
                                             description: _currencies[index].description,
                                             isSelected: (_currentCurrencies!.id == _currencies[index].id),
                                             onTap: (() {
@@ -296,6 +294,10 @@ class _HomeBudgetState extends State<HomeBudget> {
                                               });
                                               Navigator.pop(context);
                                             }),
+                                            child: FittedBox(
+                                              fit: BoxFit.contain,
+                                              child: Text(_currencies[index].symbol.toUpperCase()),
+                                            ),
                                           );
                                         },
                                       ),
@@ -319,8 +321,8 @@ class _HomeBudgetState extends State<HomeBudget> {
                                     symbol: _currentCurrencies!.symbol,
                                   ),
                                 ),
-                                SizedBox(width: 10,),
-                                Container(
+                                const SizedBox(width: 10,),
+                                const SizedBox(
                                   height: 20,
                                   child: Icon(
                                       Ionicons.chevron_down_circle
@@ -332,7 +334,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                         ),
                       ),
                       const SizedBox(height: 10,),
-                      Container(
+                      SizedBox(
                         width: double.infinity,
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -354,7 +356,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                               ),
                             ),
                             const SizedBox(width: 11,),
-                            Text(
+                            const Text(
                               "Not In Budget Expense",
                               style: TextStyle(
                                 fontSize: 10,
@@ -380,7 +382,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                       itemBuilder: ((BuildContext context, int index) {
                         if (index < _budgetList.length) {
                           // create budget transaction arguments that can be passed to other pages
-                          BudgetTransactionArgs _args = BudgetTransactionArgs(
+                          BudgetTransactionArgs args = BudgetTransactionArgs(
                             categoryid: _budgetList[index].category.id,
                             categoryName: _budgetList[index].category.name,
                             currencySymbol: _budgetList[index].currency.symbol,
@@ -411,18 +413,18 @@ class _HomeBudgetState extends State<HomeBudget> {
                                   backgroundColor: primaryBackground,
                                   icon: Ionicons.bar_chart,
                                   onPressed: ((_) {
-                                    Navigator.pushNamed(context, '/budget/stat', arguments: _args);
+                                    Navigator.pushNamed(context, '/budget/stat', arguments: args);
                                   })
                                 ),
                               ],
                             ),
                             child: GestureDetector(
                               onTap: (() {
-                                Navigator.pushNamed(context, '/budget/transaction', arguments: _args);
+                                Navigator.pushNamed(context, '/budget/transaction', arguments: args);
                               }),
                               child: Container(
                                 color: Colors.transparent,
-                                padding: EdgeInsets.all(10),
+                                padding: const EdgeInsets.all(10),
                                 child: BudgetBar(
                                   icon: IconColorList.getExpenseIcon(_budgetList[index].category.name),
                                   iconColor: IconColorList.getExpenseColor(_budgetList[index].category.name),
@@ -475,42 +477,42 @@ class _HomeBudgetState extends State<HomeBudget> {
   }
 
   double computeTotalAmount(List<BudgetModel> budgets) {
-    double _amount = 0;
-    budgets.forEach((budget) {
+    double amount = 0;
+    for (BudgetModel budget in budgets) {
       if (_showNotInBudget) {
-        _amount += budget.amount;
+        amount += budget.amount;
       }
       else {
         if (budget.status.toLowerCase() == "in") {
-          _amount += budget.amount;
+          amount += budget.amount;
         }
       }
-    });
+    }
 
-    return _amount;
+    return amount;
   }
 
   double computeTotalUsed(List<BudgetModel> budgets) {
-    double _used = 0;
-    budgets.forEach((budget) {
+    double used = 0;
+    for (BudgetModel budget in budgets) {
       if (_showNotInBudget) {
-        _used += budget.used;
+        used += budget.used;
       }
       else {
         if (budget.status.toLowerCase() == "in") {
-          _used += budget.used;
+          used += budget.used;
         }
       }
-    });
+    }
 
-    return _used;
+    return used;
   }
 
   Future<void> _fetchBudget([bool? showLoader, bool? force]) async {
-    bool _showLoader = (showLoader ?? false);
-    bool _force = (force ?? false);
+    bool isShowLoader = (showLoader ?? false);
+    bool isForce = (force ?? false);
 
-    if(_showLoader) {
+    if(isShowLoader) {
       showLoaderDialog(context);
     }
     else {
@@ -520,12 +522,12 @@ class _HomeBudgetState extends State<HomeBudget> {
 
     // fetch the budget, in case it null it will fetch the budget from the
     // backend instead.
-    String _budgetDate = DateFormat('yyyy-MM-dd').format(_selectedDate.toLocal());
-    await _budgetHTTP.fetchBudgetDate(_currentCurrencies!.id, _budgetDate, _force).then((value) {
+    String budgetDate = DateFormat('yyyy-MM-dd').format(_selectedDate.toLocal());
+    await _budgetHTTP.fetchBudgetDate(_currentCurrencies!.id, budgetDate, isForce).then((value) {
       // set the provider as we will use consumer to listen to the list
       Provider.of<HomeProvider>(context, listen: false).setBudgetList(value);
     }).then((_) {
-      if(_showLoader) {
+      if(isShowLoader) {
         Navigator.pop(context);
       }
       else {

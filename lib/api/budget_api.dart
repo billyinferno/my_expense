@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:http/http.dart' as http;
 import 'package:my_expense/model/budget_list_model.dart';
 import 'package:my_expense/model/budget_model.dart';
@@ -27,32 +26,31 @@ class BudgetHTTPService {
     String bearerToken = _bearerToken;
 
     // check from shared preferences if we already have loaded category data
-    UsersMeModel _userMe = UserSharedPreferences.getUserMe();
+    UsersMeModel userMe = UserSharedPreferences.getUserMe();
 
     // check if we got JWT token or not?
-    if (bearerToken.length > 0) {
-      var _body = {
+    if (bearerToken.isNotEmpty) {
+      var body = {
         'currency': {'id': currencyID},
-        'users_permissions_user': {'id': _userMe.id}
+        'users_permissions_user': {'id': userMe.id}
       };
 
       final response =
-          await http.put(Uri.parse(Globals.apiURL + 'budgets/defaultcurrency'),
+          await http.put(Uri.parse('${Globals.apiURL}budgets/defaultcurrency'),
               headers: {
-                HttpHeaders.authorizationHeader: "Bearer " + bearerToken,
+                HttpHeaders.authorizationHeader: "Bearer $bearerToken",
                 'Content-Type': 'application/json; charset=UTF-8',
               },
-              body: jsonEncode(_body));
+              body: jsonEncode(body));
 
       if (response.statusCode == 200) {
         // success, it will return the userMe model, so we can just replace the current userMe
-        _userMe = UsersMeModel.fromJson(jsonDecode(response.body));
-        await UserSharedPreferences.setUserMe(_userMe);
+        userMe = UsersMeModel.fromJson(jsonDecode(response.body));
+        await UserSharedPreferences.setUserMe(userMe);
         return;
       }
 
-      print("Got error <updateDefaultCurrency>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -64,34 +62,33 @@ class BudgetHTTPService {
     _checkJWT();
 
     // check from shared preferences if we already have loaded category data
-    UsersMeModel _userMe = UserSharedPreferences.getUserMe();
+    UsersMeModel userMe = UserSharedPreferences.getUserMe();
 
     // ensure that we have bearer token
-    if (_bearerToken.length > 0) {
-      var _body = {
+    if (_bearerToken.isNotEmpty) {
+      var body = {
         "category": {"id": categoryId},
         "amount": 0,
-        "users_permissions_user": {"id": _userMe.id},
+        "users_permissions_user": {"id": userMe.id},
         "currency": {"id": currencyId}
       };
 
-      final response = await http.post(Uri.parse(Globals.apiURL + 'budgets'),
+      final response = await http.post(Uri.parse('${Globals.apiURL}budgets'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: jsonEncode(_body));
+          body: jsonEncode(body));
       
       if (response.statusCode == 200) {
         // success, it will return the complete budget model
-        BudgetModel _budget = BudgetModel.fromJson(jsonDecode(response.body));
+        BudgetModel budget = BudgetModel.fromJson(jsonDecode(response.body));
         // let the caller be the one who manipulate the shared preferences and
         // the provider
-        return _budget;
+        return budget;
       }
       else {
-        print("Got error <addBudgetList>");
-        throw Exception("res=" + response.body);
+        throw Exception("res=${response.body}");
       }
     } else {
       throw Exception(
@@ -104,40 +101,39 @@ class BudgetHTTPService {
     _checkJWT();
 
     // check from shared preferences if we already have loaded category data
-    UsersMeModel _userMe = UserSharedPreferences.getUserMe();
+    UsersMeModel userMe = UserSharedPreferences.getUserMe();
 
     // ensure that we have bearer token
-    if (_bearerToken.length > 0) {
-      var _body = [];
-      budgetList.forEach((element) {
-        var _budget = {
+    if (_bearerToken.isNotEmpty) {
+      var body = [];
+      for (var element in budgetList) {
+        var budget = {
           "id": element.id,
           "category": element.category.id,
           "amount": element.amount,
-          "users_permissions_user": _userMe.id,
+          "users_permissions_user": userMe.id,
           "currency": element.currency.id
         };
-        _body.add(_budget);
-      });
+        body.add(budget);
+      }
 
       //print(jsonEncode(_body));
 
-      final response = await http.put(Uri.parse(Globals.apiURL + 'budgets/currency/' + currencyId.toString()),
+      final response = await http.put(Uri.parse('${Globals.apiURL}budgets/currency/$currencyId'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: jsonEncode(_body));
+          body: jsonEncode(body));
       
       if (response.statusCode == 200) {
         // success, decode the response as budget model
-        List<dynamic> _jsonData = jsonDecode(response.body);
-        List<BudgetModel> _listBudget = _jsonData.map((e) => BudgetModel.fromJson(e)).toList();
-        return _listBudget;
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<BudgetModel> listBudget = jsonData.map((e) => BudgetModel.fromJson(e)).toList();
+        return listBudget;
       }
       else {
-        print("Got error <updateBudgetList>");
-        throw Exception("res=" + response.body);
+        throw Exception("res=${response.body}");
       }
     } else {
       throw Exception(
@@ -150,23 +146,22 @@ class BudgetHTTPService {
     _checkJWT();
 
     // ensure that we have bearer token
-    if (_bearerToken.length > 0) {
-      final response = await http.delete(Uri.parse(Globals.apiURL + 'budgets/currency/' + currencyId.toString() + "/id/" + budgetId.toString()),
+    if (_bearerToken.isNotEmpty) {
+      final response = await http.delete(Uri.parse("${Globals.apiURL}budgets/currency/${currencyId.toString()}/id/${budgetId.toString()}"),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
             'Content-Type': 'application/json; charset=UTF-8',
           });
       
       if (response.statusCode == 200) {
         // success, it will return the complete budget model
-        BudgetModel _budget = BudgetModel.fromJson(jsonDecode(response.body));
+        BudgetModel budget = BudgetModel.fromJson(jsonDecode(response.body));
         // let the caller be the one who manipulate the shared preferences and
         // the provider
-        return _budget;
+        return budget;
       }
       else {
-        print("Got error <deleteBudgetList>");
-        throw Exception("res=" + response.body);
+        throw Exception("res=${response.body}");
       }
     } else {
       throw Exception(
@@ -176,42 +171,41 @@ class BudgetHTTPService {
 
   Future<BudgetListModel> fetchBudgetsList(int currencyID,
       [bool? force]) async {
-    bool _force = (force ?? false);
+    bool isForce = (force ?? false);
 
     // get the jwt token
     _checkJWT();
 
     // if not force, then get it from the shared preferences
-    if (!_force) {
-      BudgetListModel? _budgetListPref =
+    if (!isForce) {
+      BudgetListModel? budgetListPref =
           BudgetSharedPreferences.getBudgetList(currencyID);
-      if (_budgetListPref != null) {
-        return _budgetListPref;
+      if (budgetListPref != null) {
+        return budgetListPref;
       }
     }
 
     // budget list is null in the shared preferences, so now just fetch the budget list
     // from backend.
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL + 'budgets/list/' + currencyID.toString()),
+          Uri.parse('${Globals.apiURL}budgets/list/$currencyID'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
           });
 
       // if got success response, then parse json data and then put on the budget list model
       if (response.statusCode == 200) {
-        BudgetListModel _budgetListData =
+        BudgetListModel budgetListData =
             BudgetListModel.fromJson(json.decode(response.body));
         await BudgetSharedPreferences.setBudgetList(
-            currencyID, _budgetListData);
+            currencyID, budgetListData);
 
-        return _budgetListData;
+        return budgetListData;
       }
 
       // got error when fetch the budget list
-      print("Got error <fetchBudgetsList>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -220,44 +214,39 @@ class BudgetHTTPService {
 
   Future<List<BudgetModel>> fetchBudgetDate(int currencyID, String date,
       [bool? force]) async {
-    bool _force = (force ?? false);
+    bool isForce = (force ?? false);
 
     // get the jwt token from shared preferences
     _checkJWT();
     String bearerToken = _bearerToken;
 
-    if (!_force) {
-      List<BudgetModel>? _budgetPref =
+    if (!isForce) {
+      List<BudgetModel>? budgetPref =
           BudgetSharedPreferences.getBudget(currencyID, date);
-      if (_budgetPref != null) {
-        return _budgetPref;
+      if (budgetPref != null) {
+        return budgetPref;
       }
     }
 
     // check if we got JWT token or not?
-    if (bearerToken.length > 0) {
+    if (bearerToken.isNotEmpty) {
       final response = await http.get(
-          Uri.parse(Globals.apiURL +
-              'budgets/currency/' +
-              currencyID.toString() +
-              '/date/' +
-              date),
+          Uri.parse('${Globals.apiURL}budgets/currency/$currencyID/date/$date'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $bearerToken",
           });
 
       //print(response.body);
       if (response.statusCode == 200) {
         // success, it will return the List of Budget Model
-        List<dynamic> _jsonData = jsonDecode(response.body);
-        List<BudgetModel> _listBudget =
-            _jsonData.map((e) => BudgetModel.fromJson(e)).toList();
-        BudgetSharedPreferences.setBudget(currencyID, date, _listBudget);
-        return _listBudget;
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<BudgetModel> listBudget =
+            jsonData.map((e) => BudgetModel.fromJson(e)).toList();
+        BudgetSharedPreferences.setBudget(currencyID, date, listBudget);
+        return listBudget;
       }
 
-      print("Got error <fetchBudget>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -265,7 +254,7 @@ class BudgetHTTPService {
   }
 
   void _checkJWT() {
-    if (_bearerToken.length <= 0) {
+    if (_bearerToken.isEmpty) {
       _bearerToken = UserSharedPreferences.getJWT();
     }
   }

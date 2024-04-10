@@ -1,5 +1,10 @@
+enum WalletListType {
+  none,
+  header,
+  item
+}
 class WalletTransactionList {
-  String type = '';
+  WalletListType type =  WalletListType.none;
   Object? data;
 }
 

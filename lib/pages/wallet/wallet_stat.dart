@@ -12,7 +12,7 @@ import 'package:my_expense/widgets/chart/summary_box.dart';
 
 class WalletStatPage extends StatefulWidget {
   final Object? wallet;
-  const WalletStatPage({Key? key, required this.wallet}) : super(key: key);
+  const WalletStatPage({super.key, required this.wallet});
 
   @override
   State<WalletStatPage> createState() => _WalletStatPageState();
@@ -54,7 +54,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
     // set the min and max date as 1 day before of max date which is today
     _walletDateRange = {};
-    _minDate = DateTime.now().add(Duration(days: -1));
+    _minDate = DateTime.now().add(const Duration(days: -1));
     _maxDate = DateTime.now();
     _totalIncome = 0;
     _countIncome = 0;
@@ -72,7 +72,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
       appBar: AppBar(
         title: Center(child: Text(_wallet.name)),
         leading: IconButton(
-          icon: Icon(Ionicons.close_outline, color: textColor),
+          icon: const Icon(Ionicons.close_outline, color: textColor),
           onPressed: (() {
             Navigator.pop(context);
           }),
@@ -84,7 +84,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
               _sortAscending = !_sortAscending;
               _sortWalletStat();
             }),
-            child: Container(
+            child: SizedBox(
               width: 50,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -100,14 +100,14 @@ class _WalletStatPageState extends State<WalletStatPage> {
                     children: <Widget>[
                       Text(
                         (_sortAscending ? "A" : "Z"),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: textColor,
                         ),
                       ),
                       Text(
                         (_sortAscending ? "Z" : "A"),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: textColor,
                         ),
@@ -129,7 +129,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
       future: _getData,
       builder: ((context, snapshot) {
         if (snapshot.hasError) {
-          return Column(
+          return const Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -140,8 +140,8 @@ class _WalletStatPageState extends State<WalletStatPage> {
                   size: 25,
                 ),
               ),
-              const SizedBox(height: 5,),
-              const Center(
+              SizedBox(height: 5,),
+              Center(
                 child: Text("Unable to load data from API"),
               )
             ],
@@ -151,7 +151,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
           return _generateBarChart();
         }
         else {
-          return Column(
+          return const Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -238,7 +238,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
                         height: 50,
                         decoration: BoxDecoration(
                           color: indicator,
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(5),
                             bottomLeft: Radius.circular(5),
                           )
@@ -248,14 +248,14 @@ class _WalletStatPageState extends State<WalletStatPage> {
                       Container(
                         color: secondaryBackground,
                         width: 70,
-                        padding: EdgeInsets.fromLTRB(5, 0, 5, 0),
+                        padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
                               dt.format(_walletStat[index].date.toLocal()),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 11,
                               ),
                             ),
@@ -314,7 +314,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
       walletListTotal[dt2.format(key)] = 0;
     });
 
-    _walletStat.forEach((data) {
+    for (WalletStatModel data in _walletStat) {
       // generate the wallet list income, expense, and total
       walletListIncome[dt2.format(data.date)] = (data.income ?? 0);
       walletListExpense[dt2.format(data.date)] = (data.expense ?? 0);
@@ -335,7 +335,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
       if (data.expense! > _maxAmount) {
         _maxAmount = data.expense!;
       }
-    });
+    }
 
     // loop thru _walletDataRange again to calculate the total
     _walletDateRange.forEach((key, value) {
@@ -361,7 +361,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
         _origWalletStat.addAll(resp);
 
         // get the min date, where it should be the array 0 of the _origWalletStat
-        if (_origWalletStat.length > 0) {
+        if (_origWalletStat.isNotEmpty) {
           _minDate = DateTime(_origWalletStat[0].date.year, _origWalletStat[0].date.month, 1);
           _maxDate = DateTime(_origWalletStat[_origWalletStat.length - 1].date.year, _origWalletStat[_origWalletStat.length - 1].date.month, 1);
 

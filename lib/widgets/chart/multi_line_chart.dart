@@ -11,7 +11,7 @@ class MultiLineChart extends StatelessWidget {
   final double? min;
   final double? max;
   final bool? addBottomPadd;
-  const MultiLineChart({Key? key, this.height, required this.data, required this.color, this.legend, this.dateOffset, this.min, this.max, this.addBottomPadd}) : super(key: key);
+  const MultiLineChart({super.key, this.height, required this.data, required this.color, this.legend, this.dateOffset, this.min, this.max, this.addBottomPadd});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class MultiLineChart extends StatelessWidget {
           ),
         ),
         Visibility(
-          visible: (this.addBottomPadd ?? true),
+          visible: (addBottomPadd ?? true),
           child: const SizedBox(height: 10,)
         ),
       ],

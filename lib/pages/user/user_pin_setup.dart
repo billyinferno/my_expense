@@ -7,10 +7,10 @@ import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/widgets/input/pin_pad.dart';
 
 class PinSetupPage extends StatefulWidget {
-  const PinSetupPage({ Key? key }) : super(key: key);
+  const PinSetupPage({ super.key });
 
   @override
-  _PinSetupPageState createState() => _PinSetupPageState();
+  State<PinSetupPage> createState() => _PinSetupPageState();
 }
 
 class _PinSetupPageState extends State<PinSetupPage> {
@@ -37,8 +37,8 @@ class _PinSetupPageState extends State<PinSetupPage> {
               width: 50,
               height: 50,
               color: Colors.transparent,
-              padding: EdgeInsets.all(10),
-              child: Center(
+              padding: const EdgeInsets.all(10),
+              child: const Center(
                 child: Icon(
                   Ionicons.close_circle_outline,
                   color: textColor2,
@@ -53,26 +53,26 @@ class _PinSetupPageState extends State<PinSetupPage> {
               children: <Widget>[
                 Text(
                   (_stage == 1 ? "Enter Passcode" : "Confirm Passcode"),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 25,
                   ),
                 ),
-                SizedBox(height: 5,),
-                Text("Your passcode is required"),
-                SizedBox(height: 25,),
+                const SizedBox(height: 5,),
+                const Text("Your passcode is required"),
+                const SizedBox(height: 25,),
                 PinPad(
                   hashPin: '',
                   hashKey: '',
                   getPin: (value) {
                     // got the pin, check whether this is 1st or 2nd
-                    if(_firstPin.length <= 0) {
+                    if(_firstPin.isEmpty) {
                       _firstPin = value;
                       setState(() {
                         _stage = 2;
                       });
                     }
                     else {
-                      if(_secondPin.length <= 0) {
+                      if(_secondPin.isEmpty) {
                         _secondPin = value;
 
                         // verify whether both pin is the same or not?

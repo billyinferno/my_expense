@@ -10,7 +10,7 @@ import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 
 class UserChangePassword extends StatefulWidget {
-  const UserChangePassword({Key? key}) : super(key: key);
+  const UserChangePassword({super.key});
 
   @override
   State<UserChangePassword> createState() => _UserChangePasswordState();
@@ -53,12 +53,12 @@ class _UserChangePasswordState extends State<UserChangePassword> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text("Change Password")),
+        title: const Center(child: Text("Change Password")),
         leading: IconButton(
           onPressed: () {
             Navigator.maybePop(context, false);
           },
-          icon: Icon(
+          icon: const Icon(
             Ionicons.close,
           ),
         ),
@@ -88,8 +88,8 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                             controller: _currentPassword,
                             decoration: InputDecoration(
                               labelText: "Current Password",
-                              icon: Icon(Ionicons.lock_closed_outline),
-                              border: UnderlineInputBorder(
+                              icon: const Icon(Ionicons.lock_closed_outline),
+                              border: const UnderlineInputBorder(
                                 borderSide: BorderSide(color: secondaryBackground, width: 1.0),
                               ),
                               suffixIcon: IconButton(
@@ -107,13 +107,13 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                             obscureText: (!_showCurrentPassword),
 
                           ),
-                          SizedBox(height: 10,),
+                          const SizedBox(height: 10,),
                           TextFormField(
                             controller: _newPassword,
                             decoration: InputDecoration(
                               labelText: "New Password",
-                              icon: Icon(Ionicons.lock_closed_outline),
-                              border: UnderlineInputBorder(
+                              icon: const Icon(Ionicons.lock_closed_outline),
+                              border: const UnderlineInputBorder(
                                 borderSide: BorderSide(color: secondaryBackground, width: 1.0),
                               ),
                               suffixIcon: IconButton(
@@ -130,13 +130,13 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                             ),
                             obscureText: (!_showNewPassword),
                           ),
-                          SizedBox(height: 10,),
+                          const SizedBox(height: 10,),
                           TextFormField(
                             controller: _retypeNewPassword,
                             decoration: InputDecoration(
                               labelText: "Retype New Password",
-                              icon: Icon(Ionicons.lock_closed_outline),
-                              border: UnderlineInputBorder(
+                              icon: const Icon(Ionicons.lock_closed_outline),
+                              border: const UnderlineInputBorder(
                                 borderSide: BorderSide(color: secondaryBackground, width: 1.0),
                               ),
                               suffixIcon: IconButton(
@@ -158,7 +158,7 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       child: MaterialButton(
                         minWidth: double.infinity,
                         onPressed: (() {
@@ -182,9 +182,9 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                             );
                           });
                         }),
-                        child: Text("Change Password"),
                         color: accentColors[0],
                         height: 50,
+                        child: const Text("Change Password"),
                       ),
                     ),
                   ],
@@ -199,36 +199,38 @@ class _UserChangePasswordState extends State<UserChangePassword> {
 
   Future<void> _updatePassword() async {
     // check if all is already filled or not?
-    String _strCurrentPassword = _currentPassword.text;
-    String _strNewPassword = _newPassword.text;
-    String _strRetypeNewPassword = _retypeNewPassword.text;
+    String strCurrentPassword = _currentPassword.text;
+    String strNewPassword = _newPassword.text;
+    String strRetypeNewPassword = _retypeNewPassword.text;
 
-    if( _strCurrentPassword.trim().length > 0 &&
-        _strNewPassword.trim().length > 0 &&
-        _strRetypeNewPassword.trim().length > 0 ) {
+    if( strCurrentPassword.trim().isNotEmpty &&
+        strNewPassword.trim().isNotEmpty &&
+        strRetypeNewPassword.trim().isNotEmpty ) {
       // got data, now check if the newPassword and the retypeNewPasssword is
       // the same value or not?
-      if(_strNewPassword == _strRetypeNewPassword) {
+      if(strNewPassword == strRetypeNewPassword) {
         // new password match, now call the api for updating the password.
         // before that we should show the loader
         showLoaderDialog(context);
 
-        await _userHttp.updatePassword(_userMe.username, _strCurrentPassword, _strNewPassword).then((_) {
+        await _userHttp.updatePassword(_userMe.username, strCurrentPassword, strNewPassword).then((_) {
           // all finished, pop the loader
           Navigator.pop(context);
         }).onError((error, stackTrace) {
           debugPrint(error.toString());
+          debugPrintStack(stackTrace: stackTrace);
+          
           Navigator.pop(context);
-          ErrorModel _err = parseErrorMessage(error.toString());
-          throw new Exception(_err.message);
+          ErrorModel err = parseErrorMessage(error.toString());
+          throw Exception(err.message);
         });
       }
       else {
-        throw new Exception("New Password didn't match");
+        throw Exception("New Password didn't match");
       }
     }
     else {
-      throw new Exception("Please fill the missing fields information");
+      throw Exception("Please fill the missing fields information");
     }
   }
 }

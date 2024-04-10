@@ -23,33 +23,31 @@ class CategoryHTTPService {
   Future<void> updateDefaultCategory(String type, int categoryID) async {
     // check from shared preferences if we already have loaded category data
     _checkJWT();
-    UsersMeModel _userMe = UserSharedPreferences.getUserMe();
+    UsersMeModel userMe = UserSharedPreferences.getUserMe();
 
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
-      var _body = {
+    if (_bearerToken.isNotEmpty) {
+      var body = {
         'category': {'id': categoryID},
-        'users_permissions_user': {'id': _userMe.id}
+        'users_permissions_user': {'id': userMe.id}
       };
 
       final response = await http.put(
           Uri.parse(
-              Globals.apiURL + 'categories/default/' + type.toLowerCase()),
+              '${Globals.apiURL}categories/default/${type.toLowerCase()}'),
           headers: {
-            HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
             'Content-Type': 'application/json; charset=UTF-8',
           },
-          body: jsonEncode(_body));
+          body: jsonEncode(body));
 
       if (response.statusCode == 200) {
         // success, it will return the userMe model, so we can just replace the current userMe
-        _userMe = UsersMeModel.fromJson(jsonDecode(response.body));
-        await UserSharedPreferences.setUserMe(_userMe);
+        userMe = UsersMeModel.fromJson(jsonDecode(response.body));
+        await UserSharedPreferences.setUserMe(userMe);
         return;
       }
-
-      print("Got error <updateDefaultCategory>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -57,17 +55,17 @@ class CategoryHTTPService {
   }
 
   Future<void> fetchCategory([bool? force]) async {
-    bool _force = (force ?? false);
+    bool isForce = (force ?? false);
 
-    if (!_force) {
+    if (!isForce) {
       // check whether we have data on shared preferences or not?
-      Map<int, CategoryModel> _expensePref =
+      Map<int, CategoryModel> expensePref =
           CategorySharedPreferences.getCategory("expense");
-      Map<int, CategoryModel> _incomePref =
+      Map<int, CategoryModel> incomePref =
           CategorySharedPreferences.getCategory("income");
 
       // check if we got data there or not?
-      if (_expensePref.length > 0 && _incomePref.length > 0) {
+      if (expensePref.isNotEmpty && incomePref.isNotEmpty) {
         return;
       }
     }
@@ -75,27 +73,27 @@ class CategoryHTTPService {
     // check from shared preferences if we already have loaded category data
     _checkJWT();
     // check if we got JWT token or not?
-    if (_bearerToken.length > 0) {
+    if (_bearerToken.isNotEmpty) {
       final response =
-          await http.get(Uri.parse(Globals.apiURL + 'categories'), headers: {
-        HttpHeaders.authorizationHeader: "Bearer " + _bearerToken,
+          await http.get(Uri.parse('${Globals.apiURL}categories'), headers: {
+        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
       });
 
       if (response.statusCode == 200) {
-        List<dynamic> _jsonData = jsonDecode(response.body);
-        List<CategoryModel> _categoryList =
-            _jsonData.map((e) => CategoryModel.fromJson(e)).toList();
+        List<dynamic> jsonData = jsonDecode(response.body);
+        List<CategoryModel> categoryList =
+            jsonData.map((e) => CategoryModel.fromJson(e)).toList();
 
         List<CategoryModel> expenseModel = [];
         List<CategoryModel> incomeModel = [];
-        _categoryList.forEach((category) {
+        for (var category in categoryList) {
           // check if this is expense or income
           if (category.type.toLowerCase() == "expense") {
             expenseModel.add(category);
           } else if (category.type.toLowerCase() == "income") {
             incomeModel.add(category);
           }
-        });
+        }
 
         // saved the expense and income category model
         CategorySharedPreferences.setCategory(expenseModel, incomeModel);
@@ -104,8 +102,7 @@ class CategoryHTTPService {
         return;
       }
 
-      print("Got error <fetchCategory>");
-      throw Exception("res=" + response.body);
+      throw Exception("res=${response.body}");
     } else {
       throw Exception(
           'res={"statusCode":403,"error":"Unauthorized","message":"Empty token"}');
@@ -113,7 +110,7 @@ class CategoryHTTPService {
   }
 
   void _checkJWT() {
-    if (_bearerToken.length <= 0) {
+    if (_bearerToken.isEmpty) {
       _bearerToken = UserSharedPreferences.getJWT();
     }
   }

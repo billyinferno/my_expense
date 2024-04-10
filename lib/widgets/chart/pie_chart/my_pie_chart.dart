@@ -6,7 +6,7 @@ class PieChartView extends StatelessWidget {
   final List<Color> chartColors;
   final List<double> chartAmount;
 
-  const PieChartView({ Key? key, required this.backgroundColor, required this.chartColors, required this.chartAmount }) : super(key: key);
+  const PieChartView({ super.key, required this.backgroundColor, required this.chartColors, required this.chartAmount });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class PieChartView extends StatelessWidget {
                   chartAmount: chartAmount,
                   chartColors: chartColors,
                 ),
-                child: Center(),
+                child: const SizedBox(),
               ),
             ),
           ),

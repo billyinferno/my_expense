@@ -20,11 +20,11 @@ class PinSharedPreferences {
     if (MyBox.encryptedBox != null) {
       if (MyBox.encryptedBox!.get(_pinModel) != null) {
         // get the pin data
-        String _pinData = MyBox.encryptedBox!.get(_pinModel);
+        String pinData = MyBox.encryptedBox!.get(_pinModel);
         // print(_pinData);
         // decode the json data
-        PinModel _pin = PinModel.fromJson(jsonDecode(_pinData));
-        return _pin;
+        PinModel pin = PinModel.fromJson(jsonDecode(pinData));
+        return pin;
       } else {
         return null;
       }

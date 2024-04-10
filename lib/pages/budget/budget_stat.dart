@@ -11,7 +11,7 @@ import 'package:my_expense/widgets/input/type_slide.dart';
 
 class BudgetStatPage extends StatefulWidget {
   final Object? arguments;
-  const BudgetStatPage({Key? key, required this.arguments}) : super(key: key);
+  const BudgetStatPage({super.key, required this.arguments});
 
   @override
   State<BudgetStatPage> createState() => _BudgetStatPageState();
@@ -86,7 +86,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       appBar: AppBar(
         title: Center(child: Text("${_budgetTransaction.categoryName} Stat")),
         leading: IconButton(
-          icon: Icon(Ionicons.close_outline, color: textColor),
+          icon: const Icon(Ionicons.close_outline, color: textColor),
           onPressed: (() {
             // back to previous page
             Navigator.pop(context);
@@ -102,7 +102,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                 _sortAscending = !_sortAscending;
               });
             }),
-            child: Container(
+            child: SizedBox(
               width: 50,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -118,14 +118,14 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                     children: <Widget>[
                       Text(
                         (_sortAscending ? "A" : "Z"),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: textColor,
                         ),
                       ),
                       Text(
                         (_sortAscending ? "Z" : "A"),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: textColor,
                         ),
@@ -143,13 +143,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         future: _getData,
         builder: ((context, snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text("Error when get budget stat data"),);
+            return const Center(child: Text("Error when get budget stat data"),);
           }
           else if (snapshot.hasData) {
             return _generatePage();
           }
           else {
-            return Center(child: Text("Loading budget stat data"),);
+            return const Center(child: Text("Loading budget stat data"),);
           }
         }),
       ),
@@ -192,8 +192,8 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
   }
 
   Widget _generateMonthlyPage() {
-    if (_monthlyData.length <= 0) {
-      return Center(child: Text("No monthly data"),);
+    if (_monthlyData.isEmpty) {
+      return const Center(child: Text("No monthly data"),);
     }
 
     return Column(
@@ -219,7 +219,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(
+                    const Text(
                       "Total Monthly",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -237,7 +237,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(
+                    const Text(
                       "Avg Monthly",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -255,7 +255,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(
+                    const Text(
                       "Avg Daily",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -289,7 +289,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       width: 80,
                       decoration: BoxDecoration(
                         color: secondaryDark,
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(10),
                         ),
                         border: Border.all(
@@ -298,14 +298,14 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                           style: BorderStyle.solid 
                         )
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text("Date"),
                       ),
                     ),
                     Expanded(
                       child: Container(
                         height: 35,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: secondaryDark,
                           border: Border(
                             top: BorderSide(
@@ -320,7 +320,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                             ),
                           )
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Text("Monthly Amount"),
                         ),
                       ),
@@ -330,7 +330,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                         height: 35,
                         decoration: BoxDecoration(
                           color: secondaryDark,
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             topRight: Radius.circular(10),
                           ),
                           border: Border.all(
@@ -339,7 +339,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                             style: BorderStyle.solid 
                           )
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Text("Average Daily"),
                         ),
                       ),
@@ -348,7 +348,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                 ),
                 Container(
                   height: 5,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     border: Border(
                       left: BorderSide(
                         color: secondaryBackground,
@@ -365,7 +365,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                 ),
                 Expanded(
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       border: Border(
                         left: BorderSide(
                           color: secondaryBackground,
@@ -421,7 +421,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                 ),
                 Container(
                   height: 10,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(10),
                       bottomRight: Radius.circular(10,)
@@ -454,8 +454,8 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
   }
 
   Widget _generateYearlyPage() {
-    if (_yearlyData.length <= 0) {
-      return Center(child: Text("No yearly data"),);
+    if (_yearlyData.isEmpty) {
+      return const Center(child: Text("No yearly data"),);
     }
 
     return Column(
@@ -481,7 +481,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(
+                    const Text(
                       "Total Yearly",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -499,7 +499,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(
+                    const Text(
                       "Avg Yearly",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -517,7 +517,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text(
+                    const Text(
                       "Avg Daily",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -551,7 +551,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       width: 80,
                       decoration: BoxDecoration(
                         color: secondaryDark,
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(10),
                         ),
                         border: Border.all(
@@ -560,14 +560,14 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                           style: BorderStyle.solid 
                         )
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text("Date"),
                       ),
                     ),
                     Expanded(
                       child: Container(
                         height: 35,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: secondaryDark,
                           border: Border(
                             top: BorderSide(
@@ -582,7 +582,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                             ),
                           )
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Text("Yearly Amount"),
                         ),
                       ),
@@ -592,7 +592,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                         height: 35,
                         decoration: BoxDecoration(
                           color: secondaryDark,
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             topRight: Radius.circular(10),
                           ),
                           border: Border.all(
@@ -601,7 +601,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                             style: BorderStyle.solid 
                           )
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Text("Average Daily"),
                         ),
                       ),
@@ -610,7 +610,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                 ),
                 Container(
                   height: 5,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     border: Border(
                       left: BorderSide(
                         color: secondaryBackground,
@@ -627,7 +627,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                 ),
                 Expanded(
                   child: Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       border: Border(
                         left: BorderSide(
                           color: secondaryBackground,
@@ -683,7 +683,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                 ),
                 Container(
                   height: 10,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(10),
                       bottomRight: Radius.circular(10,)
@@ -735,12 +735,12 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       // last date of the data
 
       // first generate the monthly date range
-      DateTime _nextDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 1);
-      DateTime _lastDate = DateTime.parse("${_budgetStat.monthly[_budgetStat.monthly.length-1].date}-01");
+      DateTime nextDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 1);
+      DateTime lastDate = DateTime.parse("${_budgetStat.monthly[_budgetStat.monthly.length-1].date}-01");
       _monthlyDateRange.clear();
-      while (_lastDate.isBefore(_nextDate)) {
-        _monthlyDateRange[DateFormat("yyyy-MM").format(_lastDate)] = 0;
-        _lastDate = DateTime(_lastDate.year, _lastDate.month + 1, 1);
+      while (lastDate.isBefore(nextDate)) {
+        _monthlyDateRange[DateFormat("yyyy-MM").format(lastDate)] = 0;
+        lastDate = DateTime(lastDate.year, lastDate.month + 1, 1);
       }
       if (_monthlyDateRange.length > 12) {
         monthDateOffset = _monthlyDateRange.length ~/ 7;
@@ -749,12 +749,12 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         monthDateOffset = 1;
       }
 
-      _nextDate = DateTime(DateTime.now().year + 1, 12, 1);
-      _lastDate = DateTime.parse("${_budgetStat.yearly[_budgetStat.yearly.length-1].date}-12-01");
+      nextDate = DateTime(DateTime.now().year + 1, 12, 1);
+      lastDate = DateTime.parse("${_budgetStat.yearly[_budgetStat.yearly.length-1].date}-12-01");
       _yearlyDateRange.clear();
-      while (_lastDate.isBefore(_nextDate)) {
-        _yearlyDateRange[DateFormat("yyyy").format(_lastDate)] = 0;
-        _lastDate = DateTime(_lastDate.year + 1, 12, 1);
+      while (lastDate.isBefore(nextDate)) {
+        _yearlyDateRange[DateFormat("yyyy").format(lastDate)] = 0;
+        lastDate = DateTime(lastDate.year + 1, 12, 1);
       }
       if (_yearlyDateRange.length > 12) {
         yearlyDateOffset = _yearlyDateRange.length ~/ 7;
@@ -766,11 +766,11 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       _monthlyData.clear();
       _totalMonthlyAmount = 0;
       _totalMonthlyDailyAmount = 0;
-      _budgetStat.monthly.reversed.forEach((data) {
+      for (BudgetStatDetail data in _budgetStat.monthly.reversed) {
         _monthlyDateRange[data.date] = data.totalAmount;
         _totalMonthlyAmount += data.totalAmount;
         _totalMonthlyDailyAmount += data.averageAmount;
-      });
+      }
       _averageMonthlyAmount = _totalMonthlyAmount / _monthlyDateRange.length;
       _averageMonthlyDailyAmount = _totalMonthlyDailyAmount / _monthlyDateRange.length;
       // _monthlyDateRange = Map.fromEntries(_yearlyDateRange.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
@@ -778,11 +778,11 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
 
       _yearlyData.clear();
       _totalYearlyAmount = 0;
-      _budgetStat.yearly.reversed.forEach((data) {
+      for (BudgetStatDetail data in _budgetStat.yearly.reversed) {
         _yearlyDateRange[data.date] = data.totalAmount;
         _totalYearlyAmount += data.totalAmount;
         _totalYearlyDailyAmount += data.averageAmount;
-      });
+      }
       // _yearlyDateRange = Map.fromEntries(_yearlyDateRange.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
       _averageYearlyAmount = _totalYearlyAmount / _yearlyDateRange.length;
       _averageYearlyDailyAmount = _totalYearlyDailyAmount / _yearlyDateRange.length;

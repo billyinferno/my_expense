@@ -6,7 +6,7 @@ class Bar extends StatelessWidget {
   final double maxAmount;
   final String text;
   final Color color;
-  const Bar({Key? key, required this.amount, required this.maxAmount, required this.text, required this.color}) : super(key: key);
+  const Bar({super.key, required this.amount, required this.maxAmount, required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class Bar extends StatelessWidget {
                 height: 20,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(5),
                     bottomRight: Radius.circular(5),
                   ),
@@ -36,7 +36,7 @@ class Bar extends StatelessWidget {
           const SizedBox(width: 5,),
           Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 10,
               color: textColor,
             ),

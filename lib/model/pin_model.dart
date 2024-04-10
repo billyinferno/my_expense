@@ -10,7 +10,7 @@ class PinModel {
     );
 
     Map<String, dynamic> toJson() => {
-        "hashKey": (hashKey ?? null),
-        "hashPin": (hashPin ?? null),
+        "hashKey": (hashKey),
+        "hashPin": (hashPin),
     };
 }

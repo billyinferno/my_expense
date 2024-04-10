@@ -10,10 +10,10 @@ class BarChart extends StatefulWidget {
   final double? barWidth;
   final double? fontSize;
   
-  const BarChart({ Key? key, required this.from, required this.to, required this.data, this.barWidth, this.fontSize }) : super(key: key);
+  const BarChart({ super.key, required this.from, required this.to, required this.data, this.barWidth, this.fontSize });
 
   @override
-  _BarChartState createState() => _BarChartState();
+  State<BarChart> createState() => _BarChartState();
 }
 
 class _BarChartState extends State<BarChart> {
@@ -24,7 +24,7 @@ class _BarChartState extends State<BarChart> {
   double _barWidth = 6;
   bool _isShowed = false;
 
-  final fCCY = new NumberFormat("#,##0.00", "en_US");
+  final fCCY = NumberFormat("#,##0.00", "en_US");
 
   @override
   Widget build(BuildContext context) {
@@ -45,14 +45,14 @@ class _BarChartState extends State<BarChart> {
 
   Widget _generateBody() {
     // check if we got data or not?
-    if(widget.data.expense.length <= 0 && widget.data.income.length <= 0) {
+    if(widget.data.expense.isEmpty && widget.data.income.isEmpty) {
       return Container(
         width: double.infinity,
         height: 35,
-        margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-        padding: EdgeInsets.all(10),
+        margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Color(0xff232d37),
+          color: const Color(0xff232d37),
           borderRadius: BorderRadius.only(
             topLeft:Radius.circular(_barWidth),
             topRight: Radius.circular(_barWidth),
@@ -60,7 +60,7 @@ class _BarChartState extends State<BarChart> {
             bottomRight: Radius.circular(_barWidth),
           ),
         ),
-        child: Center(
+        child: const Center(
           child: Text("No Data"),
         ),
       );
@@ -69,10 +69,10 @@ class _BarChartState extends State<BarChart> {
       if(_isShowed) {
         return Container(
           width: double.infinity,
-          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-          padding: EdgeInsets.all(10),
+          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Color(0xff232d37),
+            color: const Color(0xff232d37),
             borderRadius: BorderRadius.only(
               topLeft:Radius.circular(_barWidth),
               topRight: Radius.circular(_barWidth),
@@ -84,8 +84,8 @@ class _BarChartState extends State<BarChart> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Center(child: Text("Close Graph")),
-              SizedBox(height: 10,),
+              const Center(child: Text("Close Graph")),
+              const SizedBox(height: 10,),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -99,10 +99,10 @@ class _BarChartState extends State<BarChart> {
         return Container(
           width: double.infinity,
           height: 40,
-          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-          padding: EdgeInsets.all(10),
+          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Color(0xff232d37),
+            color: const Color(0xff232d37),
             borderRadius: BorderRadius.only(
               topLeft:Radius.circular(_barWidth),
               topRight: Radius.circular(_barWidth),
@@ -110,7 +110,7 @@ class _BarChartState extends State<BarChart> {
               bottomRight: Radius.circular(_barWidth),
             ),
           ),
-          child: Center(
+          child: const Center(
             child: Text("Show Graph"),
           ),
         );
@@ -119,39 +119,39 @@ class _BarChartState extends State<BarChart> {
   }
 
   Widget _generateBar({required DateTime date, required double income, required double expense, required double maxIncome, required double maxExpense}) {
-    String _dateText = DateFormat('dd/MM').format(date.toLocal());
+    String dateText = DateFormat('dd/MM').format(date.toLocal());
 
     // compute the income and expense length for the bar chart
-    int _incomeLength;
-    int _expenseLength;
+    int incomeLength;
+    int expenseLength;
 
     // check if the maxIncome or maxExpense is actually 0
     // if zero then cancelled the _incomeLength and _expenseLength as we should print
     // blank chart instead full one
     if(maxIncome <= 0) {
-      _incomeLength = 0;
+      incomeLength = 0;
     }
     else {
-      _incomeLength = (((income/maxIncome) * 1000) ~/ 4);
+      incomeLength = (((income/maxIncome) * 1000) ~/ 4);
     }
 
     if(maxExpense <= 0) {
-      _expenseLength = 0;
+      expenseLength = 0;
     }
     else {
-      _expenseLength = (((expense/maxExpense) * 1000) ~/ 4);
+      expenseLength = (((expense/maxExpense) * 1000) ~/ 4);
     }
 
     // check if we got amount, but the income or expense length just too small
     // that make it 0
-    if(income > 0 && _incomeLength <= 0) {
+    if(income > 0 && incomeLength <= 0) {
       // defaulted it to at least 1 to tell that we have something here
-      _incomeLength = 1;
+      incomeLength = 1;
     }
 
-    if(expense > 0 && _expenseLength <= 0) {
+    if(expense > 0 && expenseLength <= 0) {
       // defaulted it to at least 1 to tell that we have something here
-      _expenseLength = 1;
+      expenseLength = 1;
     }
 
     return Column(
@@ -162,19 +162,19 @@ class _BarChartState extends State<BarChart> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Container(
+            SizedBox(
               width: 45,
               child: Center(
                 child: Text(
-                  _dateText,
-                  style: TextStyle(
+                  dateText,
+                  style: const TextStyle(
                     color: textColor2,
                     fontSize: 10,
                   ),
                 ),
               ),
             ),
-            SizedBox(width: 5,),
+            const SizedBox(width: 5,),
             Expanded(
               child: Stack(
                 children: <Widget>[
@@ -191,19 +191,19 @@ class _BarChartState extends State<BarChart> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Expanded(
-                        flex: (250 - _incomeLength),
+                        flex: (250 - incomeLength),
                         child: Container(
                           height: 20,
                           color: Colors.transparent,
                         ),
                       ),
                       Expanded(
-                        flex: _incomeLength,
+                        flex: incomeLength,
                         child: Container(
                           height: 20,
                           decoration: BoxDecoration(
                             color: accentColors[6],
-                            borderRadius: BorderRadius.only(
+                            borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(20),
                               bottomLeft: Radius.circular(20)
                             ),
@@ -211,12 +211,12 @@ class _BarChartState extends State<BarChart> {
                         ),
                       ),
                       Expanded(
-                        flex: _expenseLength,
+                        flex: expenseLength,
                         child: Container(
                           height: 20,
                           decoration: BoxDecoration(
                             color: accentColors[2],
-                            borderRadius: BorderRadius.only(
+                            borderRadius: const BorderRadius.only(
                               topRight: Radius.circular(20),
                               bottomRight: Radius.circular(20)
                             ),
@@ -224,7 +224,7 @@ class _BarChartState extends State<BarChart> {
                         ),
                       ),
                       Expanded(
-                        flex: (250 - _expenseLength),
+                        flex: (250 - expenseLength),
                         child: Container(
                           height: 20,
                           color: Colors.transparent,
@@ -237,7 +237,7 @@ class _BarChartState extends State<BarChart> {
                     left: 5,
                     child: Text(
                       fCCY.format(income),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 10,
                         color: textColor2,
                       ),
@@ -248,7 +248,7 @@ class _BarChartState extends State<BarChart> {
                     right: 5,
                     child: Text(
                       fCCY.format(expense),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 10,
                         color: textColor2,
                       ),
@@ -259,36 +259,36 @@ class _BarChartState extends State<BarChart> {
             ),
           ],
         ),
-        SizedBox(height: 5,),
+        const SizedBox(height: 5,),
       ],
     );
   }
 
   List<Widget> _generateBarCharts() {
-    List<Widget> _bars = [];
-    DateTime _currDate;
-    double _income = 0;
-    double _expense = 0;
+    List<Widget> bars = [];
+    DateTime currDate;
+    double income = 0;
+    double expense = 0;
 
     for(int index = 0; index <= widget.to.difference(widget.from).inDays; index++ ) {
-      _currDate = widget.from.add(Duration(days: index));
-      _income = (widget.data.income[_currDate] ?? 0.0); 
-      _expense = (widget.data.expense[_currDate] ?? 0.0);
-      if(_expense < 0) {
-        _expense *= (-1);
+      currDate = widget.from.add(Duration(days: index));
+      income = (widget.data.income[currDate] ?? 0.0); 
+      expense = (widget.data.expense[currDate] ?? 0.0);
+      if(expense < 0) {
+        expense *= (-1);
       }
 
-      _bars.add(
+      bars.add(
         _generateBar(
-          date: _currDate,
-          income: _income,
-          expense: _expense,
+          date: currDate,
+          income: income,
+          expense: expense,
           maxIncome: _maxIncome,
           maxExpense: _maxExpense
         )
       );
     }
-    return _bars;
+    return bars;
   }
 
   void _getMaxExpenseIncome() {

@@ -26,8 +26,10 @@ import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:provider/provider.dart';
 
 class RouterPage extends StatefulWidget {
+  const RouterPage({super.key});
+
   @override
-  _RouterPageState createState() => _RouterPageState();
+  State<RouterPage> createState() => _RouterPageState();
 }
 
 class _RouterPageState extends State<RouterPage> {
@@ -37,8 +39,8 @@ class _RouterPageState extends State<RouterPage> {
   }
 
   bool isUserLogin() {
-    String _bearerToken = UserSharedPreferences.getJWT();
-    if (_bearerToken.length > 0) {
+    String bearerToken = UserSharedPreferences.getJWT();
+    if (bearerToken.isNotEmpty) {
       return true;
     }
     return false;
@@ -65,88 +67,88 @@ class _RouterPageState extends State<RouterPage> {
         onGenerateRoute: (RouteSettings settings) {
           // perform validation whether user already login or not when user
           // want to directly access a page from the web browser URL.
-          String _routeName = (settings.name ?? '/');
-          if ((_routeName != "/" || _routeName != "/login") && !isUserLogin()) {
+          String routeName = (settings.name ?? '/');
+          if ((routeName != "/" || routeName != "/login") && !isUserLogin()) {
             // user not login, force user to login
-            _routeName = "/";
+            routeName = "/";
           }
-          switch (_routeName) {
+          switch (routeName) {
             case '/login':
             case '/':
               {
-                return MaterialPageRoute(builder: (context) => new LoginPage());
+                return MaterialPageRoute(builder: (context) => const LoginPage());
               }
             case '/home':
               {
-                return MaterialPageRoute(builder: (context) => new HomePage());
+                return MaterialPageRoute(builder: (context) => const HomePage());
               }
             case '/user':
               {
-                return createAnimationRoute(new UserPage());
+                return createAnimationRoute(const UserPage());
               }
             case '/user/password':
               {
-                return createAnimationRoute(new UserChangePassword());
+                return createAnimationRoute(const UserChangePassword());
               }
             case '/transaction/add':
               {
-                return createAnimationRoute(new TransactionAddPage(settings.arguments));
+                return createAnimationRoute(TransactionAddPage(params: settings.arguments,));
               }
             case '/transaction/edit':
               {
-                return createAnimationRoute(new TransactionEditPage(settings.arguments));
+                return createAnimationRoute(TransactionEditPage(params: settings.arguments,));
               }
             case '/transaction/search':
               {
-                return createAnimationRoute(new TransactionSearchPage());
+                return createAnimationRoute(const TransactionSearchPage());
               }
             case '/budget/list':
               {
-                return createAnimationRoute(new BudgetListPage(currencyId: settings.arguments,));
+                return createAnimationRoute(BudgetListPage(currencyId: settings.arguments,));
               }
             case '/budget/transaction':
               {
-                return createAnimationRoute(new BudgetTransactionPage(arguments: settings.arguments,));
+                return createAnimationRoute(BudgetTransactionPage(arguments: settings.arguments,));
               }
             case '/budget/stat':
               {
-                return createAnimationRoute(new BudgetStatPage(arguments: settings.arguments,));
+                return createAnimationRoute(BudgetStatPage(arguments: settings.arguments,));
               }
             case '/wallet/add':
               {
-                return createAnimationRoute(new WalletAddPage());
+                return createAnimationRoute(const WalletAddPage());
               }
             case '/wallet/edit':
               {
-                return createAnimationRoute(new WalletEditPage(walletData: settings.arguments,));
+                return createAnimationRoute(WalletEditPage(walletData: settings.arguments,));
               }
             case '/wallet/transaction':
               {
-                return createAnimationRoute(new WalletTransactionPage(wallet: settings.arguments,));
+                return createAnimationRoute(WalletTransactionPage(wallet: settings.arguments,));
               }
             case '/wallet/stat':
               {
-                return createAnimationRoute(new WalletStatPage(wallet: settings.arguments,));
+                return createAnimationRoute(WalletStatPage(wallet: settings.arguments,));
               }
             case '/stats/filter':
               {
-                return createAnimationRoute(new StatsFilterPage());
+                return createAnimationRoute(const StatsFilterPage());
               }
             case '/stats/all':
               {
-                return createAnimationRoute(new StatsAllPage(ccy: settings.arguments));
+                return createAnimationRoute(StatsAllPage(ccy: settings.arguments));
               }
             case '/stats/detail':
               {
-                return createAnimationRoute(new StatsDetailPage(args: settings.arguments,));
+                return createAnimationRoute(StatsDetailPage(args: settings.arguments,));
               }
             case '/stats/detail/transaction':
               {
-                return createAnimationRoute(new StatsTransactionPage(args: settings.arguments,));
+                return createAnimationRoute(StatsTransactionPage(args: settings.arguments,));
               }
             default:
               {
-                return MaterialPageRoute(builder: (context) => new LoginPage());
+                return MaterialPageRoute(builder: (context) => const LoginPage());
               }
           }
         },

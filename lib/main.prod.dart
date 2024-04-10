@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -5,23 +6,31 @@ import 'package:my_expense/router.dart';
 import 'package:my_expense/utils/prefs/shared_box.dart';
 
 Future main() async {
-  // this is needed to ensure that all the binding already initialized before
-  // we plan to load the shared preferences.
-  WidgetsFlutterBinding.ensureInitialized();
+  // run all the initialisation on the runZonedGuarded to ensure that all the
+  // init already finished before we perform runApp.
+  await runZonedGuarded(() async {
+    // ensure that the flutter widget already binding
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // initialize the shared preferences we will used
-  Future.wait([
-    dotenv.load(fileName: "conf/.prod.env"),
-    Hive.initFlutter(),
-    MyBox.init(),
-  ]).then((value) {
+    // after that we can initialize the box
+    await Future.wait([
+      dotenv.load(fileName: "conf/.prod.env"),
+      Hive.initFlutter(),
+      MyBox.init(),
+    ]);
+
     // run the actual application
     debugPrint("🚀 Initialize finished, run application");
-    runApp(MyApp());
-  });
+    runApp(const MyApp());
+  }, (error, stack) {
+    debugPrint("Error: ${error.toString()}");
+    debugPrintStack(stackTrace: stack);
+  },);
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   State<StatefulWidget> createState() => _MyAppState();
 }
@@ -31,6 +40,6 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     // return the router page, we will control all the route from here instead
-    return RouterPage();
+    return const RouterPage();
   }
 }

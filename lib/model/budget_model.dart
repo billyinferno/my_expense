@@ -23,7 +23,7 @@ class BudgetModel {
   factory BudgetModel.fromJson(Map<String, dynamic> json) => BudgetModel(
     id: json["id"],
     category: CategoryModel.fromJson(json["category"]),
-    totalTransaction: (json["total_transaction"] == null ? 0 : json["total_transaction"]),
+    totalTransaction: (json["total_transaction"] ?? 0),
     amount: json["amount"] as double,
     used: json["used"] as double,
     status: (json["status"] ?? "in"),

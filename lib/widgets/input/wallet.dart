@@ -7,19 +7,19 @@ import 'package:my_expense/themes/icon_list.dart';
 
 class Wallet extends StatelessWidget {
   final WalletModel wallet;
-  const Wallet({Key? key, required this.wallet}) : super(key: key);
+  const Wallet({super.key, required this.wallet});
 
   @override
   Widget build(BuildContext context) {
-    final fCCY = new NumberFormat("#,##0.00", "en_US");
+    final fCCY = NumberFormat("#,##0.00", "en_US");
     
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/wallet/transaction', arguments: wallet);
       },
       child: Container(
-        padding: EdgeInsets.all(12),
-        margin: EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           gradient: LinearGradient(
@@ -29,17 +29,20 @@ class Wallet extends StatelessWidget {
               ]
           ),
         ),
+        width: double.infinity,
         child: Column(
-          children: [
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
+                SizedBox(
                   height: 30,
                   width: 30,
                   child: IconList.getIcon(wallet.walletType.type),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,12 +50,12 @@ class Wallet extends StatelessWidget {
                       Text(
                         wallet.name,
                         textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 15),
+                        style: const TextStyle(fontSize: 15),
                       ),
                       Text(
                         wallet.walletType.type,
                         textAlign: TextAlign.left,
-                        style: TextStyle(fontSize: 10),
+                        style: const TextStyle(fontSize: 10),
                       )
                     ],
                   ),
@@ -62,9 +65,9 @@ class Wallet extends StatelessWidget {
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
-                (wallet.futureAmount == 0 ? "" : wallet.currency.symbol + " " + fCCY.format(wallet.futureAmount)),
+                (wallet.futureAmount == 0 ? "" : "${wallet.currency.symbol} ${fCCY.format(wallet.futureAmount)}"),
                 textAlign: TextAlign.right,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 10,
                 ),
               ),
@@ -72,9 +75,9 @@ class Wallet extends StatelessWidget {
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
-                wallet.currency.symbol + " " + fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1)),
+                "${wallet.currency.symbol} ${fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1))}",
                 textAlign: TextAlign.right,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),
@@ -82,7 +85,6 @@ class Wallet extends StatelessWidget {
             ),
           ],
         ),
-        width: double.infinity,
       ),
     );
   }

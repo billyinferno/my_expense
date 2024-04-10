@@ -17,7 +17,7 @@ class CategoryListItem extends StatelessWidget {
   final Function(int)? onTap;
   final Function(int)? onDoubleTap;
   final Function? onDelete;
-  const CategoryListItem({Key? key,
+  const CategoryListItem({super.key,
     required this.index,
     required this.budgetId,
     required this.categoryId,
@@ -29,14 +29,14 @@ class CategoryListItem extends StatelessWidget {
     required this.budgetAmount,
     this.onTap,
     this.onDoubleTap,
-    this.onDelete}) : super(key: key);
+    this.onDelete});
 
   @override
   Widget build(BuildContext context) {
-    final fCCY = new NumberFormat("#,##0.00", "en_US");
+    final fCCY = NumberFormat("#,##0.00", "en_US");
     
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(width: 1.0, color: primaryLight)),
         color: Colors.transparent,
       ),
@@ -52,8 +52,8 @@ class CategoryListItem extends StatelessWidget {
               backgroundColor: accentColors[2],
               icon: Ionicons.trash,
               onPressed: (_) {
-                if (this.onDelete != null) {
-                  this.onDelete!();
+                if (onDelete != null) {
+                  onDelete!();
                 }
               }
             ),
@@ -61,13 +61,13 @@ class CategoryListItem extends StatelessWidget {
         ),
         child: GestureDetector(
           onTap: (() {
-            if (this.onTap != null) {
-              this.onTap!(this.index);
+            if (onTap != null) {
+              onTap!(index);
             }
           }),
           onDoubleTap: (() {
-            if (this.onDoubleTap != null) {
-              this.onDoubleTap!(this.index);
+            if (onDoubleTap != null) {
+              onDoubleTap!(index);
             }
           }),
           child: Row(
@@ -84,12 +84,12 @@ class CategoryListItem extends StatelessWidget {
                 ),
                 child: categoryIcon,
               ),
-              SizedBox(
+              const SizedBox(
                 width: 10,
               ),
               Expanded(child: Text(categoryName)),
-              SizedBox(width: 10,),
-              Text(currencySymbol + " " + fCCY.format(budgetAmount)),
+              const SizedBox(width: 10,),
+              Text("$currencySymbol ${fCCY.format(budgetAmount)}"),
               const SizedBox(width: 5,),
             ],
           ),

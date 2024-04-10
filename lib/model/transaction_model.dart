@@ -26,21 +26,21 @@ class TransactionModel {
   final double exchangeRate;
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
-    WalletCategoryTransactionModel? _category;
-    WalletCategoryTransactionModel? _walletTo;
+    WalletCategoryTransactionModel? category;
+    WalletCategoryTransactionModel? walletTo;
 
     if(json["category"] != null) {
-      _category = WalletCategoryTransactionModel.fromJson(json["category"]);
+      category = WalletCategoryTransactionModel.fromJson(json["category"]);
     }
     else {
-      _category = null;
+      category = null;
     }
 
     if(json["walletTo"] != null) {
-      _walletTo = WalletCategoryTransactionModel.fromJson(json["walletTo"]);
+      walletTo = WalletCategoryTransactionModel.fromJson(json["walletTo"]);
     }
     else {
-      _walletTo = null;
+      walletTo = null;
     }
 
     // print(json.toString());
@@ -48,33 +48,35 @@ class TransactionModel {
     return TransactionModel(
       json["name"],
       json["type"],
-      _category,
+      category,
       DateTime.parse(json["date"]).toLocal(),
       WalletCategoryTransactionModel.fromJson(json["wallet"]),
       json["cleared"],
       json["description"],
       WalletCategoryTransactionModel.fromJson(json["users_permissions_user"]),
       json["amount"].toDouble(),
-      _walletTo,
+      walletTo,
       json["exchange_rate"]
     );
   }
 
   Map<String, dynamic> toJson() {
-    var _category = (category == null ? null : category!.toJson());
-    var _walletTo = (walletTo == null ? null : walletTo!.toJson());
+    // ignore: prefer_null_aware_operators
+    var currentCategory = (category == null ? null : category!.toJson());
+    // ignore: prefer_null_aware_operators
+    var currentWalletTo = (walletTo == null ? null : walletTo!.toJson());
 
     return {
       "name": name,
       "type": type,
-      "category": _category,
+      "category": currentCategory,
       "date": date.toUtc().toIso8601String(),
       "wallet": wallet.toJson(),
       "cleared": cleared,
       "description": description,
       "users_permissions_user": usersPermissionsUser.toJson(),
       "amount": amount,
-      "walletTo": _walletTo,
+      "walletTo": currentWalletTo,
       "exchange_rate": exchangeRate
     };
   }

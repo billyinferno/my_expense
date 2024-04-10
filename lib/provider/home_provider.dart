@@ -15,13 +15,13 @@ class HomeProvider extends ChangeNotifier {
   List<WorthModel> netWorth = [];
   Map<int, IncomeExpenseModel> incomeExpense = {};
 
-  setTransactionList(List<TransactionListModel> _transactionList) {
-    transactionList = _transactionList;
+  setTransactionList(List<TransactionListModel> newTransactionList) {
+    transactionList = newTransactionList;
     notifyListeners();
   }
 
-  popTransactionList(TransactionListModel _txnData) {
-    transactionList.remove(_txnData);
+  popTransactionList(TransactionListModel txnData) {
+    transactionList.remove(txnData);
     notifyListeners();
   }
 
@@ -31,13 +31,13 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setWalletList(List<WalletModel> _walletList) {
-    walletList = _walletList;
+  setWalletList(List<WalletModel> newWalletList) {
+    walletList = newWalletList;
     notifyListeners();
   }
 
-  setBudgetList(List<BudgetModel> _budgetList) {
-    budgetList = _budgetList;
+  setBudgetList(List<BudgetModel> newBudgetList) {
+    budgetList = newBudgetList;
     notifyListeners();
   }
 
@@ -47,8 +47,8 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setBudgetAddList(List<BudgetModel> _budgetList) {
-    budgetAddList = _budgetList;
+  setBudgetAddList(List<BudgetModel> budgetList) {
+    budgetAddList = budgetList;
     notifyListeners();
   }
 
@@ -58,13 +58,13 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setWalletCurrency(List<CurrencyModel> _walletCurrency) {
-    walletCurrency = _walletCurrency;
+  setWalletCurrency(List<CurrencyModel> newWalletCurrency) {
+    walletCurrency = newWalletCurrency;
     notifyListeners();
   }
 
-  setNetWorth(List<WorthModel> _netWorth) {
-    netWorth = _netWorth;
+  setNetWorth(List<WorthModel> newNetWorth) {
+    netWorth = newNetWorth;
     notifyListeners();
   }
 
@@ -74,8 +74,8 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setIncomeExpense(int ccyId, IncomeExpenseModel _incomeExpense) {
-    incomeExpense[ccyId] = _incomeExpense;
+  setIncomeExpense(int ccyId, IncomeExpenseModel updateIncomeExpense) {
+    incomeExpense[ccyId] = updateIncomeExpense;
     notifyListeners();
   }
 

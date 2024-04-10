@@ -22,15 +22,15 @@ class ItemList extends StatelessWidget {
   final double amount;
   final double? exchangeRate;
 
-  const ItemList({ Key? key, required this.type, this.name, this.categoryName, required this.walletName, required this.walletSymbol, this.walletToName, this.walletToSymbol, required this.amount, this.exchangeRate }) : super(key: key);
+  const ItemList({ super.key, required this.type, this.name, this.categoryName, required this.walletName, required this.walletSymbol, this.walletToName, this.walletToSymbol, required this.amount, this.exchangeRate });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 70,
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(
             width: 1.0,
@@ -43,11 +43,11 @@ class ItemList extends StatelessWidget {
   }
 
   Widget _getItem() {
-    NumberFormat fCCY = new NumberFormat("#,##0.00", "en_US");
+    NumberFormat fCCY = NumberFormat("#,##0.00", "en_US");
     double itemPriceConv = amount * (exchangeRate ?? 1);
 
-    String _formatAmount = fCCY.format(amount);
-    String _formatPriceConv = fCCY.format(itemPriceConv);
+    String formatAmount = fCCY.format(amount);
+    String formatPriceConv = fCCY.format(itemPriceConv);
 
     switch (type) {
       case ItemType.expense:
@@ -57,7 +57,7 @@ class ItemList extends StatelessWidget {
           itemIcon: IconColorList.getExpenseIcon((categoryName ?? '')),
           itemIconColor: IconColorList.getExpenseColor((categoryName ?? '')),
           itemCCYFrom: walletSymbol,
-          itemPriceFrom: _formatAmount,
+          itemPriceFrom: formatAmount,
           itemPriceFromColor: accentColors[2],
         );
       case ItemType.income:
@@ -67,23 +67,23 @@ class ItemList extends StatelessWidget {
           itemIcon: IconColorList.getIncomeIcon((categoryName ?? '')),
           itemIconColor: IconColorList.getIncomeColor((categoryName ?? '')),
           itemCCYFrom: walletSymbol,
-          itemPriceFrom: _formatAmount,
+          itemPriceFrom: formatAmount,
           itemPriceFromColor: accentColors[0],
         );
       case ItemType.transfer:
         return _item(
           itemName: (name ?? '-'),
           itemSub: "$walletName > ${(walletToName ?? '')}",
-          itemIcon: Icon(
+          itemIcon: const Icon(
             Ionicons.repeat,
             color: textColor,
           ),
           itemIconColor: accentColors[4],
           itemCCYFrom: walletSymbol,
-          itemPriceFrom: _formatAmount,
+          itemPriceFrom: formatAmount,
           itemPriceFromColor: accentColors[5],
           itemCCYTo: walletToSymbol,
-          itemPriceTo: _formatPriceConv,
+          itemPriceTo: formatPriceConv,
           itemPriceToColor: accentColors[5],
         );
       default:
@@ -93,7 +93,7 @@ class ItemList extends StatelessWidget {
           itemIcon: IconColorList.getExpenseIcon((categoryName ?? '')),
           itemIconColor: IconColorList.getExpenseColor((categoryName ?? '')),
           itemCCYFrom: walletSymbol,
-          itemPriceFrom: _formatAmount,
+          itemPriceFrom: formatAmount,
           itemPriceFromColor: accentColors[2],
         );
     }
@@ -111,62 +111,65 @@ class ItemList extends StatelessWidget {
     String? itemPriceTo,
     Color? itemPriceToColor,
   }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Container(
-          child: itemIcon,
-          height: 40,
-          width: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            color: itemIconColor,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: itemIconColor,
+            ),
+            margin: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+            child: itemIcon,
           ),
-          margin: EdgeInsets.fromLTRB(0, 0, 10, 0),
-        ),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                itemName,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                itemSub,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: textColor2,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  itemName,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
+                Text(
+                  itemSub,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: textColor2,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                "$itemCCYFrom $itemPriceFrom",
+                style: TextStyle(
+                  color: itemPriceFromColor,
+                ),
+              ),
+              Visibility(
+                visible: (itemCCYTo != null && itemPriceTo != null),
+                child: Text(
+                  "${itemCCYTo ?? ''} ${itemPriceTo ?? ''}",
+                  style: TextStyle(
+                    color: lighten((itemPriceToColor ?? itemPriceFromColor), 0.25),
+                  ),
+                  textAlign: TextAlign.right,
+                ),
               ),
             ],
           ),
-        ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              itemCCYFrom + " " + itemPriceFrom,
-              style: TextStyle(
-                color: itemPriceFromColor,
-              ),
-            ),
-            Visibility(
-              visible: (itemCCYTo != null && itemPriceTo != null),
-              child: Text(
-                (itemCCYTo ?? '') + " " + (itemPriceTo ?? ''),
-                style: TextStyle(
-                  color: lighten((itemPriceToColor ?? itemPriceFromColor), 0.25),
-                ),
-                textAlign: TextAlign.right,
-              ),
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

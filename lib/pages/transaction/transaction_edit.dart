@@ -9,6 +9,7 @@ import 'package:my_expense/model/transaction_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
+import 'package:my_expense/utils/function/date_utils.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
@@ -20,10 +21,10 @@ import 'package:provider/provider.dart';
 class TransactionEditPage extends StatefulWidget {
   final Object? params;
 
-  TransactionEditPage(this.params);
+  const TransactionEditPage({super.key, required this.params});
 
   @override
-  _TransactionEditPageState createState() => _TransactionEditPageState();
+  State<TransactionEditPage> createState() => _TransactionEditPageState();
 }
 
 class _TransactionEditPageState extends State<TransactionEditPage> {
@@ -61,6 +62,22 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     await _transactionHttp.updateTransaction(context, txn!, paramsData).then((txnUpdate) {
       // update necessary information after we add the transaction
       updateInformation(txnUpdate).then((_) {
+        // for transaction that actually add on the different date, we cannot notify the home list
+        // to show this transaction, because currently we are in a different date between the transaction
+        // being add and the date being selected on the home list
+        DateTime currentListTxnDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now());
+
+        if (isSameDay(txnUpdate.date.toLocal(), currentListTxnDate.toLocal())) {
+          String date = DateFormat('yyyy-MM-dd').format(paramsData.date.toLocal());
+
+          // get the transaction list from shared preferences
+          List<TransactionListModel>? txnListShared = TransactionSharedPreferences.getTransaction(date);
+
+          // once add on the shared preferences, we can change the
+          // TransactionListModel provider so it will update the home list page
+          Provider.of<HomeProvider>(context, listen: false).setTransactionList(txnListShared ?? []);
+        }
+        
         // this is success, so we can pop the loader
         Navigator.pop(context);
 
@@ -92,23 +109,23 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
   }
 
   Future<void> updateInformation(TransactionListModel txnUpdate) async {
-    Future<List<BudgetModel>> _futureBudgets;
-    Future<List<WalletModel>> _futureWallets;
-    Future<List<WorthModel>> _futureNetWorth;
+    Future<List<BudgetModel>> futureBudgets;
+    Future<List<WalletModel>> futureWallets;
+    Future<List<WorthModel>> futureNetWorth;
 
-    String _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnUpdate.date.year, txnUpdate.date.month, 1).toLocal());
-    String _prevDay = DateFormat('yyyy-MM-dd').format(DateTime(paramsData.date.year, paramsData.date.month, 1).toLocal());
+    String refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnUpdate.date.year, txnUpdate.date.month, 1).toLocal());
+    String prevDay = DateFormat('yyyy-MM-dd').format(DateTime(paramsData.date.year, paramsData.date.month, 1).toLocal());
 
     // check whether this transaction moved from one wallet to another wallet?
     // first check whether this is expense, income, or transfer?
-    bool _isWalletMoved = false;
+    bool isWalletMoved = false;
     if(txnUpdate.type == "expense" || txnUpdate.type == "income") {
       if(paramsData.wallet.id == txnUpdate.wallet.id) {
         // do nothing
       }
       else {
         // change wallet
-        _isWalletMoved = true;
+        isWalletMoved = true;
       }
     }
     else {
@@ -119,32 +136,32 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       }
       else {
         // change wallet for transfer
-        _isWalletMoved = true;
+        isWalletMoved = true;
       }
     }
 
     // if there are no wallet moved, then we can just update the wallet
-    if(!_isWalletMoved) {
+    if(!isWalletMoved) {
       // update the new transaction to the wallet transaction
-      await TransactionSharedPreferences.updateTransactionWallet(txnUpdate.wallet.id, _refreshDay, txnUpdate);
+      await TransactionSharedPreferences.updateTransactionWallet(txnUpdate.wallet.id, refreshDay, txnUpdate);
       if (txnUpdate.walletTo != null) {
-        await TransactionSharedPreferences.updateTransactionWallet(txnUpdate.walletTo!.id, _refreshDay, txnUpdate);
+        await TransactionSharedPreferences.updateTransactionWallet(txnUpdate.walletTo!.id, refreshDay, txnUpdate);
       }
     }
     else {
       // check which wallet is being moved
       if(paramsData.wallet.id != txnUpdate.wallet.id) {
         // moved the transaction from previous wallet to the new wallet
-        await TransactionSharedPreferences.deleteTransactionWallet(paramsData.wallet.id, _prevDay, paramsData);
-        await TransactionSharedPreferences.addTransactionWallet(txnUpdate.wallet.id, _refreshDay, txnUpdate);
+        await TransactionSharedPreferences.deleteTransactionWallet(paramsData.wallet.id, prevDay, paramsData);
+        await TransactionSharedPreferences.addTransactionWallet(txnUpdate.wallet.id, refreshDay, txnUpdate);
       }
 
       if(txnUpdate.walletTo != null) {
         // check if both wallet the same or not?
         if(paramsData.walletTo!.id != txnUpdate.walletTo!.id) {
           // moved the transaction from previous wallet to the new wallet
-          await TransactionSharedPreferences.deleteTransactionWallet(paramsData.walletTo!.id, _prevDay, paramsData);
-          await TransactionSharedPreferences.addTransactionWallet(txnUpdate.walletTo!.id, _refreshDay, txnUpdate);
+          await TransactionSharedPreferences.deleteTransactionWallet(paramsData.walletTo!.id, prevDay, paramsData);
+          await TransactionSharedPreferences.addTransactionWallet(txnUpdate.walletTo!.id, refreshDay, txnUpdate);
         }
       }
     }
@@ -154,9 +171,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       // we will only going to update the income expense statistic, if only this transaction
       // is perform on the same month
       if(txnUpdate.date.year == DateTime.now().year && txnUpdate.date.month == DateTime.now().month) {
-        DateTime _from = DateTime(DateTime.now().year, DateTime.now().month, 1);
-        DateTime _to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(Duration(days: 1));
-        await _transactionHttp.fetchIncomeExpense(txnUpdate.wallet.currencyId, _from, _to, true).then((incomeExpense) {
+        DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
+        DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
+        await _transactionHttp.fetchIncomeExpense(txnUpdate.wallet.currencyId, from, to, true).then((incomeExpense) {
           Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnUpdate.wallet.currencyId, incomeExpense);
         }).onError((error, stackTrace) {
           debugPrint("Error when fetchIncomeExpense at <updateInformation>");
@@ -166,46 +183,46 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     }
 
     await Future.wait([
-      _futureWallets = _walletHttp.fetchWallets(true, true),
-      _futureBudgets = _budgetHttp.fetchBudgetDate(txnUpdate.wallet.currencyId, _refreshDay, true),
-      _futureNetWorth = _walletHttp.fetchWalletsWorth(txnUpdate.date, true),
+      futureWallets = _walletHttp.fetchWallets(true, true),
+      futureBudgets = _budgetHttp.fetchBudgetDate(txnUpdate.wallet.currencyId, refreshDay, true),
+      futureNetWorth = _walletHttp.fetchWalletsWorth(txnUpdate.date, true),
     ]).then((_) {
       // got the updated wallets
-      _futureWallets.then((wallets) {
+      futureWallets.then((wallets) {
         Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
       });
 
       // got the new budgets
-      _futureBudgets.then((budgets) {
+      futureBudgets.then((budgets) {
         // now we can set the shared preferences of budget
-        BudgetSharedPreferences.setBudget(txnUpdate.wallet.currencyId, _refreshDay, budgets);
+        BudgetSharedPreferences.setBudget(txnUpdate.wallet.currencyId, refreshDay, budgets);
         Provider.of<HomeProvider>(context, listen: false).setBudgetList(budgets);
       }).then((_) {
         // lastly check whether the date being used on the transaction
         // is more or lesser than the max and min date?
-        DateTime _minDate = TransactionSharedPreferences.getTransactionMinDate();
-        DateTime _maxDate = TransactionSharedPreferences.getTransactionMaxDate();
+        DateTime minDate = TransactionSharedPreferences.getTransactionMinDate();
+        DateTime maxDate = TransactionSharedPreferences.getTransactionMaxDate();
 
-        if(_minDate.isAfter(txnUpdate.date)) {
+        if(minDate.isAfter(txnUpdate.date)) {
           // set txnAdd as current minDate, as minDate is bigger than current
           // transaction data date.
           TransactionSharedPreferences.setTransactionMinDate(txnUpdate.date);
         }
-        else if(_maxDate.isBefore(txnUpdate.date)) {
+        else if(maxDate.isBefore(txnUpdate.date)) {
           // set txnAdd as current maxDate, as maxDate is lesser than current
           // transacion data date.
           TransactionSharedPreferences.setTransactionMaxDate(txnUpdate.date);
         }
       });
 
-      _futureNetWorth.then((worth) {
-        String _dateTo = DateFormat("yyyy-MM-dd").format(DateTime(txnUpdate.date.toLocal().year, txnUpdate.date.toLocal().month+1, 1).subtract(Duration(days: 1)));
-        WalletSharedPreferences.setWalletWorth(_dateTo, worth);
+      futureNetWorth.then((worth) {
+        String dateTo = DateFormat("yyyy-MM-dd").format(DateTime(txnUpdate.date.toLocal().year, txnUpdate.date.toLocal().month+1, 1).subtract(const Duration(days: 1)));
+        WalletSharedPreferences.setWalletWorth(dateTo, worth);
         Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth);
       });
     }).onError((error, stackTrace) {
       debugPrint("Error on <updateInformation>");
-      throw new Exception(error.toString());
+      throw Exception(error.toString());
     });
   }
 }

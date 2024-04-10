@@ -12,7 +12,7 @@ class Calculator extends StatelessWidget {
   final Function(bool) onOpen;
   final double? height;
 
-  const Calculator({ Key? key, required this.onChange, required this.onFinished, required this.onClose, required this.isOpen, required this.onOpen, required this.text, required this.fontSize, this.height }) : super(key: key);
+  const Calculator({ super.key, required this.onChange, required this.onFinished, required this.onClose, required this.isOpen, required this.onOpen, required this.text, required this.fontSize, this.height });
 
   @override
   Widget build(BuildContext context) {
@@ -31,31 +31,29 @@ class Calculator extends StatelessWidget {
           onOpen(false);
         }
       }),
-      child: Container(
-        child: Text(
-          text,
-          style: TextStyle(
-            color: (text.length <= 0 ? textColor.withOpacity(0.7) : textColor),
-            fontWeight: FontWeight.bold,
-            fontSize: fontSize,
-          ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: (text.isEmpty ? textColor.withOpacity(0.7) : textColor),
+          fontWeight: FontWeight.bold,
+          fontSize: fontSize,
         ),
       ),
     );
   }
 
   Widget _numPad() {
-    double _height = (height ?? 50);
+    double currentHeight = (height ?? 50);
 
     return Container(
-      height: (5 * _height) + 25, // 5 column + 25 of padding to ensure that we will have extra space on phone without touch
+      height: (5 * currentHeight) + 25, // 5 column + 25 of padding to ensure that we will have extra space on phone without touch
       color: secondaryDark,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Container(
-            height: _height,
+          SizedBox(
+            height: currentHeight,
             child: Row(
               children: <Widget>[
                 Expanded(
@@ -89,8 +87,8 @@ class Calculator extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            height: (_height * 2),
+          SizedBox(
+            height: (currentHeight * 2),
             child: Row(
               children: <Widget>[
                 Expanded(
@@ -140,20 +138,20 @@ class Calculator extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 1,
-                  child: Container(
-                    height: (_height * 2),
+                  child: SizedBox(
+                    height: (currentHeight * 2),
                     child: _num(
                       child: _text("+"),
                       value: "+",
-                      height: (_height * 2),
+                      height: (currentHeight * 2),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          Container(
-            height: (_height * 2),
+          SizedBox(
+            height: (currentHeight * 2),
             child: Row(
               children: <Widget>[
                 Expanded(
@@ -203,19 +201,19 @@ class Calculator extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 1,
-                  child: Container(
-                    height: (_height * 2),
+                  child: SizedBox(
+                    height: (currentHeight * 2),
                     child: _num(
                       child: _icon(Ionicons.checkmark),
                       value: "v",
-                      height: (_height * 2),
+                      height: (currentHeight * 2),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 25,),
+          const SizedBox(height: 25,),
         ],
       ),
     );
@@ -224,7 +222,7 @@ class Calculator extends StatelessWidget {
   Widget _text(String text) {
     return Text(
       text,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 25,
         fontWeight: FontWeight.bold,
       ),
@@ -240,7 +238,7 @@ class Calculator extends StatelessWidget {
   }
 
   Widget _num({required Widget child, required String value, double? height}) {
-    double _h = (height ?? 50);
+    double h = (height ?? 50);
     return TextFieldTapRegion(
       child: InkWell(
         onTap: (() {
@@ -254,8 +252,8 @@ class Calculator extends StatelessWidget {
         }),
         child: Container(
           width: double.infinity,
-          height: _h,
-          decoration: BoxDecoration(
+          height: h,
+          decoration: const BoxDecoration(
             color: secondaryDark,
             border: Border(
               left: BorderSide(color: primaryLight, width: 0.5),

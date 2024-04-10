@@ -31,9 +31,9 @@ class UsersMeModel {
     'email': email,
     'confirmed': confirmed,
     'blocked': blocked,
-    'defaultCategoryExpense': (defaultCategoryExpense ?? null),
-    'defaultCategoryIncome': (defaultCategoryIncome ?? null),
-    'defaultBudgetCurrency': (defaultBudgetCurrency ?? null),
-    'defaultWallet': (defaultWallet ?? null)
+    'defaultCategoryExpense': (defaultCategoryExpense),
+    'defaultCategoryIncome': (defaultCategoryIncome),
+    'defaultBudgetCurrency': (defaultBudgetCurrency),
+    'defaultWallet': (defaultWallet)
   };
 }

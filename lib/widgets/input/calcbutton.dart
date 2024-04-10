@@ -9,17 +9,17 @@ class CalcButton extends StatelessWidget {
   final Widget child;
   final VoidCallback onTap;
 
-  const CalcButton({ Key? key, this.flex, this.color, this.borderColor, this.borderWidth, required this.child, required this.onTap }) : super(key: key);
+  const CalcButton({ super.key, this.flex, this.color, this.borderColor, this.borderWidth, required this.child, required this.onTap });
 
   @override
   Widget build(BuildContext context) {
-    int _flex = (flex ?? 1);
-    Color _color = (color ?? secondaryDark);
-    Color _borderColor = (borderColor ?? secondaryLight);
-    double _borderWidth = (borderWidth ?? 1.0);
+    int flexNum = (flex ?? 1);
+    Color currentColor = (color ?? secondaryDark);
+    Color currrentBorderColor = (borderColor ?? secondaryLight);
+    double currentBorderWidth = (borderWidth ?? 1.0);
 
     return Expanded(
-      flex: _flex,
+      flex: flexNum,
       child: TextFieldTapRegion(
         child: InkWell(
           onTap: (() {
@@ -28,8 +28,8 @@ class CalcButton extends StatelessWidget {
           child: Container(
             height: 60,
             decoration: BoxDecoration(
-              color: _color,
-              border: Border.all(color: _borderColor, width: _borderWidth),
+              color: currentColor,
+              border: Border.all(color: currrentBorderColor, width: currentBorderWidth),
             ),
             child: child,
           ),

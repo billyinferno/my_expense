@@ -15,29 +15,29 @@ class Globals {
       //accentColor: accentColors[0],
       iconTheme: const IconThemeData().copyWith(color: textColor),
       // fontFamily: 'Roboto',
-      textTheme: TextTheme(
-        displayMedium: const TextStyle(
+      textTheme: const TextTheme(
+        displayMedium: TextStyle(
           color: textColor,
           fontSize: 32.0,
           fontWeight: FontWeight.bold,
         ),
-        headlineMedium: const TextStyle(
+        headlineMedium: TextStyle(
           color: textColor2,
           fontSize: 12.0,
           fontWeight: FontWeight.w500,
           letterSpacing: 2.0,
         ),
-        bodyLarge: const TextStyle(
+        bodyLarge: TextStyle(
           color: textColor,
           fontSize: 14.0,
           fontWeight: FontWeight.w600,
           letterSpacing: 1.0,
         ),
-        bodyMedium: const TextStyle(
+        bodyMedium: TextStyle(
           color: textColor,
           letterSpacing: 1.0,
         ),
-      ), colorScheme: ColorScheme(
+      ), colorScheme: const ColorScheme(
         brightness: Brightness.dark,
         error: Colors.red,
         onError: textColor,
