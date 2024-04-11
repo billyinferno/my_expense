@@ -1,111 +1,66 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:my_expense/model/login_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/utils/globals.dart';
+import 'package:my_expense/utils/net/netutils.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 
 class UserHTTPService {
-  //late LoginModel _loginModel;
-  late String _bearerToken;
-
-  UserHTTPService() {
-    //_loginModel = UserSharedPreferences.getUserLogin();
-    _bearerToken = UserSharedPreferences.getJWT();
-  }
-
-  void refreshJWTToken() {
-    _bearerToken = UserSharedPreferences.getJWT();
-  }
-
   Future<UsersMeModel> fetchMe() async {
-    _checkJWT();
-    //print("<fetchMe>" + _bearerToken);
+    // get user information from API
+    final String result = await NetUtils.get(
+      url: '${Globals.apiURL}users/me',
+    ).onError((error, stackTrace) {
+      throw Exception(error);
+    });
 
-    // check if we got JWT token or not?
-    if (_bearerToken.isNotEmpty) {
-      final response =
-          await http.get(Uri.parse('${Globals.apiURL}users/me'), headers: {
-        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
-      });
-
-      if (response.statusCode == 200) {
-        UsersMeModel userModel =
-            UsersMeModel.fromJson(jsonDecode(response.body));
-        await UserSharedPreferences.setUserMe(userModel);
-        return userModel;
-      }
-
-      throw Exception("res=${response.body}");
-    } else {
-      throw Exception(
-          'res={"statusCode":403,"error":"Unauthorized","message":"Empty token when fetch user data"}');
-    }
+    // fetch the user information once we got it from API
+    UsersMeModel userModel = UsersMeModel.fromJson(jsonDecode(result));
+    await UserSharedPreferences.setUserMe(userModel);
+    return userModel;
   }
 
   Future<LoginModel> login(String identifier, String password) async {
-    final response = await http.post(
-      Uri.parse('${Globals.apiURL}auth/local'),
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({'identifier': identifier, 'password': password}),
-    );
+    // create the body request for login
+    var body = {'identifier': identifier, 'password': password};
 
-    if (response.statusCode == 200) {
-      // parse the login data and get the login model
-      LoginModel loginModel = LoginModel.fromJson(jsonDecode(response.body));
+    // send the login post to API
+    final String result = await NetUtils.post(
+      url: '${Globals.apiURL}auth/local',
+      body: body,
+      requiredJWT: false,
+    ).onError((error, stackTrace) {
+      throw Exception(error);
+    });
 
-      return loginModel;
-    }
-
-    throw Exception("res=${response.body}");
+    // parse the login data and get the login model
+    LoginModel loginModel = LoginModel.fromJson(jsonDecode(result));
+    return loginModel;
   }
 
   Future<void> updatePassword(
       String userName, String oldPassword, String newPassword) async {
-    _checkJWT();
+    // prepare the data request for update password
+    var body = {
+      "username": userName,
+      "password": oldPassword,
+      "newPassword": newPassword,
+      "confirmPassword": newPassword
+    };
 
-    // check if we got JWT token or not?
-    if (_bearerToken.isNotEmpty) {
-      //await Future.delayed(Duration(seconds: 3));
+    // send the login post to API
+    final String result = await NetUtils.post(
+      url: '${Globals.apiURL}password',
+      body: body,
+    ).onError((error, stackTrace) {
+      throw Exception(error);
+    });
 
-      var data = {
-        "username": userName,
-        "password": oldPassword,
-        "newPassword": newPassword,
-        "confirmPassword": newPassword
-      };
+    // this will response back our JWT token
+    LoginModel loginModel = LoginModel.fromJson(jsonDecode(result));
 
-      final response = await http.post(Uri.parse('${Globals.apiURL}password'),
-          headers: {
-            HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(data));
-
-      // check the response from the password update
-      if (response.statusCode == 200) {
-        // this will response back our JWT token
-        LoginModel loginModel = LoginModel.fromJson(jsonDecode(response.body));
-
-        // replace the login model on shared preferences
-        await UserSharedPreferences.setUserLogin(loginModel);
-      } else {
-        throw Exception("res=${response.body}");
-      }
-
-      /*print("Got error <fetchMe>");
-      throw Exception("res=" + response.body);*/
-    } else {
-      throw Exception(
-          'res={"statusCode":403,"error":"Unauthorized","message":"Empty token when changing user password"}');
-    }
-  }
-
-  void _checkJWT() {
-    _bearerToken = UserSharedPreferences.getJWT();
+    // replace the login model on shared preferences
+    await UserSharedPreferences.setUserLogin(loginModel);
   }
 }

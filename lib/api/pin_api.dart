@@ -1,24 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:http/http.dart' as http;
 import 'package:my_expense/model/pin_model.dart';
 import 'package:my_expense/utils/globals.dart';
+import 'package:my_expense/utils/net/netutils.dart';
 import 'package:my_expense/utils/prefs/shared_pin.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
 
 class PinHTTPService {
-  //late LoginModel _loginModel;
-  late String _bearerToken;
-
-  PinHTTPService() {
-    //_loginModel = UserSharedPreferences.getUserLogin();
-    _bearerToken = UserSharedPreferences.getJWT();
-  }
-
-  void refreshJWTToken() {
-    _bearerToken = UserSharedPreferences.getJWT();
-  }
-
   Future<PinModel> getPin([bool? force]) async {
     bool isForce = (force ?? false);
 
@@ -31,104 +17,64 @@ class PinHTTPService {
       }
     }
 
-    // if not null then we will try to get the data from the backend.
-    // in case user not set the pin, it will be filled with both null.
-    _checkJWT();
-    final response = await http.get(
-      Uri.parse('${Globals.apiURL}pins'),
-      headers: {
-        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+    // send the request to get the PIN to API
+    final String result = await NetUtils.get(
+      url: '${Globals.apiURL}pins',
+    ).onError((error, stackTrace) {
+      throw Exception(error);
+    });
 
-    // print("AAA " + response.body);
-    if (response.statusCode == 200) {
-      // parse the login data and get the login model
-      PinModel pin = PinModel.fromJson(jsonDecode(response.body));
-      // print("BBB " + _pin.hashKey!);
-      // print("CCC " + _pin.hashPin!);
-      // stored pin on the shared preferences
-      PinSharedPreferences.setPin(pin);
-      return pin;
-    }
-
-    throw Exception("res=${response.body}");
+    // parse the login data and get the login model
+    PinModel pin = PinModel.fromJson(jsonDecode(result));
+    
+    // stored pin on the shared preferences
+    PinSharedPreferences.setPin(pin);
+    return pin;
   }
 
   Future<PinModel> setPin(String pinNumber) async {
-    // if not null then we will try to get the data from the backend.
-    // in case user not set the pin, it will be filled with both null.
-    _checkJWT();
-    final response = await http.post(
-      Uri.parse('${Globals.apiURL}pins'),
-      headers: {
-        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({"pin": pinNumber})
-    );
+    // send the request to set the PIN to API
+    final String result = await NetUtils.post(
+      url: '${Globals.apiURL}pins',
+      body: {"pin": pinNumber}
+    ).onError((error, stackTrace) {
+      throw Exception(error);
+    });
 
-    if (response.statusCode == 200) {
-      // parse the login data and get the login model
-      PinModel pin = PinModel.fromJson(jsonDecode(response.body));
-      // stored pin on the shared preferences
-      PinSharedPreferences.setPin(pin);
-      return pin;
-    }
-
-    throw Exception("res=${response.body}");
+    // parse the login data and get the login model
+    PinModel pin = PinModel.fromJson(jsonDecode(result));
+    // stored pin on the shared preferences
+    PinSharedPreferences.setPin(pin);
+    return pin;
   }
 
   Future<PinModel> updatePin(String pinNumber) async {
-    // if not null then we will try to get the data from the backend.
-    // in case user not set the pin, it will be filled with both null.
-    _checkJWT();
-    final response = await http.put(
-      Uri.parse('${Globals.apiURL}pins'),
-      headers: {
-        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode({"pin": pinNumber})
-    );
+    // send the request to update the PIN to API
+    final String result = await NetUtils.put(
+      url: '${Globals.apiURL}pins',
+      body: {"pin": pinNumber}
+    ).onError((error, stackTrace) {
+      throw Exception(error);
+    });
 
-    if (response.statusCode == 200) {
-      // parse the login data and get the login model
-      PinModel pin = PinModel.fromJson(jsonDecode(response.body));
-      // stored pin on the shared preferences
-      PinSharedPreferences.setPin(pin);
-      return pin;
-    }
+    // parse the login data and get the login model
+    PinModel pin = PinModel.fromJson(jsonDecode(result));
 
-    throw Exception("res=${response.body}");
+    // stored pin on the shared preferences
+    PinSharedPreferences.setPin(pin);
+    return pin;
   }
 
   Future<void> deletePin() async {
-    // if not null then we will try to get the data from the backend.
-    // in case user not set the pin, it will be filled with both null.
-    _checkJWT();
-    final response = await http.delete(
-      Uri.parse('${Globals.apiURL}pins'),
-      headers: {
-        HttpHeaders.authorizationHeader: "Bearer $_bearerToken",
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
+    // send the request to delete the PIN to API
+    await NetUtils.delete(
+      url: '${Globals.apiURL}pins',
+    ).onError((error, stackTrace) {
+      throw Exception(error);
+    });
 
-    if (response.statusCode == 200) {
-      // set the pin as NULL
-      PinModel pin = PinModel(hashKey: null, hashPin: null);
-      PinSharedPreferences.setPin(pin);
-      return;
-    }
-
-    throw Exception("res=${response.body}");
-  }
-
-  void _checkJWT() {
-    if (_bearerToken.isEmpty) {
-      _bearerToken = UserSharedPreferences.getJWT();
-    }
+    // set the pin as NULL
+    PinModel pin = PinModel(hashKey: null, hashPin: null);
+    PinSharedPreferences.setPin(pin);
   }
 }

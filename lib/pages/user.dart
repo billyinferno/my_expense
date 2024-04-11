@@ -23,6 +23,7 @@ import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
+import 'package:my_expense/utils/net/netutils.dart';
 import 'package:my_expense/utils/prefs/shared_box.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
@@ -610,8 +611,11 @@ class _UserPageState extends State<UserPage> {
 
   Future<void> logout() async {
     Future.wait([
+      // clear the box
       MyBox.clear(),
     ]).then((_) {
+      // clear the JWT token
+      NetUtils.clearJWT();
       // clear provider
       Provider.of<HomeProvider>(context, listen: false).clearProvider();
       // navigate to the login screen

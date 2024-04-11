@@ -15,6 +15,7 @@ import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/misc/error_parser.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
+import 'package:my_expense/utils/net/netutils.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 
 class LoginPage extends StatefulWidget {
@@ -369,27 +370,39 @@ class _LoginPageState extends State<LoginPage> {
 
     // check if we got connection or not?
     if (_isConnect) {
-      debugPrint("🔑 Checking User Login");
-      // check if user already login or not?
-      await _userHTTP.fetchMe().then((user) async {
-        debugPrint("👨🏻 User ${user.username} already login");
-      }).onError((error, stackTrace) {
-        // set loading into false, it will rebuild the widget, which
-        // by right should show the login screen.
-        _setLoading(false);
+      debugPrint("🔐 Get beearerToken");
+      _bearerToken = UserSharedPreferences.getJWT();
 
-        // check whether this is due to JWT token is expired or not?
-        _bearerToken = UserSharedPreferences.getJWT();
-        if (_bearerToken.isNotEmpty) {
-          _isTokenExpired = true;
-          debugPrint("👨🏻 User token is expired");
-          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "User token expired, please re-login"));
-        }
-        else {
-          debugPrint("👨🏻 User not yet login");
-        }
+      // if not empty, then we can try to fecth user information
+      if (_bearerToken.isNotEmpty) {
+        debugPrint("🔑 Checking User Login");
+        // get user information
+        await _userHTTP.fetchMe().then((user) async {
+          // able to fetch information, user already login
+          debugPrint("👨🏻 User ${user.username} already login");
+        }).onError((error, stackTrace) {
+          // set loading into false, it will rebuild the widget, which
+          // by right should show the login screen.
+          _setLoading(false);
+
+          // check whether this is due to JWT token is expired or not?
+          if (_bearerToken.isNotEmpty) {
+            _isTokenExpired = true;
+            debugPrint("👨🏻 User token is expired");
+            ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "User token expired, please re-login"));
+          }
+          else {
+            debugPrint("👨🏻 User not yet login");
+          }
+          res = false;
+        });
+      }
+      else {
+        // no bearer token
         res = false;
-      });
+        _setLoading(false);
+        debugPrint("🔐 No bearer token");
+      }
     }
     else {
       // set loading into false.
@@ -439,16 +452,13 @@ class _LoginPageState extends State<LoginPage> {
     // ensure we finished storing the credentials before we actually get the
     // additional information and navigate to home
     await UserSharedPreferences.setUserLogin(loginModel).then((value) async {
-      // when user is login, check whether this is due to token expired or not?
-      // if due to token expired, then we will need to refresh the JWT token that
-      // being used by each API call that we have before we call _getAdditionalInfo
-      if (_isTokenExpired) {
-        _userHTTP.refreshJWTToken();
-        _categoryHTTP.refreshJWTToken();
-        _walletHTTP.refreshJWTToken();
-        _transactionHTTP.refreshJWTToken();
-        _pinHTTP.refreshJWTToken();
+      // refresh JWT token with the latest JWT token that we just get after
+      // login.
+      NetUtils.refreshJWT();
 
+      // as user already login again, we can reset back the isTokenExpired back
+      // into false.
+      if (_isTokenExpired) {
         // set back the token expired as false
         _isTokenExpired = false;
       }

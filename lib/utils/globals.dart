@@ -4,6 +4,7 @@ import 'package:my_expense/themes/colors.dart';
 
 class Globals {
   static String apiURL = (dotenv.env['API_URL'] ?? 'http://192.168.1.176:1337/');
+  static int apiTimeOut = 10;
   static String appVersion = (dotenv.env['APP_VERSION'] ?? '0.0.1');
   static String flutterVersion = (dotenv.env['FLUTTER_VERSION'] ?? 'beta');
   static ThemeData themeData = ThemeData(
