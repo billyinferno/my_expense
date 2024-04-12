@@ -21,7 +21,13 @@ class HomeProvider extends ChangeNotifier {
   }
 
   popTransactionList(TransactionListModel txnData) {
-    transactionList.remove(txnData);
+    // loop transaction list until find the same id
+    for(int i=0; i<transactionList.length; i++) {
+      if (transactionList[i].id == txnData.id) {
+        transactionList.removeAt(i);
+        break;
+      }
+    }
     notifyListeners();
   }
 
