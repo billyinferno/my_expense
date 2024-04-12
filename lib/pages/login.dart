@@ -370,7 +370,7 @@ class _LoginPageState extends State<LoginPage> {
 
     // check if we got connection or not?
     if (_isConnect) {
-      debugPrint("🔐 Get beearerToken");
+      debugPrint("🔐 Get Bearer Token");
       _bearerToken = UserSharedPreferences.getJWT();
 
       // if not empty, then we can try to fecth user information
