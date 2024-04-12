@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/api/budget_api.dart';
 import 'package:my_expense/api/transaction_api.dart';
+import 'package:my_expense/api/wallet_api.dart';
+import 'package:my_expense/model/budget_model.dart';
+import 'package:my_expense/model/income_expense_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/model/transaction_wallet_minmax_date_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
+import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/function/date_utils.dart';
+import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
+import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/misc/wallet_transaction_class_helper.dart';
+import 'package:my_expense/utils/prefs/shared_budget.dart';
+import 'package:my_expense/utils/prefs/shared_transaction.dart';
+import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/item/card_face_item.dart';
 import 'package:my_expense/widgets/item/item_list.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:provider/provider.dart';
 
 class WalletTransactionPage extends StatefulWidget {
   final Object? wallet;
@@ -24,10 +36,17 @@ class WalletTransactionPage extends StatefulWidget {
 class _WalletTransactionPageState extends State<WalletTransactionPage> {
   final fCCY = NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
+  final WalletHTTPService _walletHTTP = WalletHTTPService();
+  final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
+
   final DateFormat _dtDayMonthYear = DateFormat("dd MMM yyyy");
   final DateFormat _dtyyyyMMdd = DateFormat("yyyy-MM-dd");
   final DateFormat _dtMMMMyyyy = DateFormat("MMMM yyyy");
 
+  late Future<List<BudgetModel>> _futureBudgets;
+  late Future<List<WalletModel>> _futureWallets;
+  late Future<IncomeExpenseModel> _futureIncomeExpense;
+  
   late ScrollController _scrollController;
   late WalletModel _wallet;
   late TransactionWalletMinMaxDateModel _walletMinMaxDate;
@@ -40,6 +59,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   double _incomeAmount = 0.0;
   bool _sortAscending = true;
   List<TransactionListModel> _transactions = [];
+  List<BudgetModel> _budgets = [];
   late Future<bool> _getData;
 
   @override
@@ -446,72 +466,58 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           // this is item
           TransactionListModel txn = _list[index].data as TransactionListModel;
 
-          return GestureDetector(
-            onTap: () async {
-              await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
-                // check if we got return
-                if (value != null) {
-                  // convert value to the transaction list model
-                  TransactionListModel updateTxn = value as TransactionListModel;
+          return Slidable(
+            endActionPane: ActionPane(
+              motion: const DrawerMotion(),
+              extentRatio: 0.20,
+              children: <SlidableAction>[
+                SlidableAction(
+                  label: 'Delete',
+                  padding: const EdgeInsets.all(0),
+                  foregroundColor: textColor,
+                  backgroundColor: accentColors[2],
+                  icon: Ionicons.trash,
+                  onPressed: ((_) {
+                    late Future<bool?> result = ShowMyDialog(
+                      dialogTitle: "Delete Item",
+                      dialogText: "Do you want to delete ${txn.name}?",
+                      confirmText: "Delete",
+                      confirmColor: accentColors[2],
+                      cancelText: "Cancel"
+                    ).show(context);
 
-                  // check on the _transactions list for this transaction and
-                  // replace or remove it
-                  for(int i=0; i<_transactions.length; i++) {
-                    // check whether this is the same id or not?
-                    if (updateTxn.id == _transactions[i].id) {
-                      // same ID, check if all the information still the same
-                      // or not?
-                      if (updateTxn.wallet.id == _transactions[i].wallet.id) {
-                        // still the same, check if the walletTo is not null
-                        if (updateTxn.walletTo != null && _transactions[i].walletTo != null) {
-                          // both not null, means that we can check if the ID
-                          // for this transaction still the same or not?
-                          if (updateTxn.walletTo!.id == _transactions[i].walletTo!.id) {
-                            // update the _wallet
-                            _updateWalletBalance(false, updateTxn, _transactions[i]);
-                            
-                            // all the same means we can just replace this
-                            // transactions
-                            _transactions[i] = updateTxn;
-                          }
-                          else {
-                            // update the _wallet
-                            _updateWalletBalance(true, updateTxn, _transactions[i]);
-
-                            // it's different, remove this from the transaction
-                            // from the list
-                            _transactions.removeAt(i);
-                          }
-                        }
-                        else {
-                          // update the _wallet
-                          _updateWalletBalance(false, updateTxn, _transactions[i]);
+                    // check the result of the dialog box
+                    result.then((value) async {
+                      if (value == true) {
+                        try {
+                          // first delete the transaction
+                          await _deleteTransaction(txn);
                           
-                          // same wallet, we can update the transaction list
-                          _transactions[i] = updateTxn;
+                          // rebuild widget after finished
+                          await setTransactions(_transactions);
+                        }
+                        catch(error) {
+                          debugPrint("Error: ${error.toString()}");
                         }
                       }
-                      else {
-                        // update the _wallet
-                        _updateWalletBalance(true, updateTxn, _transactions[i]);
-
-                        // the wallet is change, so we can just remove this
-                        // from the transactions list
-                        _transactions.removeAt(i);
-                      }
-
-                      // set i to more than _transactions length, so we will
-                      // exit from this for loop
-                      i = _transactions.length + 1;
-                    }
+                    });
+                  })
+                ),
+              ],
+            ),
+            child: GestureDetector(
+              onTap: () async {
+                await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
+                  // check if we got return
+                  if (value != null) {
+                    // convert value to the transaction list model
+                    TransactionListModel updateTxn = value as TransactionListModel;
+                    await _updateTransactions(updateTxn);
                   }
-
-                  // rebuild the transaction
-                  await setTransactions(_transactions);
-                }
-              });
-            },
-            child: _generateItemList(txn),
+                });
+              },
+              child:  _generateItemList(txn),
+            ),
           );
         }
         else {
@@ -520,6 +526,62 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         }
       },
     );
+  }
+
+  Future<void> _updateTransactions(TransactionListModel updateTxn) async {
+    // check on the _transactions list for this transaction and
+    // replace or remove it
+    for(int i=0; i<_transactions.length; i++) {
+      // check whether this is the same id or not?
+      if (updateTxn.id == _transactions[i].id) {
+        // same ID, check if all the information still the same
+        // or not?
+        if (updateTxn.wallet.id == _transactions[i].wallet.id) {
+          // still the same, check if the walletTo is not null
+          if (updateTxn.walletTo != null && _transactions[i].walletTo != null) {
+            // both not null, means that we can check if the ID
+            // for this transaction still the same or not?
+            if (updateTxn.walletTo!.id == _transactions[i].walletTo!.id) {
+              // update the _wallet
+              _updateWalletBalance(false, updateTxn, _transactions[i]);
+              
+              // all the same means we can just replace this
+              // transactions
+              _transactions[i] = updateTxn;
+            }
+            else {
+              // update the _wallet
+              _updateWalletBalance(true, updateTxn, _transactions[i]);
+
+              // it's different, remove this from the transaction
+              // from the list
+              _transactions.removeAt(i);
+            }
+          }
+          else {
+            // update the _wallet
+            _updateWalletBalance(false, updateTxn, _transactions[i]);
+            
+            // same wallet, we can update the transaction list
+            _transactions[i] = updateTxn;
+          }
+        }
+        else {
+          // update the _wallet
+          _updateWalletBalance(true, updateTxn, _transactions[i]);
+
+          // the wallet is change, so we can just remove this
+          // from the transactions list
+          _transactions.removeAt(i);
+        }
+
+        // exit from this for loop
+        break;
+      }
+    }
+
+    // rebuild the transaction
+    await setTransactions(_transactions);
   }
 
   void _updateWalletBalance(bool isRemove, TransactionListModel updateTxn, TransactionListModel currentTxn) {
@@ -657,5 +719,162 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     ]);
 
     return true;
+  }
+
+  Future<void> _deleteTransaction(TransactionListModel txnDeleted) async {
+    showLoaderDialog(context);
+
+    await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) {
+      // get the current transaction date showed on the home list
+      DateTime currentListTxnDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now());
+
+      // here we will need to remove the transaction from the list
+      for(int i=0; i<_transactions.length; i++) {
+        // check if the id is match
+        if (_transactions[i].id == txnDeleted.id) {
+          // remove the transaction
+          _transactions.removeAt(i);
+          // quit from the loop
+          break;
+        }
+      }
+
+      // once removed then we can add back the amount to the wallet
+      double newChangeBalance = _wallet.changeBalance;
+      if (txnDeleted.type == 'expense') {
+        // add the txn delete amount back to the wallet amount
+        newChangeBalance += txnDeleted.amount;
+      }
+      else if (txnDeleted.type == 'income') {
+        // remove the txn delete amount from the wallet amount
+        newChangeBalance -= txnDeleted.amount;
+      }
+      else {
+        // this is transfer, check if we are sender or receiver?
+        if (txnDeleted.wallet.id == _wallet.id) {
+          // this is sender, it means we will need to credited back the amount
+          // back to the wallet
+          newChangeBalance += txnDeleted.amount;
+        }
+        else {
+          // this is receiver, it means we will need to subtract back the amount
+          // from the wallet
+          newChangeBalance -= txnDeleted.amount;
+        }
+      }
+
+      // recreate the wallet
+      _wallet = WalletModel(
+        _wallet.id,
+        _wallet.name,
+        _wallet.startBalance,
+        newChangeBalance,
+        _wallet.futureAmount,
+        _wallet.useForStats,
+        _wallet.enabled,
+        _wallet.walletType,
+        _wallet.currency,
+        _wallet.userPermissionUsers
+      );
+
+      // check if the same date or not with the transaction date that we just
+      // delete
+      if (isSameDay(currentListTxnDate, txnDeleted.date)) {
+        // pop the transaction from the provider
+        Provider.of<HomeProvider>(context, listen: false).popTransactionList(txnDeleted);
+
+        // get the current transaction on the provider
+        List<TransactionListModel> txnListModel = Provider.of<HomeProvider>(context, listen: false).transactionList;
+
+        // save the current transaction on the provider to the shared preferences
+        String date = DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
+        TransactionSharedPreferences.setTransaction(date, txnListModel);
+      }
+
+      // update information for txn delete
+      _updateInformation(txnDeleted);
+    }).onError((error, stackTrace) {
+      debugPrint("Error when delete");
+      debugPrint(error.toString());
+
+      // since got error we need to pop from the loader
+      Navigator.pop(context);
+
+      // show scaffold showing error
+      ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Error when delete ${txnDeleted.name}"));
+    });
+  }
+
+  Future<void> _updateInformation(TransactionListModel txnInfo) async {
+    String refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
+    DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
+
+    // delete the transaction from wallet transaction
+    await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.wallet.id, refreshDay, txnInfo);
+    if (txnInfo.walletTo != null) {
+      await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.walletTo!.id, refreshDay, txnInfo);
+    }
+
+    // delete the transaction from budget
+    await WalletSharedPreferences.deleteWalletWorth(txnInfo);
+
+    await Future.wait([
+      _futureWallets = _walletHTTP.fetchWallets(true, true),
+      _futureBudgets = _budgetHTTP.fetchBudgetDate(txnInfo.wallet.currencyId, refreshDay),
+      _futureIncomeExpense = _transactionHttp.fetchIncomeExpense(txnInfo.wallet.currencyId, from, to, true),
+    ]).then((_) {
+      // update the wallets
+      _futureWallets.then((wallets) {
+        Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+      });
+
+      // store the budgets list
+      if(txnInfo.type == "expense") {
+        _futureBudgets.then((value) {
+          _budgets = value;
+          // now loops thru budget, and see if the current category fits or not?
+          for (int i = 0; i < _budgets.length; i++) {
+            if (txnInfo.category!.id == _budgets[i].category.id) {
+              // as this is expense, subtract total transaction and the amount
+              BudgetModel newBudget = BudgetModel(
+                  id: _budgets[i].id,
+                  category: _budgets[i].category,
+                  totalTransaction: (_budgets[i].totalTransaction - 1),
+                  amount: _budgets[i].amount,
+                  used: _budgets[i].used - txnInfo.amount,
+                  status: _budgets[i].status,
+                  currency: _budgets[i].currency);
+              _budgets[i] = newBudget;
+              // break from for loop
+              break;
+            }
+          }
+          // now we can set the shared preferences of budget
+          BudgetSharedPreferences.setBudget(txnInfo.wallet.currencyId, refreshDay, _budgets);
+
+          // only set the provider if only the current budget date is the same as the refresh day
+          String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
+          if(currentBudgetDate == refreshDay) {
+            Provider.of<HomeProvider>(context, listen: false).setBudgetList(_budgets);
+          }
+        });
+      }
+
+      if(txnInfo.type == "expense" || txnInfo.type == "income") {
+        _futureIncomeExpense.then((incomeExpense) {
+          Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnInfo.wallet.currencyId, incomeExpense);
+        });
+      }
+
+      // remove the loader
+      Navigator.pop(context);
+    }).onError((error, stackTrace) {
+      // remove the loader
+      Navigator.pop(context);
+
+      debugPrint("Error on update information");
+      throw Exception(error.toString());
+    });
   }
 }
