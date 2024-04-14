@@ -355,7 +355,9 @@ class _WalletAddPageState extends State<WalletAddPage> {
                     border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                   ),
                   child: Row(
-                    children: [
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
                       const Icon(
                         Ionicons.checkbox_outline,
                         size: 20,
@@ -380,7 +382,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                     border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                   ),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       const Icon(
