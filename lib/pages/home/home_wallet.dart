@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/pages/home/home_appbar.dart';
+import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/model/wallet_model.dart';
@@ -28,38 +28,19 @@ class _HomeWalletState extends State<HomeWallet> {
   final walletHttpService = WalletHTTPService();
   bool isLoading = false;
 
-  late ScrollController _scrollControllerWallet;
+  final ScrollController _scrollControllerWallet = ScrollController();
+  late Future<bool> _getData;
 
   @override
   void initState() {
+    _getData = _refreshWallet();
     super.initState();
-    initWallet();
-    _scrollControllerWallet = ScrollController();
   }
 
   @override
   void dispose() {
-    super.dispose();
     _scrollControllerWallet.dispose();
-  }
-
-  void setLoading(bool state) {
-    setState(() {
-      isLoading = state;
-    });
-  }
-
-  Future<void> initWallet() async {
-    setLoading(true);
-    await walletHttpService.fetchWallets(true, true).then((wallets) {
-      if(wallets.isNotEmpty) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
-      }
-      setLoading(false);
-    }).onError((error, stackTrace) {
-      debugPrint("Error when <initWallet>");
-      debugPrint(error.toString());
-    });
+    super.dispose();
   }
 
   @override
@@ -78,62 +59,74 @@ class _HomeWalletState extends State<HomeWallet> {
           Navigator.pushNamed(context, '/wallet/add');
         },
       ),
-      body: generateWalletView(),
+      body: Expanded(
+        child: FutureBuilder(
+          future: _getData,
+          builder: ((context, snapshot) {
+            if (snapshot.hasError) {
+              // got error when fetching the wallet data
+              return const Center(child: Text("Error when loading wallet data"),);
+            }
+            else if (snapshot.hasData) {
+              // generate the main view
+              return _generateWalletView();
+            }
+            else {
+              // still loading
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SpinKitFadingCube(color: accentColors[6],),
+                    const SizedBox(height: 20,),
+                    const Text(
+                      "Loading Wallet",
+                      style: TextStyle(
+                        color: textColor2,
+                        fontSize: 10,
+                      ),
+                    )
+                  ],
+                )
+              );
+            }
+          }),
+        ),
+      ),
     );
   }
 
-  Widget generateWalletView() {
-    // check if we are loading here? if we are still loading then we can just
-    // showed the loading screen
-    if(isLoading) {
-      return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SpinKitFadingCube(color: accentColors[6],),
-              const SizedBox(height: 20,),
-              const Text(
-                "Loading Wallet",
-                style: TextStyle(
-                  color: textColor2,
-                  fontSize: 10,
-                ),
-              )
-            ],
-          )
-      );
-    }
-    else {
-      List<WalletModel> wallets = [];
-      return Consumer<HomeProvider>(
-        builder: (context, homeProvider, child) {
-          wallets = homeProvider.walletList;
-          return (Container(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-            child: RefreshIndicator(
-              color: accentColors[6],
-              onRefresh: () async {
-                await _refreshWallet();
+  Widget _generateWalletView() {
+    // generate the wallet list view
+    List<WalletModel> wallets = [];
+    return Consumer<HomeProvider>(
+      builder: (context, homeProvider, child) {
+        wallets = homeProvider.walletList;
+        return (Container(
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+          child: RefreshIndicator(
+            color: accentColors[6],
+            onRefresh: () async {
+              await _refreshWallet();
+            },
+            child: ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              controller: _scrollControllerWallet,
+              itemCount: wallets.length + 1,
+              itemBuilder: (BuildContext ctx, int index) {
+                if (index < wallets.length) {
+                  WalletModel wallet = wallets[index];
+                  return generateSlidable(wallet);
+                }
+                else {
+                  return const SizedBox(height: 30,);
+                }
               },
-              child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: _scrollControllerWallet,
-                itemCount: wallets.length + 1,
-                itemBuilder: (BuildContext ctx, int index) {
-                  if (index < wallets.length) {
-                    WalletModel wallet = wallets[index];
-                    return generateSlidable(wallet);
-                  }
-                  else {
-                    return const SizedBox(height: 30,);
-                  }
-                },
-              ),
             ),
-          ));
-        },
-      );
-    }
+          ),
+        ));
+      },
+    );
   }
 
   Future<void> _deleteWallet(int id) async {
@@ -156,14 +149,12 @@ class _HomeWalletState extends State<HomeWallet> {
     }).onError((error, stackTrace) {
       debugPrint("Error on <_deleteWallet>");
       debugPrint(error.toString());
+      debugPrintStack(stackTrace: stackTrace);
     });
   }
 
-  Future<void> _refreshWallet() async {
+  Future<bool> _refreshWallet() async {
     Future<List<WalletModel>> futureWallets;
-
-    // set that this is loading, so it will not load the listview builder
-    setLoading(true);
 
     // fetch the new wallet data from API
     await Future.wait([
@@ -174,14 +165,14 @@ class _HomeWalletState extends State<HomeWallet> {
           Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
         }
       });
-
-      setLoading(false);
     }).onError((error, stackTrace) {
       debugPrint("Error when do <_refreshWallet>");
       debugPrint(error.toString());
-
-      setLoading(false);
+      debugPrintStack(stackTrace: stackTrace);
+      throw Exception("Error when get wallet data");
     });
+
+    return true;
   }
 
   Widget generateSlidable(WalletModel wallet) {
@@ -261,8 +252,8 @@ class _HomeWalletState extends State<HomeWallet> {
               // check the result of the dialog box
               result.then((value) {
                 if (value == true) {
-                  // disable the wallet
-                  _enableWallet(wallet);
+                  // enable/disable the wallet
+                  _getData = _enableDisableWallet(wallet);
                 }
               });
             })
@@ -283,9 +274,7 @@ class _HomeWalletState extends State<HomeWallet> {
     );
   }
 
-  Future<void> _enableWallet(WalletModel wallet) async {
-    setLoading(true);
-
+  Future<bool> _enableDisableWallet(WalletModel wallet) async {
     Future <List<WalletModel>> walletList;
     Future <List<CurrencyModel>> walletCurrencyList;
 
@@ -301,16 +290,15 @@ class _HomeWalletState extends State<HomeWallet> {
       walletCurrencyList.then((walletsCurrency) {
         Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
       });
-
-      // set the loading back into false
-      setLoading(false);
     }).onError((error, stackTrace) {
       // got error when we try to enable/disable wallet
       debugPrint("Error <_enableWallet>");
       debugPrint(error.toString());
-
-      setLoading(false);
+      debugPrintStack(stackTrace: stackTrace);
+      throw Exception("Error when enabling the wallet");
     });
+
+    return true;
   }
 
   Future<void> _clearCache() async {

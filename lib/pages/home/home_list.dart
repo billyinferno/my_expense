@@ -11,7 +11,7 @@ import 'package:my_expense/model/income_expense_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/pages/home/home_appbar.dart';
+import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/misc/my_callback.dart';
@@ -39,8 +39,6 @@ class HomeList extends StatefulWidget {
 }
 
 class _HomeListState extends State<HomeList> {
-  bool _isLoading = false;
-
   final DateTime _firstDay = DateTime(2010, 1, 1);
   final DateTime _lastDay = DateTime(DateTime.now().year + 1, 12, 31);
   DateTime _currentFocusedDay = DateTime.now();
@@ -58,33 +56,31 @@ class _HomeListState extends State<HomeList> {
   late Future<List<BudgetModel>> _futureBudgets;
   late Future<List<WalletModel>> _futureWallets;
   late Future<IncomeExpenseModel> _futureIncomeExpense;
-  late ScrollController _scrollController;
+  final ScrollController _scrollController = ScrollController();
 
   List<TransactionListModel> _transactionData = [];
   List<BudgetModel> _budgets = [];
   late UsersMeModel _userMe;
+  late Future<bool> _getData;
 
   final fCCY = NumberFormat("#,##0.00", "en_US");
 
   @override
   void initState() {
-    super.initState();
-
     _userMe = UserSharedPreferences.getUserMe();
     
-    setState(() {
-      _appTitleMonth = DateFormat('MMMM').format(_currentFocusedDay.toLocal());
-      _appTitleYear = DateFormat('yyyy').format(_currentFocusedDay.toLocal());
-    });
+    _appTitleMonth = DateFormat('MMMM').format(_currentFocusedDay.toLocal());
+    _appTitleYear = DateFormat('yyyy').format(_currentFocusedDay.toLocal());
 
-    getInitialTransactionList();
-    _scrollController = ScrollController();
+    _getData = _refreshTransaction(_currentFocusedDay, true);
+    
+    super.initState();
   }
 
   @override
   void dispose() {
-    super.dispose();
     _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -100,7 +96,7 @@ class _HomeListState extends State<HomeList> {
             onDoubleTap: (() {
               // go to the current date
               setFocusedDay(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
-              _refreshTransaction(_currentFocusedDay);
+              _getData = _refreshTransaction(_currentFocusedDay);
             }),
             child: Container(
               color: Colors.transparent,
@@ -146,7 +142,7 @@ class _HomeListState extends State<HomeList> {
                 calendarFormat: _currentCalendarFormat,
                 onPageChanged: (focusedDay) {
                   setFocusedDay(focusedDay);
-                  _refreshTransaction(focusedDay);
+                  _getData = _refreshTransaction(focusedDay);
                 },
                 selectedDayPredicate: (day) {
                   return isSameDay(day, _currentFocusedDay);
@@ -154,7 +150,7 @@ class _HomeListState extends State<HomeList> {
                 onDaySelected: (selectedDay, focusedDay) {
                   if (!(isSameDay(selectedDay, _currentFocusedDay))) {
                     setFocusedDay(selectedDay);
-                    _refreshTransaction(selectedDay);
+                    _getData = _refreshTransaction(selectedDay);
                   }
                 },
                 headerVisible: false,
@@ -243,26 +239,45 @@ class _HomeListState extends State<HomeList> {
             ),
           ),
           Expanded(
-            child: generateView(),
+            child: FutureBuilder(
+              future: _getData,
+              builder: ((context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(child: Text("Error when get transaction list"),);
+                }
+                else if (snapshot.hasData) {
+                  return _generateView();
+                }
+                else {
+                  // show loading
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SpinKitFadingCube(
+                        color: accentColors[6],
+                        size: 25,
+                      ),
+                      const SizedBox(height: 10,),
+                      const Text(
+                        "loading...",
+                        style: TextStyle(
+                          color: textColor2,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              }),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void getInitialTransactionList() async {
-    Future.wait([
-      _refreshTransaction(_currentFocusedDay, true),
-    ]).then((_) {
-      debugPrint("💯 Initialized Home List Finished");
-    }).onError((error, stackTrace) {
-      debugPrint("Error when perform <fetchTransaction>");
-      debugPrint(error.toString());
-    });
-  }
-
   Future<void> _showCalendarPicker() async {
-    Future<DateTime?> date = showDatePicker(
+    await showDatePicker(
       context: context,
       initialDate: _currentFocusedDay,
       firstDate: _firstDay,
@@ -292,82 +307,60 @@ class _HomeListState extends State<HomeList> {
           child: child!,
         );
       }),
-    );
-
-    date.then((newDate) {
+    ).then((newDate) {
       if(newDate != null) {
         setFocusedDay(DateTime(newDate.toLocal().year, newDate.toLocal().month, newDate.toLocal().day));
-        _refreshTransaction(_currentFocusedDay);
+        _getData = _refreshTransaction(_currentFocusedDay);
       }
     });
   }
 
-  Widget generateView() {
-    if (_isLoading) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SpinKitFadingCube(
-            color: accentColors[6],
-            size: 25,
-          ),
-          const SizedBox(height: 10,),
-          const Text(
-            "loading...",
-            style: TextStyle(
-              color: textColor2,
-              fontSize: 10,
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Consumer<HomeProvider>(
-        builder: (context, homeProvider, child) {
-          _transactionData = homeProvider.transactionList;
-          return GestureDetector(
-            onHorizontalDragEnd: ((DragEndDetails details) {
-              double velocity = (details.primaryVelocity ?? 0);
-              if(velocity != 0) {
-                if(velocity > 0) {
-                  // go to the previous day
-                  setFocusedDay(_currentFocusedDay.subtract(const Duration(days: 1)));
-                  _refreshTransaction(_currentFocusedDay);
-                }
-                else if(velocity < 0) {
-                  // go to the next day
-                  setFocusedDay(_currentFocusedDay.add(const Duration(days: 1)));
-                  _refreshTransaction(_currentFocusedDay);
-                }
+  Widget _generateView() {
+    return Consumer<HomeProvider>(
+      builder: (context, homeProvider, child) {
+        _transactionData = homeProvider.transactionList;
+        return GestureDetector(
+          onHorizontalDragEnd: ((DragEndDetails details) {
+            double velocity = (details.primaryVelocity ?? 0);
+            if(velocity != 0) {
+              if(velocity > 0) {
+                // go to the previous day
+                setFocusedDay(_currentFocusedDay.subtract(const Duration(days: 1)));
+                _getData = _refreshTransaction(_currentFocusedDay);
               }
-            }),
-            child: (Container(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-              child: RefreshIndicator(
-                color: accentColors[6],
-                onRefresh: () async {
-                  await _refreshTransaction(_currentFocusedDay, true);
+              else if(velocity < 0) {
+                // go to the next day
+                setFocusedDay(_currentFocusedDay.add(const Duration(days: 1)));
+                _getData = _refreshTransaction(_currentFocusedDay);
+              }
+            }
+          }),
+          child: (Container(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+            child: RefreshIndicator(
+              color: accentColors[6],
+              onRefresh: () async {
+                _getData = _refreshTransaction(_currentFocusedDay, true);
+              },
+              child: ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: _scrollController,
+                itemCount: _transactionData.length + 1,
+                itemBuilder: (BuildContext ctx, int index) {
+                  if (index < _transactionData.length) {
+                    TransactionListModel txn = _transactionData[index];
+                    return generateListItem(index, txn, context);
+                  }
+                  else {
+                    return const SizedBox(height: 30,);
+                  }
                 },
-                child: ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  controller: _scrollController,
-                  itemCount: _transactionData.length + 1,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    if (index < _transactionData.length) {
-                      TransactionListModel txn = _transactionData[index];
-                      return generateListItem(index, txn, context);
-                    }
-                    else {
-                      return const SizedBox(height: 30,);
-                    }
-                  },
-                ),
               ),
-            )),
-          );
-        },
-      );
-    }
+            ),
+          )),
+        );
+      },
+    );
   }
 
   void setFocusedDay(DateTime focusedDay) {
@@ -394,22 +387,20 @@ class _HomeListState extends State<HomeList> {
             backgroundColor: accentColors[2],
             icon: Ionicons.trash,
             onPressed: ((_) {
-              if (!_isLoading) {
-                late Future<bool?> result = ShowMyDialog(
-                        dialogTitle: "Delete Item",
-                        dialogText: "Do you want to delete ${txn.name}?",
-                        confirmText: "Delete",
-                        confirmColor: accentColors[2],
-                        cancelText: "Cancel")
-                    .show(context);
+              late Future<bool?> result = ShowMyDialog(
+                      dialogTitle: "Delete Item",
+                      dialogText: "Do you want to delete ${txn.name}?",
+                      confirmText: "Delete",
+                      confirmColor: accentColors[2],
+                      cancelText: "Cancel")
+                  .show(context);
 
-                // check the result of the dialog box
-                result.then((value) {
-                  if (value == true) {
-                    _deleteTransaction(txn);
-                  }
-                });
-              }
+              // check the result of the dialog box
+              result.then((value) async {
+                if (value == true) {
+                  await _deleteTransaction(txn);
+                }
+              });
             })
           ),
         ],
@@ -465,17 +456,8 @@ class _HomeListState extends State<HomeList> {
     }
   }
 
-  void setLoading(bool loading) {
-    setState(() {
-      _isLoading = loading;
-    });
-  }
-
-  Future<void> _refreshTransaction(DateTime refreshDay, [bool? force]) async {
+  Future<bool> _refreshTransaction(DateTime refreshDay, [bool? force]) async {
     bool isForce = (force ?? false);
-
-    // fetch the new wallet data from API
-    setLoading(true);
 
     // store current transaction list date on shared preferences.
     // we can use this date when we perform edit, and if the date is not the same
@@ -488,13 +470,13 @@ class _HomeListState extends State<HomeList> {
       if(isSameDay(_currentFocusedDay, refreshDay)) {
         Provider.of<HomeProvider>(context, listen: false).setTransactionList(value);
       }
-      setLoading(false);
     }).onError((error, stackTrace) {
-      setLoading(false);
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
       throw Exception("Error when refresh transaction");
     });
+
+    return true;
   }
 
   Future<void> _deleteTransaction(TransactionListModel txnDeleted) async {

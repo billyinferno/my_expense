@@ -9,7 +9,7 @@ import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/budget_model.dart';
 import 'package:my_expense/model/currency_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
-import 'package:my_expense/pages/home/home_appbar.dart';
+import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
@@ -39,39 +39,18 @@ class _HomeBudgetState extends State<HomeBudget> {
   List<CurrencyModel> _currencies = []; // default to blank
   CurrencyModel? _currentCurrencies;
   late UsersMeModel _userMe;
-  late ScrollController _scrollControllerCurrencies;
-  late ScrollController _scrollControllerBudgetList;
+  final ScrollController _scrollControllerCurrencies = ScrollController();
+  final ScrollController _scrollControllerBudgetList = ScrollController();
 
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
 
-  bool _isFinished = false;
   bool _showNotInBudget = false;
   List<BudgetModel> _budgetList = [];
+  late Future<bool> _getData;
 
   @override
   void initState() {
-    super.initState();
-    initBudgetPage();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _scrollControllerCurrencies.dispose();
-    _scrollControllerBudgetList.dispose();
-  }
-
-  void setFinished(bool isFinished) {
-    setState(() {
-      _isFinished = isFinished;
-    });
-  }
-
-  Future<void> initBudgetPage() async {
-    _scrollControllerCurrencies = ScrollController();
-    _scrollControllerBudgetList = ScrollController();
-
     // static prefs for each shared preferences is already initialize during
     // the application startup.
     _currencies = WalletSharedPreferences.getWalletUserCurrency();
@@ -104,15 +83,17 @@ class _HomeBudgetState extends State<HomeBudget> {
 
       // now fetch budget based on the _currentCurrencies
       BudgetSharedPreferences.setBudgetCurrent(_selectedDate);
-      
-      // always force to get budget when load the home page, so when user
-      // got the new format it will not causing null error.
-      _fetchBudget(false, true);
     }
-    else {
-      // nothing to fetch, set this into true
-      setFinished(true);
-    }
+    
+    _getData = _fetchBudget();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollControllerCurrencies.dispose();
+    _scrollControllerBudgetList.dispose();
+    super.dispose();
   }
 
   @override
@@ -131,7 +112,40 @@ class _HomeBudgetState extends State<HomeBudget> {
           Navigator.pushNamed(context, '/budget/list', arguments: _currentCurrencies!.id);
         },
       ),
-      body: _buildHomeBudgetPage(),
+      body: Expanded(
+        child: FutureBuilder(
+          future: _getData,
+          builder: ((context, snapshot) {
+            if (snapshot.hasError) {
+              // got error when loading the budget data
+              return const Center(child: Text("Error when loading budget"),);
+            }
+            else if (snapshot.hasData) {
+              // build the budget page
+              return _buildHomeBudgetPage();
+            }
+            else {
+              // showed the loading
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SpinKitFadingCube(color: accentColors[6],),
+                    const SizedBox(height: 20,),
+                    const Text(
+                      "Loading Budget",
+                      style: TextStyle(
+                        color: textColor2,
+                        fontSize: 10,
+                      ),
+                    )
+                  ],
+                )
+              );
+            }
+          }),
+        ),
+      ),
     );
   }
 
@@ -163,294 +177,273 @@ class _HomeBudgetState extends State<HomeBudget> {
       );
     }
     else {
-      if(!_isFinished) {
-        // showed the loading
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SpinKitFadingCube(color: accentColors[6],),
-              const SizedBox(height: 20,),
-              const Text(
-                "Loading Budget",
-                style: TextStyle(
-                  color: textColor2,
-                  fontSize: 10,
-                ),
-              )
-            ],
-          )
-        );
-      }
-      else {
-        return Consumer<HomeProvider>(
-          builder: (context, homeProvider, child) {
-            _budgetList = homeProvider.budgetList;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  width: double.infinity,
-                  color: secondaryDark,
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        decoration: const BoxDecoration(
-                          border: Border(bottom: BorderSide(width: 1.0, color: secondaryBackground)),
-                        ),
-                        child: HorizontalMonthCalendar(
-                          firstDay: _firstDay,
-                          lastDay: _lastDay,
-                          selectedDate: _selectedDate,
-                          onDateSelected: ((value) {
-                            setState(() {
-                              _selectedDate = value;
-                              BudgetSharedPreferences.setBudgetCurrent(value);
-                              // in case we add transaction to other month, just refresh the budget forcefully.
-                              _fetchBudget(true, true);
-                            });
-                          }),
-                        ),
+      return Consumer<HomeProvider>(
+        builder: (context, homeProvider, child) {
+          _budgetList = homeProvider.budgetList;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: double.infinity,
+                color: secondaryDark,
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      decoration: const BoxDecoration(
+                        border: Border(bottom: BorderSide(width: 1.0, color: secondaryBackground)),
                       ),
-                      const SizedBox(height: 15,),
-                      Slidable(
-                        endActionPane: ActionPane(
-                          motion: const DrawerMotion(),
-                          extentRatio: 0.2,
-                          children: <SlidableAction>[
-                            SlidableAction(
-                              label: 'Stat',
-                              padding: const EdgeInsets.all(0),
-                              foregroundColor: accentColors[3],
-                              backgroundColor: Colors.transparent,
-                              icon: Ionicons.bar_chart,
-                              onPressed: ((_) {
-                                // create budget transaction arguments that can be passed to other pages
-                                BudgetTransactionArgs args = BudgetTransactionArgs(
-                                  categoryid: -1,
-                                  categoryName: _currentCurrencies!.description,
-                                  currencySymbol: _currentCurrencies!.symbol,
-                                  budgetAmount: -1,
-                                  budgetUsed: -1,
-                                  selectedDate: _selectedDate,
-                                  currencyId: _currentCurrencies!.id,
-                                );
-
-                                Navigator.pushNamed(context, '/budget/stat', arguments: args);
-                              })
-                            ),
-                          ],
-                        ),
-                        child: GestureDetector(
-                          onTap: () {
-                            showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                              return Container(
-                                height: 300,
-                                color: secondaryDark,
-                                child: Column(
-                                  children: <Widget>[
-                                    Container(
-                                      height: 40,
-                                      decoration: const BoxDecoration(
-                                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          const Expanded(
-                                            child: Center(child: Text("Currencies")),
-                                          ),
-                                          IconButton(
-                                            onPressed: () async {
-                                              await _refreshUserCurrencies(true);
-                                            },
-                                            icon: const Icon(
-                                              Ionicons.refresh,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: ListView.builder(
-                                        physics: const AlwaysScrollableScrollPhysics(),
-                                        controller: _scrollControllerCurrencies,
-                                        itemCount: _currencies.length,
-                                        itemBuilder: (BuildContext context, int index) {
-                                          return SimpleItem(
-                                            color: accentColors[6],
-                                            description: _currencies[index].description,
-                                            isSelected: (_currentCurrencies!.id == _currencies[index].id),
-                                            onTap: (() {
-                                              setState(() {
-                                                _currentCurrencies = _currencies[index];
-                                                _fetchBudget(true);
-                                              });
-                                              Navigator.pop(context);
-                                            }),
-                                            child: FittedBox(
-                                              fit: BoxFit.contain,
-                                              child: Text(_currencies[index].symbol.toUpperCase()),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(height: 20,),
-                                  ],
-                                ),
+                      child: HorizontalMonthCalendar(
+                        firstDay: _firstDay,
+                        lastDay: _lastDay,
+                        selectedDate: _selectedDate,
+                        onDateSelected: ((value) {
+                          setState(() {
+                            _selectedDate = value;
+                            BudgetSharedPreferences.setBudgetCurrent(value);
+                            // in case we add transaction to other month, just refresh the budget forcefully.
+                            _getData = _fetchBudget(true, true);
+                          });
+                        }),
+                      ),
+                    ),
+                    const SizedBox(height: 15,),
+                    Slidable(
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        extentRatio: 0.2,
+                        children: <SlidableAction>[
+                          SlidableAction(
+                            label: 'Stat',
+                            padding: const EdgeInsets.all(0),
+                            foregroundColor: accentColors[3],
+                            backgroundColor: Colors.transparent,
+                            icon: Ionicons.bar_chart,
+                            onPressed: ((_) {
+                              // create budget transaction arguments that can be passed to other pages
+                              BudgetTransactionArgs args = BudgetTransactionArgs(
+                                categoryid: -1,
+                                categoryName: _currentCurrencies!.description,
+                                currencySymbol: _currentCurrencies!.symbol,
+                                budgetAmount: -1,
+                                budgetUsed: -1,
+                                selectedDate: _selectedDate,
+                                currencyId: _currentCurrencies!.id,
                               );
-                            });
-                          },
-                          child: Container(
-                            height: 50,
-                            color: Colors.transparent ,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: BudgetBar(
-                                    title: _currentCurrencies!.description,
-                                    budgetTotal: computeTotalAmount(_budgetList),
-                                    budgetUsed: computeTotalUsed(_budgetList),
-                                    symbol: _currentCurrencies!.symbol,
+
+                              Navigator.pushNamed(context, '/budget/stat', arguments: args);
+                            })
+                          ),
+                        ],
+                      ),
+                      child: GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+                            return Container(
+                              height: 300,
+                              color: secondaryDark,
+                              child: Column(
+                                children: <Widget>[
+                                  Container(
+                                    height: 40,
+                                    decoration: const BoxDecoration(
+                                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        const Expanded(
+                                          child: Center(child: Text("Currencies")),
+                                        ),
+                                        IconButton(
+                                          onPressed: () async {
+                                            await _refreshUserCurrencies(true);
+                                          },
+                                          icon: const Icon(
+                                            Ionicons.refresh,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 10,),
-                                const SizedBox(
-                                  height: 20,
-                                  child: Icon(
-                                      Ionicons.chevron_down_circle
+                                  Expanded(
+                                    child: ListView.builder(
+                                      physics: const AlwaysScrollableScrollPhysics(),
+                                      controller: _scrollControllerCurrencies,
+                                      itemCount: _currencies.length,
+                                      itemBuilder: (BuildContext context, int index) {
+                                        return SimpleItem(
+                                          color: accentColors[6],
+                                          description: _currencies[index].description,
+                                          isSelected: (_currentCurrencies!.id == _currencies[index].id),
+                                          onTap: (() {
+                                            setState(() {
+                                              _currentCurrencies = _currencies[index];
+                                              _fetchBudget(true);
+                                            });
+                                            Navigator.pop(context);
+                                          }),
+                                          child: FittedBox(
+                                            fit: BoxFit.contain,
+                                            child: Text(_currencies[index].symbol.toUpperCase()),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
+                                  const SizedBox(height: 20,),
+                                ],
+                              ),
+                            );
+                          });
+                        },
+                        child: Container(
+                          height: 50,
+                          color: Colors.transparent ,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: BudgetBar(
+                                  title: _currentCurrencies!.description,
+                                  budgetTotal: computeTotalAmount(_budgetList),
+                                  budgetUsed: computeTotalUsed(_budgetList),
+                                  symbol: _currentCurrencies!.symbol,
                                 ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 10,),
+                              const SizedBox(
+                                height: 20,
+                                child: Icon(
+                                    Ionicons.chevron_down_circle
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10,),
-                      SizedBox(
-                        width: double.infinity,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            SizedBox(
-                              height: 15,
-                              width: 30,
-                              child: Transform.scale(
-                                scale: 0.6,
-                                child: CupertinoSwitch(
-                                  value: _showNotInBudget,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _showNotInBudget = value;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 11,),
-                            const Text(
-                              "Not In Budget Expense",
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: textColor,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: RefreshIndicator(
-                    color: accentColors[6],
-                    onRefresh: () async {
-                      _fetchBudget(true, true);
-                    },
-                    child: ListView.builder(
-                      controller: _scrollControllerBudgetList,
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: _budgetList.length + 1,
-                      itemBuilder: ((BuildContext context, int index) {
-                        if (index < _budgetList.length) {
-                          // create budget transaction arguments that can be passed to other pages
-                          BudgetTransactionArgs args = BudgetTransactionArgs(
-                            categoryid: _budgetList[index].category.id,
-                            categoryName: _budgetList[index].category.name,
-                            currencySymbol: _budgetList[index].currency.symbol,
-                            budgetAmount: _budgetList[index].amount,
-                            budgetUsed: _budgetList[index].used,
-                            selectedDate: _selectedDate,
-                            currencyId: _currentCurrencies!.id,
-                          );
-
-                          // check whether we will show not in budget or not?
-                          if (!_showNotInBudget) {
-                            // check current budget, whether this is in or out
-                            if (_budgetList[index].status.toLowerCase() != "in") {
-                              // return empty widget
-                              return const SizedBox();
-                            }
-                          }
-
-                          return Slidable(
-                            endActionPane: ActionPane(
-                              motion: const DrawerMotion(),
-                              extentRatio: 0.2,
-                              children: <SlidableAction>[
-                                SlidableAction(
-                                  label: 'Stat',
-                                  padding: const EdgeInsets.all(0),
-                                  foregroundColor: accentColors[3],
-                                  backgroundColor: primaryBackground,
-                                  icon: Ionicons.bar_chart,
-                                  onPressed: ((_) {
-                                    Navigator.pushNamed(context, '/budget/stat', arguments: args);
-                                  })
-                                ),
-                              ],
-                            ),
-                            child: GestureDetector(
-                              onTap: (() {
-                                Navigator.pushNamed(context, '/budget/transaction', arguments: args);
-                              }),
-                              child: Container(
-                                color: Colors.transparent,
-                                padding: const EdgeInsets.all(10),
-                                child: BudgetBar(
-                                  icon: IconColorList.getExpenseIcon(_budgetList[index].category.name),
-                                  iconColor: IconColorList.getExpenseColor(_budgetList[index].category.name),
-                                  title: _budgetList[index].category.name,
-                                  subTitle: "${_budgetList[index].totalTransaction} transaction${_budgetList[index].totalTransaction > 1 ? 's' : ''}",
-                                  symbol: _budgetList[index].currency.symbol,
-                                  budgetUsed: _budgetList[index].used,
-                                  budgetTotal: _budgetList[index].amount,
-                                  type: _budgetList[index].status,
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                        else {
-                          return const SizedBox(height: 30,);
-                        }
-                      }),
                     ),
+                    const SizedBox(height: 10,),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 15,
+                            width: 30,
+                            child: Transform.scale(
+                              scale: 0.6,
+                              child: CupertinoSwitch(
+                                value: _showNotInBudget,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _showNotInBudget = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 11,),
+                          const Text(
+                            "Not In Budget Expense",
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: textColor,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  color: accentColors[6],
+                  onRefresh: () async {
+                    await _fetchBudget(true, true);
+                  },
+                  child: ListView.builder(
+                    controller: _scrollControllerBudgetList,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: _budgetList.length + 1,
+                    itemBuilder: ((BuildContext context, int index) {
+                      if (index < _budgetList.length) {
+                        // create budget transaction arguments that can be passed to other pages
+                        BudgetTransactionArgs args = BudgetTransactionArgs(
+                          categoryid: _budgetList[index].category.id,
+                          categoryName: _budgetList[index].category.name,
+                          currencySymbol: _budgetList[index].currency.symbol,
+                          budgetAmount: _budgetList[index].amount,
+                          budgetUsed: _budgetList[index].used,
+                          selectedDate: _selectedDate,
+                          currencyId: _currentCurrencies!.id,
+                        );
+
+                        // check whether we will show not in budget or not?
+                        if (!_showNotInBudget) {
+                          // check current budget, whether this is in or out
+                          if (_budgetList[index].status.toLowerCase() != "in") {
+                            // return empty widget
+                            return const SizedBox();
+                          }
+                        }
+
+                        return Slidable(
+                          endActionPane: ActionPane(
+                            motion: const DrawerMotion(),
+                            extentRatio: 0.2,
+                            children: <SlidableAction>[
+                              SlidableAction(
+                                label: 'Stat',
+                                padding: const EdgeInsets.all(0),
+                                foregroundColor: accentColors[3],
+                                backgroundColor: primaryBackground,
+                                icon: Ionicons.bar_chart,
+                                onPressed: ((_) {
+                                  Navigator.pushNamed(context, '/budget/stat', arguments: args);
+                                })
+                              ),
+                            ],
+                          ),
+                          child: GestureDetector(
+                            onTap: (() {
+                              Navigator.pushNamed(context, '/budget/transaction', arguments: args);
+                            }),
+                            child: Container(
+                              color: Colors.transparent,
+                              padding: const EdgeInsets.all(10),
+                              child: BudgetBar(
+                                icon: IconColorList.getExpenseIcon(_budgetList[index].category.name),
+                                iconColor: IconColorList.getExpenseColor(_budgetList[index].category.name),
+                                title: _budgetList[index].category.name,
+                                subTitle: "${_budgetList[index].totalTransaction} transaction${_budgetList[index].totalTransaction > 1 ? 's' : ''}",
+                                symbol: _budgetList[index].currency.symbol,
+                                budgetUsed: _budgetList[index].used,
+                                budgetTotal: _budgetList[index].amount,
+                                type: _budgetList[index].status,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      else {
+                        return const SizedBox(height: 30,);
+                      }
+                    }),
                   ),
                 ),
-              ],
-            );
-          },
-        );
-      }
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -508,16 +501,12 @@ class _HomeBudgetState extends State<HomeBudget> {
     return used;
   }
 
-  Future<void> _fetchBudget([bool? showLoader, bool? force]) async {
+  Future<bool> _fetchBudget([bool? showLoader, bool? force]) async {
     bool isShowLoader = (showLoader ?? false);
     bool isForce = (force ?? false);
 
     if(isShowLoader) {
       showLoaderDialog(context);
-    }
-    else {
-      // always assume that we not yet finished
-      setFinished(false);
     }
 
     // fetch the budget, in case it null it will fetch the budget from the
@@ -530,10 +519,13 @@ class _HomeBudgetState extends State<HomeBudget> {
       if(isShowLoader) {
         Navigator.pop(context);
       }
-      else {
-        // set finished into true, as we finished already
-        setFinished(true);
-      }
-    });
+    }).onError((error, stackTrace) {
+      debugPrint("🚫 Error when fetching budget data");
+      debugPrintStack(stackTrace: stackTrace);
+      throw Exception("Error when fetching budget data");
+    },);
+
+    // if all good return true
+    return true;
   }
 }
