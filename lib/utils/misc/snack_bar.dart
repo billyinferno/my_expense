@@ -16,12 +16,15 @@ SnackBar createSnackBar({required String message, Icon? icon, int? duration}) {
         children: <Widget>[
           snackBarIcon,
           const SizedBox(width: 10,),
-          Text(
-            message,
-            style: const TextStyle(
-              color: textColor,
-              fontSize: 15,
-              fontFamily: '--apple-system',
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: textColor,
+                fontSize: 15,
+                fontFamily: '--apple-system',
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
