@@ -465,6 +465,9 @@ class _HomeListState extends State<HomeList> {
     await TransactionSharedPreferences.setTransactionListCurrentDate(refreshDay.toLocal());
 
     String strRefreshDay = DateFormat('yyyy-MM-dd').format(refreshDay.toLocal());
+
+    debugPrint("🧺 Refresh TRansaction $strRefreshDay");
+    
     await _transactionHttp.fetchTransaction(strRefreshDay, isForce).then((value) {
       // ensure that the selectedDate and the refreshDay is the same
       if(isSameDay(_currentFocusedDay, refreshDay)) {
