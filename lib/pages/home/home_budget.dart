@@ -112,39 +112,37 @@ class _HomeBudgetState extends State<HomeBudget> {
           Navigator.pushNamed(context, '/budget/list', arguments: _currentCurrencies!.id);
         },
       ),
-      body: Expanded(
-        child: FutureBuilder(
-          future: _getData,
-          builder: ((context, snapshot) {
-            if (snapshot.hasError) {
-              // got error when loading the budget data
-              return const Center(child: Text("Error when loading budget"),);
-            }
-            else if (snapshot.hasData) {
-              // build the budget page
-              return _buildHomeBudgetPage();
-            }
-            else {
-              // showed the loading
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SpinKitFadingCube(color: accentColors[6],),
-                    const SizedBox(height: 20,),
-                    const Text(
-                      "Loading Budget",
-                      style: TextStyle(
-                        color: textColor2,
-                        fontSize: 10,
-                      ),
-                    )
-                  ],
-                )
-              );
-            }
-          }),
-        ),
+      body: FutureBuilder(
+        future: _getData,
+        builder: ((context, snapshot) {
+          if (snapshot.hasError) {
+            // got error when loading the budget data
+            return const Center(child: Text("Error when loading budget"),);
+          }
+          else if (snapshot.hasData) {
+            // build the budget page
+            return _buildHomeBudgetPage();
+          }
+          else {
+            // showed the loading
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SpinKitFadingCube(color: accentColors[6],),
+                  const SizedBox(height: 20,),
+                  const Text(
+                    "Loading Budget",
+                    style: TextStyle(
+                      color: textColor2,
+                      fontSize: 10,
+                    ),
+                  )
+                ],
+              )
+            );
+          }
+        }),
       ),
     );
   }
@@ -512,6 +510,11 @@ class _HomeBudgetState extends State<HomeBudget> {
     // fetch the budget, in case it null it will fetch the budget from the
     // backend instead.
     String budgetDate = DateFormat('yyyy-MM-dd').format(_selectedDate.toLocal());
+
+    // show the debug print to know that we are refreshing/fetching budget
+    debugPrint("📃 Refresh Budget at $budgetDate");
+
+    // get the budget data
     await _budgetHTTP.fetchBudgetDate(_currentCurrencies!.id, budgetDate, isForce).then((value) {
       // set the provider as we will use consumer to listen to the list
       Provider.of<HomeProvider>(context, listen: false).setBudgetList(value);

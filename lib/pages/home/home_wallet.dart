@@ -59,39 +59,37 @@ class _HomeWalletState extends State<HomeWallet> {
           Navigator.pushNamed(context, '/wallet/add');
         },
       ),
-      body: Expanded(
-        child: FutureBuilder(
-          future: _getData,
-          builder: ((context, snapshot) {
-            if (snapshot.hasError) {
-              // got error when fetching the wallet data
-              return const Center(child: Text("Error when loading wallet data"),);
-            }
-            else if (snapshot.hasData) {
-              // generate the main view
-              return _generateWalletView();
-            }
-            else {
-              // still loading
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SpinKitFadingCube(color: accentColors[6],),
-                    const SizedBox(height: 20,),
-                    const Text(
-                      "Loading Wallet",
-                      style: TextStyle(
-                        color: textColor2,
-                        fontSize: 10,
-                      ),
-                    )
-                  ],
-                )
-              );
-            }
-          }),
-        ),
+      body: FutureBuilder(
+        future: _getData,
+        builder: ((context, snapshot) {
+          if (snapshot.hasError) {
+            // got error when fetching the wallet data
+            return const Center(child: Text("Error when loading wallet data"),);
+          }
+          else if (snapshot.hasData) {
+            // generate the main view
+            return _generateWalletView();
+          }
+          else {
+            // still loading
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SpinKitFadingCube(color: accentColors[6],),
+                  const SizedBox(height: 20,),
+                  const Text(
+                    "Loading Wallet",
+                    style: TextStyle(
+                      color: textColor2,
+                      fontSize: 10,
+                    ),
+                  )
+                ],
+              )
+            );
+          }
+        }),
       ),
     );
   }
@@ -107,7 +105,7 @@ class _HomeWalletState extends State<HomeWallet> {
           child: RefreshIndicator(
             color: accentColors[6],
             onRefresh: () async {
-              await _refreshWallet();
+              _getData = _refreshWallet();
             },
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -155,6 +153,9 @@ class _HomeWalletState extends State<HomeWallet> {
 
   Future<bool> _refreshWallet() async {
     Future<List<WalletModel>> futureWallets;
+
+    // showed a debug print message to knew that we refresh the wallet
+    debugPrint("💳 Refresh Wallet");
 
     // fetch the new wallet data from API
     await Future.wait([
