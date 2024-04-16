@@ -307,52 +307,54 @@ class _HomeStatsState extends State<HomeStats> {
 
     return GestureDetector(
       onTap: (() {
-        showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-          return Container(
-            height: 300,
-            color: secondaryDark,
-            child: Column(
-              children: <Widget>[
-                Container(
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+        // check if user have more than 1 currencies?
+        if (_currencies.length > 1) {
+          // if so, then show the bottom sheet
+          showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+            return Container(
+              height: 300,
+              color: secondaryDark,
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                    ),
+                    child: const Center(child: Text("Currencies")),
                   ),
-                  child: const Expanded(
-                    child: Center(child: Text("Currencies")),
+                  Expanded(
+                    child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      controller: _scrollControllerCurrencies,
+                      itemCount: _currencies.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return SimpleItem(
+                          color: accentColors[6],
+                          description: _currencies[index].description,
+                          isSelected: (_currentCurrencyId == _currencies[index].id),
+                          onTap: (() {
+                            setState(() {
+                              _currentCurrencyId = _currencies[index].id;
+                              _currentCurrencySymbol = _currencies[index].symbol;
+                              _changeCurrentWorth();
+                            });
+                            Navigator.pop(context);
+                          }),
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: Text(_currencies[index].symbol.toUpperCase()),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    controller: _scrollControllerCurrencies,
-                    itemCount: _currencies.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return SimpleItem(
-                        color: accentColors[6],
-                        description: _currencies[index].description,
-                        isSelected: (_currentCurrencyId == _currencies[index].id),
-                        onTap: (() {
-                          setState(() {
-                            _currentCurrencyId = _currencies[index].id;
-                            _currentCurrencySymbol = _currencies[index].symbol;
-                            _changeCurrentWorth();
-                          });
-                          Navigator.pop(context);
-                        }),
-                        child: FittedBox(
-                          fit: BoxFit.contain,
-                          child: Text(_currencies[index].symbol.toUpperCase()),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20,),
-              ],
-            ),
-          );
-        });
+                  const SizedBox(height: 20,),
+                ],
+              ),
+            );
+          });
+        }
       }),
       child: Container(
         color: secondaryDark,
