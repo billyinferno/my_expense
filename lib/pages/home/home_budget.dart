@@ -5,7 +5,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/budget_model.dart';
 import 'package:my_expense/model/currency_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
@@ -42,7 +41,6 @@ class _HomeBudgetState extends State<HomeBudget> {
   final ScrollController _scrollControllerCurrencies = ScrollController();
   final ScrollController _scrollControllerBudgetList = ScrollController();
 
-  final WalletHTTPService _walletHTTP = WalletHTTPService();
   final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
 
   bool _showNotInBudget = false;
@@ -250,24 +248,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                                     decoration: const BoxDecoration(
                                       border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        const Expanded(
-                                          child: Center(child: Text("Currencies")),
-                                        ),
-                                        IconButton(
-                                          onPressed: () async {
-                                            await _refreshUserCurrencies(true);
-                                          },
-                                          icon: const Icon(
-                                            Ionicons.refresh,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    child: const Center(child: Text("Currencies")),
                                   ),
                                   Expanded(
                                     child: ListView.builder(
@@ -448,22 +429,6 @@ class _HomeBudgetState extends State<HomeBudget> {
   void setCurrencies(List<CurrencyModel> currencies) {
     setState(() {
       _currencies = currencies;
-    });
-  }
-
-  Future<void> _refreshUserCurrencies(bool force) async {
-    showLoaderDialog(context);
-    await _walletHTTP.fetchWalletCurrencies(force).then((currencies) {
-      setCurrencies(currencies);
-      
-      // set the home provider
-      Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(currencies);
-      
-      Navigator.pop(context);
-    }).onError((error, stackTrace) {
-      debugPrint("Error when <_refreshUserCurrencies>");
-      debugPrint(error.toString());
-      Navigator.pop(context);
     });
   }
 
