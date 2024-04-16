@@ -8,7 +8,8 @@ import 'package:my_expense/themes/colors.dart';
 enum ItemType {
   expense,
   income,
-  transfer
+  transfer,
+  nothing
 }
 
 class ItemList extends StatelessWidget {
@@ -89,12 +90,16 @@ class ItemList extends StatelessWidget {
       default:
         return _item(
           itemName: (name ?? ''),
-          itemSub: "($walletName) ${(categoryName ?? '')}",
-          itemIcon: IconColorList.getExpenseIcon((categoryName ?? '')),
-          itemIconColor: IconColorList.getExpenseColor((categoryName ?? '')),
-          itemCCYFrom: walletSymbol,
-          itemPriceFrom: formatAmount,
-          itemPriceFromColor: accentColors[2],
+          itemSub: "-",
+          itemIcon: const Icon(
+            Ionicons.remove,
+            color: textColor,
+            size: 20,
+          ),
+          itemIconColor: Colors.grey[900]!,
+          itemCCYFrom: "-",
+          itemPriceFrom: "-",
+          itemPriceFromColor: textColor,
         );
     }
   }
