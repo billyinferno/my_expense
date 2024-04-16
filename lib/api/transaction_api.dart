@@ -8,6 +8,7 @@ import 'package:my_expense/model/last_transaction_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/model/transaction_model.dart';
 import 'package:my_expense/model/transaction_stats_detail_model.dart';
+import 'package:my_expense/model/transaction_top_model.dart';
 import 'package:my_expense/model/transaction_wallet_minmax_date_model.dart';
 import 'package:my_expense/utils/function/date_utils.dart';
 import 'package:my_expense/utils/globals.dart';
@@ -387,5 +388,32 @@ class TransactionHTTPService {
     ).onError((error, stackTrace) {
       throw Exception(error);
     });
+  }
+
+  Future<List<TransactionTopModel>> fetchTransactionTop(String type, int ccy, String from, String to, [bool? force]) async {
+    bool isForce = (force ?? false);
+
+    // check if we got data on the sharedPreferences or not?
+    if (!isForce) {
+      List<TransactionTopModel>? transactionPref =
+          TransactionSharedPreferences.getTransactionTop(from, type);
+      if (transactionPref != null) {
+        return transactionPref;
+      }
+    }
+
+    // send the request to get the transaction
+    final String result = await NetUtils.get(
+      url: '${Globals.apiURL}transactions/top/type/$type/ccy/$ccy/from/$from/to/$to',
+    ).onError((error, stackTrace) {
+      throw Exception(error);
+    });
+
+    // parse the result and return the transaction list
+    List<dynamic> jsonData = jsonDecode(result);
+    List<TransactionTopModel> transactionModel =
+        jsonData.map((e) => TransactionTopModel.fromJson(e)).toList();
+    TransactionSharedPreferences.setTransactionTop(from, type, transactionModel);
+    return transactionModel;
   }
 }

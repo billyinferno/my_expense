@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:my_expense/model/income_expense_model.dart';
 import 'package:my_expense/model/last_transaction_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
+import 'package:my_expense/model/transaction_top_model.dart';
 import 'package:my_expense/utils/prefs/shared_box.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -16,6 +17,7 @@ class TransactionSharedPreferences {
   static const _transactionWallet = "trx_wallet";
   static const _transactionIncomeExpense = "trx_income_expense";
   static const _transactionListCurrentDate = "trx_list_current_date";
+  static const _transactionTop = "trx_top";
 
   static Future setTransaction(String date, List<TransactionListModel> model) async {
     String key = "${_transactionKey}_$date";
@@ -353,6 +355,27 @@ class TransactionSharedPreferences {
     if(data != null) {
       DateTime date = DateTime.parse(data);
       return date;
+    }
+    else {
+      return null;
+    }
+  }
+
+  static Future setTransactionTop(String date, String type, List<TransactionTopModel> model) async {
+    String key = "${_transactionTop}_${date}_$type";
+    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
+
+    await MyBox.putStringList(key, data);
+  }
+
+  static List<TransactionTopModel>? getTransactionTop(String date, String type) {
+    String key = "${_transactionTop}_${date}_$type";
+
+    List<String>? data = MyBox.getStringList(key);
+
+    if(data != null) {
+      List<TransactionTopModel> transaction = data.map((e) => TransactionTopModel.fromJson(jsonDecode(e))).toList();
+      return transaction;
     }
     else {
       return null;
