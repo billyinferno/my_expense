@@ -9,8 +9,9 @@ class BarChart extends StatefulWidget {
   final IncomeExpenseModel data;
   final double? barWidth;
   final double? fontSize;
+  final bool? needColapse;
   
-  const BarChart({ super.key, required this.from, required this.to, required this.data, this.barWidth, this.fontSize });
+  const BarChart({ super.key, required this.from, required this.to, required this.data, this.barWidth, this.fontSize, this.needColapse });
 
   @override
   State<BarChart> createState() => _BarChartState();
@@ -19,25 +20,44 @@ class BarChart extends StatefulWidget {
 class _BarChartState extends State<BarChart> {
   Map<DateTime, double> _expense = {};
   Map<DateTime, double> _income = {};
-  double _maxExpense = 0.0;
-  double _maxIncome = 0.0;
-  double _barWidth = 6;
-  bool _isShowed = false;
+  late double _maxExpense;
+  late double _maxIncome;
+  late double _barWidth;
+  late bool _isShowed;
+  late bool _needColapse;
 
   final fCCY = NumberFormat("#,##0.00", "en_US");
+
+  @override
+  void initState() {
+    _maxExpense = 0;
+    _maxIncome = 0;
+    _barWidth = 6;
+    _isShowed = false;
+
+    _needColapse = (widget.needColapse ?? true);
+    if (!_needColapse) {
+      _isShowed = true;
+    }
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     _expense = widget.data.expense;
     _income = widget.data.income;
     _barWidth = (widget.barWidth ?? 6);
+
     _getMaxExpenseIncome();
 
     return GestureDetector(
       onTap: (() {
-        setState(() {
-          _isShowed = !_isShowed;
-        });
+        if (_needColapse) {
+          setState(() {
+            _isShowed = !_isShowed;
+          });
+        }
       }),
       child: _generateBody(),
     );
@@ -84,8 +104,16 @@ class _BarChartState extends State<BarChart> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              const Center(child: Text("Close Graph")),
-              const SizedBox(height: 10,),
+              Visibility(
+                visible: _needColapse,
+                child: const Center(
+                  child: Text("Close Graph")
+                )
+              ),
+              Visibility(
+                visible: _needColapse,
+                child: const SizedBox(height: 10,)
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
