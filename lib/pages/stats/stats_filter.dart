@@ -353,6 +353,11 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       if(_currentToDate.toLocal().isBefore(_currentFromDate.toLocal())) {
         _currentToDate = DateTime(_currentFromDate.toLocal().year, _currentFromDate.toLocal().month + 1, 1).subtract(const Duration(days: 1));
       }
+
+      // ensure _currentToDate also not more than _maxDate
+      if (_currentToDate.toLocal().isAfter(_maxDate.toLocal())) {
+        _currentToDate = _maxDate;
+      }
       return _generateCustomCalendar();
     }
   }
