@@ -375,6 +375,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       if (_currentToDate.toLocal().isAfter(_maxDate.toLocal())) {
         _currentToDate = _maxDate;
       }
+
       return _generateCustomCalendar();
     }
   }
@@ -392,7 +393,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
               itemExtent: 25,
               onSelectedItemChanged: (int value) {
                 setState(() {
-                   _currentFromDate = DateTime(_currentToDate.toLocal().year, value+1, 1);
+                  _currentFromDate = DateTime(_currentToDate.toLocal().year, value+1, 1);
                   _currentToDate = DateTime(_currentToDate.toLocal().year, value+2, 1).subtract(const Duration(days: 1));
                 });
               },
@@ -484,65 +485,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             }),
           ),
         ),
-        // const Text("From Date"),
-        // Expanded(
-        //   child: Center(
-        //     child: CupertinoTheme(
-        //       data: const CupertinoThemeData(
-        //         brightness: Brightness.dark,
-        //         textTheme: CupertinoTextThemeData(
-        //           dateTimePickerTextStyle: TextStyle(
-        //             color: textColor2,
-        //             fontSize: 20,
-        //             fontFamily: '--apple-system'
-        //           ),
-        //         ),
-        //       ),
-        //       child: CupertinoDatePicker(
-        //         onDateTimeChanged: (DateTime value) {
-        //           setState(() {
-        //             _currentFromDate = value;
-        //           });
-        //         },
-        //         initialDateTime: _currentFromDate.toLocal(),
-        //         maximumDate: _maxDate.toLocal(),
-        //         minimumDate: _minDate.toLocal(),
-        //         dateOrder: DatePickerDateOrder.dmy,
-        //         mode: CupertinoDatePickerMode.date,
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        // const Divider(height: 10,),
-        // const Text("To Date"),
-        // Expanded(
-        //   child: Center(
-        //     child: CupertinoTheme(
-        //       data: const CupertinoThemeData(
-        //         brightness: Brightness.dark,
-        //         textTheme: CupertinoTextThemeData(
-        //           dateTimePickerTextStyle: TextStyle(
-        //             color: textColor2,
-        //             fontSize: 20,
-        //             fontFamily: '--apple-system'
-        //           ),
-        //         ),
-        //       ),
-        //       child: CupertinoDatePicker(
-        //         onDateTimeChanged: (DateTime value) {
-        //           setState(() {
-        //             _currentToDate = value;
-        //           });
-        //         },
-        //         initialDateTime: _currentToDate.toLocal(),
-        //         maximumDate: _maxDate.toLocal(),
-        //         minimumDate: _currentFromDate.toLocal(),
-        //         dateOrder: DatePickerDateOrder.dmy,
-        //         mode: CupertinoDatePickerMode.date,
-        //       ),
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }
