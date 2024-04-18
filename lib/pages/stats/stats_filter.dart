@@ -1,3 +1,4 @@
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -56,6 +57,20 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   late ScrollController _scrollControllerWallet;
   
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
+  final CalendarDatePicker2Config _calendarConfig = CalendarDatePicker2Config(
+    calendarType: CalendarDatePicker2Type.range,
+    selectedDayHighlightColor: primaryLight,
+    weekdayLabelTextStyle: const TextStyle(
+      color: textColor,
+      fontWeight: FontWeight.bold,
+    ),
+    controlsTextStyle: const TextStyle(
+      color: textColor,
+      fontSize: 15,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+  late List<DateTime> _selectedDateTime;
 
   @override
   void initState() {
@@ -102,6 +117,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     }
     // set the minimum date as the 1 day of the minimum transaction date
     _minDate = DateTime(_minDate.year, 1, 1);
+
+    _selectedDateTime = [];
 
     _scrollControllerCurrencies = ScrollController();
     _scrollControllerWallet = ScrollController();
@@ -451,65 +468,81 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        const Text("From Date"),
         Expanded(
-          child: Center(
-            child: CupertinoTheme(
-              data: const CupertinoThemeData(
-                brightness: Brightness.dark,
-                textTheme: CupertinoTextThemeData(
-                  dateTimePickerTextStyle: TextStyle(
-                    color: textColor2,
-                    fontSize: 20,
-                    fontFamily: '--apple-system'
-                  ),
-                ),
-              ),
-              child: CupertinoDatePicker(
-                onDateTimeChanged: (DateTime value) {
-                  setState(() {
-                    _currentFromDate = value;
-                  });
-                },
-                initialDateTime: _currentFromDate.toLocal(),
-                maximumDate: _maxDate.toLocal(),
-                minimumDate: _minDate.toLocal(),
-                dateOrder: DatePickerDateOrder.dmy,
-                mode: CupertinoDatePickerMode.date,
-              ),
-            ),
+          child: CalendarDatePicker2(
+            config: _calendarConfig,
+            value: _selectedDateTime,
+            onValueChanged: ((newDate) {
+              if(newDate.length == 2) {
+                setState(() {                
+                  _currentFromDate = newDate[0]!;
+                  _currentToDate = newDate[1]!;
+          
+                  _selectedDateTime = [_currentFromDate, _currentToDate];
+                });
+              }
+            }),
           ),
         ),
-        const Divider(height: 10,),
-        const Text("To Date"),
-        Expanded(
-          child: Center(
-            child: CupertinoTheme(
-              data: const CupertinoThemeData(
-                brightness: Brightness.dark,
-                textTheme: CupertinoTextThemeData(
-                  dateTimePickerTextStyle: TextStyle(
-                    color: textColor2,
-                    fontSize: 20,
-                    fontFamily: '--apple-system'
-                  ),
-                ),
-              ),
-              child: CupertinoDatePicker(
-                onDateTimeChanged: (DateTime value) {
-                  setState(() {
-                    _currentToDate = value;
-                  });
-                },
-                initialDateTime: _currentToDate.toLocal(),
-                maximumDate: _maxDate.toLocal(),
-                minimumDate: _currentFromDate.toLocal(),
-                dateOrder: DatePickerDateOrder.dmy,
-                mode: CupertinoDatePickerMode.date,
-              ),
-            ),
-          ),
-        ),
+        // const Text("From Date"),
+        // Expanded(
+        //   child: Center(
+        //     child: CupertinoTheme(
+        //       data: const CupertinoThemeData(
+        //         brightness: Brightness.dark,
+        //         textTheme: CupertinoTextThemeData(
+        //           dateTimePickerTextStyle: TextStyle(
+        //             color: textColor2,
+        //             fontSize: 20,
+        //             fontFamily: '--apple-system'
+        //           ),
+        //         ),
+        //       ),
+        //       child: CupertinoDatePicker(
+        //         onDateTimeChanged: (DateTime value) {
+        //           setState(() {
+        //             _currentFromDate = value;
+        //           });
+        //         },
+        //         initialDateTime: _currentFromDate.toLocal(),
+        //         maximumDate: _maxDate.toLocal(),
+        //         minimumDate: _minDate.toLocal(),
+        //         dateOrder: DatePickerDateOrder.dmy,
+        //         mode: CupertinoDatePickerMode.date,
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        // const Divider(height: 10,),
+        // const Text("To Date"),
+        // Expanded(
+        //   child: Center(
+        //     child: CupertinoTheme(
+        //       data: const CupertinoThemeData(
+        //         brightness: Brightness.dark,
+        //         textTheme: CupertinoTextThemeData(
+        //           dateTimePickerTextStyle: TextStyle(
+        //             color: textColor2,
+        //             fontSize: 20,
+        //             fontFamily: '--apple-system'
+        //           ),
+        //         ),
+        //       ),
+        //       child: CupertinoDatePicker(
+        //         onDateTimeChanged: (DateTime value) {
+        //           setState(() {
+        //             _currentToDate = value;
+        //           });
+        //         },
+        //         initialDateTime: _currentToDate.toLocal(),
+        //         maximumDate: _maxDate.toLocal(),
+        //         minimumDate: _currentFromDate.toLocal(),
+        //         dateOrder: DatePickerDateOrder.dmy,
+        //         mode: CupertinoDatePickerMode.date,
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
