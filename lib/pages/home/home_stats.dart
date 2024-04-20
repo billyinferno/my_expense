@@ -13,6 +13,7 @@ import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/appbar/home_appbar.dart';
@@ -143,24 +144,25 @@ class _HomeStatsState extends State<HomeStats> {
           }
           else {
             return Center(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SpinKitFadingCube(
-                  color: accentColors[6],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Text(
-                  "Loading Stats",
-                  style: TextStyle(
-                    color: textColor2,
-                    fontSize: 10,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SpinKitFadingCube(
+                    color: accentColors[6],
                   ),
-                )
-              ],
-            ));
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const Text(
+                    "Loading Stats",
+                    style: TextStyle(
+                      color: textColor2,
+                      fontSize: 10,
+                    ),
+                  )
+                ],
+              )
+            );
           }
         }),
       ),
@@ -207,86 +209,95 @@ class _HomeStatsState extends State<HomeStats> {
                   // set the new from and to date
                   _from = from;
                   _to = to;
-
+          
                   // set the current from and to string
                   _fromString = _df.format(_from.toLocal());
                   _toString = _df.format(_to.toLocal());
-
+          
                   // fetch the statistic data again once we change the _from and _to date
-                  _getStat = _fetchData();
+                  _getStat = _fetchData(showDialog: true);
                 })
               ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Slidable(
-                      endActionPane: ActionPane(
-                        motion: const DrawerMotion(),
-                        extentRatio: 0.2,
-                        children: <SlidableAction>[
-                          SlidableAction(
-                            label: 'Stat',
-                            padding: const EdgeInsets.all(0),
-                            foregroundColor: accentColors[3],
-                            backgroundColor: secondaryDark,
-                            icon: Ionicons.bar_chart,
-                            onPressed: ((_) {
-                              Navigator.pushNamed(context, '/stats/all', arguments: _currentCurrencyId);
-                            })
-                          ),
-                        ],
-                      ),
-                      child: _worthBar(),
+              Slidable(
+                endActionPane: ActionPane(
+                  motion: const DrawerMotion(),
+                  extentRatio: 0.35,
+                  children: <SlidableAction>[
+                    SlidableAction(
+                      label: 'Stat',
+                      padding: const EdgeInsets.all(0),
+                      foregroundColor: accentColors[3],
+                      backgroundColor: secondaryDark,
+                      icon: Ionicons.bar_chart,
+                      onPressed: ((_) {
+                        Navigator.pushNamed(context, '/stats/all', arguments: _currentCurrencyId);
+                      })
                     ),
-                    const SizedBox(height: 10,),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      child: Center(
-                        child: CupertinoSegmentedControl<PageName>(
-                          selectedColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
-                          // Provide horizontal padding around the children.
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          // This represents a currently selected segmented control.
-                          groupValue: _resultPageName,
-                          // Callback that sets the selected segmented control.
-                          onValueChanged: (PageName value) {
-                            setState(() {
-                              _resultPageName = value;
-                            });
-                          },
-                          children: const <PageName, Widget>{
-                            PageName.chart: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Text('Chart'),
-                            ),
-                            PageName.expense: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Text('Expense'),
-                            ),
-                            PageName.income: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 20),
-                              child: Text('Income'),
-                            ),
-                          },
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: _scrollController,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            _generateSubPage(),
-                            const SizedBox(height: 30,),
-                          ],
-                        ),
-                      ),
+                    SlidableAction(
+                      label: 'Refresh',
+                      padding: const EdgeInsets.all(0),
+                      foregroundColor: accentColors[6],
+                      backgroundColor: secondaryDark,
+                      icon: Ionicons.refresh,
+                      onPressed: ((_) async {
+                        _getStat = _fetchData(showDialog: true);
+                      })
                     ),
                   ],
+                ),
+                child: _worthBar(),
+              ),
+              const SizedBox(height: 10,),
+              Container(
+                padding: const EdgeInsets.all(10),
+                child: Center(
+                  child: CupertinoSegmentedControl<PageName>(
+                    selectedColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
+                    // Provide horizontal padding around the children.
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    // This represents a currently selected segmented control.
+                    groupValue: _resultPageName,
+                    // Callback that sets the selected segmented control.
+                    onValueChanged: (PageName value) {
+                      setState(() {
+                        _resultPageName = value;
+                      });
+                    },
+                    children: const <PageName, Widget>{
+                      PageName.chart: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Text('Chart'),
+                      ),
+                      PageName.expense: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Text('Expense'),
+                      ),
+                      PageName.income: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Text('Income'),
+                      ),
+                    },
+                  ),
+                ),
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: (() async {
+                    _getStat = _fetchData(showDialog: true);
+                  }),
+                  color: accentColors[0],
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        _generateSubPage(),
+                        const SizedBox(height: 30,),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -467,23 +478,27 @@ class _HomeStatsState extends State<HomeStats> {
         // during refresh, the transaction top might be empty so return sized
         // box shrink first until we got the data.
         if (_transactionTop.isEmpty) {
-          return const SizedBox.shrink();
+          return const Center(child: Text("Fetching data"),);
         }
         else {
           // check if we got the currency id for this or not?
           if (_transactionTop.containsKey(_currentCurrencyId)) {
             // got key, now check if we got the result page name or not?
             if (_transactionTop[_currentCurrencyId]!.containsKey(_resultPageName)) {
-              // got data, let it flow!
+              // got data, check if the data is empty or not?
+              if (_transactionTop[_currentCurrencyId]![_resultPageName]!.isEmpty) {
+                // data for this, return no data
+                return const Center(child: Text("No data"),);
+              }
             }
             else {
               // page name not yet generated, so return SizedBox
-              return const SizedBox.shrink();
+              return const Center(child: Text("Fetching data"),);
             }
           }
           else {
             // no key, just return as SizedBox
-            return const SizedBox.shrink();
+            return const Center(child: Text("Fetching data"),);
           }
         }
 
@@ -514,7 +529,7 @@ class _HomeStatsState extends State<HomeStats> {
           from: _from,
           to: _to,
           data: (_getData(_incomeExpense[_currentCurrencyId])),
-          needColapse: true,
+          needColapse: false,
         );
       default:
         return const SizedBox.shrink();
@@ -553,8 +568,15 @@ class _HomeStatsState extends State<HomeStats> {
     }
   }
 
-  Future<bool> _fetchData([bool? isForce]) async {
+  Future<bool> _fetchData({bool? isForce, bool? showDialog}) async {
     bool currentForce = (isForce ?? true);
+    bool isShowDialog = (showDialog ?? false);
+
+    // check if we need to showe dialog
+    if (isShowDialog) {
+      showLoaderDialog(context);
+    }
+
     // check if the currencies is not empty
     if (_currencies.isNotEmpty) {
       // show debug print to knew that we will fetch data
@@ -575,8 +597,17 @@ class _HomeStatsState extends State<HomeStats> {
         debugPrint("Error on _fetchData");
         debugPrint(error.toString());
         debugPrintStack(stackTrace: stackTrace);
+        // check the loader dialog
+        if (isShowDialog) {
+          Navigator.pop(context);
+        }
         throw Exception("Error when fetch statistic data");
       });
+    }
+
+    // check the loader dialog
+    if (isShowDialog && mounted) {
+      Navigator.pop(context);
     }
 
     return true;

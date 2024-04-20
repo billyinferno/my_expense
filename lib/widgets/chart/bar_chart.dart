@@ -10,8 +10,9 @@ class BarChart extends StatefulWidget {
   final double? barWidth;
   final double? fontSize;
   final bool? needColapse;
+  final bool? showed;
   
-  const BarChart({ super.key, required this.from, required this.to, required this.data, this.barWidth, this.fontSize, this.needColapse });
+  const BarChart({ super.key, required this.from, required this.to, required this.data, this.barWidth, this.fontSize, this.needColapse, this.showed });
 
   @override
   State<BarChart> createState() => _BarChartState();
@@ -33,7 +34,7 @@ class _BarChartState extends State<BarChart> {
     _maxExpense = 0;
     _maxIncome = 0;
     _barWidth = 6;
-    _isShowed = false;
+    _isShowed = (widget.showed ?? false);
 
     _needColapse = (widget.needColapse ?? true);
     if (!_needColapse) {
@@ -69,17 +70,7 @@ class _BarChartState extends State<BarChart> {
       return Container(
         width: double.infinity,
         height: 35,
-        margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: const Color(0xff232d37),
-          borderRadius: BorderRadius.only(
-            topLeft:Radius.circular(_barWidth),
-            topRight: Radius.circular(_barWidth),
-            bottomLeft: Radius.circular(_barWidth),
-            bottomRight: Radius.circular(_barWidth),
-          ),
-        ),
+        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
         child: const Center(
           child: Text("No Data"),
         ),
@@ -89,17 +80,7 @@ class _BarChartState extends State<BarChart> {
       if(_isShowed) {
         return Container(
           width: double.infinity,
-          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: const Color(0xff232d37),
-            borderRadius: BorderRadius.only(
-              topLeft:Radius.circular(_barWidth),
-              topRight: Radius.circular(_barWidth),
-              bottomLeft: Radius.circular(_barWidth),
-              bottomRight: Radius.circular(_barWidth),
-            ),
-          ),
+          padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
