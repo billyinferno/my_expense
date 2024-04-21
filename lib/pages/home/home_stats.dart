@@ -315,6 +315,7 @@ class _HomeStatsState extends State<HomeStats> {
     double amount = _currentWorth.walletsStartBalance + _currentWorth.walletsChangesAmount;
     double currentWorthIncome = (_incomeExpense[_currentWorth.currenciesId] != null ? _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.income)) : 0.0);
     double currentWorthExpense = (_incomeExpense[_currentWorth.currenciesId] != null ? _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.expense)) : 0.0);
+    double totalCurrentWorth = currentWorthIncome + currentWorthExpense;
 
     return GestureDetector(
       onTap: (() {
@@ -400,10 +401,10 @@ class _HomeStatsState extends State<HomeStats> {
                     ),
                   ),
                   Text(
-                    "(${_fCCY.format(currentWorthIncome - currentWorthExpense)})",
+                    "(${_fCCY.format(totalCurrentWorth)})",
                     style: TextStyle(
                       fontSize: 10,
-                      color: (currentWorthIncome + currentWorthExpense < 0 ? accentColors[2] : accentColors[6]),
+                      color: (totalCurrentWorth < 0 ? accentColors[2] : accentColors[6]),
                     ),
                   ),
                   const SizedBox(height: 5,),
