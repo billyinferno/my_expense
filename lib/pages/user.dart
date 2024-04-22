@@ -240,16 +240,8 @@ class _UserPageState extends State<UserPage> {
                                         )
                                       ),
                                     ),
-                                    child: const Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Expanded(
-                                          child: Center(
-                                            child: Text("Expense Category"),
-                                          ),
-                                        ),
-                                      ],
+                                    child: const Center(
+                                      child: Text("Expense Category"),
                                     ),
                                   ),
                                   const SizedBox(
@@ -300,10 +292,8 @@ class _UserPageState extends State<UserPage> {
                                         )
                                       ),
                                     ),
-                                    child: const Expanded(
-                                      child: Center(
-                                          child: Text("Income Category")),
-                                    ),
+                                    child: const Center(
+                                        child: Text("Income Category")),
                                   ),
                                   const SizedBox(
                                     height: 10,
@@ -424,15 +414,7 @@ class _UserPageState extends State<UserPage> {
                                       ),
                                     ),
                                   ),
-                                  child: const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Expanded(
-                                        child: Center(child: Text("Account")),
-                                      ),
-                                    ],
-                                  ),
+                                  child: const Center(child: Text("Account")),
                                 ),
                                 Expanded(
                                   child: ListView.builder(
