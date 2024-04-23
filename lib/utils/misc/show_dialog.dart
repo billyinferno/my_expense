@@ -10,7 +10,8 @@ class ShowMyDialog {
     this.confirmText,
     this.confirmColor,
     this.cancelText,
-    this.cancelColor
+    this.cancelColor,
+    this.cancelEnabled,
   });
 
   final String? dialogTitle;
@@ -19,6 +20,7 @@ class ShowMyDialog {
   final Color? confirmColor;
   final String? cancelText;
   final Color? cancelColor;
+  final bool? cancelEnabled;
 
   Future<bool?> show(BuildContext context) async {
     return showDialog<bool>(
@@ -61,17 +63,20 @@ class ShowMyDialog {
                   ),
                 ),
               ),
-              CupertinoDialogAction(
-                child: Text(
-                  cancelText ?? "Cancel",
-                  style: TextStyle(
-                    fontFamily: '--apple-system',
-                    color: (cancelColor ?? textColor),
+              Visibility(
+                visible: (cancelEnabled ?? true),
+                child: CupertinoDialogAction(
+                  child: Text(
+                    cancelText ?? "Cancel",
+                    style: TextStyle(
+                      fontFamily: '--apple-system',
+                      color: (cancelColor ?? textColor),
+                    ),
                   ),
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
                 ),
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
               ),
             ],
           );
