@@ -355,17 +355,18 @@ class _UserPageState extends State<UserPage> {
                                           description: currencies[index].description,
                                           isSelected: selectedCurrency!.id == currencies[index].id,
                                           onTap: (() {
-                                            setState(() {
-                                              selectedCurrency = currencies[index];
-
-                                              // check if currency the same or not?
-                                              // if not the same then we can perform
-                                              // update on the default budget currency.
-                                              if (selectedCurrency!.id != currentCurrency!.id) {
-                                                // need to update the currency
+                                            // get the selected currencies
+                                            selectedCurrency = currencies[index];
+                                            
+                                            // check if currency the same or not?
+                                            // if not the same then we can perform
+                                            // update on the default budget currency.
+                                            if (selectedCurrency!.id != currentCurrency!.id) {
+                                              // need to update the currency
+                                              setState(() {
                                                 updateBudgetCurrency(currencies[index].id);
-                                              }
-                                            });
+                                              });
+                                            }
                                             Navigator.pop(context);
                                           }),
                                           child: FittedBox(
@@ -426,17 +427,18 @@ class _UserPageState extends State<UserPage> {
                                         description: wallets[index].name,
                                         isSelected: (currentWallet!.id == wallets[index].id),
                                         onTap: (() {
-                                          setState(() {
-                                            selectedWallet = wallets[index];
-                                            // check if currency the same or not?
-                                            // if not the same then we can perform
-                                            // update on the default budget currency.
-                                            if (selectedWallet!.id != currentWallet!.id) {
-                                              // need to update the currency
+                                          // get current selected wallet
+                                          selectedWallet = wallets[index];
+
+                                          // check if currency the same or not?
+                                          // if not the same then we can perform
+                                          // update on the default budget currency.
+                                          if (selectedWallet!.id != currentWallet!.id) {
+                                            // need to update the currency
+                                            setState(() {
                                               updateDefaultWallet(wallets[index].id);
-                                            }
-                                          });
-                                          Navigator.pop(context);
+                                            });
+                                          }
                                         }),
                                         child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
                                       );
@@ -771,7 +773,7 @@ class _UserPageState extends State<UserPage> {
     // get the current date of the budget that we need to load
     String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
 
-    Future.wait([
+    await Future.wait([
       budgetHTTP.updateBudgetCurrency(currencyID),
       futureBudgetList = budgetHTTP.fetchBudgetDate(currencyID, currentBudgetDate),
     ]).then((_) {
@@ -815,9 +817,7 @@ class _UserPageState extends State<UserPage> {
     // show the loader dialog
     showLoaderDialog(context);
 
-    Future.wait([
-      walletHTTP.updateDefaultWallet(walletId),
-    ]).then((_) {
+    await walletHTTP.updateDefaultWallet(walletId).then((_) {
       refreshUserMe();
       currentWallet = selectedWallet!;
       Navigator.pop(context);
@@ -846,13 +846,24 @@ class _UserPageState extends State<UserPage> {
         )
       );
     });
+
+    // remove the bottom sheet
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   Future<void> refreshTransactionTag() async {
-    Future.wait([
+    // show loader dialog
+    showLoaderDialog(context);
+
+    await Future.wait([
       transactionHTTP.fetchLastTransaction("income", true),
       transactionHTTP.fetchLastTransaction("expense", true)
     ]).then((_) {
+      // remove the loader
+      Navigator.pop(context);
+
       // finished fetch the last transaction income and expense
       // showed a message on the scaffold telling that the refresh is finished
       ScaffoldMessenger.of(context).showSnackBar(
@@ -864,6 +875,13 @@ class _UserPageState extends State<UserPage> {
           )
         )
       );
+    }).onError((error, stackTrace) {
+      debugPrint("Got error when refresh transaction tag");
+      debugPrint(error.toString());
+      debugPrintStack(stackTrace: stackTrace);
+
+      // remove the loader
+      Navigator.pop(context);
     });
   }
 
