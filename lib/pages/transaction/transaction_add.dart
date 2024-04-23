@@ -11,8 +11,8 @@ import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/function/date_utils.dart';
+import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
@@ -69,9 +69,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     // show the loader
     showLoaderDialog(context);
     // now we can try to send updated data to the backend
-    await _transactionHttp.addTransaction(context, txn!, selectedDate).then((result) {
+    await _transactionHttp.addTransaction(context, txn!, selectedDate).then((result) async {
       // update necessary information after we add the transaction
-      _updateInformation(result).then((_) {
+      await _updateInformation(result).then((_) {
         // get the transaction edit date
         String date = DateFormat('yyyy-MM-dd').format(txn.date.toLocal());
         
@@ -86,27 +86,37 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         }
         
         // finished update information
-      }).onError((error, stackTrace) {
+      }).onError((error, stackTrace) async {
         // pop the loader
         Navigator.pop(context);
 
-        // on error showed the snackBar
-        ScaffoldMessenger.of(context).showSnackBar(
-          createSnackBar(
-            message: "Error when refresh information",
-          )
-        );
+        // print the error
+        debugPrint("Error: ${error.toString()}");
+        debugPrintStack(stackTrace: stackTrace);
+
+        // show the error dialog
+        await ShowMyDialog(
+          cancelEnabled: false,
+          confirmText: "OK",
+          dialogTitle: "Error Refresh",
+          dialogText: "Error when refresh information."
+        ).show(context);
       });
-    }).onError((error, stackTrace) {
+    }).onError((error, stackTrace) async {
       // pop the loader
       Navigator.pop(context);
 
-      // on error showed the snackBar
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Error when add transaction",
-        )
-      );
+      // print the error
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stackTrace);
+
+      // show the error dialog
+      await ShowMyDialog(
+        cancelEnabled: false,
+        confirmText: "OK",
+        dialogTitle: "Error Add",
+        dialogText: "Error when add transaction."
+      ).show(context);
     });
   }
 

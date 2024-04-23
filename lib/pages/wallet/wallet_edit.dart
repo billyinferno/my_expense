@@ -13,8 +13,8 @@ import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/misc/decimal_formatter.dart';
+import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
@@ -111,22 +111,27 @@ class _WalletEditPageState extends State<WalletEditPage> {
           IconButton(
             onPressed: () async {
               showLoaderDialog(context);
-              await updateTransaction().then((_) {
+              await _updateWallet().then((_) {
                 // remove the loader
                 Navigator.pop(context);
 
                 // finished, so we can just go back to the previous page
                 Navigator.pop(context);
-              }).onError((error, stackTrace) {
+              }).onError((error, stackTrace) async {
                 // remove the loader
                 Navigator.pop(context);
 
-                // show the snackbar here?
-                ScaffoldMessenger.of(context).showSnackBar(
-                  createSnackBar(
-                    message: error.toString(),
-                  )
-                );
+                // print the error
+                debugPrint("Error: ${error.toString()}");
+                debugPrintStack(stackTrace: stackTrace);
+
+                // show the error dialog
+                await ShowMyDialog(
+                  cancelEnabled: false,
+                  confirmText: "OK",
+                  dialogTitle: "Error Update",
+                  dialogText: "Unable to update wallet data."
+                ).show(context);
               });
             },
             icon: const Icon(
@@ -457,7 +462,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
     }
   }
 
-  Future<void> updateTransaction() async {
+  Future<void> _updateWallet() async {
     // perform validation, in case there are any error, then just throw an
     // exception, it will automatically create the snackbar, as we already
     // using future for the transaction.

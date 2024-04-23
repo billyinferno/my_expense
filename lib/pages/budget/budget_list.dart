@@ -113,13 +113,18 @@ class _BudgetListPageState extends State<BudgetListPage> {
               await _updateBudgetList().then((_) {
                 // this is success, we can going back from this page
                 Navigator.pop(context);
-              }).onError((error, stackTrace) {
-                // show the snack bar
-                ScaffoldMessenger.of(context).showSnackBar(
-                  createSnackBar(
-                    message: error.toString(),
-                  )
-                );
+              }).onError((error, stackTrace) async {
+                // print the error
+                debugPrint("Error ${error.toString()}");
+                debugPrintStack(stackTrace: stackTrace);
+
+                // show dialog of error
+                await ShowMyDialog(
+                  cancelEnabled: false,
+                  confirmText: "OK",
+                  dialogTitle: "Error Update Budget",
+                  dialogText: "Error while updating budget list."
+                ).show(context);
               });
             },
             icon: const Icon(
@@ -235,15 +240,21 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                               Ionicons.checkmark_circle_outline,
                                               color: accentColors[6],
                                             ),
-                                          )
+                                          ),
                                         );
-                                      }).onError((error, stackTrace) {
+                                      }).onError((error, stackTrace) async {
+                                        // print the error
+                                        debugPrint("ERROR: ${error.toString()}");
+                                        debugPrintStack(stackTrace: stackTrace);
+
+                                        // show error dialog
+                                        await ShowMyDialog(
+                                          cancelEnabled: false,
+                                          confirmText: "OK",
+                                          dialogTitle: "Error Add Budget",
+                                          dialogText: "Error while add budget category."
+                                        ).show(context);
                                         // show the snack bar of error
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          createSnackBar(
-                                            message: error.toString(),
-                                          )
-                                        );
                                       });
                                     }
                                     // remove the modal dialog

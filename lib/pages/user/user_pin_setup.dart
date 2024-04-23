@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/pin_api.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/widgets/input/pin_pad.dart';
 
 class PinSetupPage extends StatefulWidget {
@@ -63,7 +63,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
                 PinPad(
                   hashPin: '',
                   hashKey: '',
-                  getPin: (value) {
+                  getPin: (value) async {
                     // got the pin, check whether this is 1st or 2nd
                     if(_firstPin.isEmpty) {
                       _firstPin = value;
@@ -78,11 +78,14 @@ class _PinSetupPageState extends State<PinSetupPage> {
                         // verify whether both pin is the same or not?
                         if(_firstPin != _secondPin) {
                           // show error, and reset all
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            createSnackBar(
-                              message: "PIN didn't match",
-                            )
-                          );
+                          // show the error dialog
+                          await ShowMyDialog(
+                            cancelEnabled: false,
+                            confirmText: "OK",
+                            dialogTitle: "Error",
+                            dialogText: "PIN didn't match."
+                          ).show(context);
+
                           setState(() {
                             _stage = 1;
                             _firstPin = "";
@@ -114,18 +117,21 @@ class _PinSetupPageState extends State<PinSetupPage> {
       // pin already set, so now we can pop from this page
       // and tell it's true
       Navigator.pop(context, true);
-    }).onError((error, stackTrace) {
+    }).onError((error, stackTrace) async {
       // pop the loader dialog
       Navigator.pop(context);
 
-      debugPrint("Error on <_savePin>");
-      debugPrint(error.toString());
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stackTrace);
+
+      // show the error dialog
+      await ShowMyDialog(
+        cancelEnabled: false,
+        confirmText: "OK",
+        dialogTitle: "Error Save",
+        dialogText: "Error when Save PIN"
+      ).show(context);
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Error when Save PIN",
-        )
-      );
       setState(() {
         _stage = 1;
         _firstPin = "";

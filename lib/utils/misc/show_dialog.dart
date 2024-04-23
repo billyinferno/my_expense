@@ -49,38 +49,48 @@ class ShowMyDialog {
                 ],
               ),
             ),
-            actions: <Widget>[
-              CupertinoDialogAction(
-                isDefaultAction: true,
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-                child: Text(
-                  confirmText ?? "Confirm",
-                  style: TextStyle(
-                    fontFamily: '--apple-system',
-                    color: (confirmColor ?? accentColors[0]),
-                  ),
-                ),
-              ),
-              Visibility(
-                visible: (cancelEnabled ?? true),
-                child: CupertinoDialogAction(
-                  child: Text(
-                    cancelText ?? "Cancel",
-                    style: TextStyle(
-                      fontFamily: '--apple-system',
-                      color: (cancelColor ?? textColor),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                ),
-              ),
-            ],
+            actions: _generateActionButton(context),
           );
         }
     );
+  }
+
+  List<CupertinoDialogAction> _generateActionButton(BuildContext context) {
+    List<CupertinoDialogAction> ret = [
+      CupertinoDialogAction(
+        isDefaultAction: true,
+        onPressed: () {
+          Navigator.pop(context, true);
+        },
+        child: Text(
+          confirmText ?? "Confirm",
+          style: TextStyle(
+            fontFamily: '--apple-system',
+            color: (confirmColor ?? accentColors[0]),
+          ),
+        ),
+      ),
+    ];
+
+    // check if we need to enabled the cancel button or not?
+    if (cancelEnabled ?? true) {
+      ret.add(
+        CupertinoDialogAction(
+          child: Text(
+            cancelText ?? "Cancel",
+            style: TextStyle(
+              fontFamily: '--apple-system',
+              color: (cancelColor ?? textColor),
+            ),
+          ),
+          onPressed: () {
+            Navigator.pop(context, false);
+          },
+        )
+      );
+    }
+
+    // return the dialog button
+    return ret;
   }
 }

@@ -730,21 +730,25 @@ class _UserPageState extends State<UserPage> {
     showLoaderDialog(context);
 
     await categoryHTTP.updateDefaultCategory(type, categoryID).then((_) {
+      String newCategoryName = '';
+
       // refresh the user me, as we already stored the updated user me
       // in the shared preferences
       refreshUserMe();
 
       if (type == "expense") {
         currentExpenseCategory = selectedExpenseCategory;
+        newCategoryName = currentExpenseCategory!.name;
       } else {
         currentIncomeCategory = selectedIncomeCategory;
+        newCategoryName = currentIncomeCategory!.name;
       }
 
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
         createSnackBar(
-          message: "Default category updated",
+          message: "Default $type updated to $newCategoryName",
           icon: Icon(
             Ionicons.checkmark_circle_outline,
             color: accentColors[6],
@@ -752,7 +756,7 @@ class _UserPageState extends State<UserPage> {
         )
       );
     }).onError((error, stackTrace) {
-      debugPrint("Got error when update default category!");
+      debugPrint("Got error when update default $type category!");
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
 
@@ -760,7 +764,7 @@ class _UserPageState extends State<UserPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         createSnackBar(
-          message: "Unable to update default category",
+          message: "Unable to update default $type",
         )
       );
     });
@@ -906,15 +910,13 @@ class _UserPageState extends State<UserPage> {
           pinUser = PinSharedPreferences.getPin();
 
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              createSnackBar(
-                message: "PIN is removed",
-                icon: Icon(
-                  Ionicons.checkmark_circle_outline,
-                  color: accentColors[6],
-                )
-              )
-            );
+            await ShowMyDialog(
+              dialogTitle: "PIN Removed",
+              dialogText: "Successfully remove PIN",
+              confirmText: "OK",
+              confirmColor: accentColors[0],
+              cancelEnabled: false,
+            ).show(context);
           }
         }
       }

@@ -3,8 +3,8 @@ import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/pin_api.dart';
 import 'package:my_expense/model/pin_model.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_pin.dart';
 import 'package:my_expense/widgets/input/pin_pad.dart';
 
@@ -17,12 +17,15 @@ class PinRemovePage extends StatefulWidget {
 
 class _PinRemovePageState extends State<PinRemovePage> {
   late PinModel? pin;
+  late int tries;
   final PinHTTPService pinHttp = PinHTTPService();
 
   @override
   void initState() {
-    super.initState();
     pin = PinSharedPreferences.getPin();
+    tries = 1;
+
+    super.initState();
   }
 
   @override
@@ -68,12 +71,17 @@ class _PinRemovePageState extends State<PinRemovePage> {
                 PinPad(
                   hashPin: (pin!.hashPin ?? ''),
                   hashKey: (pin!.hashKey ?? ''),
-                  onError: (() {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      createSnackBar(
-                        message: "Wrong Passcode",
-                      )
-                    );
+                  onError: (() async {
+                    // show the error dialog
+                    await ShowMyDialog(
+                      cancelEnabled: false,
+                      confirmText: "OK",
+                      dialogTitle: "Error",
+                      dialogText: "Wrong Passcode ($tries tries)."
+                    ).show(context);
+
+                    // add tries
+                    tries += 1;
                   }),
                   onSuccess: (() {
                     showLoaderDialog(context);
@@ -99,18 +107,20 @@ class _PinRemovePageState extends State<PinRemovePage> {
       // pin already removed, and by right it should be already updated
       // the pin information on the shared preferences.
       Navigator.pop(context, true);
-    }).onError((error, stackTrace) {
+    }).onError((error, stackTrace) async {
       // pop the loader
       Navigator.pop(context);
 
-      debugPrint("Error when <_removePin>");
-      debugPrint(error.toString());
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stackTrace);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Error when Remove PIN",
-        )
-      );
+      // show the error dialog
+      await ShowMyDialog(
+        cancelEnabled: false,
+        confirmText: "OK",
+        dialogTitle: "Error",
+        dialogText: "Error when removing PIN from backend."
+      ).show(context);
     });
   }
 }

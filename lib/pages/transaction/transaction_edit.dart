@@ -10,8 +10,8 @@ import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/function/date_utils.dart';
+import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
@@ -59,9 +59,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     // send also the date we got from the parent widget, to see whether there
     // are any changes on the date of the transaction. If there are changes
     // then it means we need to manipulate 2 shared preferences instead of one.
-    await _transactionHttp.updateTransaction(context, txn!, paramsData).then((txnUpdate) {
+    await _transactionHttp.updateTransaction(context, txn!, paramsData).then((txnUpdate) async {
       // update necessary information after we add the transaction
-      updateInformation(txnUpdate).then((_) {
+      await updateInformation(txnUpdate).then((_) {
         // for transaction that actually add on the different date, we cannot notify the home list
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
@@ -84,27 +84,37 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         // since we already finished, we can pop again to return back to the
         // previous page
         Navigator.pop(context, txnUpdate);
-      }).onError((error, stackTrace) {
+      }).onError((error, stackTrace) async {
         // pop the loader
         Navigator.pop(context);
 
-        // on error showed the snackBar
-        ScaffoldMessenger.of(context).showSnackBar(
-          createSnackBar(
-            message: "Error when refresh information",
-          )
-        );
+        // print the error
+        debugPrint("Error: ${error.toString()}");
+        debugPrintStack(stackTrace: stackTrace);
+
+        // show the error dialog
+        await ShowMyDialog(
+          cancelEnabled: false,
+          confirmText: "OK",
+          dialogTitle: "Error Refresh",
+          dialogText: "Error when refresh information."
+        ).show(context);
       });
-    }).onError((error, stackTrace) {
+    }).onError((error, stackTrace) async {
       // pop the loader
       Navigator.pop(context);
 
-      // on error showed the snackBar
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Error when update transaction",
-        )
-      );
+      // print the error
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stackTrace);
+
+      // show the error dialog
+      await ShowMyDialog(
+        cancelEnabled: false,
+        confirmText: "OK",
+        dialogTitle: "Error Update",
+        dialogText: "Error when update transaction."
+      ).show(context);
     });
   }
 

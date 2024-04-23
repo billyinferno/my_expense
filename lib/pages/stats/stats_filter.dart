@@ -13,8 +13,8 @@ import 'package:my_expense/model/wallet_type_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/args/stats_detail_args.dart';
+import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
@@ -778,14 +778,21 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
         // navigate to stats detail
         Navigator.pushNamed(context, '/stats/detail', arguments: args);
-      }).onError((error, stackTrace) {
+      }).onError((error, stackTrace) async {
         // pop the loader
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          createSnackBar(
-            message: error.toString(),
-          )
-        );
+
+        // print the error
+        debugPrint("Error: ${error.toString()}");
+        debugPrintStack(stackTrace: stackTrace);
+
+        // show the error dialog
+        await ShowMyDialog(
+          cancelEnabled: false,
+          confirmText: "OK",
+          dialogTitle: "Error Fetch",
+          dialogText: "Error while fetching stats information from server."
+        ).show(context);
       });
     }
   }

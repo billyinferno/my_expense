@@ -5,8 +5,8 @@ import 'package:my_expense/model/error_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/misc/error_parser.dart';
+import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 
 class UserChangePassword extends StatefulWidget {
@@ -161,25 +161,28 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                       padding: const EdgeInsets.all(10),
                       child: MaterialButton(
                         minWidth: double.infinity,
-                        onPressed: (() {
-                          _updatePassword().then((value) {
+                        onPressed: (() async {
+                          await _updatePassword().then((value) async {
                             // showed that we already success update the password
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              createSnackBar(
-                                message: "Password updated",
-                                icon: Icon(
-                                  Ionicons.checkmark_circle,
-                                  size: 20,
-                                  color: accentColors[0],
-                                ),
-                              )
-                            );
-                          }).onError((error, stackTrace) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              createSnackBar(
-                                message: error.toString(),
-                              )
-                            );
+                            await ShowMyDialog(
+                              cancelEnabled: false,
+                              confirmText: "OK",
+                              confirmColor: accentColors[0],
+                              dialogTitle: "Updated",
+                              dialogText: "Password update successfully."
+                            ).show(context);
+                          }).onError((error, stackTrace) async {
+                            // print the error
+                            debugPrint("Error: ${error.toString()}");
+                            debugPrintStack(stackTrace: stackTrace);
+
+                            // show the error dialog
+                            await ShowMyDialog(
+                              cancelEnabled: false,
+                              confirmText: "OK",
+                              dialogTitle: "Error Update",
+                              dialogText: "Error when update password."
+                            ).show(context);
                           });
                         }),
                         color: accentColors[0],
