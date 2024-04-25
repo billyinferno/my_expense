@@ -1,6 +1,8 @@
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_simple_calculator/flutter_simple_calculator.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/model/category_model.dart';
@@ -20,7 +22,6 @@ import 'package:my_expense/utils/prefs/shared_category.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/input/calcbutton.dart';
 import 'package:my_expense/widgets/input/type_slide.dart';
 import 'package:my_expense/widgets/item/expand_animation.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
@@ -29,10 +30,6 @@ import 'package:table_calendar/table_calendar.dart';
 
 enum TransactionInputType {
   add, edit
-}
-
-enum CalculatorOperation {
-  none, add, subtract, multiply, divide, percentage, equal 
 }
 
 class TransactionInput extends StatefulWidget {
@@ -63,12 +60,10 @@ class _TransactionInputState extends State<TransactionInput> {
   final ScrollController _transferToWalletController = ScrollController();
 
   final TextEditingController _nameController  = TextEditingController();
-  final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _exchangeController = TextEditingController();
 
   final FocusNode _nameFocus = FocusNode();
-  final FocusNode _amountFocus = FocusNode();
   
   final fCCY = NumberFormat("0.00", "en_US");
 
@@ -100,16 +95,13 @@ class _TransactionInputState extends State<TransactionInput> {
 
   late double _currentExchangeRate;
 
+  late double _currentAmount;
   late double _currentAmountFontSize;
 
   late List<LastTransactionModel> _filterList;
   late List<LastTransactionModel> _lastExpense;
   late List<LastTransactionModel> _lastIncome;
   late List<WalletModel> _walletList;
-
-  late CalculatorOperation _calcOperand;
-  late double _calcMemoryAmount;
-  late bool _calcAmountReset;
 
   late bool _showCalendar;
   late bool _showDescription;
@@ -132,9 +124,21 @@ class _TransactionInputState extends State<TransactionInput> {
     // once we got the date, convert the current date to local here
     _currentDate = _currentDate.toLocal();
 
+    // get the default current amount
+    _currentAmount = 0;
+    if (widget.currentTransaction != null) {
+      _currentAmount = widget.currentTransaction!.amount;
+    }
+
     // text field variable
     // default font size of the amount text field to 25
-    _currentAmountFontSize = 25;
+    if (_currentAmount <= 0) {
+      _currentAmountFontSize = 25;
+    }
+    else {
+      // calculate the actual current amount font size
+      _currentAmountFontSize = min(25, 25 - ((10/6) * (fCCY.format(_currentAmount).length - 6)));
+    }
 
     // check the type by checkiung if we send current transaction or not?
     if (widget.currentTransaction == null) {
@@ -156,11 +160,6 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // get the list of enabled wallet
     _walletList = WalletSharedPreferences.getWallets(false);
-
-    // initialize calculator
-    _calcOperand = CalculatorOperation.none;
-    _calcMemoryAmount = 0;
-    _calcAmountReset = false;
 
     // set the show calendar as false
     _showCalendar = false;
@@ -191,10 +190,6 @@ class _TransactionInputState extends State<TransactionInput> {
     _nameFocus.dispose();
     _nameController.dispose();
 
-    // amount fields
-    _amountFocus.dispose();
-    _amountController.dispose();
-
     _descriptionController.dispose();
     _exchangeController.dispose();
     
@@ -220,16 +215,6 @@ class _TransactionInputState extends State<TransactionInput> {
     
     // set the current wallet being used
     _getUserFromWalletInfo(walletId: widget.currentTransaction!.wallet.id);
-
-    // set the current amount
-    _amountController.text = fCCY.format(widget.currentTransaction!.amount);
-
-    // set the current amount font size based on the current value
-    if(_amountController.text.length > 6) {
-      // change the font size
-      // target is 15 when 12 is filled
-      _currentAmountFontSize = 25 - ((10/6) * (_amountController.text.length - 6));
-    }
 
     // set the selected date based on the current transaction date
     _currentDate = widget.currentTransaction!.date;
@@ -662,12 +647,12 @@ class _TransactionInputState extends State<TransactionInput> {
                   onTap: (() {
                     _filterAutoComplete(_nameController.text);
                   }),
-                  onFieldSubmitted: ((value) {
+                  onFieldSubmitted: ((value) async {
                     // ensure that the value got some length, before we focus
                     // on the amount controller
                     if(value.trim().isNotEmpty) {
-                      // focus directly to the amount
-                      FocusScope.of(context).requestFocus(_amountFocus);
+                      // show the calculator
+                      await _showCalculator();
                     }
                   }),
                   textInputAction: TextInputAction.done,
@@ -693,108 +678,84 @@ class _TransactionInputState extends State<TransactionInput> {
         const SizedBox(width: 10,),
         SizedBox(
           width: 120,
-          child: TextFormField(
-            controller: _amountController,
-            focusNode: _amountFocus,
-            showCursor: true,
-            textAlign: TextAlign.right,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            // showCursor: true,
-            // readOnly: true,
-            decoration: const InputDecoration(
-              hintText: "0.00",
-              border: OutlineInputBorder(
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: EdgeInsets.zero,
-              isCollapsed: true,
-            ),
-            style: TextStyle(
-              fontSize: _currentAmountFontSize,
-              fontWeight: FontWeight.bold,
-            ),
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(12),
-              DecimalTextInputFormatter(decimalRange: 3),
-            ],
-            onChanged: (value) {
-              setState(() {
-                // check whether this is amount reset or not?
-                if (_calcAmountReset) {
-                  // reset the amount controller as we will just use the last
-                  // one input by user.
-                  // get the last digit input by the user
-                  String lastDigit = value.substring(value.length - 1);
-                  double? lastDigitValue = double.tryParse(lastDigit);
-
-                  // ensure last digit is number, otherwise we can just make
-                  // it blank.
-                  if ((lastDigitValue ?? 0) > 0) {
-                    // set the last digit into amount controller
-                    _amountController.text = lastDigit;
-
-                    // set the cursor on the back so it will not override
-                    // the current text
-                    _amountController.selection = TextSelection.fromPosition(
-                      TextPosition(
-                        offset: _amountController.text.length
-                      )
-                    );
-                  }
-                  else {
-                    // just make it blank
-                    _amountController.text = "";
-                  }
-
-                  // reset the font size
-                  _currentAmountFontSize = 25;
-
-                  // reset back the amount reset into false
-                  _calcAmountReset = false;
-                }
-                else {
-                  // check what is the length of the text now, and change the
-                  // fontsize based on the length
-                  if(value.length > 6) {
-                    // change the font size
-                    // target is 15 when 12 is filled
-                    _currentAmountFontSize = 25 - ((10/6) * (value.length - 6));
-                  }
-                  else {
-                    _currentAmountFontSize = 25;
-                  }
-                }
-              });
-            },
-            onFieldSubmitted: ((_) {
-              // reset the calculator variable here, except calc memory amount
-              _calcOperand = CalculatorOperation.none;
-              _calcAmountReset = false;
+          child: GestureDetector(
+            onTap: (() async {
+              await _showCalculator();
             }),
-            onTap: () {
-              setState(() {
-                // check whether we already have amount?
-                // if already then we need to put that amount on the calculator
-                // memory, as user probably want to perform some calculation
-                // with the number
-                if (_amountController.text.trim().isNotEmpty) {
-                  // try to parse the amount
-                  double? currentAmount = double.tryParse(_amountController.text.trim());
-                  
-                  // check if this is more than 0 or not?
-                  if ((currentAmount ?? 0) > 0) {
-                    _calcMemoryAmount = currentAmount!;
-                  }
-                }
-
-                // reset all the calculator
-                _calcOperand = CalculatorOperation.none;
-                _calcAmountReset = false;
-              });
-            },
+            child: Text(
+              fCCY.format(_currentAmount),
+              style: TextStyle(
+                fontSize: _currentAmountFontSize,
+                color: textColor,
+              ),
+              textAlign: TextAlign.end,
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Future<void> _showCalculator() async {
+    return showModalBottomSheet(
+      isScrollControlled: true,
+      isDismissible: false,
+      useSafeArea: true,
+      context: context,
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.75,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: double.infinity,
+                color: secondaryDark,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: (() {
+                      Navigator.pop(context);
+                    }),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(50, 10, 10, 10),
+                      color: Colors.transparent,
+                      child: const Text(
+                        "DONE",
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    )
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SimpleCalculator(
+                  value: _currentAmount,
+                  hideExpression: false,
+                  hideSurroundingBorder: true,
+                  autofocus: true,
+                  theme: CalculatorThemeData(
+                    operatorColor: Colors.orange[600],
+                  ),
+                  onChanged: (key, value, expression) {
+                    setState(() {
+                      // set the current amount as previous current amount if value is null
+                      _currentAmount = (value ?? _currentAmount);
+
+                      // calculate the current amount font size
+                      _currentAmountFontSize = min(25, 25 - ((10/6) * (fCCY.format(_currentAmount).length - 6)));
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1055,9 +1016,6 @@ class _TransactionInputState extends State<TransactionInput> {
     if (_nameFocus.hasFocus) {
       return _buildAutoComplete();
     }
-    else if (_amountFocus.hasFocus) {
-      return _buildCalculator();
-    }
     else {
       return const SizedBox.shrink();
     }
@@ -1082,15 +1040,16 @@ class _TransactionInputState extends State<TransactionInput> {
           scrollDirection: Axis.horizontal,
           itemBuilder: ((context, index) {
             return GestureDetector(
-              onTap: (() {
+              onTap: (() async {
                 // set automatically the name controller text, and the category
                 // based on the auto complete selection
                 setState(() {
                   _nameController.text = _filterList[index].name;
                   _getCurrentCategoryIconAndColor(categoryId: _filterList[index].category.id);
-                  // focus directly to the amount
-                  FocusScope.of(context).requestFocus(_amountFocus);
                 });
+
+                // show the calculator
+                await _showCalculator();
               }),
               child: Container(
                 margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -1106,266 +1065,6 @@ class _TransactionInputState extends State<TransactionInput> {
         ),
       ),
     );
-  }
-
-  Widget _buildCalculator() {
-    return Container(
-      height: 55,
-      padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-      width: MediaQuery.of(context).size.width,
-      color: Colors.grey[850],
-      child: TextFieldTapRegion(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            CalcButton(
-              color: Colors.white,
-              onTap: (() {
-                // clear the calc memory
-                setState(() {                    
-                  // reset the amount      
-                  _amountController.text = "";
-                  _currentAmountFontSize = 25;
-        
-                  // reset calculator
-                  _calcAmountReset = false;
-                  _calcMemoryAmount = 0;
-                  _calcOperand = CalculatorOperation.none;
-                });
-              }),
-              child: const Center(
-                child: Text(
-                  "AC",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: primaryBackground,
-                  ),
-                )
-              ),
-            ),
-            CalcButton(
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.add);
-              }),
-              child: const Center(
-                child: Text(
-                  "+",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              ),
-            ),
-            CalcButton(
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.subtract);
-              }),
-              child: const Center(
-                child: Text(
-                  "-",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              ),
-            ),
-            CalcButton(
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.multiply);
-              }),
-              child: const Center(
-                child: Text(
-                  "×",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              ),
-            ),
-            CalcButton(
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.divide);
-              }),
-              child: const Center(
-                child: Text(
-                  "÷",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              ),
-            ),
-            CalcButton(
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.percentage);
-              }),
-              child: const Center(
-                child: Text(
-                  "%",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              ),
-            ),
-            CalcButton(
-              color: Colors.orange,
-              onTap: (() {
-                _performCalculation(CalculatorOperation.equal);
-              }),
-              child: const Center(
-                child: Text(
-                  "=",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _performCalculation(CalculatorOperation operand) {
-    // ensure that we have length on the controller before we perform any
-    // calculation.
-    if (_amountController.text.trim().isNotEmpty) {
-      // we have amount data in the amount controller, try to parse it and see
-      // if this is more than 0 or not?
-      double? currentAmount = double.tryParse(_amountController.text.trim());
-      if ((currentAmount ?? 0) > 0) {
-        // current amount is more than 0, we can perform calculation here
-        
-        // percentaga have special way where it will just perform calculation
-        // on the current amount and put on the calculator text fields.
-        if (operand == CalculatorOperation.percentage) {
-          // percentage will just change what is the current amount
-          // to percent format (/ 100), and put this on the amount
-          // controller
-          currentAmount = currentAmount! / 100;
-          _amountController.text = fCCY.format(currentAmount);
-
-          // return and no need to perform the rest
-          return;
-        }
-        else {
-          // first check the current operand
-          if (_calcOperand == CalculatorOperation.none) {
-            // means this is the first one.
-            // store current amount to calc amount
-            _calcMemoryAmount = currentAmount!;
-            
-            // set the amount reset, so when user type new number it will be
-            // reseted from that number only
-            _calcAmountReset = true;
-            
-            // set the calc operand to this operand
-            _calcOperand = operand;
-          }
-          else {
-            // user press operand, but if they press operand with amount reset,
-            // it means that user haven't type anything and keep pressing the
-            // operand button only on the calculator.
-            // in this case we don't need to perform the operand
-            if (!_calcAmountReset) {
-              // user already type something after press operand, here we can         
-              // check which operand that we will perform
-              switch (operand) {
-                case CalculatorOperation.add:
-                case CalculatorOperation.subtract:
-                case CalculatorOperation.multiply:
-                case CalculatorOperation.divide:
-                  // perform calculation for the previous operand, and store it
-                  // on the memory.
-                  _calcMemoryAmount = _performOperand(
-                    operand: _calcOperand,
-                    currentAmount: currentAmount!,
-                    memoryAmount: _calcMemoryAmount,
-                  );
-
-                  // display the memory amount on the amount controller
-                  _amountController.text = fCCY.format(_calcMemoryAmount);
-
-                  // set the calc operand to current operand
-                  _calcOperand = operand;
-                  break;
-                case CalculatorOperation.equal:
-                  // for equal it means that we will need to perform the
-                  // calculation.
-                  _calcMemoryAmount = _performOperand(
-                    operand: _calcOperand,
-                    currentAmount: currentAmount!,
-                    memoryAmount: _calcMemoryAmount,
-                  );
-
-                  // once got the total amount, then we can put it on the amount
-                  // controller.
-                  _amountController.text = fCCY.format(_calcMemoryAmount);
-
-                  // reset the calculator operand to none
-                  _calcOperand = CalculatorOperation.none;
-                  break;
-                case CalculatorOperation.percentage:
-                case CalculatorOperation.none:
-                  // nothing to do here
-                  return;
-              }
-
-              // set the calc amount reset into true, since user can also add number
-              _calcAmountReset = true;
-            }
-            else {
-              // check if user press the same operand or not?
-              // if user not pressing the same operand, it might be because they
-              // want to change the operand, e.g. from add to subtract.
-              if (_calcOperand != operand) {
-                // change the stored operand with this
-                _calcOperand = operand;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  double _performOperand({
-    required CalculatorOperation operand,
-    required double currentAmount,
-    required double memoryAmount}) {
-    
-    switch (operand) {
-      case CalculatorOperation.add:
-        return memoryAmount + currentAmount;
-      case CalculatorOperation.subtract:
-        return memoryAmount - currentAmount;
-      case CalculatorOperation.multiply:
-        return memoryAmount * currentAmount;
-      case CalculatorOperation.divide:
-        return memoryAmount / currentAmount;
-      case CalculatorOperation.percentage:
-      case CalculatorOperation.none:
-      case CalculatorOperation.equal:
-        // nothing to do for this
-        break;
-    }
-
-    return 0;
   }
 
   List<Widget> _generateIconCategory() {
@@ -1601,17 +1300,12 @@ class _TransactionInputState extends State<TransactionInput> {
     }
 
     // check if the amount is not empty
-    if (_amountController.text.trim().isEmpty) {
-      throw Exception('Amount cannot be empty');
+    if (_currentAmount <= 0) {
+      throw Exception('Amount should be more than 0');
     }
     else {
-      // we got amount, try to convert it
-      currentAmount = double.tryParse(_amountController.text);
-
-      // check it this is more than 0?
-      if ((currentAmount ?? 0) <= 0) {
-        throw Exception('Amount should be more than 0');
-      }
+      // we got the amount
+      currentAmount = _currentAmount;
     }
 
     // check if wallet already selected or not?
@@ -1655,7 +1349,7 @@ class _TransactionInputState extends State<TransactionInput> {
       _currentClear,
       _descriptionController.text.trim(),
       usersPermissionsUser,
-      currentAmount!,
+      currentAmount,
       walletTo,
       _currentExchangeRate
     );

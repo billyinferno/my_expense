@@ -17,6 +17,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
+  auto_size_text:
+    dependency: transitive
+    description:
+      name: auto_size_text
+      sha256: "3f5261cd3fb5f2a9ab4e2fc3fba84fd9fcaac8821f20a1d4e71f557521b22599"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   badges:
     dependency: "direct main"
     description:
@@ -105,6 +113,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.10"
+  expressions:
+    dependency: transitive
+    description:
+      name: expressions
+      sha256: "0a3a207dc4697bbb0e17c731c7f10f2df6f88d9dbb99ac83c4168a10b57e7a20"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.5+1"
   fake_async:
     dependency: transitive
     description:
@@ -134,6 +150,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.0"
+  flutter_grid_button:
+    dependency: transitive
+    description:
+      name: flutter_grid_button
+      sha256: "51e8a3838439ccdc33363a8fec2cb7575d63a3a2cf37f189d110a05ae2740752"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -142,6 +166,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_simple_calculator:
+    dependency: "direct main"
+    description:
+      name: flutter_simple_calculator
+      sha256: "744758b9145df23178cefbee19221ddc7d899ce7a142980338f0ff584d89b91e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.5"
   flutter_slidable:
     dependency: "direct main"
     description:
@@ -384,6 +416,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.2"
+  quiver:
+    dependency: transitive
+    description:
+      name: quiver
+      sha256: b1c1ac5ce6688d77f65f3375a9abb9319b3cb32486bdc7a1e0fdf004d7ba4e47
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      sha256: "0c7c0cedd93788d996e33041ffecda924cc54389199cde4e6a34b440f50044cb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.27.7"
   simple_gesture_detector:
     dependency: transitive
     description:
@@ -497,10 +545,10 @@ packages:
     dependency: transitive
     description:
       name: win32
-      sha256: "0a989dc7ca2bb51eac91e8fd00851297cfffd641aa7538b165c62637ca0eaa4a"
+      sha256: "0eaf06e3446824099858367950a813472af675116bf63f008a4c2a75ae13e9cb"
       url: "https://pub.dev"
     source: hosted
-    version: "5.4.0"
+    version: "5.5.0"
   xdg_directories:
     dependency: transitive
     description:
