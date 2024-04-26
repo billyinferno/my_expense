@@ -697,6 +697,13 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   Future<void> _showCalculator() async {
+    // check if name has focus or not?
+    if (_nameFocus.hasFocus) {
+      // unfocus from name text field
+      _nameFocus.unfocus();
+    }
+
+    // show the calculator on the modal bottom sheet
     return showModalBottomSheet(
       isScrollControlled: true,
       isDismissible: false,
