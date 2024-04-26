@@ -741,10 +741,14 @@ class _TransactionInputState extends State<TransactionInput> {
                   theme: CalculatorThemeData(
                     operatorColor: Colors.orange[600],
                   ),
+                  maximumDigits: 14,
                   onChanged: (key, value, expression) {
                     setState(() {
                       // set the current amount as previous current amount if value is null
                       _currentAmount = (value ?? _currentAmount);
+
+                      // convert to fccy and convert back to current amount
+                      _currentAmount = (double.tryParse(fCCY.format(_currentAmount)) ?? 0);
 
                       // calculate the current amount font size
                       _currentAmountFontSize = min(25, 25 - ((10/6) * (fCCY.format(_currentAmount).length - 6)));
