@@ -541,7 +541,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         return MyBottomSheet(
           context: context,
           title: "Account",
-          screenRatio: 0.75,
+          screenRatio: 0.45,
           child: ListView.builder(
             controller: _scrollControllerWallet,
             itemCount: _currentWallets.length,

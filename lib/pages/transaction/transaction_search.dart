@@ -241,7 +241,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                       return MyBottomSheet(
                         context: context,
                         title: "Account",
-                        screenRatio: 0.75,
+                        screenRatio: 0.45,
                         actionButton: InkWell(
                           onTap: (() {
                             if (_selectedWalletList.isNotEmpty) {

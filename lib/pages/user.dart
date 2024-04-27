@@ -229,6 +229,7 @@ class _UserPageState extends State<UserPage> {
                             return MyBottomSheet(
                               context: context,
                               title: "Expense Category",
+                              screenRatio: 0.75,
                               child: GridView.count(
                                 crossAxisCount: 4,
                                 children: generateExpenseCategory(),
@@ -258,6 +259,7 @@ class _UserPageState extends State<UserPage> {
                             return MyBottomSheet(
                               context: context,
                               title: "Income Category",
+                              screenRatio: 0.75,
                               child: GridView.count(
                                 crossAxisCount: 4,
                                 children: generateIncomeCategory(),
@@ -343,6 +345,7 @@ class _UserPageState extends State<UserPage> {
                             return MyBottomSheet(
                               context: context,
                               title: "Account",
+                              screenRatio: 0.40,
                               child: ListView.builder(
                                 controller: _scrollControllerWallet,
                                 itemCount: wallets.length,

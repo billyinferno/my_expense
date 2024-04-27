@@ -757,7 +757,7 @@ class _TransactionInputState extends State<TransactionInput> {
             return MyBottomSheet(
               context: context,
               title: "Account",
-              screenRatio: 0.75,
+              screenRatio: 0.45,
               child:  ListView.builder(
                 controller: _walletController,
                 itemCount: _walletList.length,
@@ -925,7 +925,7 @@ class _TransactionInputState extends State<TransactionInput> {
     return MyBottomSheet(
       context: context,
       title: title,
-      screenRatio: 0.75,
+      screenRatio: 0.45,
       child: ListView.builder(
         controller: controller,
         itemCount: wallets.length,
