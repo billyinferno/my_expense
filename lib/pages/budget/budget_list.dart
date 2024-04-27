@@ -208,7 +208,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                           int key = _expenseCategory.keys.elementAt(index);
                           return SimpleItem(
                             color: IconColorList.getExpenseColor(_expenseCategory[key]!.name),
-                            description: _expenseCategory[key]!.name,
+                            title: _expenseCategory[key]!.name,
                             isSelected: (_checkIfCategorySelected(_expenseCategory[key]!.id)),
                             onTap: (() async {
                               // check if this is not already added as budget or not?
@@ -244,7 +244,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                 Navigator.pop(context);
                               }
                             }),
-                            child: IconColorList.getExpenseIcon(_expenseCategory[key]!.name),
+                            icon: IconColorList.getExpenseIcon(_expenseCategory[key]!.name),
                           );
                         },
                       ),

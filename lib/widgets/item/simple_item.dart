@@ -4,16 +4,16 @@ import 'package:my_expense/themes/colors.dart';
 
 class SimpleItem extends StatelessWidget {
   final Color color;
-  final Widget child;
-  final String description;
+  final Widget icon;
+  final String title;
   final bool? isSelected;
   final Color? checkmarkColor;
   final Function? onTap;
   const SimpleItem({
     super.key,
     required this.color,
-    required this.child,
-    required this.description,
+    required this.icon,
+    required this.title,
     this.isSelected,
     this.checkmarkColor,
     this.onTap
@@ -37,9 +37,9 @@ class SimpleItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(40),
               color: color,
             ),
-            child: child,
+            child: icon,
           ),
-          title: Text(description),
+          title: Text(title),
           trailing: Visibility(
             visible: (isSelected ?? false),
             child: Icon(

@@ -507,7 +507,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             itemBuilder: (BuildContext context, int index) {
               return SimpleItem(
                 color: accentColors[6],
-                description: _currencies[index].description,
+                title: _currencies[index].description,
                 isSelected: (_currentCurrencies!.id == _currencies[index].id),
                 onTap: (() {
                   setState(() {
@@ -516,7 +516,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                   });
                   Navigator.pop(context);
                 }),
-                child: FittedBox(
+                icon: FittedBox(
                   fit: BoxFit.contain,
                   child: Text(_currencies[index].symbol.toUpperCase()),
                 ),
@@ -548,7 +548,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             itemBuilder: (BuildContext context, int index) {
               return SimpleItem(
                 color: IconList.getColor(_currentWallets[index].walletType.type.toLowerCase()),
-                description: _currentWallets[index].name,
+                title: _currentWallets[index].name,
                 isSelected: (_currentWallet!.id == _currentWallets[index].id),
                 onTap: (() {
                   setState(() {
@@ -556,7 +556,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                   });
                   Navigator.pop(context);
                 }),
-                child: IconList.getIcon(_currentWallets[index].walletType.type.toLowerCase()),
+                icon: IconList.getIcon(_currentWallets[index].walletType.type.toLowerCase()),
               );
             },
           ),

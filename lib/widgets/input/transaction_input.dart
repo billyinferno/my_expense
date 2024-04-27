@@ -764,7 +764,7 @@ class _TransactionInputState extends State<TransactionInput> {
                 itemBuilder: (BuildContext context, int index) {
                   return SimpleItem(
                     color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                    description: _walletList[index].name,
+                    title: _walletList[index].name,
                     isSelected: (_currentWalletFromID == _walletList[index].id),
                     onTap: (() {
                       setState(() {
@@ -775,7 +775,7 @@ class _TransactionInputState extends State<TransactionInput> {
                       });
                       Navigator.pop(context);
                     }),
-                    child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
+                    icon: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
                   );
                 },
               )
@@ -932,13 +932,13 @@ class _TransactionInputState extends State<TransactionInput> {
         itemBuilder: (BuildContext context, int index) {
           return SimpleItem(
             color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-            description: wallets[index].name,
+            title: wallets[index].name,
             isSelected: (selectedId == wallets[index].id),
             onTap: (() {
               onTap(index);
               Navigator.pop(context);
             }),
-            child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
+            icon: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
           );
         },
       ),

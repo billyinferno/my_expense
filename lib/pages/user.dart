@@ -296,7 +296,7 @@ class _UserPageState extends State<UserPage> {
                                 itemBuilder: (BuildContext context, int index) {
                                   return SimpleItem(
                                     color: accentColors[6],
-                                    description: currencies[index].description,
+                                    title: currencies[index].description,
                                     isSelected: selectedCurrency!.id == currencies[index].id,
                                     onTap: (() {
                                       // get the selected currencies
@@ -313,7 +313,7 @@ class _UserPageState extends State<UserPage> {
                                       }
                                       Navigator.pop(context);
                                     }),
-                                    child: FittedBox(
+                                    icon: FittedBox(
                                       fit: BoxFit.contain,
                                       child: Text(currencies[index].symbol.toUpperCase()),
                                     ),
@@ -352,7 +352,7 @@ class _UserPageState extends State<UserPage> {
                                 itemBuilder: (BuildContext context, int index) {
                                   return SimpleItem(
                                     color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-                                    description: wallets[index].name,
+                                    title: wallets[index].name,
                                     isSelected: (currentWallet!.id == wallets[index].id),
                                     onTap: (() {
                                       // get current selected wallet
@@ -368,7 +368,7 @@ class _UserPageState extends State<UserPage> {
                                         });
                                       }
                                     }),
-                                    child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
+                                    icon: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
                                   );
                                 },
                               ),

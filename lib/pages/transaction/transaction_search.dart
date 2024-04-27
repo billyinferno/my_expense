@@ -16,6 +16,7 @@ import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
+import 'package:my_expense/widgets/item/my_item_list.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 
 enum PageName { summary, all, income, expense, transfer }
@@ -29,6 +30,8 @@ class TransactionSearchPage extends StatefulWidget {
 
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final fCCY = NumberFormat("#,##0.00", "en_US");
+  final df = DateFormat('E, dd MMM yyyy');
+  final df2 = DateFormat('dd/MM/yyyy');
   final TransactionHTTPService transactionHttp = TransactionHTTPService();
   final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
 
@@ -156,177 +159,189 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
-                  child: Center(
-                    child: CupertinoSlidingSegmentedControl(
-                      onValueChanged: (int? value) {
-                        setState(() {
-                          _resultPage = value!;
-                          switch(_resultPage) {
-                            case 0: _resultPageName = PageName.summary; break;
-                            case 1: _resultPageName = PageName.all; break;
-                            case 2: _resultPageName = PageName.income; break;
-                            case 3: _resultPageName = PageName.expense; break;
-                            case 4: _resultPageName = PageName.transfer; break;
-                          }
-                        });
-                      },
-                      groupValue: _resultPage,
-                      thumbColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
-                      children: const {
-                        0: Text(
-                            "Summary",
-                            style: TextStyle(
-                              fontFamily: '--apple-system',
-                              fontSize: 11,
-                            ),
-                          ),
-                        1: Text(
-                            "All",
-                            style: TextStyle(
-                              fontFamily: '--apple-system',
-                              fontSize: 11,
-                            ),
-                          ),
-                        2: Text(
-                            "Income",
-                            style: TextStyle(
-                              fontFamily: '--apple-system',
-                              fontSize: 11,
-                            ),
-                          ),
-                        3: Text(
-                            "Expense",
-                            style: TextStyle(
-                              fontFamily: '--apple-system',
-                              fontSize: 11,
-                            ),
-                          ),
-                        4: Text(
-                            "Transfer",
-                            style: TextStyle(
-                              fontFamily: '--apple-system',
-                              fontSize: 11,
-                            ),
-                          ),
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 5,),
-              InkWell(
-                onDoubleTap: (() {
-                  // clear the wallet
-                  setState(() {
-                    // clear the selected wallet list
-                    _selectedWalletList.clear();
-
-                    // filter and group the transaction
-                    _filterTheTransaction();
-                    _groupTransactions();
-
-                  });
-                }),
-                onTap: (() {
-                  showModalBottomSheet<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return MyBottomSheet(
-                        context: context,
-                        title: "Account",
-                        screenRatio: 0.45,
-                        actionButton: InkWell(
-                          onTap: (() {
-                            if (_selectedWalletList.isNotEmpty) {
-                              setState(() {
-                                // clear the selected wallet list
-                                _selectedWalletList.clear();
-
-                                // filter and group the transaction
-                                _filterTheTransaction();
-                                _groupTransactions();
-
-                              });
-
-                              // close the modal dialog
-                              Navigator.pop(context);
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: primaryLight,
+                  width: 1.0,
+                  style: BorderStyle.solid
+                )
+              )
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(5, 10, 5, 10),
+                    child: Center(
+                      child: CupertinoSlidingSegmentedControl(
+                        onValueChanged: (int? value) {
+                          setState(() {
+                            _resultPage = value!;
+                            switch(_resultPage) {
+                              case 0: _resultPageName = PageName.summary; break;
+                              case 1: _resultPageName = PageName.all; break;
+                              case 2: _resultPageName = PageName.income; break;
+                              case 3: _resultPageName = PageName.expense; break;
+                              case 4: _resultPageName = PageName.transfer; break;
                             }
-                          }),
-                          child: const SizedBox(
-                            child: Icon(
-                              Ionicons.close_circle,
-                              size: 20,
-                              color: textColor,
+                          });
+                        },
+                        groupValue: _resultPage,
+                        thumbColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
+                        children: const {
+                          0: Text(
+                              "Summary",
+                              style: TextStyle(
+                                fontFamily: '--apple-system',
+                                fontSize: 11,
+                              ),
                             ),
-                          ),
-                        ),
-                        child: ListView.builder(
-                          controller: _walletController,
-                          itemCount: _walletList.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return SimpleItem(
-                              color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                              description: _walletList[index].name,
-                              isSelected: (_selectedWalletList[_walletList[index].id] ?? false),
-                              onTap: (() {
-                                setState(() {
-                                  // check if this ID previously selected or not?
-                                  if (_selectedWalletList.containsKey(_walletList[index].id)) {
-                                    // delete this data
-                                    _selectedWalletList.remove(_walletList[index].id);
-                                  }
-                                  else {
-                                    // new data, set this as true
-                                    _selectedWalletList[_walletList[index].id] = true;
-                                  }
-
-                                  // once finished call filter the transaction
-                                  // to filter the transactions that listed
-                                  _filterTheTransaction();
-
-                                  // group the transactions
-                                  _groupTransactions();
-                                });
-                                Navigator.pop(context);
-                              }),
-                              child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
-                            );
-                          },
-                        ),
-                      );
-                    }
-                  );
-                }),
-                child: SizedBox(
-                  width: 35,
-                  child: badges.Badge(
-                    position: badges.BadgePosition.topEnd(end: 5),
-                    badgeStyle: badges.BadgeStyle (
-                      badgeColor: accentColors[2]
-                    ),
-                    badgeContent: Text(
-                      _selectedWalletList.length.toString(),
-                      style: const TextStyle(
-                        color: textColor,
-                        fontSize: 10
+                          1: Text(
+                              "All",
+                              style: TextStyle(
+                                fontFamily: '--apple-system',
+                                fontSize: 11,
+                              ),
+                            ),
+                          2: Text(
+                              "Income",
+                              style: TextStyle(
+                                fontFamily: '--apple-system',
+                                fontSize: 11,
+                              ),
+                            ),
+                          3: Text(
+                              "Expense",
+                              style: TextStyle(
+                                fontFamily: '--apple-system',
+                                fontSize: 11,
+                              ),
+                            ),
+                          4: Text(
+                              "Transfer",
+                              style: TextStyle(
+                                fontFamily: '--apple-system',
+                                fontSize: 11,
+                              ),
+                            ),
+                        },
                       ),
                     ),
-                    child: const Icon(
-                      Ionicons.wallet,
-                      size: 15,
-                      color: textColor,
+                  ),
+                ),
+                const SizedBox(width: 5,),
+                InkWell(
+                  onDoubleTap: (() {
+                    // clear the wallet
+                    setState(() {
+                      // clear the selected wallet list
+                      _selectedWalletList.clear();
+            
+                      // filter and group the transaction
+                      _filterTheTransaction();
+                      _groupTransactions();
+            
+                    });
+                  }),
+                  onTap: (() {
+                    showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return MyBottomSheet(
+                          context: context,
+                          title: "Account",
+                          screenRatio: 0.45,
+                          actionButton: InkWell(
+                            onTap: (() {
+                              if (_selectedWalletList.isNotEmpty) {
+                                setState(() {
+                                  // clear the selected wallet list
+                                  _selectedWalletList.clear();
+            
+                                  // filter and group the transaction
+                                  _filterTheTransaction();
+                                  _groupTransactions();
+            
+                                });
+            
+                                // close the modal dialog
+                                Navigator.pop(context);
+                              }
+                            }),
+                            child: const SizedBox(
+                              child: Icon(
+                                Ionicons.close_circle,
+                                size: 20,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          child: ListView.builder(
+                            controller: _walletController,
+                            itemCount: _walletList.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return SimpleItem(
+                                color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
+                                title: _walletList[index].name,
+                                isSelected: (_selectedWalletList[_walletList[index].id] ?? false),
+                                onTap: (() {
+                                  setState(() {
+                                    // check if this ID previously selected or not?
+                                    if (_selectedWalletList.containsKey(_walletList[index].id)) {
+                                      // delete this data
+                                      _selectedWalletList.remove(_walletList[index].id);
+                                    }
+                                    else {
+                                      // new data, set this as true
+                                      _selectedWalletList[_walletList[index].id] = true;
+                                    }
+            
+                                    // once finished call filter the transaction
+                                    // to filter the transactions that listed
+                                    _filterTheTransaction();
+            
+                                    // group the transactions
+                                    _groupTransactions();
+                                  });
+                                  Navigator.pop(context);
+                                }),
+                                icon: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
+                              );
+                            },
+                          ),
+                        );
+                      }
+                    );
+                  }),
+                  child: SizedBox(
+                    width: 35,
+                    child: badges.Badge(
+                      position: badges.BadgePosition.topEnd(end: 5),
+                      badgeStyle: badges.BadgeStyle (
+                        badgeColor: accentColors[2]
+                      ),
+                      badgeContent: Text(
+                        _selectedWalletList.length.toString(),
+                        style: const TextStyle(
+                          color: textColor,
+                          fontSize: 10
+                        ),
+                      ),
+                      child: const Icon(
+                        Ionicons.wallet,
+                        size: 15,
+                        color: textColor,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Expanded(
             child: _getResultChild(),
@@ -339,59 +354,44 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   Widget _getResultChild() {
     switch (_resultPageName) {
       case PageName.all:
-        return Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: ListView.builder(
-            controller: _scrollController,
-            itemCount: _filterTransactions.length,
-            itemBuilder: (context, index) {
-              return _createItem(_filterTransactions[index], true);
-            },
-          ),
+        return ListView.builder(
+          controller: _scrollController,
+          itemCount: _filterTransactions.length,
+          itemBuilder: (context, index) {
+            return _createItem(_filterTransactions[index], true);
+          },
         );
       case PageName.summary:
-        return Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: ListView.builder(
-            controller: _scrollControllerSummary,
-            itemCount: _summaryList.length,
-            itemBuilder: ((context, index) {
-              return _summaryList[index];
-            })
-          ),
+        return ListView.builder(
+          controller: _scrollControllerSummary,
+          itemCount: _summaryList.length,
+          itemBuilder: ((context, index) {
+            return _summaryList[index];
+          })
         );
       case PageName.income:
-        return Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: ListView.builder(
-            controller: _scrollControllerIncome,
-            itemCount: _income.length,
-            itemBuilder: (context, index) {
-              return _createItem(_income[index], false);
-            },
-          ),
+        return ListView.builder(
+          controller: _scrollControllerIncome,
+          itemCount: _income.length,
+          itemBuilder: (context, index) {
+            return _createItem(_income[index], false);
+          },
         );
       case PageName.expense:
-        return Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: ListView.builder(
-            controller: _scrollControllerExpense,
-            itemCount: _expense.length,
-            itemBuilder: (context, index) {
-              return _createItem(_expense[index], false);
-            },
-          ),
+        return ListView.builder(
+          controller: _scrollControllerExpense,
+          itemCount: _expense.length,
+          itemBuilder: (context, index) {
+            return _createItem(_expense[index], false);
+          },
         );
       case PageName.transfer:
-        return Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: ListView.builder(
-            controller: _scrollControllerTransfer,
-            itemCount: _transfer.length,
-            itemBuilder: (context, index) {
-              return _createItem(_transfer[index], false);
-            },
-          ),
+        return ListView.builder(
+          controller: _scrollControllerTransfer,
+          itemCount: _transfer.length,
+          itemBuilder: (context, index) {
+            return _createItem(_transfer[index], false);
+          },
         );
       default:
       // unknown just return SizedBox.shrink();
@@ -864,7 +864,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   Widget _createSummaryItem({required TransactionListModel txn, required DateTime startDate, required DateTime endDate, required int count}){
     return Container(
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
       ),
@@ -884,16 +884,18 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  "${DateFormat('dd/MM/yyyy').format(startDate.toLocal())} - ${DateFormat('dd/MM/yyyy').format(endDate.toLocal())}",
+                  "${df2.format(startDate.toLocal())} - ${df2.format(endDate.toLocal())}",
                   style: const TextStyle(
                     fontSize: 10,
                   ),
                 ),
-                Text(
-                  (txn.category != null ? txn.category!.name : ''),
-                  style: const TextStyle(
-                    fontSize: 10,
-                  ),
+                (txn.category == null ? const SizedBox.shrink() : 
+                  Text(
+                    (txn.category != null ? txn.category!.name : ''),
+                    style: const TextStyle(
+                      fontSize: 10,
+                    ),
+                  )
                 ),
                 const SizedBox(height: 5,),
                 Text(
@@ -913,52 +915,80 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   Widget _createItem(TransactionListModel txn, [bool? canEdit]){
-    String name = "";
-    if (txn.category != null) {
-      name = txn.category!.name;
-    }
-
     return InkWell(
       onTap: (() {
         if (canEdit ?? true) {
           _showTransactionEditScreen(txn);
         }
       }),
-      child: Container(
-        height: 50,
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            _categoryIcon(name: name, type: txn.type),
-            const SizedBox(width: 10,),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    txn.name,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    DateFormat('E, dd MMM yyyy').format(txn.date.toLocal()),
-                    style: const TextStyle(
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 10,),
-            _getAmount(txn),
-          ],
-        ),
-      ),
+      child: _createItemType(txn)
     );
+  }
+
+  Widget _createItemType(TransactionListModel txn) {
+    switch (txn.type.toLowerCase()) {
+      case "expense":
+        return MyItemList(
+          iconColor: IconColorList.getExpenseColor(txn.category!.name),
+          icon: IconColorList.getExpenseIcon((txn.category!.name)),
+          type: txn.type.toLowerCase(),
+          title: txn.name,
+          subTitle: df.format(txn.date.toLocal()),
+          subTitleStyle: const TextStyle(fontSize: 10),
+          description: txn.description,
+          descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          symbol: txn.wallet.symbol,
+          amount: txn.amount,
+          amountColor: accentColors[2],
+        );
+      case "income":
+        return MyItemList(
+          iconColor: IconColorList.getIncomeColor(txn.category!.name),
+          icon: IconColorList.getIncomeIcon((txn.category!.name)),
+          type: txn.type.toLowerCase(),
+          title: txn.name,
+          subTitle: df.format(txn.date.toLocal()),
+          subTitleStyle: const TextStyle(fontSize: 10),
+          description: txn.description,
+          descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          symbol: txn.wallet.symbol,
+          amount: txn.amount,
+          amountColor: accentColors[6],
+        );
+      case "transfer":
+      return MyItemList(
+          iconColor: accentColors[4],
+          icon: const Icon(
+            Ionicons.repeat,
+            color: textColor,
+          ),
+          type: txn.type.toLowerCase(),
+          title: txn.name,
+          subTitle: df.format(txn.date.toLocal()),
+          subTitleStyle: const TextStyle(fontSize: 10),
+          description: txn.description,
+          descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          symbol: txn.wallet.symbol,
+          amount: txn.amount,
+          amountColor: accentColors[4],
+          symbolTo: txn.walletTo!.symbol,
+          amountTo: (txn.amount * txn.exchangeRate),
+        );
+      default:
+        return MyItemList(
+          iconColor: IconColorList.getExpenseColor(txn.category!.name),
+          icon: IconColorList.getExpenseIcon((txn.category!.name)),
+          type: txn.type.toLowerCase(),
+          title: txn.name,
+          subTitle: df.format(txn.date.toLocal()),
+          subTitleStyle: const TextStyle(fontSize: 10),
+          description: txn.description,
+          descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          symbol: txn.wallet.symbol,
+          amount: txn.amount,
+          amountColor: accentColors[2],
+        );
+    }
   }
 
   void setTransactions(List<TransactionListModel> transactions, int limit, int start) {

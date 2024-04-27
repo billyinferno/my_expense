@@ -337,7 +337,7 @@ class _HomeStatsState extends State<HomeStats> {
                   itemBuilder: (BuildContext context, int index) {
                     return SimpleItem(
                       color: accentColors[6],
-                      description: _currencies[index].description,
+                      title: _currencies[index].description,
                       isSelected: (_currentCurrencyId == _currencies[index].id),
                       onTap: (() {
                         setState(() {
@@ -347,7 +347,7 @@ class _HomeStatsState extends State<HomeStats> {
                         });
                         Navigator.pop(context);
                       }),
-                      child: FittedBox(
+                      icon: FittedBox(
                         fit: BoxFit.contain,
                         child: Text(_currencies[index].symbol.toUpperCase()),
                       ),

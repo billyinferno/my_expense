@@ -150,7 +150,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                             itemBuilder: (BuildContext context, int index) {
                               return SimpleItem(
                                 color: IconList.getColor(_walletType[index].type.toLowerCase()),
-                                description: _walletType[index].type,
+                                title: _walletType[index].type,
                                 isSelected: (_currentWalletTypeID == _walletType[index].id),
                                 onTap: (() {
                                   setState(() {
@@ -159,7 +159,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                                   });
                                   Navigator.pop(context);
                                 }),
-                                child: IconList.getIcon(_walletType[index].type.toLowerCase()),
+                                icon: IconList.getIcon(_walletType[index].type.toLowerCase()),
                               );
                             },
                           ),
@@ -302,7 +302,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                             itemBuilder: (BuildContext context, int index) {
                               return SimpleItem(
                                 color: accentColors[6],
-                                description: _currencies[index].description,
+                                title: _currencies[index].description,
                                 isSelected: _currentWalletCurrencyID == _currencies[index].id,
                                 onTap: (() {
                                   setState(() {
@@ -312,7 +312,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                                   });
                                   Navigator.pop(context);
                                 }),
-                                child: FittedBox(
+                                icon: FittedBox(
                                   fit: BoxFit.contain,
                                   child: Text(_currencies[index].symbol.toUpperCase()),
                                 ),
