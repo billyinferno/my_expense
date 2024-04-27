@@ -88,22 +88,26 @@ class _HomeListState extends State<HomeList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: HomeAppBar(
-        title: Center(
-          child: InkWell(
-            onTap: (() {
-              // show the month selector
-              _showCalendarPicker();
-            }),
-            onDoubleTap: (() {
-              // go to the current date
-              setFocusedDay(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
-              _getData = _refreshTransaction(_currentFocusedDay);
-            }),
-            child: Container(
-              color: Colors.transparent,
-              child: Text(
-                "$_appTitleMonth $_appTitleYear",
-                textAlign: TextAlign.right,
+        title: InkWell(
+          onTap: (() {
+            // show the month selector
+            _showCalendarPicker();
+          }),
+          onDoubleTap: (() {
+            // go to the current date
+            setFocusedDay(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+            _getData = _refreshTransaction(_currentFocusedDay);
+          }),
+          child: Container(
+            width: double.infinity,
+            color: Colors.transparent,
+            child: Center(
+              child: Container(
+                color: Colors.transparent,
+                child: Text(
+                  "$_appTitleMonth $_appTitleYear",
+                  textAlign: TextAlign.right,
+                ),
               ),
             ),
           ),
