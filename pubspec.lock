@@ -18,7 +18,7 @@ packages:
     source: hosted
     version: "2.11.0"
   auto_size_text:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: auto_size_text
       sha256: "3f5261cd3fb5f2a9ab4e2fc3fba84fd9fcaac8821f20a1d4e71f557521b22599"
@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: calendar_date_picker2
-      sha256: e4bd75b55d721743f8736a8afe3ab6149f402c200135c952bbb82f1e10df4405
+      sha256: efa732f9643b8aa771e0b4f67a2bdfdc6ed2c8ba5f0bba8e433b077f81c761b7
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.5"
+    version: "0.5.6"
   characters:
     dependency: transitive
     description:

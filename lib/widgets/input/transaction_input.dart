@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -65,7 +65,8 @@ class _TransactionInputState extends State<TransactionInput> {
 
   final FocusNode _nameFocus = FocusNode();
   
-  final fCCY = NumberFormat("0.00", "en_US");
+  final NumberFormat _fCCY = NumberFormat("0.00", "en_US");
+  final NumberFormat _nf = NumberFormat.decimalPattern("en_US")..maximumFractionDigits = 2;
 
   late UsersMeModel _userMe;
 
@@ -96,7 +97,6 @@ class _TransactionInputState extends State<TransactionInput> {
   late double _currentExchangeRate;
 
   late double _currentAmount;
-  late double _currentAmountFontSize;
 
   late List<LastTransactionModel> _filterList;
   late List<LastTransactionModel> _lastExpense;
@@ -128,16 +128,6 @@ class _TransactionInputState extends State<TransactionInput> {
     _currentAmount = 0;
     if (widget.currentTransaction != null) {
       _currentAmount = widget.currentTransaction!.amount;
-    }
-
-    // text field variable
-    // default font size of the amount text field to 25
-    if (_currentAmount <= 0) {
-      _currentAmountFontSize = 25;
-    }
-    else {
-      // calculate the actual current amount font size
-      _currentAmountFontSize = min(25, 25 - ((10/6) * (fCCY.format(_currentAmount).length - 6)));
     }
 
     // check the type by checkiung if we send current transaction or not?
@@ -202,7 +192,7 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // set exchange rate as 1 (assuming that we will always send the same CCY)
     _currentExchangeRate = 1;
-    _exchangeController.text = fCCY.format(_currentExchangeRate);
+    _exchangeController.text = _fCCY.format(_currentExchangeRate);
 
     // set default user from and to
     _getUserFromWalletInfo(walletId: _userMe.defaultWallet);
@@ -224,7 +214,7 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // set the exchange rate
     _currentExchangeRate = widget.currentTransaction!.exchangeRate;
-    _exchangeController.text = fCCY.format(_currentExchangeRate);
+    _exchangeController.text = _fCCY.format(_currentExchangeRate);
 
     // set the description
     _descriptionController.text = widget.currentTransaction!.description;
@@ -621,6 +611,7 @@ class _TransactionInputState extends State<TransactionInput> {
         ),
         const SizedBox(width: 10,),
         Expanded(
+          flex: 5,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -675,20 +666,21 @@ class _TransactionInputState extends State<TransactionInput> {
             ],
           ),
         ),
-        const SizedBox(width: 10,),
-        SizedBox(
-          width: 120,
+        const SizedBox(width: 5,),
+        Expanded(
+          flex: 4,
           child: GestureDetector(
             onTap: (() async {
               await _showCalculator();
             }),
-            child: Text(
-              fCCY.format(_currentAmount),
-              style: TextStyle(
-                fontSize: _currentAmountFontSize,
+            child: AutoSizeText(
+              _fCCY.format(_currentAmount),
+              style: const TextStyle(
+                fontSize: 25,
                 color: textColor,
               ),
               textAlign: TextAlign.end,
+              maxLines: 1,
             ),
           ),
         ),
@@ -749,16 +741,11 @@ class _TransactionInputState extends State<TransactionInput> {
                     operatorColor: Colors.orange[600],
                   ),
                   maximumDigits: 14,
+                  numberFormat: _nf,
                   onChanged: (key, value, expression) {
                     setState(() {
                       // set the current amount as previous current amount if value is null
                       _currentAmount = (value ?? _currentAmount);
-
-                      // convert to fccy and convert back to current amount
-                      _currentAmount = (double.tryParse(fCCY.format(_currentAmount)) ?? 0);
-
-                      // calculate the current amount font size
-                      _currentAmountFontSize = min(25, 25 - ((10/6) * (fCCY.format(_currentAmount).length - 6)));
                     });
                   },
                 ),
@@ -1315,8 +1302,8 @@ class _TransactionInputState extends State<TransactionInput> {
       throw Exception('Amount should be more than 0');
     }
     else {
-      // we got the amount
-      currentAmount = _currentAmount;
+      // we got the amount, clamp the result to 2 digit
+      currentAmount = num.parse(_currentAmount.toStringAsFixed(2)).toDouble();
     }
 
     // check if wallet already selected or not?
