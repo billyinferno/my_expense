@@ -24,6 +24,7 @@ import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/type_slide.dart';
 import 'package:my_expense/widgets/item/expand_animation.dart';
+import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -574,38 +575,28 @@ class _TransactionInputState extends State<TransactionInput> {
             if (_currentType != 'transfer')
             {
               // show the modal bottom sheet
-              showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                return Container(
-                  height: 300,
-                  color: secondaryDark,
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        height: 40,
-                        decoration: const BoxDecoration(
-                          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Expanded(
-                              child: Center(child: Text("Category Tab")),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10,),
-                      Expanded(
-                        child: GridView.count(
-                          crossAxisCount: 4,
-                          children: _generateIconCategory(),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              });
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  String title = "";
+                  if (_currentType == 'income') {
+                    title = "Income Category";
+                  }
+                  else {
+                    title = "Expense Category";
+                  }
+
+                  return MyBottomSheet(
+                    context: context,
+                    title: title,
+                    screenRatio: 0.75,
+                    child:  GridView.count(
+                      crossAxisCount: 4,
+                      children: _generateIconCategory(),
+                    ),
+                  );
+                }
+              );
             }
           },
         ),
@@ -760,48 +751,37 @@ class _TransactionInputState extends State<TransactionInput> {
   Widget _buildIncomeExpenseWalletSelection() {
     return GestureDetector(
       onTap: () {
-        showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-          return Container(
-            height: 300,
-            color: secondaryDark,
-            child: Column(
-              children: <Widget>[
-                Container(
-                  width: double.infinity,
-                  height: 40,
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                  ),
-                  child: const Center(child: Text("Account")),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    controller: _walletController,
-                    itemCount: _walletList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return SimpleItem(
-                        color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                        description: _walletList[index].name,
-                        isSelected: (_currentWalletFromID == _walletList[index].id),
-                        onTap: (() {
-                          setState(() {
-                            _currentWalletFromID = _walletList[index].id;
-                            _currentWalletFromName = _walletList[index].name;
-                            _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                            _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                          });
-                          Navigator.pop(context);
-                        }),
-                        child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20,),
-              ],
-            ),
-          );
-        });
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return MyBottomSheet(
+              context: context,
+              title: "Account",
+              screenRatio: 0.75,
+              child:  ListView.builder(
+                controller: _walletController,
+                itemCount: _walletList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return SimpleItem(
+                    color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
+                    description: _walletList[index].name,
+                    isSelected: (_currentWalletFromID == _walletList[index].id),
+                    onTap: (() {
+                      setState(() {
+                        _currentWalletFromID = _walletList[index].id;
+                        _currentWalletFromName = _walletList[index].name;
+                        _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                        _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+                      });
+                      Navigator.pop(context);
+                    }),
+                    child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
+                  );
+                },
+              )
+            );
+          }
+        );
       },
       child: Container(
         height: 50,
@@ -942,44 +922,25 @@ class _TransactionInputState extends State<TransactionInput> {
     required int selectedId,
     required Function(int) onTap,
   }) {
-    return Container(
-      height: 300,
-      color: secondaryDark,
-      child: Column(
-        children: <Widget>[
-          Container(
-            height: 40,
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Center(child: Text(title)),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              controller: controller,
-              itemCount: wallets.length,
-              itemBuilder: (BuildContext context, int index) {
-                return SimpleItem(
-                  color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-                  description: wallets[index].name,
-                  isSelected: (selectedId == wallets[index].id),
-                  onTap: (() {
-                    onTap(index);
-                    Navigator.pop(context);
-                  }),
-                  child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 20,),
-        ],
+    return MyBottomSheet(
+      context: context,
+      title: title,
+      screenRatio: 0.75,
+      child: ListView.builder(
+        controller: controller,
+        itemCount: wallets.length,
+        itemBuilder: (BuildContext context, int index) {
+          return SimpleItem(
+            color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
+            description: wallets[index].name,
+            isSelected: (selectedId == wallets[index].id),
+            onTap: (() {
+              onTap(index);
+              Navigator.pop(context);
+            }),
+            child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
+          );
+        },
       ),
     );
   }

@@ -20,6 +20,7 @@ import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/widgets/calendar/month_prev_next_calendar.dart';
 import 'package:my_expense/widgets/chart/bar_chart.dart';
 import 'package:my_expense/widgets/item/item_list.dart';
+import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
@@ -322,50 +323,40 @@ class _HomeStatsState extends State<HomeStats> {
         // check if user have more than 1 currencies?
         if (_currencies.length > 1) {
           // if so, then show the bottom sheet
-          showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-            return Container(
-              height: 300,
-              color: secondaryDark,
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                    ),
-                    child: const Center(child: Text("Currencies")),
-                  ),
-                  Expanded(
-                    child: ListView.builder(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      controller: _scrollControllerCurrencies,
-                      itemCount: _currencies.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return SimpleItem(
-                          color: accentColors[6],
-                          description: _currencies[index].description,
-                          isSelected: (_currentCurrencyId == _currencies[index].id),
-                          onTap: (() {
-                            setState(() {
-                              _currentCurrencyId = _currencies[index].id;
-                              _currentCurrencySymbol = _currencies[index].symbol;
-                              _changeCurrentWorth();
-                            });
-                            Navigator.pop(context);
-                          }),
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            child: Text(_currencies[index].symbol.toUpperCase()),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 20,),
-                ],
-              ),
-            );
-          });
+          showModalBottomSheet<void>(
+            context: context,
+            builder: (BuildContext context) {
+              return MyBottomSheet(
+                context: context,
+                title: "Currencies",
+                screenRatio: 0.35,
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  controller: _scrollControllerCurrencies,
+                  itemCount: _currencies.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return SimpleItem(
+                      color: accentColors[6],
+                      description: _currencies[index].description,
+                      isSelected: (_currentCurrencyId == _currencies[index].id),
+                      onTap: (() {
+                        setState(() {
+                          _currentCurrencyId = _currencies[index].id;
+                          _currentCurrencySymbol = _currencies[index].symbol;
+                          _changeCurrentWorth();
+                        });
+                        Navigator.pop(context);
+                      }),
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: Text(_currencies[index].symbol.toUpperCase()),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }
+          );
         }
       }),
       child: Container(

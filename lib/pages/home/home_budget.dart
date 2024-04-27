@@ -20,6 +20,7 @@ import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/chart/budget_bar.dart';
 import 'package:my_expense/widgets/calendar/horizontal_month_calendar.dart';
+import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
@@ -238,45 +239,32 @@ class _HomeBudgetState extends State<HomeBudget> {
                       child: GestureDetector(
                         onTap: () {
                           showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                            return Container(
-                              height: 300,
-                              color: secondaryDark,
-                              child: Column(
-                                children: <Widget>[
-                                  Container(
-                                    height: 40,
-                                    decoration: const BoxDecoration(
-                                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                            return MyBottomSheet(
+                              context: context,
+                              title: "Currencies",
+                              screenRatio: 0.35,
+                              child: ListView.builder(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                controller: _scrollControllerCurrencies,
+                                itemCount: _currencies.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SimpleItem(
+                                    color: accentColors[6],
+                                    description: _currencies[index].description,
+                                    isSelected: (_currentCurrencies!.id == _currencies[index].id),
+                                    onTap: (() {
+                                      setState(() {
+                                        _currentCurrencies = _currencies[index];
+                                        _fetchBudget(true);
+                                      });
+                                      Navigator.pop(context);
+                                    }),
+                                    child: FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: Text(_currencies[index].symbol.toUpperCase()),
                                     ),
-                                    child: const Center(child: Text("Currencies")),
-                                  ),
-                                  Expanded(
-                                    child: ListView.builder(
-                                      physics: const AlwaysScrollableScrollPhysics(),
-                                      controller: _scrollControllerCurrencies,
-                                      itemCount: _currencies.length,
-                                      itemBuilder: (BuildContext context, int index) {
-                                        return SimpleItem(
-                                          color: accentColors[6],
-                                          description: _currencies[index].description,
-                                          isSelected: (_currentCurrencies!.id == _currencies[index].id),
-                                          onTap: (() {
-                                            setState(() {
-                                              _currentCurrencies = _currencies[index];
-                                              _fetchBudget(true);
-                                            });
-                                            Navigator.pop(context);
-                                          }),
-                                          child: FittedBox(
-                                            fit: BoxFit.contain,
-                                            child: Text(_currencies[index].symbol.toUpperCase()),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20,),
-                                ],
+                                  );
+                                },
                               ),
                             );
                           });

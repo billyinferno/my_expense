@@ -20,6 +20,7 @@ import 'package:my_expense/utils/prefs/shared_box.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
 import 'package:my_expense/widgets/item/category_list_item.dart';
+import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
@@ -196,79 +197,56 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 showModalBottomSheet<void>(
                   context: context,
                   builder: (BuildContext context) {
-                    return Container(
-                      height: 300,
-                      color: secondaryDark,
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            height: 40,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                  bottom: BorderSide(
-                                      color: primaryLight, width: 1.0)),
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Center(child: Text("Categories")),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              controller: _scrollControllerAddCategory,
-                              itemCount: _expenseCategory.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                int key = _expenseCategory.keys.elementAt(index);
-                                return SimpleItem(
-                                  color: IconColorList.getExpenseColor(_expenseCategory[key]!.name),
-                                  description: _expenseCategory[key]!.name,
-                                  isSelected: (_checkIfCategorySelected(_expenseCategory[key]!.id)),
-                                  onTap: (() async {
-                                    // check if this is not already added as budget or not?
-                                    // if not yet then we can add this new budget to the budget list
-                                    if (!_checkIfCategorySelected(_expenseCategory[key]!.id)) {
-                                      await _addBudget(_expenseCategory[key]!.id,_currencyID).then((_) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          createSnackBar(
-                                            message: "Success add new category",
-                                            icon: Icon(
-                                              Ionicons.checkmark_circle_outline,
-                                              color: accentColors[6],
-                                            ),
-                                          ),
-                                        );
-                                      }).onError((error, stackTrace) async {
-                                        // print the error
-                                        debugPrint("ERROR: ${error.toString()}");
-                                        debugPrintStack(stackTrace: stackTrace);
+                    return MyBottomSheet(
+                      context: context,
+                      title: "Categories",
+                      screenRatio: 0.75,
+                      child: ListView.builder(
+                        controller: _scrollControllerAddCategory,
+                        itemCount: _expenseCategory.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          int key = _expenseCategory.keys.elementAt(index);
+                          return SimpleItem(
+                            color: IconColorList.getExpenseColor(_expenseCategory[key]!.name),
+                            description: _expenseCategory[key]!.name,
+                            isSelected: (_checkIfCategorySelected(_expenseCategory[key]!.id)),
+                            onTap: (() async {
+                              // check if this is not already added as budget or not?
+                              // if not yet then we can add this new budget to the budget list
+                              if (!_checkIfCategorySelected(_expenseCategory[key]!.id)) {
+                                await _addBudget(_expenseCategory[key]!.id,_currencyID).then((_) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    createSnackBar(
+                                      message: "Success add new category",
+                                      icon: Icon(
+                                        Ionicons.checkmark_circle_outline,
+                                        color: accentColors[6],
+                                      ),
+                                    ),
+                                  );
+                                }).onError((error, stackTrace) async {
+                                  // print the error
+                                  debugPrint("ERROR: ${error.toString()}");
+                                  debugPrintStack(stackTrace: stackTrace);
 
-                                        // show error dialog
-                                        await ShowMyDialog(
-                                          cancelEnabled: false,
-                                          confirmText: "OK",
-                                          dialogTitle: "Error Add Budget",
-                                          dialogText: "Error while add budget category."
-                                        ).show(context);
-                                        // show the snack bar of error
-                                      });
-                                    }
-                                    // remove the modal dialog
-                                    if (context.mounted) {
-                                      Navigator.pop(context);
-                                    }
-                                  }),
-                                  child: IconColorList.getExpenseIcon(_expenseCategory[key]!.name),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 20,),
-                        ],
+                                  // show error dialog
+                                  await ShowMyDialog(
+                                    cancelEnabled: false,
+                                    confirmText: "OK",
+                                    dialogTitle: "Error Add Budget",
+                                    dialogText: "Error while add budget category."
+                                  ).show(context);
+                                  // show the snack bar of error
+                                });
+                              }
+                              // remove the modal dialog
+                              if (context.mounted) {
+                                Navigator.pop(context);
+                              }
+                            }),
+                            child: IconColorList.getExpenseIcon(_expenseCategory[key]!.name),
+                          );
+                        },
                       ),
                     );
                   }

@@ -32,6 +32,7 @@ import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/switch.dart';
 import 'package:my_expense/widgets/input/user_button.dart';
+import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
@@ -225,35 +226,12 @@ class _UserPageState extends State<UserPage> {
                         showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
-                            return Container(
-                              height: 300,
-                              color: secondaryDark,
-                              child: Column(
-                                children: <Widget>[
-                                  Container(
-                                    height: 40,
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: primaryLight,
-                                          width: 1.0
-                                        )
-                                      ),
-                                    ),
-                                    child: const Center(
-                                      child: Text("Expense Category"),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Expanded(
-                                    child: GridView.count(
-                                      crossAxisCount: 4,
-                                      children: generateExpenseCategory(),
-                                    ),
-                                  ),
-                                ],
+                            return MyBottomSheet(
+                              context: context,
+                              title: "Expense Category",
+                              child: GridView.count(
+                                crossAxisCount: 4,
+                                children: generateExpenseCategory(),
                               ),
                             );
                           }
@@ -277,34 +255,12 @@ class _UserPageState extends State<UserPage> {
                         showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
-                            return Container(
-                              height: 300,
-                              color: secondaryDark,
-                              child: Column(
-                                children: <Widget>[
-                                  Container(
-                                    height: 40,
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: primaryLight,
-                                          width: 1.0
-                                        )
-                                      ),
-                                    ),
-                                    child: const Center(
-                                        child: Text("Income Category")),
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Expanded(
-                                    child: GridView.count(
-                                      crossAxisCount: 4,
-                                      children: generateIncomeCategory(),
-                                    ),
-                                  ),
-                                ],
+                            return MyBottomSheet(
+                              context: context,
+                              title: "Income Category",
+                              child: GridView.count(
+                                crossAxisCount: 4,
+                                children: generateIncomeCategory(),
                               ),
                             );
                           });
@@ -328,57 +284,39 @@ class _UserPageState extends State<UserPage> {
                         showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
-                            return Container(
-                              height: 300,
-                              color: secondaryDark,
-                              child: Column(
-                                children: <Widget>[
-                                  Container(
-                                    height: 40,
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: primaryLight,
-                                          width: 1.0
-                                        )
-                                      ),
+                            return MyBottomSheet(
+                              context: context,
+                              title: "Currencies",
+                              screenRatio: 0.35,
+                              child: ListView.builder(
+                                controller: _scrollControllerCurrency,
+                                itemCount: currencies.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SimpleItem(
+                                    color: accentColors[6],
+                                    description: currencies[index].description,
+                                    isSelected: selectedCurrency!.id == currencies[index].id,
+                                    onTap: (() {
+                                      // get the selected currencies
+                                      selectedCurrency = currencies[index];
+                                      
+                                      // check if currency the same or not?
+                                      // if not the same then we can perform
+                                      // update on the default budget currency.
+                                      if (selectedCurrency!.id != currentCurrency!.id) {
+                                        // need to update the currency
+                                        setState(() {
+                                          updateBudgetCurrency(currencies[index].id);
+                                        });
+                                      }
+                                      Navigator.pop(context);
+                                    }),
+                                    child: FittedBox(
+                                      fit: BoxFit.contain,
+                                      child: Text(currencies[index].symbol.toUpperCase()),
                                     ),
-                                    child: const Center(child: Text("Currencies")),
-                                  ),
-                                  Expanded(
-                                    child: ListView.builder(
-                                      controller: _scrollControllerCurrency,
-                                      itemCount: currencies.length,
-                                      itemBuilder: (BuildContext context, int index) {
-                                        return SimpleItem(
-                                          color: accentColors[6],
-                                          description: currencies[index].description,
-                                          isSelected: selectedCurrency!.id == currencies[index].id,
-                                          onTap: (() {
-                                            // get the selected currencies
-                                            selectedCurrency = currencies[index];
-                                            
-                                            // check if currency the same or not?
-                                            // if not the same then we can perform
-                                            // update on the default budget currency.
-                                            if (selectedCurrency!.id != currentCurrency!.id) {
-                                              // need to update the currency
-                                              setState(() {
-                                                updateBudgetCurrency(currencies[index].id);
-                                              });
-                                            }
-                                            Navigator.pop(context);
-                                          }),
-                                          child: FittedBox(
-                                            fit: BoxFit.contain,
-                                            child: Text(currencies[index].symbol.toUpperCase()),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20,),
-                                ],
+                                  );
+                                },
                               ),
                             );
                           }
@@ -399,57 +337,41 @@ class _UserPageState extends State<UserPage> {
                         ),
                       ),
                       callback: (() {
-                        showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                          return Container(
-                            height: 300,
-                            color: secondaryDark,
-                            child: Column(
-                              children: <Widget>[
-                                Container(
-                                  height: 40,
-                                  decoration: const BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: primaryLight,
-                                        width: 1.0
-                                      ),
-                                    ),
-                                  ),
-                                  child: const Center(child: Text("Account")),
-                                ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    controller: _scrollControllerWallet,
-                                    itemCount: wallets.length,
-                                    itemBuilder: (BuildContext context, int index) {
-                                      return SimpleItem(
-                                        color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-                                        description: wallets[index].name,
-                                        isSelected: (currentWallet!.id == wallets[index].id),
-                                        onTap: (() {
-                                          // get current selected wallet
-                                          selectedWallet = wallets[index];
+                        showModalBottomSheet<void>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return MyBottomSheet(
+                              context: context,
+                              title: "Account",
+                              child: ListView.builder(
+                                controller: _scrollControllerWallet,
+                                itemCount: wallets.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SimpleItem(
+                                    color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
+                                    description: wallets[index].name,
+                                    isSelected: (currentWallet!.id == wallets[index].id),
+                                    onTap: (() {
+                                      // get current selected wallet
+                                      selectedWallet = wallets[index];
 
-                                          // check if currency the same or not?
-                                          // if not the same then we can perform
-                                          // update on the default budget currency.
-                                          if (selectedWallet!.id != currentWallet!.id) {
-                                            // need to update the currency
-                                            setState(() {
-                                              updateDefaultWallet(wallets[index].id);
-                                            });
-                                          }
-                                        }),
-                                        child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                const SizedBox(height: 20,),
-                              ],
-                            ),
-                          );
-                        });
+                                      // check if currency the same or not?
+                                      // if not the same then we can perform
+                                      // update on the default budget currency.
+                                      if (selectedWallet!.id != currentWallet!.id) {
+                                        // need to update the currency
+                                        setState(() {
+                                          updateDefaultWallet(wallets[index].id);
+                                        });
+                                      }
+                                    }),
+                                    child: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
+                                  );
+                                },
+                              ),
+                            );
+                          }
+                        );
                       }),
                     ),
                     UserButton(

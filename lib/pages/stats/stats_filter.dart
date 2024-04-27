@@ -21,6 +21,7 @@ import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/type_slide.dart';
 import 'package:my_expense/widgets/input/user_button.dart';
 import 'package:my_expense/widgets/item/expand_animation.dart';
+import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 
 class StatsFilterPage extends StatefulWidget {
@@ -188,15 +189,18 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                       const SizedBox(width: 10,),
                       InkWell(
                         onTap: (() {
-                          showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+                          showModalBottomSheet<void>(
+                            context: context,
+                            builder: (BuildContext context) {
                             return Container(
-                              height: 300,
+                              height: MediaQuery.of(context).size.height * 0.35,
                               color: secondaryDark,
                               child: Column(
                                 children: <Widget>[
                                   _nameButton(value: "Any"),
                                   _nameButton(value: "Match"),
                                   _nameButton(value: "Exact"),
+                                  const SizedBox(height: 20,),
                                 ],
                               ),
                             );
@@ -490,65 +494,38 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   Future<void> _showCurrencySelection() async {
-    showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-      return Container(
-        height: 300,
-        color: secondaryDark,
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 40,
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Expanded(
-                    child: Center(child: Text("Currencies")),
-                  ),
-                  IconButton(
-                    onPressed: () async {
-                      debugPrint("Refresh currency");
-                    },
-                    icon: const Icon(
-                      Ionicons.refresh,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollControllerCurrencies,
-                itemCount: _currencies.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return SimpleItem(
-                    color: accentColors[6],
-                    description: _currencies[index].description,
-                    isSelected: (_currentCurrencies!.id == _currencies[index].id),
-                    onTap: (() {
-                      setState(() {
-                        _currentCurrencies = _currencies[index];
-                        _filterWalletList();
-                      });
-                      Navigator.pop(context);
-                    }),
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Text(_currencies[index].symbol.toUpperCase()),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20,),
-          ],
-        ),
-      );
-    });
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return MyBottomSheet(
+          context: context,
+          title: "Currencies",
+          screenRatio: 0.35,
+          child: ListView.builder(
+            controller: _scrollControllerCurrencies,
+            itemCount: _currencies.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SimpleItem(
+                color: accentColors[6],
+                description: _currencies[index].description,
+                isSelected: (_currentCurrencies!.id == _currencies[index].id),
+                onTap: (() {
+                  setState(() {
+                    _currentCurrencies = _currencies[index];
+                    _filterWalletList();
+                  });
+                  Navigator.pop(context);
+                }),
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Text(_currencies[index].symbol.toUpperCase()),
+                ),
+              );
+            },
+          ),
+        );
+      }
+    );
   }
 
   Future<void> _showAccountSelection() async {
@@ -558,61 +535,34 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       return;
     }
 
-    showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-      return Container(
-        height: 300,
-        color: secondaryDark,
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 40,
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  const Expanded(
-                    child: Center(child: Text("Account")),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      debugPrint("Refresh wallet");
-                    },
-                    icon: const Icon(
-                      Ionicons.refresh,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollControllerWallet,
-                itemCount: _currentWallets.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return SimpleItem(
-                    color: IconList.getColor(_currentWallets[index].walletType.type.toLowerCase()),
-                    description: _currentWallets[index].name,
-                    isSelected: (_currentWallet!.id == _currentWallets[index].id),
-                    onTap: (() {
-                      setState(() {
-                        _currentWallet = _currentWallets[index];
-                      });
-                      Navigator.pop(context);
-                    }),
-                    child: IconList.getIcon(_currentWallets[index].walletType.type.toLowerCase()),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20,),
-          ],
-        ),
-      );
-    });
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return MyBottomSheet(
+          context: context,
+          title: "Account",
+          screenRatio: 0.75,
+          child: ListView.builder(
+            controller: _scrollControllerWallet,
+            itemCount: _currentWallets.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SimpleItem(
+                color: IconList.getColor(_currentWallets[index].walletType.type.toLowerCase()),
+                description: _currentWallets[index].name,
+                isSelected: (_currentWallet!.id == _currentWallets[index].id),
+                onTap: (() {
+                  setState(() {
+                    _currentWallet = _currentWallets[index];
+                  });
+                  Navigator.pop(context);
+                }),
+                child: IconList.getIcon(_currentWallets[index].walletType.type.toLowerCase()),
+              );
+            },
+          ),
+        );
+      }
+    );
   }
 
   Widget _generateAccountSelector() {

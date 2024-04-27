@@ -15,7 +15,9 @@ import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
+import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
+
 enum PageName { summary, all, income, expense, transfer }
 
 class TransactionSearchPage extends StatefulWidget {
@@ -61,7 +63,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final Map<int, CategoryModel> _categorySelected = {};
   Map<int, CategoryModel> _categoryExpenseList = {};
   Map<int, CategoryModel> _categoryIncomeList = {};
-  final Map<int, CategoryModel> _categoryList = {};
+  final List<Widget> _categoryExpenseIcon = [];
+  final List<Widget> _categoryIncomeIcon = [];
 
   List<WalletModel> _walletList = [];
   final Map<int, bool> _selectedWalletList = {};
@@ -80,17 +83,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _categoryExpenseList = CategorySharedPreferences.getCategory('expense');
     _categoryIncomeList = CategorySharedPreferences.getCategory('income');
 
+    // generate the icon list widget for both expense and income
+    _generateIconCategory();
+
     // get the wallet list
     _walletList = WalletSharedPreferences.getWallets(false);
-
-    // generate category list
-    _categoryExpenseList.forEach((key, value) {
-      _categoryList[key] = value;
-    });
-
-    _categoryIncomeList.forEach((key, value) {
-      _categoryList[key] = value;
-    });
 
     super.initState();
   }
@@ -238,97 +235,74 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   });
                 }),
                 onTap: (() {
-                  showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                    return Container(
-                      height: 300,
-                      color: secondaryDark,
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            height: 40,
-                            decoration: const BoxDecoration(
-                              border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Expanded(
-                                  child: Center(
-                                    child: Text(
-                                      "Account"
-                                    )
-                                  )
-                                ),
-                                InkWell(
-                                  onTap: (() {
-                                    if (_selectedWalletList.isNotEmpty) {
-                                      setState(() {
-                                        // clear the selected wallet list
-                                        _selectedWalletList.clear();
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return MyBottomSheet(
+                        context: context,
+                        title: "Account",
+                        screenRatio: 0.75,
+                        actionButton: InkWell(
+                          onTap: (() {
+                            if (_selectedWalletList.isNotEmpty) {
+                              setState(() {
+                                // clear the selected wallet list
+                                _selectedWalletList.clear();
 
-                                        // filter and group the transaction
-                                        _filterTheTransaction();
-                                        _groupTransactions();
+                                // filter and group the transaction
+                                _filterTheTransaction();
+                                _groupTransactions();
 
-                                      });
+                              });
 
-                                      // close the modal dialog
-                                      Navigator.pop(context);
-                                    }
-                                  }),
-                                  child: const SizedBox(
-                                    child: Icon(
-                                      Ionicons.close_circle,
-                                      size: 20,
-                                      color: textColor,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10,),
-                              ],
+                              // close the modal dialog
+                              Navigator.pop(context);
+                            }
+                          }),
+                          child: const SizedBox(
+                            child: Icon(
+                              Ionicons.close_circle,
+                              size: 20,
+                              color: textColor,
                             ),
                           ),
-                          Expanded(
-                            child: ListView.builder(
-                              controller: _walletController,
-                              itemCount: _walletList.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SimpleItem(
-                                  color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                                  description: _walletList[index].name,
-                                  isSelected: (_selectedWalletList[_walletList[index].id] ?? false),
-                                  onTap: (() {
-                                    setState(() {
-                                      // check if this ID previously selected or not?
-                                      if (_selectedWalletList.containsKey(_walletList[index].id)) {
-                                        // delete this data
-                                        _selectedWalletList.remove(_walletList[index].id);
-                                      }
-                                      else {
-                                        // new data, set this as true
-                                        _selectedWalletList[_walletList[index].id] = true;
-                                      }
+                        ),
+                        child: ListView.builder(
+                          controller: _walletController,
+                          itemCount: _walletList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return SimpleItem(
+                              color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
+                              description: _walletList[index].name,
+                              isSelected: (_selectedWalletList[_walletList[index].id] ?? false),
+                              onTap: (() {
+                                setState(() {
+                                  // check if this ID previously selected or not?
+                                  if (_selectedWalletList.containsKey(_walletList[index].id)) {
+                                    // delete this data
+                                    _selectedWalletList.remove(_walletList[index].id);
+                                  }
+                                  else {
+                                    // new data, set this as true
+                                    _selectedWalletList[_walletList[index].id] = true;
+                                  }
 
-                                      // once finished call filter the transaction
-                                      // to filter the transactions that listed
-                                      _filterTheTransaction();
+                                  // once finished call filter the transaction
+                                  // to filter the transactions that listed
+                                  _filterTheTransaction();
 
-                                      // group the transactions
-                                      _groupTransactions();
-                                    });
-                                    Navigator.pop(context);
-                                  }),
-                                  child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 20,),
-                        ],
-                      ),
-                    );
-                  });
+                                  // group the transactions
+                                  _groupTransactions();
+                                });
+                                Navigator.pop(context);
+                              }),
+                              child: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
+                            );
+                          },
+                        ),
+                      );
+                    }
+                  );
                 }),
                 child: SizedBox(
                   width: 35,
@@ -1327,49 +1301,30 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   void _showCategorySelectionDialog() {
-    showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-      return Container(
-        height: 300,
-        color: secondaryDark,
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 40,
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Center(child: Text("Category Tab")),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10,),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 4,
-                children: _generateIconCategory(),
-              ),
-            ),
-          ],
-        ),
-      );
-    });
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return MyBottomSheet(
+          context: context,
+          title: "Category",
+          screenRatio: 0.75,
+          child: TransactionSearchCategory(
+            categoryExpense: _categoryExpenseIcon,
+            categoryIncome: _categoryIncomeIcon,
+          ),
+        );
+      }
+    );
   }
 
-  List<Widget> _generateIconCategory() {
-    List<Widget> ret = [];
-
-    // loop thru all the _currentCategoryList, and generate the category icon
-    _categoryList.forEach((key, value) {
-      ret.add(_iconCategory(value));
+  void _generateIconCategory() {
+    _categoryExpenseList.forEach((key, value) {
+      _categoryExpenseIcon.add(_iconCategory(value));
     });
 
-    return ret;
+    _categoryIncomeList.forEach((key, value) {
+      _categoryIncomeIcon.add(_iconCategory(value));
+    });
   }
 
   Widget _iconCategory(CategoryModel category) {
@@ -1469,5 +1424,70 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     });
 
     return result;
+  }
+}
+
+class TransactionSearchCategory extends StatefulWidget {
+  final List<Widget> categoryExpense;
+  final List<Widget> categoryIncome;
+  const TransactionSearchCategory({
+    super.key,
+    required this.categoryExpense,
+    required this.categoryIncome
+  });
+
+  @override
+  State<TransactionSearchCategory> createState() => _TransactionSearchCategoryState();
+}
+
+class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
+  PageName _resultCategoryName = PageName.expense;
+  final Map<PageName, Color> _resultCategoryColor = {
+    PageName.expense: accentColors[2],
+    PageName.income: accentColors[6],
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.all(10),
+          child: Center(
+            child: CupertinoSegmentedControl<PageName>(
+              selectedColor: (_resultCategoryColor[_resultCategoryName] ?? accentColors[9]),
+              // Provide horizontal padding around the children.
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              // This represents a currently selected segmented control.
+              groupValue: _resultCategoryName,
+              // Callback that sets the selected segmented control.
+              onValueChanged: (PageName value) {
+                setState(() {
+                  _resultCategoryName = value;
+                });
+              },
+              children: const <PageName, Widget>{
+                PageName.expense: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text('Expense'),
+                ),
+                PageName.income: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text('Income'),
+                ),
+              },
+            ),
+          ),
+        ),
+        Expanded(
+          child: GridView.count(
+            crossAxisCount: 4,
+            children: (_resultCategoryName == PageName.expense ? widget.categoryExpense : widget.categoryIncome),
+          ),
+        ),
+      ],
+    );
   }
 }
