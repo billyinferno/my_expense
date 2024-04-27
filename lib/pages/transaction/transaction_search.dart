@@ -956,14 +956,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           amountColor: accentColors[6],
         );
       case "transfer":
-      return MyItemList(
+        return MyItemList(
           iconColor: accentColors[4],
           icon: const Icon(
             Ionicons.repeat,
             color: textColor,
           ),
           type: txn.type.toLowerCase(),
-          title: txn.name,
+          title: '-',
           subTitle: df.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,

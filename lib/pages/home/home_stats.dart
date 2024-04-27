@@ -12,6 +12,7 @@ import 'package:my_expense/model/transaction_top_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
+import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -19,8 +20,8 @@ import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/widgets/calendar/month_prev_next_calendar.dart';
 import 'package:my_expense/widgets/chart/bar_chart.dart';
-import 'package:my_expense/widgets/item/item_list.dart';
 import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
+import 'package:my_expense/widgets/item/my_item_list.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
@@ -494,9 +495,9 @@ class _HomeStatsState extends State<HomeStats> {
           }
         }
 
-        ItemType type = ItemType.expense;
+        String type = 'expense';
         if (_resultPageName == PageName.income) {
-          type = ItemType.income;
+          type = 'income';
         }
 
         return Column(
@@ -505,14 +506,32 @@ class _HomeStatsState extends State<HomeStats> {
           children: List<Widget>.generate(
             _transactionTop[_currentCurrencyId]![_resultPageName]!.length,
             ((index) {
-              return ItemList(
-                type: type,
-                name: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionName,
-                walletName: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName,
-                walletSymbol: _currentCurrencySymbol,
-                categoryName: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName,
-                amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount
-              );
+              if (type == 'expense') {
+                return MyItemList(
+                  height: 70,
+                  iconColor: IconColorList.getExpenseColor(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                  icon: IconColorList.getExpenseIcon(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                  type: type,
+                  title: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionName,
+                  subTitle: "(${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName}) ${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName}",
+                  symbol: _currentCurrencySymbol,
+                  amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount,
+                  amountColor: accentColors[2],
+                );
+              }
+              else {
+                return MyItemList(
+                  height: 70,
+                  iconColor: IconColorList.getIncomeColor(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                  icon: IconColorList.getIncomeIcon(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                  type: type,
+                  title: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionName,
+                  subTitle: "(${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName}) ${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName}",
+                  symbol: _currentCurrencySymbol,
+                  amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount,
+                  amountColor: accentColors[2],
+                );
+              }
             }),
           ),
         );

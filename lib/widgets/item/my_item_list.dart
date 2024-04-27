@@ -5,6 +5,7 @@ import 'package:my_expense/themes/colors.dart';
 
 class MyItemList extends StatelessWidget {
   final String type;
+  final double? height;
   final Color iconColor;
   final Widget icon;
   final String title;
@@ -25,6 +26,7 @@ class MyItemList extends StatelessWidget {
   final Color? borderColor;
   const MyItemList({
     super.key,
+    this.height,
     required this.iconColor,
     required this.icon,
     required this.type,
@@ -53,7 +55,7 @@ class MyItemList extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      height: 65,
+      height: (height ?? 65),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(

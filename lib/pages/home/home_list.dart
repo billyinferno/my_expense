@@ -11,6 +11,7 @@ import 'package:my_expense/model/income_expense_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
+import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/globals.dart';
@@ -21,7 +22,7 @@ import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/item/item_list.dart';
+import 'package:my_expense/widgets/item/my_item_list.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:my_expense/themes/colors.dart';
@@ -417,41 +418,57 @@ class _HomeListState extends State<HomeList> {
   Widget generateItem(TransactionListModel txn) {
     switch (txn.type.toLowerCase()) {
       case "expense":
-        return ItemList(
-          type: ItemType.expense,
-          name: txn.name,
-          walletName: txn.wallet.name,
-          walletSymbol: txn.wallet.symbol,
-          categoryName: txn.category!.name,
-          amount: txn.amount
+        return MyItemList(
+          height: 70,
+          iconColor: IconColorList.getExpenseColor(txn.category!.name),
+          icon: IconColorList.getExpenseIcon((txn.category!.name)),
+          type: txn.type.toLowerCase(),
+          title: txn.name,
+          subTitle: "(${txn.wallet.name}) ${(txn.category!.name)}",
+          symbol: txn.wallet.symbol,
+          amount: txn.amount,
+          amountColor: accentColors[2],
         );
       case "income":
-        return ItemList(
-          type: ItemType.income,
-          name: txn.name,
-          walletName: txn.wallet.name,
-          walletSymbol: txn.wallet.symbol,
-          categoryName: txn.category!.name,
-          amount: txn.amount
+        return MyItemList(
+          height: 70,
+          iconColor: IconColorList.getIncomeColor(txn.category!.name),
+          icon: IconColorList.getIncomeIcon((txn.category!.name)),
+          type: txn.type.toLowerCase(),
+          title: txn.name,
+          subTitle: "(${txn.wallet.name}) ${(txn.category!.name)}",
+          symbol: txn.wallet.symbol,
+          amount: txn.amount,
+          amountColor: accentColors[2],
         );
       case "transfer":
-        return ItemList(
-          type: ItemType.transfer,
-          walletName: txn.wallet.name,
-          walletSymbol: txn.wallet.symbol,
-          walletToName: txn.walletTo!.name,
-          walletToSymbol: txn.walletTo!.symbol,
+        return MyItemList(
+          height: 70,
+          iconColor: accentColors[4],
+          icon: const Icon(
+            Ionicons.repeat,
+            color: textColor,
+          ),
+          type: txn.type.toLowerCase(),
+          title: '-',
+          subTitle: "${txn.wallet.name} > ${txn.walletTo!.name}",
+          symbol: txn.wallet.symbol,
           amount: txn.amount,
-          exchangeRate: txn.exchangeRate,
+          amountColor: accentColors[4],
+          symbolTo: txn.walletTo!.symbol,
+          amountTo: (txn.amount * txn.exchangeRate),
         );
       default:
-        return ItemList(
-          type: ItemType.expense,
-          name: txn.name,
-          walletName: txn.wallet.name,
-          walletSymbol: txn.wallet.symbol,
-          categoryName: txn.category!.name,
-          amount: txn.amount
+        return MyItemList(
+          height: 70,
+          iconColor: IconColorList.getExpenseColor(txn.category!.name),
+          icon: IconColorList.getExpenseIcon((txn.category!.name)),
+          type: txn.type.toLowerCase(),
+          title: txn.name,
+          subTitle: "(${txn.wallet.name}) ${(txn.category!.name)}",
+          symbol: txn.wallet.symbol,
+          amount: txn.amount,
+          amountColor: accentColors[2],
         );
     }
   }
