@@ -529,7 +529,7 @@ class _HomeStatsState extends State<HomeStats> {
                   subTitle: "(${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName}) ${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName}",
                   symbol: _currentCurrencySymbol,
                   amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount,
-                  amountColor: accentColors[2],
+                  amountColor: accentColors[6],
                 );
               }
             }),

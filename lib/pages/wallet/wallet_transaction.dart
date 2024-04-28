@@ -689,7 +689,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           subTitle: "(${txn.wallet.name}) ${(txn.category!.name)}",
           symbol: txn.wallet.symbol,
           amount: txn.amount,
-          amountColor: accentColors[2],
+          amountColor: accentColors[6],
         );
       case "transfer":
         return MyItemList(
