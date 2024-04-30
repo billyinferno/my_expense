@@ -158,7 +158,7 @@ class _UserPageState extends State<UserPage> {
         actions: <Widget>[
           IconButton(
             onPressed: () {
-              showLogoutDialog();
+              _showLogoutDialog();
             },
             icon: Icon(
               Ionicons.log_out_outline,
@@ -232,7 +232,7 @@ class _UserPageState extends State<UserPage> {
                               screenRatio: 0.75,
                               child: GridView.count(
                                 crossAxisCount: 4,
-                                children: generateExpenseCategory(),
+                                children: _generateExpenseCategory(),
                               ),
                             );
                           }
@@ -262,7 +262,7 @@ class _UserPageState extends State<UserPage> {
                               screenRatio: 0.75,
                               child: GridView.count(
                                 crossAxisCount: 4,
-                                children: generateIncomeCategory(),
+                                children: _generateIncomeCategory(),
                               ),
                             );
                           });
@@ -308,7 +308,7 @@ class _UserPageState extends State<UserPage> {
                                       if (selectedCurrency!.id != currentCurrency!.id) {
                                         // need to update the currency
                                         setState(() {
-                                          updateBudgetCurrency(currencies[index].id);
+                                          _updateBudgetCurrency(currencies[index].id);
                                         });
                                       }
                                       Navigator.pop(context);
@@ -364,7 +364,7 @@ class _UserPageState extends State<UserPage> {
                                       if (selectedWallet!.id != currentWallet!.id) {
                                         // need to update the currency
                                         setState(() {
-                                          updateDefaultWallet(wallets[index].id);
+                                          _updateDefaultWallet(wallets[index].id);
                                         });
                                       }
                                     }),
@@ -393,7 +393,7 @@ class _UserPageState extends State<UserPage> {
                       ),
                       callback: (() {
                         showLoaderDialog(context);
-                        refreshTransactionTag().then((_) {
+                        _refreshTransactionTag().then((_) {
                           // remove the loader dialog
                           Navigator.pop(context);
                         });
@@ -429,11 +429,11 @@ class _UserPageState extends State<UserPage> {
                         if(_isPinEnabled) {
                           // ask user if they really want to disable the pin?
                           // if yes, then show the PinPad screen and if correct then remove the pin
-                          showRemovePinDialog();
+                          _showRemovePinDialog();
                         }
                         else {
                           // setup the pin
-                          showSetupPin();
+                          _showSetupPin();
                         }
                       }),
                     ),
@@ -486,7 +486,7 @@ class _UserPageState extends State<UserPage> {
                         ),
                       ),
                       callback: (() {
-                        showLogoutDialog();
+                        _showLogoutDialog();
                       }),
                     ),
                   ],
@@ -500,7 +500,7 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
-  Future<void> showLogoutDialog() async {
+  Future<void> _showLogoutDialog() async {
     late Future<bool?> result = ShowMyDialog(
             dialogTitle: "Logout",
             dialogText: "Do you want to logout?",
@@ -513,12 +513,12 @@ class _UserPageState extends State<UserPage> {
     result.then((value) async {
       if (value == true) {
         debugPrint("logout user");
-        await logout();
+        await _logout();
       }
     });
   }
 
-  Future<void> logout() async {
+  Future<void> _logout() async {
     Future.wait([
       // clear the box
       MyBox.clear(),
@@ -533,7 +533,7 @@ class _UserPageState extends State<UserPage> {
     });
   }
 
-  Widget iconCategory(CategoryModel category) {
+  Widget _iconCategory(CategoryModel category) {
     // check if this is expense or income
     Color iconColor;
     Icon icon;
@@ -560,16 +560,16 @@ class _UserPageState extends State<UserPage> {
         // check if this is the same or not?
         // if not same then save this to server by sending the update request
         if (category.type.toLowerCase() == "expense") {
-          if (!compareCategory(
+          if (!_compareCategory(
               currentExpenseCategory!, selectedExpenseCategory!)) {
             // update expense category
-            updateDefaultCategory(category.type.toLowerCase(), category.id);
+            _updateDefaultCategory(category.type.toLowerCase(), category.id);
           }
         } else {
-          if (!compareCategory(
+          if (!_compareCategory(
               currentIncomeCategory!, selectedIncomeCategory!)) {
             // update income category
-            updateDefaultCategory(category.type.toLowerCase(), category.id);
+            _updateDefaultCategory(category.type.toLowerCase(), category.id);
           }
         }
       },
@@ -607,29 +607,29 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
-  List<Widget> generateExpenseCategory() {
+  List<Widget> _generateExpenseCategory() {
     List<Widget> ret = [];
 
     // loop thru all the _currentCategoryList, and generate the category icon
     expenseCategory.forEach((key, value) {
-      ret.add(iconCategory(value));
+      ret.add(_iconCategory(value));
     });
 
     return ret;
   }
 
-  List<Widget> generateIncomeCategory() {
+  List<Widget> _generateIncomeCategory() {
     List<Widget> ret = [];
 
     // loop thru all the _currentCategoryList, and generate the category icon
     incomeCategory.forEach((key, value) {
-      ret.add(iconCategory(value));
+      ret.add(_iconCategory(value));
     });
 
     return ret;
   }
 
-  bool compareCategory(CategoryModel cat1, CategoryModel cat2) {
+  bool _compareCategory(CategoryModel cat1, CategoryModel cat2) {
     if (cat1.name == cat2.name &&
         cat1.id == cat2.id &&
         cat1.type == cat2.type) {
@@ -638,19 +638,19 @@ class _UserPageState extends State<UserPage> {
     return false;
   }
 
-  void refreshUserMe() {
+  void _refreshUserMe() {
     setState(() {
       userMe = UserSharedPreferences.getUserMe();
     });
   }
 
-  void setIsPinEnabled(bool enabled) {
+  void _setIsPinEnabled(bool enabled) {
     setState(() {
       _isPinEnabled = enabled;
     });
   }
 
-  Future<void> updateDefaultCategory(String type, int categoryID) async {
+  Future<void> _updateDefaultCategory(String type, int categoryID) async {
     // show the loader dialog
     showLoaderDialog(context);
 
@@ -659,7 +659,7 @@ class _UserPageState extends State<UserPage> {
 
       // refresh the user me, as we already stored the updated user me
       // in the shared preferences
-      refreshUserMe();
+      _refreshUserMe();
 
       if (type == "expense") {
         currentExpenseCategory = selectedExpenseCategory;
@@ -695,7 +695,7 @@ class _UserPageState extends State<UserPage> {
     });
   }
 
-  Future<void> updateBudgetCurrency(int currencyID) async {
+  Future<void> _updateBudgetCurrency(int currencyID) async {
     // show the loader dialog
     showLoaderDialog(context);
 
@@ -706,7 +706,7 @@ class _UserPageState extends State<UserPage> {
       budgetHTTP.updateBudgetCurrency(currencyID),
       futureBudgetList = budgetHTTP.fetchBudgetDate(currencyID, currentBudgetDate),
     ]).then((_) {
-      refreshUserMe();
+      _refreshUserMe();
       currentCurrency = selectedCurrency!;
 
       // update the budget provider and budget shared preferences
@@ -742,12 +742,12 @@ class _UserPageState extends State<UserPage> {
     });
   }
 
-  Future<void> updateDefaultWallet(int walletId) async {
+  Future<void> _updateDefaultWallet(int walletId) async {
     // show the loader dialog
     showLoaderDialog(context);
 
     await walletHTTP.updateDefaultWallet(walletId).then((_) {
-      refreshUserMe();
+      _refreshUserMe();
       currentWallet = selectedWallet!;
       Navigator.pop(context);
       
@@ -782,7 +782,7 @@ class _UserPageState extends State<UserPage> {
     }
   }
 
-  Future<void> refreshTransactionTag() async {
+  Future<void> _refreshTransactionTag() async {
     // show loader dialog
     showLoaderDialog(context);
 
@@ -814,7 +814,7 @@ class _UserPageState extends State<UserPage> {
     });
   }
 
-  void showRemovePinDialog() {
+  void _showRemovePinDialog() {
     late Future<bool?> result = ShowMyDialog(
             dialogTitle: "Remove Pin",
             dialogText: "Do you want to remove PIN?",
@@ -830,7 +830,7 @@ class _UserPageState extends State<UserPage> {
         final result = await Navigator.push(context, createAnimationRoute(const PinRemovePage()));
         if(result) {
           // set the pin as disabled
-          setIsPinEnabled(false);
+          _setIsPinEnabled(false);
           // refresh the pin model value
           pinUser = PinSharedPreferences.getPin();
 
@@ -848,12 +848,12 @@ class _UserPageState extends State<UserPage> {
     });
   }
 
-  void showSetupPin() async {
+  void _showSetupPin() async {
     // navigate to the remove pin screen.
     final result = await Navigator.push(context, createAnimationRoute(const PinSetupPage()));
     if(result) {
       // set the pin as disabled
-      setIsPinEnabled(true);
+      _setIsPinEnabled(true);
       // refresh the pin model value
       pinUser = PinSharedPreferences.getPin();
 
