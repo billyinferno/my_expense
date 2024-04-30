@@ -16,7 +16,7 @@ class IconList {
       case "loan": { return Icon(FontAwesomeIcons.handHoldingDollar, color: const Color(0xFFFFFFFF), size: currentSize); }
       case "savings": { return Icon(FontAwesomeIcons.piggyBank, color: const Color(0xFFFFFFFF), size: currentSize); }
       case "other": { return Icon(FontAwesomeIcons.wallet, color: const Color(0xFFFFFFFF), size: currentSize); }
-      default: { return Icon(FontAwesomeIcons.wallet, color: const Color(0xFFFFFFFF), size: currentSize); }
+      default: { return Icon(FontAwesomeIcons.question, color: const Color(0xFFFFFFFF), size: currentSize); }
     }
   }
 
@@ -32,7 +32,7 @@ class IconList {
       case "loan": { return accentColors[2]; }
       case "savings": { return accentColors[4]; }
       case "other": { return accentColors[3]; }
-      default: { return accentColors[0]; }
+      default: { return Colors.grey[800]!; }
     }
   }
 
@@ -48,7 +48,7 @@ class IconList {
       case "loan": { return darkAccentColors[2]; }
       case "savings": { return darkAccentColors[4]; }
       case "other": { return darkAccentColors[3]; }
-      default: { return darkAccentColors[0]; }
+      default: { return Colors.grey[900]!; }
     }
   }
 
@@ -64,7 +64,7 @@ class IconList {
       case "loan": { return lightAccentColors[2]; }
       case "savings": { return lightAccentColors[4]; }
       case "other": { return lightAccentColors[3]; }
-      default: { return lightAccentColors[0]; }
+      default: { return Colors.grey[700]!; }
     }
   }
 }
