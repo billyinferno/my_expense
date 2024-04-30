@@ -355,126 +355,24 @@ class _TransactionInputState extends State<TransactionInput> {
               ],
             ),
           ),
-          const SizedBox(height: 10,),
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: SingleChildScrollView(
-                controller: _optionController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Visibility(
-                      visible: (_currentType == 'transfer'),
-                      child: _buildTransferWalletSelection()
+            child: SingleChildScrollView(
+              controller: _optionController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Visibility(
+                    visible: (_currentType == 'transfer'),
+                    child: _buildTransferWalletSelection()
+                  ),
+                  Visibility(
+                    visible: (
+                      _currentType == 'transfer' &&
+                      (_currentWalletFromID > 0 && _currentWalletToID > 0) &&
+                      (_currentWalletFromCCY != _currentWalletToCCY)
                     ),
-                    Visibility(
-                      visible: (
-                        _currentType == 'transfer' &&
-                        (_currentWalletFromID > 0 && _currentWalletToID > 0) &&
-                        (_currentWalletFromCCY != _currentWalletToCCY)
-                      ),
-                      child: Container(
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Ionicons.swap_horizontal_sharp,
-                              size: 20,
-                              color: textColor,
-                            ),
-                            const SizedBox(width: 10,),
-                            Expanded(
-                              child: TextFormField(
-                                controller: _exchangeController,
-                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                decoration: const InputDecoration(
-                                  hintText: "1.00",
-                                  border: OutlineInputBorder(
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: EdgeInsets.zero,
-                                  isCollapsed: true,
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                ),
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(12),
-                                  DecimalTextInputFormatter(decimalRange: 11),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (_showDescription) {
-                            _showDescription = !_showDescription;
-                          }
-                          _showCalendar = !_showCalendar;
-                        });
-                      },
-                      child: Container(
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Ionicons.calendar_outline,
-                              size: 20,
-                              color: textColor,
-                            ),
-                            const SizedBox(width: 10,),
-                            Text(_calendarText()),
-                          ],
-                        ),
-                      ),
-                    ),
-                    AnimationExpand(
-                      expand: _showCalendar,
-                      child: SizedBox(
-                        height: 200,
-                        child: CupertinoTheme(
-                          data: const CupertinoThemeData(
-                            brightness: Brightness.dark,
-                            textTheme: CupertinoTextThemeData(
-                              textStyle: TextStyle(
-                                fontFamily: '--apple-system',
-                                fontSize: 20,
-                              ),
-                              dateTimePickerTextStyle: TextStyle(
-                                fontFamily: '--apple-system',
-                                fontSize: 20,
-                              ),
-                            )
-                          ),
-                          child: CupertinoDatePicker(
-                            mode: CupertinoDatePickerMode.date,
-                            initialDateTime: _currentDate.toLocal(),
-                            onDateTimeChanged: (val) {
-                              setState(() {
-                                _currentDate = val.toLocal();
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                    Visibility(
-                      visible: (_currentType != 'transfer'),
-                      child: _buildIncomeExpenseWalletSelection(),
-                    ),
-                    Container(
+                    child: Container(
                       height: 50,
                       decoration: const BoxDecoration(
                         border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
@@ -482,70 +380,171 @@ class _TransactionInputState extends State<TransactionInput> {
                       child: Row(
                         children: [
                           const Icon(
-                            Ionicons.checkbox_outline,
+                            Ionicons.swap_horizontal_sharp,
                             size: 20,
                             color: textColor,
                           ),
                           const SizedBox(width: 10,),
-                          const Expanded(child: Text("Cleared")),
-                          CupertinoSwitch(
-                            value: _currentClear,
-                            onChanged: (value) {
-                              setState(() {
-                                _currentClear = value;
-                              });
-                            },
+                          Expanded(
+                            child: TextFormField(
+                              controller: _exchangeController,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              decoration: const InputDecoration(
+                                hintText: "1.00",
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: EdgeInsets.zero,
+                                isCollapsed: true,
+                              ),
+                              style: const TextStyle(
+                                fontSize: 15,
+                              ),
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(12),
+                                DecimalTextInputFormatter(decimalRange: 11),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if(_showCalendar) {
-                            _showCalendar = false;
-                          }
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (_showDescription) {
                           _showDescription = !_showDescription;
-                        });
-                      },
-                      child: Container(
-                        height: 50,
-                        decoration: const BoxDecoration(
-                          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                        }
+                        _showCalendar = !_showCalendar;
+                      });
+                    },
+                    child: Container(
+                      height: 50,
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      decoration: const BoxDecoration(
+                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Ionicons.calendar_outline,
+                            size: 20,
+                            color: textColor,
+                          ),
+                          const SizedBox(width: 10,),
+                          Text(_calendarText()),
+                        ],
+                      ),
+                    ),
+                  ),
+                  AnimationExpand(
+                    expand: _showCalendar,
+                    child: SizedBox(
+                      height: 200,
+                      child: CupertinoTheme(
+                        data: const CupertinoThemeData(
+                          brightness: Brightness.dark,
+                          textTheme: CupertinoTextThemeData(
+                            textStyle: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 20,
+                            ),
+                            dateTimePickerTextStyle: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 20,
+                            ),
+                          )
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Ionicons.newspaper_outline,
-                              size: 20,
-                              color: textColor,
-                            ),
-                            const SizedBox(width: 10,),
-                            Text(
-                              (_descriptionController.text.trim().isEmpty ? "Description" : _descriptionController.text),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                        child: CupertinoDatePicker(
+                          mode: CupertinoDatePickerMode.date,
+                          initialDateTime: _currentDate.toLocal(),
+                          onDateTimeChanged: (val) {
+                            setState(() {
+                              _currentDate = val.toLocal();
+                            });
+                          },
                         ),
                       ),
                     ),
-                    AnimationExpand(
-                      expand: _showDescription,
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        child: TextFormField(
-                          controller: _descriptionController,
-                          keyboardType: TextInputType.multiline,
-                          maxLines: 8,
-                          maxLength: 250,
-                          decoration: const InputDecoration(
-                            hintText: "Input description",
-                          ),
-                        ),
-                      )
+                  ),
+                  Visibility(
+                    visible: (_currentType != 'transfer'),
+                    child: _buildIncomeExpenseWalletSelection(),
+                  ),
+                  Container(
+                    height: 50,
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    decoration: const BoxDecoration(
+                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Ionicons.checkbox_outline,
+                          size: 20,
+                          color: textColor,
+                        ),
+                        const SizedBox(width: 10,),
+                        const Expanded(child: Text("Cleared")),
+                        CupertinoSwitch(
+                          value: _currentClear,
+                          onChanged: (value) {
+                            setState(() {
+                              _currentClear = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if(_showCalendar) {
+                          _showCalendar = false;
+                        }
+                        _showDescription = !_showDescription;
+                      });
+                    },
+                    child: Container(
+                      height: 50,
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      decoration: const BoxDecoration(
+                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Ionicons.newspaper_outline,
+                            size: 20,
+                            color: textColor,
+                          ),
+                          const SizedBox(width: 10,),
+                          Text(
+                            (_descriptionController.text.trim().isEmpty ? "Description" : _descriptionController.text),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  AnimationExpand(
+                    expand: _showDescription,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      child: TextFormField(
+                        controller: _descriptionController,
+                        keyboardType: TextInputType.multiline,
+                        maxLines: 8,
+                        maxLength: 250,
+                        decoration: const InputDecoration(
+                          hintText: "Input description",
+                        ),
+                      ),
+                    )
+                  ),
+                ],
               ),
             ),
           ),
@@ -708,6 +707,43 @@ class _TransactionInputState extends State<TransactionInput> {
                     onTap: (() {
                       Navigator.pop(context);
                     }),
+                    onDoubleTap: (() async {
+                      // remove the calculator first
+                      Navigator.pop(context);
+                      
+                      // check whether this is expense/income/transfer
+                      if (_currentType == 'transfer') {
+                        // show the to account selection for transfer
+                        await _showAccountSelection(
+                          title: "From Account",
+                          selectedId: _currentWalletFromID,
+                          disableID: _currentWalletToID,
+                          onTap: ((index) {
+                            setState(() {
+                              _currentWalletFromID = _walletList[index].id;
+                              _currentWalletFromName = _walletList[index].name;
+                              _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                              _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+                            });
+                          })
+                        );
+                      }
+                      else {
+                        // show the to account selection for expense/income
+                        await _showAccountSelection(
+                          title: "From Account",
+                          selectedId: _currentWalletFromID,
+                          onTap: ((index) {
+                            setState(() {
+                              _currentWalletFromID = _walletList[index].id;
+                              _currentWalletFromName = _walletList[index].name;
+                              _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                              _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+                            });
+                          })
+                        );
+                      }
+                    }),
                     child: Container(
                       padding: const EdgeInsets.fromLTRB(50, 10, 10, 10),
                       color: Colors.transparent,
@@ -748,43 +784,81 @@ class _TransactionInputState extends State<TransactionInput> {
     );
   }
 
+  Future<void> _showAccountSelection({
+    required String title,
+    required int selectedId,
+    int? disableID,
+    required Function(int) onTap,
+  }) async {
+    int currentDisableID = (disableID ?? -1);
+    IconData? disableIcon;
+    Color? disableColor;
+    bool isDisabled = false;
+    
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return MyBottomSheet(
+          context: context,
+          title: title,
+          screenRatio: 0.45,
+          child:  ListView.builder(
+            controller: _walletController,
+            itemCount: _walletList.length,
+            itemBuilder: (BuildContext context, int index) {
+              isDisabled = false;
+              disableIcon = null;
+              disableColor = null;
+
+              // check if the ID is the same with disabled ID or not?
+              // if same then we dilled the disabled icon, and checkmark color
+              // with red, and disable the onTap
+              if (currentDisableID == _walletList[index].id) {
+                disableIcon = Ionicons.alert_circle;
+                disableColor = accentColors[2];
+                isDisabled = true;
+              }
+
+              return SimpleItem(
+                color: (isDisabled ? Colors.grey[600]! : IconList.getColor(_walletList[index].walletType.type.toLowerCase())),
+                title: _walletList[index].name,
+                isSelected: (selectedId == _walletList[index].id || isDisabled),
+                checkmarkIcon: disableIcon,
+                checkmarkColor: disableColor,
+                isDisabled: isDisabled,
+                onTap: (() {
+                  onTap(index);
+                  Navigator.pop(context);
+                }),
+                icon: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
+              );
+            },
+          )
+        );
+
+      }
+    );
+  }
+
   Widget _buildIncomeExpenseWalletSelection() {
     return GestureDetector(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (BuildContext context) {
-            return MyBottomSheet(
-              context: context,
-              title: "Account",
-              screenRatio: 0.45,
-              child:  ListView.builder(
-                controller: _walletController,
-                itemCount: _walletList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return SimpleItem(
-                    color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                    title: _walletList[index].name,
-                    isSelected: (_currentWalletFromID == _walletList[index].id),
-                    onTap: (() {
-                      setState(() {
-                        _currentWalletFromID = _walletList[index].id;
-                        _currentWalletFromName = _walletList[index].name;
-                        _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                        _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                      });
-                      Navigator.pop(context);
-                    }),
-                    icon: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
-                  );
-                },
-              )
-            );
-          }
+      onTap: () async {
+        await _showAccountSelection(
+          title: "Account",
+          selectedId: _currentWalletFromID,
+          onTap: ((index) {
+            setState(() {
+              _currentWalletFromID = _walletList[index].id;
+              _currentWalletFromName = _walletList[index].name;
+              _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+              _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+            });
+          })
         );
       },
       child: Container(
         height: 50,
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
         decoration: const BoxDecoration(
           border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
         ),
@@ -817,23 +891,20 @@ class _TransactionInputState extends State<TransactionInput> {
           const SizedBox(width: 30,),
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                  return _transferWalletSelection(
-                    controller: _transferFromWalletController,
-                    title: "From Account",
-                    wallets: _walletList,
-                    selectedId: _currentWalletFromID,
-                    onTap: (index) {
-                      setState(() {
-                        _currentWalletFromID = _walletList[index].id;
-                        _currentWalletFromName = _walletList[index].name;
-                        _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                        _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                      });
-                    },
-                  );
-                });
+              onTap: () async {
+                await _showAccountSelection(
+                  title: "From Account",
+                  selectedId: _currentWalletFromID,
+                  disableID: _currentWalletToID,
+                  onTap: ((index) {
+                    setState(() {
+                      _currentWalletFromID = _walletList[index].id;
+                      _currentWalletFromName = _walletList[index].name;
+                      _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                      _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+                    });
+                  })
+                );
               },
               child: Container(
                 color: Colors.transparent,
@@ -869,23 +940,20 @@ class _TransactionInputState extends State<TransactionInput> {
           const SizedBox(width: 10,),
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
-                  return _transferWalletSelection(
-                    controller: _transferToWalletController,
-                    title: "To Account",
-                    wallets: _walletList,
-                    selectedId: _currentWalletFromID,
-                    onTap: (index) {
-                      setState(() {
-                        _currentWalletToID = _walletList[index].id;
-                        _currentWalletToName = _walletList[index].name;
-                        _currentWalletToType = _walletList[index].walletType.type.toLowerCase();
-                        _currentWalletToCCY = _walletList[index].currency.name.toLowerCase();
-                      });
-                    },
-                  );
-                });
+              onTap: () async {
+                await _showAccountSelection(
+                  title: "To Account",
+                  selectedId: _currentWalletToID,
+                  disableID: _currentWalletFromID,
+                  onTap: ((index) {
+                    setState(() {
+                      _currentWalletToID = _walletList[index].id;
+                      _currentWalletToName = _walletList[index].name;
+                      _currentWalletToType = _walletList[index].walletType.type.toLowerCase();
+                      _currentWalletToCCY = _walletList[index].currency.name.toLowerCase();
+                    });
+                  })
+                );
               },
               child: Container(
                 color: Colors.transparent,
@@ -898,7 +966,7 @@ class _TransactionInputState extends State<TransactionInput> {
                       width: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(40),
-                        color: (_currentWalletToType.isNotEmpty ? IconList.getColor(_currentWalletToType) : accentColors[5]),
+                        color: (_currentWalletToType.isNotEmpty ? IconList.getColor(_currentWalletToType) : Colors.grey[600]),
                       ),
                       child: _getTransferInIcon(_currentWalletToType),
                     ),
@@ -911,36 +979,6 @@ class _TransactionInputState extends State<TransactionInput> {
           ),
           const SizedBox(width: 30,),
         ],
-      ),
-    );
-  }
-
-  Widget _transferWalletSelection({
-    required ScrollController controller,
-    required String title,
-    required List<WalletModel> wallets,
-    required int selectedId,
-    required Function(int) onTap,
-  }) {
-    return MyBottomSheet(
-      context: context,
-      title: title,
-      screenRatio: 0.45,
-      child: ListView.builder(
-        controller: controller,
-        itemCount: wallets.length,
-        itemBuilder: (BuildContext context, int index) {
-          return SimpleItem(
-            color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-            title: wallets[index].name,
-            isSelected: (selectedId == wallets[index].id),
-            onTap: (() {
-              onTap(index);
-              Navigator.pop(context);
-            }),
-            icon: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
-          );
-        },
       ),
     );
   }
