@@ -31,7 +31,7 @@ class WalletEditPage extends StatefulWidget {
 
 class _WalletEditPageState extends State<WalletEditPage> {
   // format variable
-  final fCCY = NumberFormat("#,##0.00", "en_US");
+  final _fCCY = NumberFormat("0.00", "en_US");
   double _currentAmountFontSize = 25;
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
@@ -56,11 +56,6 @@ class _WalletEditPageState extends State<WalletEditPage> {
 
   @override
   void initState() {
-    super.initState();
-    initWalletEdit();
-  }
-
-  void initWalletEdit() async {
     // get the wallet data from param
     final WalletModel walletData = widget.walletData as WalletModel;
 
@@ -82,8 +77,11 @@ class _WalletEditPageState extends State<WalletEditPage> {
     // set all the input data based on the initialize data above
     _nameController.text = walletData.name;
     if(_currentStartBalance > 0) {
-      _amountController.text = fCCY.format(_currentStartBalance);
+      _amountController.text = _fCCY.format(_currentStartBalance);
+      _currentAmountFontSize = 25 - ((10/6) * (_amountController.text.length - 6));
     }
+
+    super.initState();
   }
 
   @override
@@ -156,7 +154,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 GestureDetector(
-                  child: getCurrentWalletTypeIcon(),
+                  child: _getCurrentWalletTypeIcon(),
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
@@ -403,7 +401,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
     );
   }
 
-  Widget getCurrentWalletTypeIcon() {
+  Widget _getCurrentWalletTypeIcon() {
     // check what is the current wallet type being selected
     if(_currentWalletTypeID < 0) {
       return Container(

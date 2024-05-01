@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/currency_model.dart';
@@ -30,7 +29,6 @@ class WalletAddPage extends StatefulWidget {
 
 class _WalletAddPageState extends State<WalletAddPage> {
   // format variable
-  final fCCY = NumberFormat("#,##0.00", "en_US");
   double _currentAmountFontSize = 25;
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
@@ -54,15 +52,10 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
   @override
   void initState() {
-    super.initState();
-
-    initWalletAdd();
-  }
-
-  void initWalletAdd() async {
     _walletType = WalletSharedPreferences.getWalletTypes();
     _currencies = WalletSharedPreferences.getWalletCurrency();
     _userMe = UserSharedPreferences.getUserMe();
+    super.initState();
   }
 
   @override
@@ -91,7 +84,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
           IconButton(
             onPressed: () async {
               showLoaderDialog(context);
-              await saveWallet().then((_) {
+              await _saveWallet().then((_) {
                 // remove the loader
                 Navigator.pop(context);
 
@@ -135,7 +128,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 GestureDetector(
-                  child: getCurrentWalletTypeIcon(),
+                  child: _getCurrentWalletTypeIcon(),
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
@@ -386,7 +379,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
     );
   }
 
-  Widget getCurrentWalletTypeIcon() {
+  Widget _getCurrentWalletTypeIcon() {
     // check what is the current wallet type being selected
     if(_currentWalletTypeID < 0) {
       return Container(
@@ -415,7 +408,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
     }
   }
 
-  Future<void> saveWallet() async {
+  Future<void> _saveWallet() async {
     // perform validation, in case there are any error, then just throw an
     // exception, it will automatically create the snackbar, as we already
     // using future for the transaction.
