@@ -35,7 +35,7 @@ class WalletTransactionPage extends StatefulWidget {
 }
 
 class _WalletTransactionPageState extends State<WalletTransactionPage> {
-  final fCCY = NumberFormat("#,##0.00", "en_US");
+  final _fCCY = NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
@@ -99,7 +99,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             onTap: (() async {
               // set the sorting to inverse
               _sortAscending = !_sortAscending;
-              await setTransactions(_transactions);
+              await _setTransactions(_transactions);
             }),
             child: SizedBox(
               width: 50,
@@ -183,7 +183,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     );
   }
 
-  Future<void> setTransactions(List<TransactionListModel> transactions) async {
+  Future<void> _setTransactions(List<TransactionListModel> transactions) async {
     setState(() {
       double income = 0.0;
       double expense = 0.0;
@@ -285,7 +285,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     // get the transaction
     String date = _dtyyyyMMdd.format(DateTime(fetchDate.toLocal().year, fetchDate.toLocal().month, 1));
     await _transactionHttp.fetchTransactionWallet(_wallet.id, date, isForce).then((txns) async {
-      await setTransactions(txns);
+      await _setTransactions(txns);
       _transactions = txns.toList();
 
     }).onError((error, stackTrace) {
@@ -363,9 +363,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                       RichText(
                         text: TextSpan(
                           children: <TextSpan>[
-                            TextSpan(text: "(${fCCY.format(_expenseAmount)})", style: TextStyle(color: accentColors[2])),
+                            TextSpan(text: "(${_fCCY.format(_expenseAmount)})", style: TextStyle(color: accentColors[2])),
                             const TextSpan(text: " "),
-                            TextSpan(text: "(${fCCY.format(_incomeAmount)})", style: TextStyle(color: accentColors[6])),
+                            TextSpan(text: "(${_fCCY.format(_incomeAmount)})", style: TextStyle(color: accentColors[6])),
                           ]
                         ),
                       ),
@@ -451,12 +451,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   ),
                 ),
                 Text(
-                  "(${fCCY.format(header.expense)})",
+                  "(${_fCCY.format(header.expense)})",
                   style: TextStyle(color: accentColors[2])
                 ),
                 const SizedBox(width: 5,),
                 Text(
-                  "(${fCCY.format(header.income)})",
+                  "(${_fCCY.format(header.income)})",
                   style: TextStyle(color: accentColors[6])
                 ),
               ],
@@ -495,7 +495,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                           await _deleteTransaction(txn);
                           
                           // rebuild widget after finished
-                          await setTransactions(_transactions);
+                          await _setTransactions(_transactions);
                         }
                         catch(error) {
                           debugPrint("Error: ${error.toString()}");
@@ -582,7 +582,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     }
 
     // rebuild the transaction
-    await setTransactions(_transactions);
+    await _setTransactions(_transactions);
   }
 
   void _updateWalletBalance(bool isRemove, TransactionListModel updateTxn, TransactionListModel currentTxn) {

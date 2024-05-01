@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/currency_model.dart';
@@ -24,9 +23,7 @@ class HomeWallet extends StatefulWidget {
 }
 
 class _HomeWalletState extends State<HomeWallet> {
-  final fCCY = NumberFormat("#,##0.00", "en_US");
-  final walletHttpService = WalletHTTPService();
-  bool isLoading = false;
+  final _walletHttpService = WalletHTTPService();
 
   final ScrollController _scrollControllerWallet = ScrollController();
   late Future<bool> _getData;
@@ -114,7 +111,7 @@ class _HomeWalletState extends State<HomeWallet> {
               itemBuilder: (BuildContext ctx, int index) {
                 if (index < wallets.length) {
                   WalletModel wallet = wallets[index];
-                  return generateSlidable(wallet);
+                  return _generateSlidable(wallet);
                 }
                 else {
                   return const SizedBox(height: 30,);
@@ -134,8 +131,8 @@ class _HomeWalletState extends State<HomeWallet> {
     showLoaderDialog(context);
 
     Future.wait([
-      walletList = walletHttpService.deleteWallets(id),
-      walletCurrencyList = walletHttpService.fetchWalletCurrencies(true),
+      walletList = _walletHttpService.deleteWallets(id),
+      walletCurrencyList = _walletHttpService.fetchWalletCurrencies(true),
     ]).then((_) {
       // set the provider so it can tell the consumer to update/build the widget.
       walletList.then((wallets) {
@@ -159,7 +156,7 @@ class _HomeWalletState extends State<HomeWallet> {
 
     // fetch the new wallet data from API
     await Future.wait([
-      futureWallets = walletHttpService.fetchWallets(true, true),
+      futureWallets = _walletHttpService.fetchWallets(true, true),
     ]).then((_) {
       futureWallets.then((wallets) {
         if(wallets.isNotEmpty) {
@@ -176,7 +173,7 @@ class _HomeWalletState extends State<HomeWallet> {
     return true;
   }
 
-  Widget generateSlidable(WalletModel wallet) {
+  Widget _generateSlidable(WalletModel wallet) {
     return Slidable(
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
@@ -199,40 +196,38 @@ class _HomeWalletState extends State<HomeWallet> {
             backgroundColor: primaryBackground,
             icon: Ionicons.trash,
             onPressed: ((_) {
-              if(!isLoading) {
-                late Future<bool?> result = ShowMyDialog(
-                  dialogTitle: "Delete Wallet",
-                  dialogText: "Do you want to delete ${wallet.name}?\nThis will also delete all related transaction to this wallet.",
-                  confirmText: "Delete",
-                  confirmColor: accentColors[2],
-                  cancelText: "Cancel"
-                ).show(context);
+              late Future<bool?> result = ShowMyDialog(
+                dialogTitle: "Delete Wallet",
+                dialogText: "Do you want to delete ${wallet.name}?\nThis will also delete all related transaction to this wallet.",
+                confirmText: "Delete",
+                confirmColor: accentColors[2],
+                cancelText: "Cancel"
+              ).show(context);
 
-                // check the result of the dialog box
-                result.then((value) async {
-                  if(value == true) {
-                    await _deleteWallet(wallet.id).then((_) {
-                      Navigator.pop(context);
-                      // clear all the cache for the application so we can just
-                      // fetch again all data from internet, for this let user knew
-                      // that we will delete all the cache
-                      late Future<bool?> userConfirm = ShowMyDialog(
-                          dialogTitle: "Cache Clear",
-                          dialogText: "We will clear all the cache for the application.",
-                          confirmText: "Okay",
-                          confirmColor: accentColors[0],
-                      ).show(context);
+              // check the result of the dialog box
+              result.then((value) async {
+                if(value == true) {
+                  await _deleteWallet(wallet.id).then((_) {
+                    Navigator.pop(context);
+                    // clear all the cache for the application so we can just
+                    // fetch again all data from internet, for this let user knew
+                    // that we will delete all the cache
+                    late Future<bool?> userConfirm = ShowMyDialog(
+                        dialogTitle: "Cache Clear",
+                        dialogText: "We will clear all the cache for the application.",
+                        confirmText: "Okay",
+                        confirmColor: accentColors[0],
+                    ).show(context);
 
-                      userConfirm.then((value) {
-                        _clearCache();
-                      });
-                    }).onError((error, stackTrace) {
-                      debugPrint("Error when clicking delete wallet");
-                      Navigator.pop(context);
+                    userConfirm.then((value) {
+                      _clearCache();
                     });
-                  }
-                });
-              }
+                  }).onError((error, stackTrace) {
+                    debugPrint("Error when clicking delete wallet");
+                    Navigator.pop(context);
+                  });
+                }
+              });
             })
           ),
           SlidableAction(
@@ -280,8 +275,8 @@ class _HomeWalletState extends State<HomeWallet> {
     Future <List<CurrencyModel>> walletCurrencyList;
 
     Future.wait([
-      walletList = walletHttpService.enableWallet(wallet, !wallet.enabled),
-      walletCurrencyList = walletHttpService.fetchWalletCurrencies(true),
+      walletList = _walletHttpService.enableWallet(wallet, !wallet.enabled),
+      walletCurrencyList = _walletHttpService.fetchWalletCurrencies(true),
     ]).then((_) {
       // set the provider with the new wallets we got
       walletList.then((wallets) {

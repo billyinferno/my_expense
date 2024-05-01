@@ -18,7 +18,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
   String _secondPin = "";
   int _stage = 1;
 
-  final PinHTTPService pinHttp = PinHTTPService();
+  final PinHTTPService _pinHttp = PinHTTPService();
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +110,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
   }
 
   Future<void> _savePin() async {
-    await pinHttp.setPin(_firstPin).then((_) {
+    await _pinHttp.setPin(_firstPin).then((_) {
       // pop the loader dialog
       Navigator.pop(context);
 

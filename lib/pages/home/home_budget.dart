@@ -277,8 +277,8 @@ class _HomeBudgetState extends State<HomeBudget> {
                               Expanded(
                                 child: BudgetBar(
                                   title: _currentCurrencies!.description,
-                                  budgetTotal: computeTotalAmount(_budgetList),
-                                  budgetUsed: computeTotalUsed(_budgetList),
+                                  budgetTotal: _computeTotalAmount(_budgetList),
+                                  budgetUsed: _computeTotalUsed(_budgetList),
                                   symbol: _currentCurrencies!.symbol,
                                 ),
                               ),
@@ -414,13 +414,7 @@ class _HomeBudgetState extends State<HomeBudget> {
     }
   }
 
-  void setCurrencies(List<CurrencyModel> currencies) {
-    setState(() {
-      _currencies = currencies;
-    });
-  }
-
-  double computeTotalAmount(List<BudgetModel> budgets) {
+  double _computeTotalAmount(List<BudgetModel> budgets) {
     double amount = 0;
     for (BudgetModel budget in budgets) {
       if (_showNotInBudget) {
@@ -436,7 +430,7 @@ class _HomeBudgetState extends State<HomeBudget> {
     return amount;
   }
 
-  double computeTotalUsed(List<BudgetModel> budgets) {
+  double _computeTotalUsed(List<BudgetModel> budgets) {
     double used = 0;
     for (BudgetModel budget in budgets) {
       if (_showNotInBudget) {

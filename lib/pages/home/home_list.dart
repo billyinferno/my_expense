@@ -95,7 +95,7 @@ class _HomeListState extends State<HomeList> {
           }),
           onDoubleTap: (() {
             // go to the current date
-            setFocusedDay(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+            _setFocusedDay(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
             _getData = _refreshTransaction(_currentFocusedDay);
           }),
           child: Container(
@@ -146,7 +146,7 @@ class _HomeListState extends State<HomeList> {
                 lastDay: _lastDay,
                 calendarFormat: _currentCalendarFormat,
                 onPageChanged: (focusedDay) {
-                  setFocusedDay(focusedDay);
+                  _setFocusedDay(focusedDay);
                   _getData = _refreshTransaction(focusedDay);
                 },
                 selectedDayPredicate: (day) {
@@ -154,7 +154,7 @@ class _HomeListState extends State<HomeList> {
                 },
                 onDaySelected: (selectedDay, focusedDay) {
                   if (!(isSameDay(selectedDay, _currentFocusedDay))) {
-                    setFocusedDay(selectedDay);
+                    _setFocusedDay(selectedDay);
                     _getData = _refreshTransaction(selectedDay);
                   }
                 },
@@ -314,7 +314,7 @@ class _HomeListState extends State<HomeList> {
       }),
     ).then((newDate) {
       if(newDate != null) {
-        setFocusedDay(DateTime(newDate.toLocal().year, newDate.toLocal().month, newDate.toLocal().day));
+        _setFocusedDay(DateTime(newDate.toLocal().year, newDate.toLocal().month, newDate.toLocal().day));
         _getData = _refreshTransaction(_currentFocusedDay);
       }
     });
@@ -330,12 +330,12 @@ class _HomeListState extends State<HomeList> {
             if(velocity != 0) {
               if(velocity > 0) {
                 // go to the previous day
-                setFocusedDay(_currentFocusedDay.subtract(const Duration(days: 1)));
+                _setFocusedDay(_currentFocusedDay.subtract(const Duration(days: 1)));
                 _getData = _refreshTransaction(_currentFocusedDay);
               }
               else if(velocity < 0) {
                 // go to the next day
-                setFocusedDay(_currentFocusedDay.add(const Duration(days: 1)));
+                _setFocusedDay(_currentFocusedDay.add(const Duration(days: 1)));
                 _getData = _refreshTransaction(_currentFocusedDay);
               }
             }
@@ -354,7 +354,7 @@ class _HomeListState extends State<HomeList> {
                 itemBuilder: (BuildContext ctx, int index) {
                   if (index < _transactionData.length) {
                     TransactionListModel txn = _transactionData[index];
-                    return generateListItem(index, txn, context);
+                    return _generateListItem(index, txn, context);
                   }
                   else {
                     return const SizedBox(height: 30,);
@@ -368,7 +368,7 @@ class _HomeListState extends State<HomeList> {
     );
   }
 
-  void setFocusedDay(DateTime focusedDay) {
+  void _setFocusedDay(DateTime focusedDay) {
     setState(() {
       _currentFocusedDay = focusedDay;
       _appTitleMonth = DateFormat('MMMM').format(_currentFocusedDay.toLocal());
@@ -379,7 +379,7 @@ class _HomeListState extends State<HomeList> {
     });
   }
 
-  Widget generateListItem(int index, TransactionListModel txn, BuildContext context) {
+  Widget _generateListItem(int index, TransactionListModel txn, BuildContext context) {
     return Slidable(
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
@@ -414,12 +414,12 @@ class _HomeListState extends State<HomeList> {
         onTap: () {
           Navigator.pushNamed(context, '/transaction/edit', arguments: txn);
         },
-        child: generateItem(txn),
+        child: _generateItem(txn),
       ),
     );
   }
 
-  Widget generateItem(TransactionListModel txn) {
+  Widget _generateItem(TransactionListModel txn) {
     switch (txn.type.toLowerCase()) {
       case "expense":
         return MyItemList(
@@ -520,7 +520,7 @@ class _HomeListState extends State<HomeList> {
       TransactionSharedPreferences.setTransaction(date, txnListModel);
 
       // update information for txn delete
-      updateInformation(txnDeleted);
+      _updateInformation(txnDeleted);
     }).onError((error, stackTrace) {
       debugPrint("Error when delete");
       debugPrint(error.toString());
@@ -529,7 +529,7 @@ class _HomeListState extends State<HomeList> {
     });
   }
 
-  Future<void> updateInformation(TransactionListModel txnInfo) async {
+  Future<void> _updateInformation(TransactionListModel txnInfo) async {
     _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
     DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
     DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));

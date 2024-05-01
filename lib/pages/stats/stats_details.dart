@@ -20,7 +20,7 @@ class StatsDetailPage extends StatefulWidget {
 
 class _StatsDetailPageState extends State<StatsDetailPage> {
   late StatsDetailArgs _stats;
-  final fCCY = NumberFormat("#,##0.00", "en_US");
+  final _fCCY = NumberFormat("#,##0.00", "en_US");
   double _maxExpense = 0.0;
   double _maxIncome = 0.0;
 
@@ -242,7 +242,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                 onTap: (() {
                   // go to income pages
                   // income page will always going to be 1
-                  changePageViewPostion(0);
+                  _changePageViewPostion(0);
                 }),
                 child: Container(
                   padding: const EdgeInsets.all(10),
@@ -286,11 +286,11 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                   // for expense, we need to see whether we have income data or not?
                   // if got income data, then it means that the page will be 2
                   if(incomeDataMap.isNotEmpty) {
-                    changePageViewPostion(1);
+                    _changePageViewPostion(1);
                   }
                   else {
                     // we only have expense no income
-                    changePageViewPostion(0);
+                    _changePageViewPostion(0);
                   }
                 }),
                 child: Container(
@@ -384,7 +384,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
     }
 
     // return the formated CCY
-    return "$symbol ${fCCY.format(total)}";
+    return "$symbol ${_fCCY.format(total)}";
   }
 
   void _getMaxAmount() {
@@ -399,7 +399,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
     }
   }
 
-  void changePageViewPostion(int whichPage) {
+  void _changePageViewPostion(int whichPage) {
     int itemCount = 0;
     if(_stats.incomeExpenseCategory.income.isNotEmpty) {
       itemCount++;

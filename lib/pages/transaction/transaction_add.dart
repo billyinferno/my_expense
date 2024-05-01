@@ -29,7 +29,7 @@ class TransactionAddPage extends StatefulWidget {
 }
 
 class _TransactionAddPageState extends State<TransactionAddPage> {
-  DateTime selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime.now();
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
@@ -41,13 +41,13 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
   void initState() {
     DateTime? prefCurrentTime;
 
-    selectedDate = widget.params as DateTime;
+    _selectedDate = widget.params as DateTime;
     
     // check on the shared preferences if the transaction list current time is already set or not?
     // if not then use params.
     prefCurrentTime = TransactionSharedPreferences.getTransactionListCurrentDate();
     if (prefCurrentTime != null) {
-      selectedDate = prefCurrentTime;
+      _selectedDate = prefCurrentTime;
     }
 
     super.initState();
@@ -61,7 +61,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       saveTransaction: (value) {
         _saveTransaction(value);
       },
-      selectedDate: selectedDate.toLocal(),
+      selectedDate: _selectedDate.toLocal(),
     );
   }
 
@@ -69,7 +69,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     // show the loader
     showLoaderDialog(context);
     // now we can try to send updated data to the backend
-    await _transactionHttp.addTransaction(context, txn!, selectedDate).then((result) async {
+    await _transactionHttp.addTransaction(context, txn!, _selectedDate).then((result) async {
       // update necessary information after we add the transaction
       await _updateInformation(result).then((_) {
         // get the transaction edit date
@@ -81,7 +81,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // for transaction that actually add on the different date, we cannot notify the home list
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
-        if (isSameDay(txn.date.toLocal(), selectedDate.toLocal())) {
+        if (isSameDay(txn.date.toLocal(), _selectedDate.toLocal())) {
           Provider.of<HomeProvider>(context, listen: false).setTransactionList(txnListShared);
         }
         

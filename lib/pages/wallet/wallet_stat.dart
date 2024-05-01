@@ -19,9 +19,9 @@ class WalletStatPage extends StatefulWidget {
 }
 
 class _WalletStatPageState extends State<WalletStatPage> {
-  final fCCY = NumberFormat("#,##0.00", "en_US");
-  final dt = DateFormat("yyyy-MM");
-  final dt2 = DateFormat("MM/yy");
+  final _fCCY = NumberFormat("#,##0.00", "en_US");
+  final _dt = DateFormat("yyyy-MM");
+  final _dt2 = DateFormat("MM/yy");
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   bool _sortAscending = true;
   late WalletModel _wallet;
@@ -193,14 +193,14 @@ class _WalletStatPageState extends State<WalletStatPage> {
                 SummaryBox(
                   color: accentColors[0],
                   text: "Income",
-                  value: fCCY.format(_totalIncome),
+                  value: _fCCY.format(_totalIncome),
                   count: _countIncome,
                 ),
                 const SizedBox(width: 10,),
                 SummaryBox(
                   color: accentColors[2],
                   text: "Expense",
-                  value: fCCY.format(_totalExpense),
+                  value: _fCCY.format(_totalExpense),
                   count: _countExpense
                 ),
               ],
@@ -254,7 +254,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              dt.format(_walletStat[index].date.toLocal()),
+                              _dt.format(_walletStat[index].date.toLocal()),
                               style: const TextStyle(
                                 fontSize: 11,
                               ),
@@ -281,8 +281,8 @@ class _WalletStatPageState extends State<WalletStatPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Bar(amount: _walletStat[index].income!, maxAmount: _maxAmount, text: fCCY.format(_walletStat[index].income!), color: accentColors[0]),
-                            Bar(amount: _walletStat[index].expense!, maxAmount: _maxAmount, text: fCCY.format(_walletStat[index].expense!), color: accentColors[2]),
+                            Bar(amount: _walletStat[index].income!, maxAmount: _maxAmount, text: _fCCY.format(_walletStat[index].income!), color: accentColors[0]),
+                            Bar(amount: _walletStat[index].expense!, maxAmount: _maxAmount, text: _fCCY.format(_walletStat[index].expense!), color: accentColors[2]),
                           ],
                         ),
                       ),
@@ -309,15 +309,15 @@ class _WalletStatPageState extends State<WalletStatPage> {
     _maxAmount = double.infinity * -1;
 
     _walletDateRange.forEach((key, value) {
-      walletListIncome[dt2.format(key)] = 0;
-      walletListExpense[dt2.format(key)] = 0;
-      walletListTotal[dt2.format(key)] = 0;
+      walletListIncome[_dt2.format(key)] = 0;
+      walletListExpense[_dt2.format(key)] = 0;
+      walletListTotal[_dt2.format(key)] = 0;
     });
 
     for (WalletStatModel data in _walletStat) {
       // generate the wallet list income, expense, and total
-      walletListIncome[dt2.format(data.date)] = (data.income ?? 0);
-      walletListExpense[dt2.format(data.date)] = (data.expense ?? 0);
+      walletListIncome[_dt2.format(data.date)] = (data.income ?? 0);
+      walletListExpense[_dt2.format(data.date)] = (data.expense ?? 0);
       
       _totalIncome += data.income!;
       _totalExpense += data.expense!;
@@ -339,8 +339,8 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
     // loop thru _walletDataRange again to calculate the total
     _walletDateRange.forEach((key, value) {
-      total += walletListIncome[dt2.format(key)]! - walletListExpense[dt2.format(key)]!;
-      walletListTotal[dt2.format(key)] = total;
+      total += walletListIncome[_dt2.format(key)]! - walletListExpense[_dt2.format(key)]!;
+      walletListTotal[_dt2.format(key)] = total;
     });
 
     _dateOffset = walletListTotal.length ~/ 8;

@@ -19,38 +19,38 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int currentIndex = 0;
-  DateTime selectedDate = DateTime.now().toLocal();
+  int _currentIndex = 0;
+  DateTime _selectedDate = DateTime.now().toLocal();
 
-  List<Widget> pages = [];
+  final List<Widget> _pages = [];
 
-  late PinModel? pin;
-  bool isPinEnabled = false;
+  late PinModel? _pin;
+  bool _isPinEnabled = false;
 
   @override
   void initState() {
     super.initState();
 
     // get the pin data
-    pin = PinSharedPreferences.getPin();
-    if(pin != null) {
-      if(pin!.hashKey != null && pin!.hashPin != null) {
-        isPinEnabled = true;
+    _pin = PinSharedPreferences.getPin();
+    if(_pin != null) {
+      if(_pin!.hashKey != null && _pin!.hashPin != null) {
+        _isPinEnabled = true;
       }
     }
     
     // check if login or not?
-    pages.add(HomeList(
+    _pages.add(HomeList(
       userIconPress: () {
         Navigator.pushNamed(context, '/user');
       },
       userDateSelect: (value) {
-        setSelectedDate(value);
+        _setSelectedDate(value);
       },
     ));
-    pages.add(const HomeStats());
-    pages.add(const HomeBudget());
-    pages.add(const HomeWallet());
+    _pages.add(const HomeStats());
+    _pages.add(const HomeBudget());
+    _pages.add(const HomeWallet());
   }
 
   Widget _showPinScreen() {
@@ -70,8 +70,8 @@ class _HomePageState extends State<HomePage> {
           const Text("Your passcode is required"),
           const SizedBox(height: 25,),
           PinPad(
-            hashPin: (pin!.hashPin ?? ''),
-            hashKey: (pin!.hashKey ?? ''),
+            hashPin: (_pin!.hashPin ?? ''),
+            hashKey: (_pin!.hashKey ?? ''),
             onError: (() async {
               await ShowMyDialog(
                 cancelEnabled: false,
@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
             onSuccess: (() {
               debugPrint("🏠 Show home");
               setState(() {
-                isPinEnabled = false;
+                _isPinEnabled = false;
               });
             }),
           ),
@@ -97,15 +97,15 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     // check whether we got pin enabled or not?
     // if got pin enabled then we will show the pin screen instead of home screen
-    if (isPinEnabled) {
+    if (_isPinEnabled) {
       return _showPinScreen();
     }
     
     // there are no pin enabled, means we can just showed the home
     return Scaffold(
       body: IndexedStack(
-        index: currentIndex,
-        children: pages,
+        index: _currentIndex,
+        children: _pages,
       ),
       bottomNavigationBar: BottomAppBar(
         elevation: 0.0,
@@ -118,63 +118,63 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             BarButton(
               index: 0,
-              currentIndex: currentIndex,
+              currentIndex: _currentIndex,
               icon: Ionicons.calendar,
               text: "Calendar",
               onTap: (() {
                 setState(() {
-                  currentIndex = 0;
+                  _currentIndex = 0;
                 });
               }),
             ),
             BarButton(
               index: 1,
-              currentIndex: currentIndex,
+              currentIndex: _currentIndex,
               icon: Ionicons.stats_chart,
               text: "Stats",
               onTap: (() {
                 setState(() {
-                  currentIndex = 1;
+                  _currentIndex = 1;
                 });
               }),
             ),
             const Expanded(child: SizedBox(),),
             BarButton(
               index: 2,
-              currentIndex: currentIndex,
+              currentIndex: _currentIndex,
               icon: Ionicons.list,
               text: "Budget",
               onTap: (() {
                 setState(() {
-                  currentIndex = 2;
+                  _currentIndex = 2;
                 });
               }),
             ),
             BarButton(
               index: 3,
-              currentIndex: currentIndex,
+              currentIndex: _currentIndex,
               icon: Ionicons.wallet,
               text: "Account",
               onTap: (() {
                 setState(() {
-                  currentIndex = 3;
+                  _currentIndex = 3;
                 });
               }),
             ),
           ],
         ),
       ),
-      floatingActionButton: createFloatingAddButton(),
+      floatingActionButton: _createFloatingAddButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  Widget createFloatingAddButton() {
+  Widget _createFloatingAddButton() {
     return FloatingActionButton(
       elevation: 0.0,
       backgroundColor: Colors.transparent,
       onPressed: () {
-        Navigator.pushNamed(context, '/transaction/add', arguments: selectedDate);
+        Navigator.pushNamed(context, '/transaction/add', arguments: _selectedDate);
       },
       child: Container(
         width: 75,
@@ -192,15 +192,9 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void selectedTab(int index) {
+  void _setSelectedDate(DateTime value) {
     setState(() {
-      currentIndex = index;
-    });
-  }
-
-  void setSelectedDate(DateTime value) {
-    setState(() {
-      selectedDate = value;
+      _selectedDate = value;
     });
   }
 }

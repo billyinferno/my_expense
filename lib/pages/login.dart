@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
   
   String _bearerToken = "";
   bool _isTokenExpired = false;
-  List<ConnectivityResult> connectivityResult = [ConnectivityResult.wifi]; // default as already have wifi connection
+  List<ConnectivityResult> _connectivityResult = [ConnectivityResult.wifi]; // default as already have wifi connection
   bool _isLoading = true;
   bool _isConnect = true;
 
@@ -440,14 +440,14 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _checkConnection() async {
     // check for internet connection
     try {
-      connectivityResult = await _connectivity.checkConnectivity();
-      if (connectivityResult.isEmpty) {
+      _connectivityResult = await _connectivity.checkConnectivity();
+      if (_connectivityResult.isEmpty) {
         debugPrint("⛔ No connection");
       }
       else {
         // check if got connectivity result none or not?
         _isConnect = true;
-        for (ConnectivityResult result in connectivityResult) {
+        for (ConnectivityResult result in _connectivityResult) {
           if (result == ConnectivityResult.none) {
             _isConnect = false;
           }

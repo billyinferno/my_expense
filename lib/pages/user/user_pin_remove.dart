@@ -16,14 +16,14 @@ class PinRemovePage extends StatefulWidget {
 }
 
 class _PinRemovePageState extends State<PinRemovePage> {
-  late PinModel? pin;
-  late int tries;
-  final PinHTTPService pinHttp = PinHTTPService();
+  late PinModel? _pin;
+  late int _tries;
+  final PinHTTPService _pinHttp = PinHTTPService();
 
   @override
   void initState() {
-    pin = PinSharedPreferences.getPin();
-    tries = 1;
+    _pin = PinSharedPreferences.getPin();
+    _tries = 1;
 
     super.initState();
   }
@@ -69,19 +69,19 @@ class _PinRemovePageState extends State<PinRemovePage> {
                 const Text("Your passcode is required"),
                 const SizedBox(height: 25,),
                 PinPad(
-                  hashPin: (pin!.hashPin ?? ''),
-                  hashKey: (pin!.hashKey ?? ''),
+                  hashPin: (_pin!.hashPin ?? ''),
+                  hashKey: (_pin!.hashKey ?? ''),
                   onError: (() async {
                     // show the error dialog
                     await ShowMyDialog(
                       cancelEnabled: false,
                       confirmText: "OK",
                       dialogTitle: "Error",
-                      dialogText: "Wrong Passcode ($tries tries)."
+                      dialogText: "Wrong Passcode ($_tries tries)."
                     ).show(context);
 
                     // add tries
-                    tries += 1;
+                    _tries += 1;
                   }),
                   onSuccess: (() {
                     showLoaderDialog(context);
@@ -100,7 +100,7 @@ class _PinRemovePageState extends State<PinRemovePage> {
   }
 
   Future<void> _removePin() async {
-    await pinHttp.deletePin().then((_) {
+    await _pinHttp.deletePin().then((_) {
       // pop the loader
       Navigator.pop(context);
 

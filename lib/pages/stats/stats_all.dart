@@ -17,9 +17,9 @@ class StatsAllPage extends StatefulWidget {
 }
 
 class _StatsAllPageState extends State<StatsAllPage> {
-  final fCCY = NumberFormat("#,##0.00", "en_US");
-  final dt = DateFormat("yyyy-MM");
-  final dt2 = DateFormat("MM/yy");
+  final _fCCY = NumberFormat("#,##0.00", "en_US");
+  final _dt = DateFormat("yyyy-MM");
+  final _dt2 = DateFormat("MM/yy");
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   
   late Future<bool> _getData;
@@ -30,7 +30,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
   late int _countIncome;
   late double _totalExpense;
   late int _countExpense;
-  late int ccy;
+  late int _ccy;
 
   // multiline chart data
   late List<Map<String, double>> _walletLineChartData;
@@ -44,7 +44,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
   @override
   void initState() {
     // get the current ccy
-    ccy = widget.ccy as int;
+    _ccy = widget.ccy as int;
 
     // init the wallet list into empty list
     _walletStatAll = [];
@@ -199,14 +199,14 @@ class _StatsAllPageState extends State<StatsAllPage> {
                 SummaryBox(
                   color: accentColors[0],
                   text: "Income",
-                  value: fCCY.format(_totalIncome),
+                  value: _fCCY.format(_totalIncome),
                   count: _countIncome,
                 ),
                 const SizedBox(width: 10,),
                 SummaryBox(
                   color: accentColors[2],
                   text: "Expense",
-                  value: fCCY.format(_totalExpense),
+                  value: _fCCY.format(_totalExpense),
                   count: _countExpense
                 ),
               ],
@@ -259,7 +259,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                         child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                            dt.format(_walletStatAll[0].data[index].date),
+                            _dt.format(_walletStatAll[0].data[index].date),
                           ),
                         ),
                       ),
@@ -269,9 +269,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Bar(amount: _walletStatAll[0].data[index].income!, maxAmount: _maxAmount, text: fCCY.format(_walletStatAll[0].data[index].income!), color: accentColors[0]),
-                            Bar(amount: _walletStatAll[0].data[index].expense!, maxAmount: _maxAmount, text: fCCY.format(_walletStatAll[0].data[index].expense!),color: accentColors[2]),
-                            Bar(amount: _walletStatAll[0].data[index].balance!, maxAmount: _maxAmount, text: fCCY.format(_walletStatAll[0].data[index].balance!),color: accentColors[4]),
+                            Bar(amount: _walletStatAll[0].data[index].income!, maxAmount: _maxAmount, text: _fCCY.format(_walletStatAll[0].data[index].income!), color: accentColors[0]),
+                            Bar(amount: _walletStatAll[0].data[index].expense!, maxAmount: _maxAmount, text: _fCCY.format(_walletStatAll[0].data[index].expense!),color: accentColors[2]),
+                            Bar(amount: _walletStatAll[0].data[index].balance!, maxAmount: _maxAmount, text: _fCCY.format(_walletStatAll[0].data[index].balance!),color: accentColors[4]),
                           ],
                         ),
                       ),
@@ -300,19 +300,19 @@ class _StatsAllPageState extends State<StatsAllPage> {
     // loop thru all the stat all date to add as key on the wallet list income
     // expense, and total
     _walletDateRange.forEach((key, value) {
-      walletListIncome[dt2.format(key)] = 0;
-      walletListExpense[dt2.format(key)] = 0;
-      walletListTotal[dt2.format(key)] = 0;
+      walletListIncome[_dt2.format(key)] = 0;
+      walletListExpense[_dt2.format(key)] = 0;
+      walletListTotal[_dt2.format(key)] = 0;
     });
 
     for (WalletStatAllModel ccy in _walletStatAll) {
       for (Datum data in ccy.data) {
         // generate the wallet list income, expense, and total
-        walletListIncome[dt2.format(data.date)] = (data.income ?? 0);
-        walletListExpense[dt2.format(data.date)] = (data.expense ?? 0);
+        walletListIncome[_dt2.format(data.date)] = (data.income ?? 0);
+        walletListExpense[_dt2.format(data.date)] = (data.expense ?? 0);
 
         total += (data.diff ?? 0);
-        walletListTotal[dt2.format(data.date)] = total;
+        walletListTotal[_dt2.format(data.date)] = total;
 
         _totalIncome += data.income!;
         _totalExpense += data.expense!;
@@ -348,7 +348,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
   Future<bool> _getWalletStatAllData() async {
     try {
       // perform the get company detail information here
-      await _walletHTTP.getAllStat(ccy).then((resp) {
+      await _walletHTTP.getAllStat(_ccy).then((resp) {
         // copy the response to company detail data
         _walletStatAll = resp;
         _origWalletStatAll.addAll(resp);

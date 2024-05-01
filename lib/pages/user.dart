@@ -44,98 +44,98 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
-  final CategoryHTTPService categoryHTTP = CategoryHTTPService();
-  final BudgetHTTPService budgetHTTP = BudgetHTTPService();
-  final WalletHTTPService walletHTTP = WalletHTTPService();
-  final TransactionHTTPService transactionHTTP = TransactionHTTPService();
+  final CategoryHTTPService _categoryHTTP = CategoryHTTPService();
+  final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
+  final WalletHTTPService _walletHTTP = WalletHTTPService();
+  final TransactionHTTPService _transactionHTTP = TransactionHTTPService();
   final ScrollController _scrollControllerCurrency = ScrollController();
   final ScrollController _scrollControllerWallet = ScrollController();
 
-  late UsersMeModel userMe;
-  late Map<int, CategoryModel> expenseCategory;
-  late Map<int, CategoryModel> incomeCategory;
-  late List<CurrencyModel> currencies;
-  late List<WalletModel> wallets;
+  late UsersMeModel _userMe;
+  late Map<int, CategoryModel> _expenseCategory;
+  late Map<int, CategoryModel> _incomeCategory;
+  late List<CurrencyModel> _currencies;
+  late List<WalletModel> _wallets;
 
-  late CategoryModel? currentExpenseCategory;
-  late CategoryModel? currentIncomeCategory;
-  late CurrencyModel? currentCurrency;
-  late WalletModel? currentWallet;
+  late CategoryModel? _currentExpenseCategory;
+  late CategoryModel? _currentIncomeCategory;
+  late CurrencyModel? _currentCurrency;
+  late WalletModel? _currentWallet;
   
-  late CategoryModel? selectedExpenseCategory;
-  late CategoryModel? selectedIncomeCategory;
-  late CurrencyModel? selectedCurrency;
-  late WalletModel? selectedWallet;
-  late PinModel? pinUser;
+  late CategoryModel? _selectedExpenseCategory;
+  late CategoryModel? _selectedIncomeCategory;
+  late CurrencyModel? _selectedCurrency;
+  late WalletModel? _selectedWallet;
+  late PinModel? _pinUser;
 
-  late Future<List<BudgetModel>> futureBudgetList;
+  late Future<List<BudgetModel>> _futureBudgetList;
   bool _isPinEnabled = false;
 
   @override
   void initState() {
     // get the current user information
-    userMe = UserSharedPreferences.getUserMe();
+    _userMe = UserSharedPreferences.getUserMe();
 
     // get the expense and incomr category
-    expenseCategory = CategorySharedPreferences.getCategory("expense");
-    incomeCategory = CategorySharedPreferences.getCategory("income");
+    _expenseCategory = CategorySharedPreferences.getCategory("expense");
+    _incomeCategory = CategorySharedPreferences.getCategory("income");
     
     // check what is the default category for expense
-    if(userMe.defaultCategoryExpense != null) {
-      currentExpenseCategory = expenseCategory[userMe.defaultCategoryExpense];
+    if(_userMe.defaultCategoryExpense != null) {
+      _currentExpenseCategory = _expenseCategory[_userMe.defaultCategoryExpense];
     }
     else {
-      currentExpenseCategory = CategoryModel(-1, "", "expense");
+      _currentExpenseCategory = CategoryModel(-1, "", "expense");
     }
-    selectedExpenseCategory = currentExpenseCategory;
+    _selectedExpenseCategory = _currentExpenseCategory;
 
     // check what is the default category for income
-    if(userMe.defaultCategoryIncome != null) {
-      currentIncomeCategory = incomeCategory[userMe.defaultCategoryIncome];
+    if(_userMe.defaultCategoryIncome != null) {
+      _currentIncomeCategory = _incomeCategory[_userMe.defaultCategoryIncome];
     }
     else {
-      currentIncomeCategory = CategoryModel(-1, "", "income");
+      _currentIncomeCategory = CategoryModel(-1, "", "income");
     }
-    selectedIncomeCategory = currentIncomeCategory;
+    _selectedIncomeCategory = _currentIncomeCategory;
 
     // for user that don't have any wallet currencies it means that the
     // selectedCurrency will still be null, to avoid this we can just
     // initialize selectedCurrency with default data first instead before
-    selectedCurrency = CurrencyModel(-1, "", "", "");
-    currentCurrency = CurrencyModel(-1, "", "", "");
+    _selectedCurrency = CurrencyModel(-1, "", "", "");
+    _currentCurrency = CurrencyModel(-1, "", "", "");
 
     // get user default currency
-    currencies = WalletSharedPreferences.getWalletUserCurrency();
-    if(currencies.isNotEmpty) {
-      for (int i = 0; i < currencies.length; i++) {
-        if (userMe.defaultBudgetCurrency == currencies[i].id) {
-          currentCurrency = currencies[i];
-          selectedCurrency = currencies[i];
+    _currencies = WalletSharedPreferences.getWalletUserCurrency();
+    if(_currencies.isNotEmpty) {
+      for (int i = 0; i < _currencies.length; i++) {
+        if (_userMe.defaultBudgetCurrency == _currencies[i].id) {
+          _currentCurrency = _currencies[i];
+          _selectedCurrency = _currencies[i];
           break;
         }
       }
     }
 
     // initialize the user default wallet
-    currentWallet = WalletModel(-1, "", 0.0, 0.0, 0.0, true, true, WalletTypeModel(-1, ""), CurrencyModel(-1, "", "", ""), UserPermissionModel(-1, "", ""));
-    selectedWallet = currentWallet;
+    _currentWallet = WalletModel(-1, "", 0.0, 0.0, 0.0, true, true, WalletTypeModel(-1, ""), CurrencyModel(-1, "", "", ""), UserPermissionModel(-1, "", ""));
+    _selectedWallet = _currentWallet;
 
     // get list of wallets from shared preferences
-    wallets = WalletSharedPreferences.getWallets(false);
-    if(userMe.defaultWallet != null && wallets.isNotEmpty) {
-      for (int i=0; i<wallets.length; i++) {
-        if(userMe.defaultWallet == wallets[i].id) {
-          currentWallet = wallets[i];
-          selectedWallet = wallets[i];
+    _wallets = WalletSharedPreferences.getWallets(false);
+    if(_userMe.defaultWallet != null && _wallets.isNotEmpty) {
+      for (int i=0; i<_wallets.length; i++) {
+        if(_userMe.defaultWallet == _wallets[i].id) {
+          _currentWallet = _wallets[i];
+          _selectedWallet = _wallets[i];
           break;
         }
       }
     }
 
     // check the pin for user
-    pinUser = PinSharedPreferences.getPin();
-    if(pinUser != null) {
-      if(pinUser!.hashKey != null && pinUser!.hashPin != null) {
+    _pinUser = PinSharedPreferences.getPin();
+    if(_pinUser != null) {
+      if(_pinUser!.hashKey != null && _pinUser!.hashPin != null) {
         _isPinEnabled = true;
       }
     }
@@ -189,7 +189,7 @@ class _UserPageState extends State<UserPage> {
                   height: 5,
                 ),
                 Text(
-                  userMe.username,
+                  _userMe.username,
                   style: const TextStyle(
                     color: textColor,
                     fontSize: 25,
@@ -215,7 +215,7 @@ class _UserPageState extends State<UserPage> {
                       value: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          selectedExpenseCategory!.name.toString(),
+                          _selectedExpenseCategory!.name.toString(),
                           //textAlign: TextAlign.right,
                           style: const TextStyle(
                             color: textColor,
@@ -246,7 +246,7 @@ class _UserPageState extends State<UserPage> {
                       value: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          selectedIncomeCategory!.name.toString(),
+                          _selectedIncomeCategory!.name.toString(),
                           style: const TextStyle(
                             color: textColor,
                           ),
@@ -275,7 +275,7 @@ class _UserPageState extends State<UserPage> {
                       value: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          selectedCurrency!.symbol.toString(),
+                          _selectedCurrency!.symbol.toString(),
                           //textAlign: TextAlign.right,
                           style: const TextStyle(
                             color: textColor,
@@ -292,30 +292,30 @@ class _UserPageState extends State<UserPage> {
                               screenRatio: 0.35,
                               child: ListView.builder(
                                 controller: _scrollControllerCurrency,
-                                itemCount: currencies.length,
+                                itemCount: _currencies.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   return SimpleItem(
                                     color: accentColors[6],
-                                    title: currencies[index].description,
-                                    isSelected: selectedCurrency!.id == currencies[index].id,
+                                    title: _currencies[index].description,
+                                    isSelected: _selectedCurrency!.id == _currencies[index].id,
                                     onTap: (() {
                                       // get the selected currencies
-                                      selectedCurrency = currencies[index];
+                                      _selectedCurrency = _currencies[index];
                                       
                                       // check if currency the same or not?
                                       // if not the same then we can perform
                                       // update on the default budget currency.
-                                      if (selectedCurrency!.id != currentCurrency!.id) {
+                                      if (_selectedCurrency!.id != _currentCurrency!.id) {
                                         // need to update the currency
                                         setState(() {
-                                          _updateBudgetCurrency(currencies[index].id);
+                                          _updateBudgetCurrency(_currencies[index].id);
                                         });
                                       }
                                       Navigator.pop(context);
                                     }),
                                     icon: FittedBox(
                                       fit: BoxFit.contain,
-                                      child: Text(currencies[index].symbol.toUpperCase()),
+                                      child: Text(_currencies[index].symbol.toUpperCase()),
                                     ),
                                   );
                                 },
@@ -332,7 +332,7 @@ class _UserPageState extends State<UserPage> {
                       value: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          selectedWallet!.name.toString(),
+                          _selectedWallet!.name.toString(),
                           style: const TextStyle(
                             color: textColor,
                           ),
@@ -348,27 +348,27 @@ class _UserPageState extends State<UserPage> {
                               screenRatio: 0.40,
                               child: ListView.builder(
                                 controller: _scrollControllerWallet,
-                                itemCount: wallets.length,
+                                itemCount: _wallets.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   return SimpleItem(
-                                    color: IconList.getColor(wallets[index].walletType.type.toLowerCase()),
-                                    title: wallets[index].name,
-                                    isSelected: (currentWallet!.id == wallets[index].id),
+                                    color: IconList.getColor(_wallets[index].walletType.type.toLowerCase()),
+                                    title: _wallets[index].name,
+                                    isSelected: (_currentWallet!.id == _wallets[index].id),
                                     onTap: (() {
                                       // get current selected wallet
-                                      selectedWallet = wallets[index];
+                                      _selectedWallet = _wallets[index];
 
                                       // check if currency the same or not?
                                       // if not the same then we can perform
                                       // update on the default budget currency.
-                                      if (selectedWallet!.id != currentWallet!.id) {
+                                      if (_selectedWallet!.id != _currentWallet!.id) {
                                         // need to update the currency
                                         setState(() {
-                                          _updateDefaultWallet(wallets[index].id);
+                                          _updateDefaultWallet(_wallets[index].id);
                                         });
                                       }
                                     }),
-                                    icon: IconList.getIcon(wallets[index].walletType.type.toLowerCase()),
+                                    icon: IconList.getIcon(_wallets[index].walletType.type.toLowerCase()),
                                   );
                                 },
                               ),
@@ -551,9 +551,9 @@ class _UserPageState extends State<UserPage> {
         // print("Select category");
         setState(() {
           if (category.type.toLowerCase() == "expense") {
-            selectedExpenseCategory = category;
+            _selectedExpenseCategory = category;
           } else {
-            selectedIncomeCategory = category;
+            _selectedIncomeCategory = category;
           }
         });
         Navigator.pop(context);
@@ -561,13 +561,13 @@ class _UserPageState extends State<UserPage> {
         // if not same then save this to server by sending the update request
         if (category.type.toLowerCase() == "expense") {
           if (!_compareCategory(
-              currentExpenseCategory!, selectedExpenseCategory!)) {
+              _currentExpenseCategory!, _selectedExpenseCategory!)) {
             // update expense category
             _updateDefaultCategory(category.type.toLowerCase(), category.id);
           }
         } else {
           if (!_compareCategory(
-              currentIncomeCategory!, selectedIncomeCategory!)) {
+              _currentIncomeCategory!, _selectedIncomeCategory!)) {
             // update income category
             _updateDefaultCategory(category.type.toLowerCase(), category.id);
           }
@@ -611,7 +611,7 @@ class _UserPageState extends State<UserPage> {
     List<Widget> ret = [];
 
     // loop thru all the _currentCategoryList, and generate the category icon
-    expenseCategory.forEach((key, value) {
+    _expenseCategory.forEach((key, value) {
       ret.add(_iconCategory(value));
     });
 
@@ -622,7 +622,7 @@ class _UserPageState extends State<UserPage> {
     List<Widget> ret = [];
 
     // loop thru all the _currentCategoryList, and generate the category icon
-    incomeCategory.forEach((key, value) {
+    _incomeCategory.forEach((key, value) {
       ret.add(_iconCategory(value));
     });
 
@@ -640,7 +640,7 @@ class _UserPageState extends State<UserPage> {
 
   void _refreshUserMe() {
     setState(() {
-      userMe = UserSharedPreferences.getUserMe();
+      _userMe = UserSharedPreferences.getUserMe();
     });
   }
 
@@ -654,7 +654,7 @@ class _UserPageState extends State<UserPage> {
     // show the loader dialog
     showLoaderDialog(context);
 
-    await categoryHTTP.updateDefaultCategory(type, categoryID).then((_) {
+    await _categoryHTTP.updateDefaultCategory(type, categoryID).then((_) {
       String newCategoryName = '';
 
       // refresh the user me, as we already stored the updated user me
@@ -662,11 +662,11 @@ class _UserPageState extends State<UserPage> {
       _refreshUserMe();
 
       if (type == "expense") {
-        currentExpenseCategory = selectedExpenseCategory;
-        newCategoryName = currentExpenseCategory!.name;
+        _currentExpenseCategory = _selectedExpenseCategory;
+        newCategoryName = _currentExpenseCategory!.name;
       } else {
-        currentIncomeCategory = selectedIncomeCategory;
-        newCategoryName = currentIncomeCategory!.name;
+        _currentIncomeCategory = _selectedIncomeCategory;
+        newCategoryName = _currentIncomeCategory!.name;
       }
 
       Navigator.pop(context);
@@ -703,15 +703,15 @@ class _UserPageState extends State<UserPage> {
     String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
 
     await Future.wait([
-      budgetHTTP.updateBudgetCurrency(currencyID),
-      futureBudgetList = budgetHTTP.fetchBudgetDate(currencyID, currentBudgetDate),
+      _budgetHTTP.updateBudgetCurrency(currencyID),
+      _futureBudgetList = _budgetHTTP.fetchBudgetDate(currencyID, currentBudgetDate),
     ]).then((_) {
       _refreshUserMe();
-      currentCurrency = selectedCurrency!;
+      _currentCurrency = _selectedCurrency!;
 
       // update the budget provider and budget shared preferences
       // now we can set the shared preferences of budget
-      futureBudgetList.then((value) {
+      _futureBudgetList.then((value) {
         BudgetSharedPreferences.setBudget(currencyID, currentBudgetDate, value);
       });
 
@@ -731,7 +731,7 @@ class _UserPageState extends State<UserPage> {
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
 
-      selectedCurrency = currentCurrency;
+      _selectedCurrency = _currentCurrency;
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -746,9 +746,9 @@ class _UserPageState extends State<UserPage> {
     // show the loader dialog
     showLoaderDialog(context);
 
-    await walletHTTP.updateDefaultWallet(walletId).then((_) {
+    await _walletHTTP.updateDefaultWallet(walletId).then((_) {
       _refreshUserMe();
-      currentWallet = selectedWallet!;
+      _currentWallet = _selectedWallet!;
       Navigator.pop(context);
       
       // show it success
@@ -766,7 +766,7 @@ class _UserPageState extends State<UserPage> {
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
 
-      selectedWallet = currentWallet;
+      _selectedWallet = _currentWallet;
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -787,8 +787,8 @@ class _UserPageState extends State<UserPage> {
     showLoaderDialog(context);
 
     await Future.wait([
-      transactionHTTP.fetchLastTransaction("income", true),
-      transactionHTTP.fetchLastTransaction("expense", true)
+      _transactionHTTP.fetchLastTransaction("income", true),
+      _transactionHTTP.fetchLastTransaction("expense", true)
     ]).then((_) {
       // remove the loader
       Navigator.pop(context);
@@ -832,7 +832,7 @@ class _UserPageState extends State<UserPage> {
           // set the pin as disabled
           _setIsPinEnabled(false);
           // refresh the pin model value
-          pinUser = PinSharedPreferences.getPin();
+          _pinUser = PinSharedPreferences.getPin();
 
           if (mounted) {
             await ShowMyDialog(
@@ -855,7 +855,7 @@ class _UserPageState extends State<UserPage> {
       // set the pin as disabled
       _setIsPinEnabled(true);
       // refresh the pin model value
-      pinUser = PinSharedPreferences.getPin();
+      _pinUser = PinSharedPreferences.getPin();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

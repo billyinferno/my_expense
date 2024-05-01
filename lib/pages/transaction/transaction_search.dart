@@ -29,10 +29,10 @@ class TransactionSearchPage extends StatefulWidget {
 }
 
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
-  final fCCY = NumberFormat("#,##0.00", "en_US");
-  final df = DateFormat('E, dd MMM yyyy');
-  final df2 = DateFormat('dd/MM/yyyy');
-  final TransactionHTTPService transactionHttp = TransactionHTTPService();
+  final _fCCY = NumberFormat("#,##0.00", "en_US");
+  final _df = DateFormat('E, dd MMM yyyy');
+  final _df2 = DateFormat('dd/MM/yyyy');
+  final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
 
   String _searchText = "";
@@ -446,7 +446,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            "${transaction.wallet.currency} ${fCCY.format(transaction.amount)}",
+            "${transaction.wallet.currency} ${_fCCY.format(transaction.amount)}",
             style: TextStyle(
               color: (transaction.type == "expense" ? accentColors[2] : accentColors[0]),
             ),
@@ -460,7 +460,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            "${transaction.wallet.currency} ${fCCY.format(transaction.amount)}",
+            "${transaction.wallet.currency} ${_fCCY.format(transaction.amount)}",
             style: TextStyle(
               color: accentColors[5],
             ),
@@ -469,7 +469,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           Visibility(
             visible: (transaction.walletTo != null),
             child: Text(
-              "${transaction.walletTo != null ? transaction.walletTo!.currency : ''} ${fCCY.format(transaction.amount * transaction.exchangeRate)}",
+              "${transaction.walletTo != null ? transaction.walletTo!.currency : ''} ${_fCCY.format(transaction.amount * transaction.exchangeRate)}",
               style: TextStyle(
                 color: lighten(accentColors[5], 0.25),
               ),
@@ -846,7 +846,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: Text(
-                    fCCY.format(value),
+                    _fCCY.format(value),
                     style: TextStyle(
                       color: color,
                     ),
@@ -884,7 +884,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  "${df2.format(startDate.toLocal())} - ${df2.format(endDate.toLocal())}",
+                  "${_df2.format(startDate.toLocal())} - ${_df2.format(endDate.toLocal())}",
                   style: const TextStyle(
                     fontSize: 10,
                   ),
@@ -933,7 +933,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: IconColorList.getExpenseIcon((txn.category!.name)),
           type: txn.type.toLowerCase(),
           title: txn.name,
-          subTitle: df.format(txn.date.toLocal()),
+          subTitle: _df.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
           descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
@@ -947,7 +947,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: IconColorList.getIncomeIcon((txn.category!.name)),
           type: txn.type.toLowerCase(),
           title: txn.name,
-          subTitle: df.format(txn.date.toLocal()),
+          subTitle: _df.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
           descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
@@ -964,7 +964,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           ),
           type: txn.type.toLowerCase(),
           title: '-',
-          subTitle: df.format(txn.date.toLocal()),
+          subTitle: _df.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
           descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
@@ -980,7 +980,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: IconColorList.getExpenseIcon((txn.category!.name)),
           type: txn.type.toLowerCase(),
           title: txn.name,
-          subTitle: df.format(txn.date.toLocal()),
+          subTitle: _df.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
           descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
@@ -991,7 +991,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     }
   }
 
-  void setTransactions(List<TransactionListModel> transactions, int limit, int start) {
+  void _setTransactions(List<TransactionListModel> transactions, int limit, int start) {
     setState(() {
       _transactions.clear();
       _transactions.addAll(transactions);
@@ -1038,8 +1038,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   Future <void> _findTransaction(String searchText, String categoryId, String type, int limit, int start) async {
-    await transactionHttp.findTransaction(type, searchText, categoryId, limit, start).then((results) {
-      setTransactions(results, limit, start);
+    await _transactionHttp.findTransaction(type, searchText, categoryId, limit, start).then((results) {
+      _setTransactions(results, limit, start);
     });
   }
 
@@ -1157,7 +1157,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             });
           }),
           onSuffixTap: (() async {
-            _submitSearch().then((_) {
+            await _submitSearch().then((_) {
               // remove the focus from the text
               FocusScopeNode currentFocusSuffix = FocusScope.of(context);
               if(!currentFocusSuffix.hasPrimaryFocus) {

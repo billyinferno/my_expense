@@ -28,7 +28,7 @@ class TransactionEditPage extends StatefulWidget {
 }
 
 class _TransactionEditPageState extends State<TransactionEditPage> {
-  late TransactionListModel paramsData;
+  late TransactionListModel _paramsData;
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final WalletHTTPService _walletHttp = WalletHTTPService();
   final BudgetHTTPService _budgetHttp = BudgetHTTPService();
@@ -36,7 +36,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
   @override
   void initState() {
     super.initState();
-    paramsData = widget.params as TransactionListModel;
+    _paramsData = widget.params as TransactionListModel;
   }
 
   @override
@@ -47,8 +47,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       saveTransaction: (value) {
         _saveTransaction(value);
       },
-      selectedDate: paramsData.date,
-      currentTransaction: paramsData,
+      selectedDate: _paramsData.date,
+      currentTransaction: _paramsData,
     );
   }
 
@@ -59,16 +59,16 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     // send also the date we got from the parent widget, to see whether there
     // are any changes on the date of the transaction. If there are changes
     // then it means we need to manipulate 2 shared preferences instead of one.
-    await _transactionHttp.updateTransaction(context, txn!, paramsData).then((txnUpdate) async {
+    await _transactionHttp.updateTransaction(context, txn!, _paramsData).then((txnUpdate) async {
       // update necessary information after we add the transaction
-      await updateInformation(txnUpdate).then((_) {
+      await _updateInformation(txnUpdate).then((_) {
         // for transaction that actually add on the different date, we cannot notify the home list
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
         DateTime currentListTxnDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now());
 
         if (isSameDay(txnUpdate.date.toLocal(), currentListTxnDate.toLocal())) {
-          String date = DateFormat('yyyy-MM-dd').format(paramsData.date.toLocal());
+          String date = DateFormat('yyyy-MM-dd').format(_paramsData.date.toLocal());
 
           // get the transaction list from shared preferences
           List<TransactionListModel>? txnListShared = TransactionSharedPreferences.getTransaction(date);
@@ -118,19 +118,19 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     });
   }
 
-  Future<void> updateInformation(TransactionListModel txnUpdate) async {
+  Future<void> _updateInformation(TransactionListModel txnUpdate) async {
     Future<List<BudgetModel>> futureBudgets;
     Future<List<WalletModel>> futureWallets;
     Future<List<WorthModel>> futureNetWorth;
 
     String refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnUpdate.date.year, txnUpdate.date.month, 1).toLocal());
-    String prevDay = DateFormat('yyyy-MM-dd').format(DateTime(paramsData.date.year, paramsData.date.month, 1).toLocal());
+    String prevDay = DateFormat('yyyy-MM-dd').format(DateTime(_paramsData.date.year, _paramsData.date.month, 1).toLocal());
 
     // check whether this transaction moved from one wallet to another wallet?
     // first check whether this is expense, income, or transfer?
     bool isWalletMoved = false;
     if(txnUpdate.type == "expense" || txnUpdate.type == "income") {
-      if(paramsData.wallet.id == txnUpdate.wallet.id) {
+      if(_paramsData.wallet.id == txnUpdate.wallet.id) {
         // do nothing
       }
       else {
@@ -140,8 +140,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     }
     else {
       // this is transfer, check both
-      if(paramsData.wallet.id == txnUpdate.wallet.id &&
-         paramsData.walletTo?.id == txnUpdate.walletTo?.id) {
+      if(_paramsData.wallet.id == txnUpdate.wallet.id &&
+         _paramsData.walletTo?.id == txnUpdate.walletTo?.id) {
         // do nothing
       }
       else {
@@ -160,17 +160,17 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     }
     else {
       // check which wallet is being moved
-      if(paramsData.wallet.id != txnUpdate.wallet.id) {
+      if(_paramsData.wallet.id != txnUpdate.wallet.id) {
         // moved the transaction from previous wallet to the new wallet
-        await TransactionSharedPreferences.deleteTransactionWallet(paramsData.wallet.id, prevDay, paramsData);
+        await TransactionSharedPreferences.deleteTransactionWallet(_paramsData.wallet.id, prevDay, _paramsData);
         await TransactionSharedPreferences.addTransactionWallet(txnUpdate.wallet.id, refreshDay, txnUpdate);
       }
 
       if(txnUpdate.walletTo != null) {
         // check if both wallet the same or not?
-        if(paramsData.walletTo!.id != txnUpdate.walletTo!.id) {
+        if(_paramsData.walletTo!.id != txnUpdate.walletTo!.id) {
           // moved the transaction from previous wallet to the new wallet
-          await TransactionSharedPreferences.deleteTransactionWallet(paramsData.walletTo!.id, prevDay, paramsData);
+          await TransactionSharedPreferences.deleteTransactionWallet(_paramsData.walletTo!.id, prevDay, _paramsData);
           await TransactionSharedPreferences.addTransactionWallet(txnUpdate.walletTo!.id, refreshDay, txnUpdate);
         }
       }
