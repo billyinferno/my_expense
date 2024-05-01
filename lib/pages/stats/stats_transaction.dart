@@ -18,13 +18,13 @@ class StatsTransactionPage extends StatefulWidget {
 }
 
 class _StatsTransactionPageState extends State<StatsTransactionPage> {
-  final fCCY = NumberFormat("#,##0.00", "en_US");
-  final transactionHttp = TransactionHTTPService();
+  final _fCCY = NumberFormat("#,##0.00", "en_US");
+  final _transactionHttp = TransactionHTTPService();
 
-  bool _isLoading = true;
   final ScrollController _scrollController = ScrollController();
   late List<TransactionStatsDetailModel> _transactions;
   late StatsTransactionArgs _args;
+  late Future<bool> _getData;
 
   @override
   void initState() {
@@ -32,11 +32,10 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     _args = widget.args as StatsTransactionArgs;
 
     // initialize all default value
-    _isLoading = true;
     _transactions = [];
 
     // now try to fetch the transaction data
-    _fetchStatsDetail();
+    _getData = _fetchStatsDetail();
   }
 
   @override
@@ -61,69 +60,77 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
   }
 
   Widget _getBody() {
-    if(_isLoading) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SpinKitFadingCube(
-            color: accentColors[6],
-            size: 25,
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          const Text(
-            "loading...",
-            style: TextStyle(
-              color: textColor2,
-              fontSize: 10,
-            ),
-          ),
-        ],
-      );
-    }
-    else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-              color: secondaryDark,
-              border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
-            ),
-            child: BudgetBar(
-              title: _args.categoryName,
-              symbol: _args.currency.symbol,
-              budgetUsed: (_args.amount < 0 ? _args.amount * (-1) : _args.amount),
-              budgetTotal: (_args.total < 0 ? _args.total * (-1) : _args.total),
-              barColor: (_args.type == "expense" ? IconColorList.getExpenseColor(_args.categoryName) : IconColorList.getIncomeColor(_args.categoryName)),
-              showLeftText: false,
-            ),
-          ),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                itemCount: _transactions.length,
-                itemBuilder: (BuildContext ctx, int index) {
-                  TransactionStatsDetailModel txn = _transactions[index];
-                  return generateListItem(txn);
-                },
+    return FutureBuilder(
+      future: _getData,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: const BoxDecoration(
+                  color: secondaryDark,
+                  border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
+                ),
+                child: BudgetBar(
+                  title: _args.categoryName,
+                  symbol: _args.currency.symbol,
+                  budgetUsed: (_args.amount < 0 ? _args.amount * (-1) : _args.amount),
+                  budgetTotal: (_args.total < 0 ? _args.total * (-1) : _args.total),
+                  barColor: (_args.type == "expense" ? IconColorList.getExpenseColor(_args.categoryName) : IconColorList.getIncomeColor(_args.categoryName)),
+                  showLeftText: false,
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 25,),
-        ],
-      );
-    }
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    controller: _scrollController,
+                    itemCount: _transactions.length,
+                    itemBuilder: (BuildContext ctx, int index) {
+                      TransactionStatsDetailModel txn = _transactions[index];
+                      return _generateListItem(txn);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 25,),
+            ],
+          ); 
+        }
+        else if (snapshot.hasError) {
+          return const Center(child: Text("Error when get statistic information"),);
+        }
+        else {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SpinKitFadingCube(
+                color: accentColors[6],
+                size: 25,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                "loading...",
+                style: TextStyle(
+                  color: textColor2,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          );
+        }
+      },
+    );
   }
 
-  Widget generateListItem(TransactionStatsDetailModel txn) {
+  Widget _generateListItem(TransactionStatsDetailModel txn) {
     return Container(
       height: 60,
       width: double.infinity,
@@ -174,7 +181,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
               Text(
-                "${_args.currency.symbol} ${fCCY.format(txn.amount)}",
+                "${_args.currency.symbol} ${_fCCY.format(txn.amount)}",
                 style: TextStyle(
                   color: (_args.type == "expense" ? accentColors[2] : accentColors[6]),
                 ),
@@ -186,20 +193,8 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     );
   }
 
-  void setLoading(bool isLoading) {
-    setState(() {
-      _isLoading = isLoading;
-    });
-  }
-
-  void setTransactions(List<TransactionStatsDetailModel> transactions) {
-    setState(() {
-      _transactions = transactions;
-    });
-  }
-
-  Future<void> _fetchStatsDetail() async {
-    await transactionHttp.fetchIncomeExpenseCategoryDetail(
+  Future<bool> _fetchStatsDetail() async {
+    await _transactionHttp.fetchIncomeExpenseCategoryDetail(
       _args.name,
       _args.search,
       _args.type,
@@ -209,12 +204,13 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
       _args.fromDate,
       _args.toDate,
     ).then((result) {
-      setTransactions(result);
-      setLoading(false);
+      _transactions = result;
     }).onError((error, stackTrace) {
       debugPrint("Error on <_fetchStatsDetail>");
       debugPrint(error.toString());
-      setLoading(false);
+      throw Exception("Error when fetching statistic");
     });
+
+    return true;
   }
 }

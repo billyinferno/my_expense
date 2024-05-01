@@ -1,138 +1,130 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_expense/model/income_expense_model.dart';
 import 'package:my_expense/themes/colors.dart';
 
-class BarChart extends StatefulWidget {
+class BarChart extends StatelessWidget {
   final DateTime from;
   final DateTime to;
   final IncomeExpenseModel data;
   final double? barWidth;
   final double? fontSize;
-  final bool? needColapse;
   final bool? showed;
-  
-  const BarChart({ super.key, required this.from, required this.to, required this.data, this.barWidth, this.fontSize, this.needColapse, this.showed });
-
-  @override
-  State<BarChart> createState() => _BarChartState();
-}
-
-class _BarChartState extends State<BarChart> {
-  Map<DateTime, double> _expense = {};
-  Map<DateTime, double> _income = {};
-  late double _maxExpense;
-  late double _maxIncome;
-  late double _barWidth;
-  late bool _isShowed;
-  late bool _needColapse;
-
-  final fCCY = NumberFormat("#,##0.00", "en_US");
-
-  @override
-  void initState() {
-    _maxExpense = 0;
-    _maxIncome = 0;
-    _barWidth = 6;
-    _isShowed = (widget.showed ?? false);
-
-    _needColapse = (widget.needColapse ?? true);
-    if (!_needColapse) {
-      _isShowed = true;
-    }
-
-    super.initState();
-  }
+  final double? maxAmount;
+  const BarChart({
+    super.key,
+    required this.from,
+    required this.to,
+    required this.data,
+    this.barWidth,
+    this.fontSize,
+    this.showed,
+    this.maxAmount
+  });
 
   @override
   Widget build(BuildContext context) {
-    _expense = widget.data.expense;
-    _income = widget.data.income;
-    _barWidth = (widget.barWidth ?? 6);
-
-    _getMaxExpenseIncome();
-
-    return GestureDetector(
-      onTap: (() {
-        if (_needColapse) {
-          setState(() {
-            _isShowed = !_isShowed;
-          });
-        }
-      }),
-      child: _generateBody(),
-    );
-  }
-
-  Widget _generateBody() {
-    // check if we got data or not?
-    if(widget.data.expense.isEmpty && widget.data.income.isEmpty) {
-      return Container(
+    // check if data is empty or not?
+    if (data.expense.isEmpty && data.income.isEmpty) {
+      return const SizedBox(
         width: double.infinity,
-        height: 35,
-        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-        child: const Center(
-          child: Text("No Data"),
+        child: Center(
+          child: Text("No data"),
         ),
       );
     }
     else {
-      if(_isShowed) {
-        return Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Visibility(
-                visible: _needColapse,
-                child: const Center(
-                  child: Text("Close Graph")
-                )
-              ),
-              Visibility(
-                visible: _needColapse,
-                child: const SizedBox(height: 10,)
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: _generateBarCharts(),
-              )
-            ],
-          ),
-        );
-      }
-      else {
-        return Container(
-          width: double.infinity,
-          height: 40,
-          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: const Color(0xff232d37),
-            borderRadius: BorderRadius.only(
-              topLeft:Radius.circular(_barWidth),
-              topRight: Radius.circular(_barWidth),
-              bottomLeft: Radius.circular(_barWidth),
-              bottomRight: Radius.circular(_barWidth),
-            ),
-          ),
-          child: const Center(
-            child: Text("Show Graph"),
-          ),
-        );
-      }
+      return _buildBarChart();
     }
   }
 
-  Widget _generateBar({required DateTime date, required double income, required double expense, required double maxIncome, required double maxExpense}) {
+  Widget _buildBarChart()  {
+    bool isShowed = (showed ?? false);
+    
+    // check if showed or not?
+    if (!isShowed) {
+      // return the button text instead the bar chart
+      return Container(
+        width: double.infinity,
+        height: 40,
+        margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        padding: const EdgeInsets.all(10),
+        decoration: const BoxDecoration(
+          color: secondaryDark,
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+        child: const Center(
+          child: Text("Show Graph"),
+        ),
+      );
+    }
+
+    // generate the bar chart
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: _generateBarCharts(),
+          )
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _generateBarCharts() {
+    final fCCY = NumberFormat("#,##0.00", "en_US");
+    final List<Widget> bars = [];
+    DateTime currDate;
+    double income = 0;
+    double expense = 0;
+    double maxExpense = _getMaxAmount(data: data.expense, clamp: maxAmount);
+    double maxIncome = _getMaxAmount(data: data.income, clamp: maxAmount);
+
+    for(int index = 0; index <= to.difference(from).inDays; index++ ) {
+      currDate = from.add(Duration(days: index));
+      income = (data.income[currDate] ?? 0.0); 
+      expense = (data.expense[currDate] ?? 0.0);
+      if(expense < 0) {
+        expense *= (-1);
+      }
+
+      bars.add(
+        _generateBar(
+          date: currDate,
+          income: income,
+          expense: expense,
+          maxIncome: maxIncome,
+          maxExpense: maxExpense,
+          fCCY: fCCY,
+        )
+      );
+    }
+    return bars;
+  }
+
+  Widget _generateBar({
+    required DateTime date,
+    required double income,
+    required double expense,
+    required double maxIncome,
+    required double maxExpense,
+    required NumberFormat fCCY,
+  }) {
     String dateText = DateFormat('dd/MM').format(date.toLocal());
 
     // compute the income and expense length for the bar chart
     int incomeLength;
     int expenseLength;
+    bool isIncomeExceeded;
+    bool isExpenseExceeded;
 
     // check if the maxIncome or maxExpense is actually 0
     // if zero then cancelled the _incomeLength and _expenseLength as we should print
@@ -157,10 +149,24 @@ class _BarChartState extends State<BarChart> {
       // defaulted it to at least 1 to tell that we have something here
       incomeLength = 1;
     }
+    
+    // clamp income length to 250 if it's exceeded
+    isIncomeExceeded = false;
+    if (incomeLength > 250) {
+      incomeLength = 250;
+      isIncomeExceeded = true;
+    }
 
     if(expense > 0 && expenseLength <= 0) {
       // defaulted it to at least 1 to tell that we have something here
       expenseLength = 1;
+    }
+
+    // clamp expense length to 250 if it's exceeded
+    isExpenseExceeded = false;
+    if (expenseLength > 250) {
+      expenseLength = 250;
+      isExpenseExceeded = true;
     }
 
     return Column(
@@ -211,7 +217,14 @@ class _BarChartState extends State<BarChart> {
                         child: Container(
                           height: 20,
                           decoration: BoxDecoration(
-                            color: accentColors[6],
+                            gradient: LinearGradient(
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
+                              colors: [
+                                accentColors[6],
+                                (isIncomeExceeded ? darkAccentColors[6] : accentColors[6]),
+                              ],
+                            ),
                             borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(20),
                               bottomLeft: Radius.circular(20)
@@ -224,7 +237,14 @@ class _BarChartState extends State<BarChart> {
                         child: Container(
                           height: 20,
                           decoration: BoxDecoration(
-                            color: accentColors[2],
+                            gradient: LinearGradient(
+                              begin: Alignment.topRight,
+                              end: Alignment.bottomLeft,
+                              colors: [
+                                (isExpenseExceeded ? darkAccentColors[2] : accentColors[2]),
+                                accentColors[2],
+                              ],
+                            ),
                             borderRadius: const BorderRadius.only(
                               topRight: Radius.circular(20),
                               bottomRight: Radius.circular(20)
@@ -273,44 +293,27 @@ class _BarChartState extends State<BarChart> {
     );
   }
 
-  List<Widget> _generateBarCharts() {
-    List<Widget> bars = [];
-    DateTime currDate;
-    double income = 0;
-    double expense = 0;
-
-    for(int index = 0; index <= widget.to.difference(widget.from).inDays; index++ ) {
-      currDate = widget.from.add(Duration(days: index));
-      income = (widget.data.income[currDate] ?? 0.0); 
-      expense = (widget.data.expense[currDate] ?? 0.0);
-      if(expense < 0) {
-        expense *= (-1);
+  double _getMaxAmount({required Map<DateTime, double> data, double? clamp}) {
+    // check clamp
+    if (clamp != null) {
+      if (clamp > 0) {
+        return clamp;
       }
-
-      bars.add(
-        _generateBar(
-          date: currDate,
-          income: income,
-          expense: expense,
-          maxIncome: _maxIncome,
-          maxExpense: _maxExpense
-        )
-      );
     }
-    return bars;
-  }
 
-  void _getMaxExpenseIncome() {
-    _expense.forEach((key, value) {
-      if(_maxExpense < (value * (-1))) {
-        _maxExpense = (value * (-1));
+    double maxAmount = 0;
+
+    // loop thru data
+    data.forEach((key, value) {
+      if (value < 0) {
+        maxAmount = max(maxAmount, (value * -1));
+      }
+      else {
+        maxAmount = max(maxAmount, value);
       }
     });
 
-    _income.forEach((key, value) {
-      if(_maxIncome < value) {
-        _maxIncome = value;
-      }
-    });
+    // return max amount
+    return maxAmount;
   }
 }

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/api/wallet_api.dart';
+import 'package:my_expense/model/budget_model.dart';
 import 'package:my_expense/model/currency_model.dart';
 import 'package:my_expense/model/income_expense_model.dart';
 import 'package:my_expense/model/transaction_top_model.dart';
@@ -15,6 +16,7 @@ import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
+import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/appbar/home_appbar.dart';
@@ -54,12 +56,15 @@ class _HomeStatsState extends State<HomeStats> {
   late WorthModel _currentWorth;
   late int _currentCurrencyId;
   late String _currentCurrencySymbol;
+  late double _currentMaxAmount;
 
   final Map<int, IncomeExpenseModel> _incomeExpense = {};
   final Map<int, Map<PageName, List<TransactionTopModel>>> _transactionTop = {};
+  final Map<int, double> _maxBudget = {};
   final ScrollController _scrollController = ScrollController();
   final ScrollController _scrollControllerCurrencies = ScrollController();
   late Future<bool> _getStat;
+  late bool _clampToBudget;
   late UsersMeModel _userMe;
 
   final Map<PageName, Color> _resultPageColor = {
@@ -103,7 +108,14 @@ class _HomeStatsState extends State<HomeStats> {
         _currentCurrencySymbol = _currencies[0].symbol;
       }
     }
-    _getStat = _fetchData();
+
+    // force the fetch data when the page is loaded, this is to ensure we
+    // are getting the latest data from server.
+    _getStat = _fetchData(isForce: true);
+
+    // default clamp to budget to false, and max amount as 0
+    _clampToBudget = false;
+    _currentMaxAmount = 0;
 
     super.initState();
   }
@@ -220,34 +232,85 @@ class _HomeStatsState extends State<HomeStats> {
                   _getStat = _fetchData(showDialog: true);
                 })
               ),
-              Slidable(
-                endActionPane: ActionPane(
-                  motion: const DrawerMotion(),
-                  extentRatio: 0.35,
-                  children: <SlidableAction>[
-                    SlidableAction(
-                      label: 'Stat',
-                      padding: const EdgeInsets.all(0),
-                      foregroundColor: accentColors[3],
-                      backgroundColor: secondaryDark,
-                      icon: Ionicons.bar_chart,
-                      onPressed: ((_) {
-                        Navigator.pushNamed(context, '/stats/all', arguments: _currentCurrencyId);
-                      })
+              Container(
+                color: secondaryDark,
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Slidable(
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        extentRatio: 0.35,
+                        children: <SlidableAction>[
+                          SlidableAction(
+                            label: 'Stat',
+                            padding: const EdgeInsets.all(0),
+                            foregroundColor: accentColors[3],
+                            backgroundColor: secondaryDark,
+                            icon: Ionicons.bar_chart,
+                            onPressed: ((_) {
+                              Navigator.pushNamed(context, '/stats/all', arguments: _currentCurrencyId);
+                            })
+                          ),
+                          SlidableAction(
+                            label: 'Refresh',
+                            padding: const EdgeInsets.all(0),
+                            foregroundColor: accentColors[6],
+                            backgroundColor: secondaryDark,
+                            icon: Ionicons.refresh,
+                            onPressed: ((_) async {
+                              _getStat = _fetchData(showDialog: true);
+                            })
+                          ),
+                        ],
+                      ),
+                      child: _worthBar(),
                     ),
-                    SlidableAction(
-                      label: 'Refresh',
-                      padding: const EdgeInsets.all(0),
-                      foregroundColor: accentColors[6],
-                      backgroundColor: secondaryDark,
-                      icon: Ionicons.refresh,
-                      onPressed: ((_) async {
-                        _getStat = _fetchData(showDialog: true);
-                      })
+                    Visibility(
+                      visible: ((_maxBudget[_currentCurrencyId] ?? 0) > 0),
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(
+                              height: 15,
+                              width: 30,
+                              child: Transform.scale(
+                                scale: 0.6,
+                                child: CupertinoSwitch(
+                                  value: _clampToBudget,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _clampToBudget = value;
+                                      if (_clampToBudget) {
+                                        _currentMaxAmount = (_maxBudget[_currentCurrencyId] ?? 0);
+                                      }
+                                      else {
+                                        _currentMaxAmount = 0;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 11,),
+                            Text(
+                              "Clamp to avg daily budget ($_currentCurrencySymbol ${_fCCY.format(_maxBudget[_currentCurrencyId] ?? 0)})",
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: textColor,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                child: _worthBar(),
               ),
               const SizedBox(height: 10,),
               Container(
@@ -344,6 +407,12 @@ class _HomeStatsState extends State<HomeStats> {
                         setState(() {
                           _currentCurrencyId = _currencies[index].id;
                           _currentCurrencySymbol = _currencies[index].symbol;
+                          if (_clampToBudget) {
+                            _currentMaxAmount = (_maxBudget[_currencies[index].id] ?? 0);
+                          }
+                          else {
+                            _currentMaxAmount = 0;
+                          }
                           _changeCurrentWorth();
                         });
                         Navigator.pop(context);
@@ -361,8 +430,7 @@ class _HomeStatsState extends State<HomeStats> {
         }
       }),
       child: Container(
-        color: secondaryDark,
-        padding: const EdgeInsets.all(10),
+        color: Colors.transparent,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -540,7 +608,8 @@ class _HomeStatsState extends State<HomeStats> {
           from: _from,
           to: _to,
           data: (_getData(_incomeExpense[_currentCurrencyId])),
-          needColapse: false,
+          showed: true,
+          maxAmount: _currentMaxAmount,
         );
       default:
         return const SizedBox.shrink();
@@ -582,6 +651,9 @@ class _HomeStatsState extends State<HomeStats> {
   Future<bool> _fetchData({bool? isForce, bool? showDialog}) async {
     bool currentForce = (isForce ?? true);
     bool isShowDialog = (showDialog ?? false);
+    List<BudgetModel> currentBudget = [];
+    double maxBudget = 0;
+    String currentDataString = _df.format(DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal());
 
     // check if we need to showe dialog
     if (isShowDialog) {
@@ -599,10 +671,33 @@ class _HomeStatsState extends State<HomeStats> {
       // if currency is not empty, it means that we can calculate the worth
       // by calling the API and fetch income expense for each currency.
       await _fetchWorth(_to, currentForce).then((_) async {
+        // loop thru all the currency in the currencies
         for(CurrencyModel ccy in _currencies) {
-          await _fetchIncomeExpense(_from, _to, ccy, currentForce);
-          await _fetchTopTransaction('expense', ccy.id, currentForce);
-          await _fetchTopTransaction('income', ccy.id, currentForce);
+          // fetch the stats information
+          await Future.wait([
+            _fetchIncomeExpense(_from, _to, ccy, currentForce),
+            _fetchTopTransaction('expense', ccy.id, currentForce),
+            _fetchTopTransaction('income', ccy.id, currentForce),
+          ]).then((_) {
+            // try to get the budget data for this currencies
+            // we can use the from to get the budget date
+            currentBudget = (BudgetSharedPreferences.getBudget(ccy.id, currentDataString) ?? []);
+
+            // default the max budget to 0 first
+            maxBudget = 0;
+
+            // check if currentBudget is not empty
+            if (currentBudget.isNotEmpty) {
+              // loop thru the current budget to get the budget
+              for(BudgetModel budget in currentBudget) {
+                maxBudget += budget.amount;
+              }
+            }
+
+            // once finished add max budget to the max budget map divide by
+            // 30, assuming that we will always have 30 days
+            _maxBudget[ccy.id] = maxBudget / 30;
+          });
         }
       }).onError((error, stackTrace) {
         debugPrint("Error on _fetchData");
