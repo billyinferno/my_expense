@@ -2,12 +2,15 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/api/budget_api.dart';
 import 'package:my_expense/api/category_api.dart';
 import 'package:my_expense/api/pin_api.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/api/user_api.dart';
 import 'package:my_expense/api/wallet_api.dart';
+import 'package:my_expense/model/currency_model.dart';
 import 'package:my_expense/model/error_model.dart';
 import 'package:my_expense/model/login_model.dart';
 import 'package:my_expense/themes/colors.dart';
@@ -17,6 +20,7 @@ import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/net/netutils.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
+import 'package:my_expense/utils/prefs/shared_wallet.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -32,12 +36,15 @@ class _LoginPageState extends State<LoginPage> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final TransactionHTTPService _transactionHTTP = TransactionHTTPService();
   final PinHTTPService _pinHTTP = PinHTTPService();
+  final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
 
   final TextEditingController _usernameController = TextEditingController();
   final FocusNode _usernameFocus = FocusNode();
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _passwordFocus = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late DateTime _currentDate;
+  late String _currentDateString;
   
   String _bearerToken = "";
   bool _isTokenExpired = false;
@@ -52,6 +59,10 @@ class _LoginPageState extends State<LoginPage> {
     _isConnect = true;
     _bearerToken = "";
     _isTokenExpired = false;
+
+    // get the current date
+    _currentDate = DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
+    _currentDateString = DateFormat('yyyy-MM-dd').format(_currentDate);
 
     Future.microtask(() async {
       await _checkLogin().then((isLogin) async {
@@ -335,8 +346,9 @@ class _LoginPageState extends State<LoginPage> {
       _walletHTTP.fetchCurrency().then((_) {
         debugPrint("⏳ Fetch Currency");
       }),
-      _walletHTTP.fetchWalletCurrencies(true).then((_) {
+      _walletHTTP.fetchWalletCurrencies(true).then((_) async {
         debugPrint("⏳ Fetch Wallet User Currency");
+        await _fetchAllBudget();
       }),
       _transactionHTTP.fetchLastTransaction("expense").then((value) {
         debugPrint("⏳ Fetch Expense Last Transaction : ${value.length}");
@@ -361,6 +373,16 @@ class _LoginPageState extends State<LoginPage> {
 
     // return response
     return res;
+  }
+
+  Future<void> _fetchAllBudget() async {
+    // loop thru all the currencies and get the budget
+    List<CurrencyModel> ccyLists = WalletSharedPreferences.getWalletUserCurrency();
+    for(CurrencyModel ccy in ccyLists) {
+      // fetch the budget for this ccy
+      await _budgetHTTP.fetchBudgetDate(ccy.id, _currentDateString, true);
+      debugPrint("⏳ Fetch budget at $_currentDateString for ${ccy.name}");
+    }
   }
 
   Future<bool> _checkLogin() async {
