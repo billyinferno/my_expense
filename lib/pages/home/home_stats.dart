@@ -17,6 +17,7 @@ import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
+import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/appbar/home_appbar.dart';
@@ -236,6 +237,9 @@ class _HomeStatsState extends State<HomeStats> {
                   // set the current from and to string
                   _fromString = _df.format(_from.toLocal());
                   _toString = _df.format(_to.toLocal());
+
+                  // stored the from and to on the shared preferences
+                  TransactionSharedPreferences.setStatDate(from, to);
           
                   // fetch the statistic data again once we change the _from and _to date
                   _getStat = _fetchData(showDialog: true);

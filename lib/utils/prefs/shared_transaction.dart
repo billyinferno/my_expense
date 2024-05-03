@@ -18,6 +18,8 @@ class TransactionSharedPreferences {
   static const _transactionIncomeExpense = "trx_income_expense";
   static const _transactionListCurrentDate = "trx_list_current_date";
   static const _transactionTop = "trx_top";
+  static const _transactionStatDateFrom = "trx_stat_date_from";
+  static const _transactionStatDateTo = "trx_stat_date_to";
 
   static Future setTransaction(String date, List<TransactionListModel> model) async {
     String key = "${_transactionKey}_$date";
@@ -380,5 +382,30 @@ class TransactionSharedPreferences {
     else {
       return null;
     }
+  }
+
+  static Future setStatDate(DateTime from, DateTime to) async {
+    String strDateFrom = from.toLocal().toIso8601String();
+    String strDateTo = to.toLocal().toIso8601String();
+
+    await MyBox.putString(_transactionStatDateFrom, strDateFrom);
+    await MyBox.putString(_transactionStatDateTo, strDateTo);
+  }
+
+  static (DateTime, DateTime) getStatDate() {
+    String? dateFrom = MyBox.getString(_transactionStatDateFrom);
+    String? dateTo = MyBox.getString(_transactionStatDateFrom);
+
+    DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
+
+    if (dateFrom != null) {
+      from = DateTime.parse(dateFrom);
+    }
+    if (dateTo != null) {
+      to = DateTime.parse(dateTo);
+    }
+    
+    return (from, to);
   }
 }

@@ -12,3 +12,10 @@ bool isSameDay(DateTime dt1, DateTime dt2) {
   }
   return false;
 }
+
+bool isWithin(DateTime date, DateTime from, DateTime to) {
+  if ((date.isAtSameMomentAs(from) || date.isAfter(from)) && (date.isAtSameMomentAs(to) || date.isBefore(to))) {
+    return true;
+  }
+  return false;
+}

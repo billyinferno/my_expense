@@ -238,27 +238,36 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       throw Exception(error.toString());
     });
 
+    // if expense or income then fetch the top transaction information
     if (txnUpdate.type == 'expense' || txnUpdate.type == 'income') {
-      // TODO: to check with the current stats date, whether we need to refresh or not?
-      // if expense or income then fetch the top transaction information
-      await _transactionHttp.fetchTransactionTop(
-        txnUpdate.type,
-        txnUpdate.wallet.currencyId,
-        fromString,
-        toString,
-      true).then((transactionTop) {
-        // set the provide for this
-        Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
-          txnUpdate.wallet.currencyId,
+      // check if transaction year and month is the same as today?
+      // we will just assume that the stats is showed current mont
+      DateTime statFrom;
+      DateTime statTo;
+
+      (statFrom, statTo) = TransactionSharedPreferences.getStatDate();
+
+      // check if txn update is within stat from and to date
+      if (isWithin(txnUpdate.date, statFrom, statTo)) {
+        await _transactionHttp.fetchTransactionTop(
           txnUpdate.type,
-          transactionTop
-        );
-      }).onError((error, stackTrace) {
-        debugPrint("Error on <_fetchTopTransaction>");
-        debugPrint(error.toString());
-        debugPrintStack(stackTrace: stackTrace);
-        throw Exception("Error when fetching top transaction");
-      },);
+          txnUpdate.wallet.currencyId,
+          fromString,
+          toString,
+        true).then((transactionTop) {
+          // set the provide for this
+          Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
+            txnUpdate.wallet.currencyId,
+            txnUpdate.type,
+            transactionTop
+          );
+        }).onError((error, stackTrace) {
+          debugPrint("Error on <_fetchTopTransaction>");
+          debugPrint(error.toString());
+          debugPrintStack(stackTrace: stackTrace);
+          throw Exception("Error when fetching top transaction");
+        },);
+      }
     }
   }
 }
