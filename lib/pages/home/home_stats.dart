@@ -27,10 +27,6 @@ import 'package:my_expense/widgets/item/my_item_list.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:provider/provider.dart';
 
-enum PageName {
-  expense, income, chart
-}
-
 class HomeStats extends StatefulWidget {
   const HomeStats({super.key});
 
@@ -59,7 +55,7 @@ class _HomeStatsState extends State<HomeStats> {
   late double _currentMaxAmount;
 
   final Map<int, IncomeExpenseModel> _incomeExpense = {};
-  final Map<int, Map<PageName, List<TransactionTopModel>>> _transactionTop = {};
+  final Map<int, Map<String, List<TransactionTopModel>>> _transactionTop = {};
   final Map<int, double> _maxBudget = {};
   final ScrollController _scrollController = ScrollController();
   final ScrollController _scrollControllerCurrencies = ScrollController();
@@ -67,12 +63,12 @@ class _HomeStatsState extends State<HomeStats> {
   late bool _clampToBudget;
   late UsersMeModel _userMe;
 
-  final Map<PageName, Color> _resultPageColor = {
-    PageName.chart: accentColors[4],
-    PageName.expense: accentColors[2],
-    PageName.income: accentColors[6],
+  final Map<String, Color> _resultPageColor = {
+    'chart': accentColors[4],
+    'expense': accentColors[2],
+    'income': accentColors[6],
   };
-  PageName _resultPageName = PageName.chart;
+  String _resultPageName = 'chart';
 
   @override
   void initState() {
@@ -213,6 +209,19 @@ class _HomeStatsState extends State<HomeStats> {
     if (_worth.isNotEmpty) {
       return Consumer<HomeProvider>(
         builder: ((context, homeProvider, child) {
+          // loop thru income expense in home provide to get the data
+          _incomeExpense.clear();
+          homeProvider.incomeExpense.forEach((ccy, data) {
+            _incomeExpense[ccy] = data;
+          });
+
+          // put the top transaction
+          _transactionTop.clear();
+          homeProvider.topTransaction.forEach((ccy, data) {
+            _transactionTop[ccy] = data;
+          });
+
+          // loop thru the 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -316,28 +325,28 @@ class _HomeStatsState extends State<HomeStats> {
               Container(
                 padding: const EdgeInsets.all(10),
                 child: Center(
-                  child: CupertinoSegmentedControl<PageName>(
+                  child: CupertinoSegmentedControl<String>(
                     selectedColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
                     // Provide horizontal padding around the children.
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     // This represents a currently selected segmented control.
                     groupValue: _resultPageName,
                     // Callback that sets the selected segmented control.
-                    onValueChanged: (PageName value) {
+                    onValueChanged: (String value) {
                       setState(() {
                         _resultPageName = value;
                       });
                     },
-                    children: const <PageName, Widget>{
-                      PageName.chart: Padding(
+                    children: const <String, Widget>{
+                      'chart': Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: Text('Chart'),
                       ),
-                      PageName.expense: Padding(
+                      'expense': Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: Text('Expense'),
                       ),
-                      PageName.income: Padding(
+                      'income': Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: Text('Income'),
                       ),
@@ -534,8 +543,8 @@ class _HomeStatsState extends State<HomeStats> {
 
   Widget _generateSubPage() {
     switch(_resultPageName) {
-      case PageName.expense:
-      case PageName.income:
+      case 'expense':
+      case 'income':
         // during refresh, the transaction top might be empty so return sized
         // box shrink first until we got the data.
         if (_transactionTop.isEmpty) {
@@ -564,7 +573,7 @@ class _HomeStatsState extends State<HomeStats> {
         }
 
         String type = 'expense';
-        if (_resultPageName == PageName.income) {
+        if (_resultPageName == 'income') {
           type = 'income';
         }
 
@@ -603,7 +612,7 @@ class _HomeStatsState extends State<HomeStats> {
             }),
           ),
         );
-      case PageName.chart:
+      case 'chart':
         return BarChart(
           from: _from,
           to: _to,
@@ -742,8 +751,6 @@ class _HomeStatsState extends State<HomeStats> {
 
     // get the data
     await _transactionHttp.fetchIncomeExpense(ccy.id, from, to, isForce).then((incomeExpense) {
-      _incomeExpense[ccy.id] = incomeExpense;
-
       // set the provider for income expense
       Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(ccy.id, incomeExpense);
     }).onError((error, stackTrace) {
@@ -755,38 +762,9 @@ class _HomeStatsState extends State<HomeStats> {
 
   Future<void> _fetchTopTransaction(String type, int ccy, [bool? force]) async {
     bool isForce = (force ?? false);
-    Map<PageName, List<TransactionTopModel>> currentTransactionTop = {};
-    PageName pageName = PageName.expense;
-    switch(type) {
-      case "expense":
-        pageName = PageName.expense;
-        break;
-      case "income":
-        pageName = PageName.income;
-        break; 
-    }
-
     await _transactionHttp.fetchTransactionTop(type, ccy, _fromString, _toString, isForce).then((transactionTop) {
-      // set the transaction top for this currency
-      
-      // check if currency already exists or not?
-      if(_transactionTop.containsKey(ccy)) {
-        // already there so we can just get this data first to check if we have
-        // the page name or not?
-        currentTransactionTop = _transactionTop[ccy]!;
-
-        // regardless, just change the page name on the current transaction top
-        // with the one we got from API.
-        currentTransactionTop[pageName] = transactionTop;
-      }
-      else {
-        // it means that ccy is not exists just add this data
-        // first we create the currentTransactionTop
-        currentTransactionTop[pageName] = transactionTop;
-
-        // then add currentTransactionTop to _transactionTop
-        _transactionTop[ccy] = currentTransactionTop;
-      }
+      // set the provide for this
+      Provider.of<HomeProvider>(context, listen: false).setTopTransaction(ccy, type, transactionTop);
     }).onError((error, stackTrace) {
       debugPrint("Error on <_fetchTopTransaction>");
       debugPrint(error.toString());
