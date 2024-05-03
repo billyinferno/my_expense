@@ -7,7 +7,6 @@ import 'package:my_expense/api/budget_api.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/model/income_expense_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/model/transaction_wallet_minmax_date_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
@@ -46,7 +45,6 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
   late Future<List<BudgetModel>> _futureBudgets;
   late Future<List<WalletModel>> _futureWallets;
-  late Future<IncomeExpenseModel> _futureIncomeExpense;
   
   late ScrollController _scrollController;
   late WalletModel _wallet;
@@ -741,7 +739,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   Future<void> _deleteTransaction(TransactionListModel txnDeleted) async {
     showLoaderDialog(context);
 
-    await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) {
+    await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) async {
       // get the current transaction date showed on the home list
       DateTime currentListTxnDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now());
 
@@ -809,7 +807,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       }
 
       // update information for txn delete
-      _updateInformation(txnDeleted);
+      await _updateInformation(txnDeleted);
+
+      // remove loader if mounted
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }).onError((error, stackTrace) {
       debugPrint("Error when delete");
       debugPrint(error.toString());
@@ -824,8 +827,18 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
   Future<void> _updateInformation(TransactionListModel txnInfo) async {
     String refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
-    DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
+    DateTime from;
+    DateTime to;
+    String fromString;
+    String toString;
+    int txnCurrencyId = txnInfo.wallet.currencyId;
+
+    // get the from and to date
+    (from, to) = TransactionSharedPreferences.getStatDate();
+
+    // format the from and to string
+    fromString = DateFormat('yyyy-MM-dd').format(from);
+    toString = DateFormat('yyyy-MM-dd').format(to);
 
     // delete the transaction from wallet transaction
     await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.wallet.id, refreshDay, txnInfo);
@@ -838,8 +851,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
     await Future.wait([
       _futureWallets = _walletHTTP.fetchWallets(true, true),
-      _futureBudgets = _budgetHTTP.fetchBudgetDate(txnInfo.wallet.currencyId, refreshDay),
-      _futureIncomeExpense = _transactionHttp.fetchIncomeExpense(txnInfo.wallet.currencyId, from, to, true),
+      _futureBudgets = _budgetHTTP.fetchBudgetDate(txnCurrencyId, refreshDay),
     ]).then((_) {
       // update the wallets
       _futureWallets.then((wallets) {
@@ -868,7 +880,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             }
           }
           // now we can set the shared preferences of budget
-          BudgetSharedPreferences.setBudget(txnInfo.wallet.currencyId, refreshDay, _budgets);
+          BudgetSharedPreferences.setBudget(txnCurrencyId, refreshDay, _budgets);
 
           // only set the provider if only the current budget date is the same as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
@@ -877,21 +889,40 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           }
         });
       }
-
-      if(txnInfo.type == "expense" || txnInfo.type == "income") {
-        _futureIncomeExpense.then((incomeExpense) {
-          Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnInfo.wallet.currencyId, incomeExpense);
-        });
-      }
-
-      // remove the loader
-      Navigator.pop(context);
     }).onError((error, stackTrace) {
-      // remove the loader
-      Navigator.pop(context);
-
       debugPrint("Error on update information");
       throw Exception(error.toString());
     });
+
+    if (
+        (isWithin(txnInfo.date, from, to)) &&
+        (txnInfo.type == 'expense' || txnInfo.type == 'income')
+      ) {
+      await _transactionHttp.fetchIncomeExpense(txnCurrencyId, from, to, true).then((result) {
+        Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnCurrencyId, result);
+      }).onError((error, stackTrace) {
+        debugPrint("Error on update information");
+        throw Exception(error.toString());
+      });
+
+      // refresh top transaction
+      // fetch the top transaction
+      await _transactionHttp.fetchTransactionTop(
+        txnInfo.type,
+        txnCurrencyId,
+        fromString,
+        toString,
+      true).then((transactionTop) {
+        // set the provide for this
+        Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
+          txnCurrencyId,
+          txnInfo.type,
+          transactionTop
+        );
+      }).onError((error, stackTrace) {
+        debugPrint("Error on update information");
+        throw Exception(error.toString());
+      },);
+    }
   }
 }

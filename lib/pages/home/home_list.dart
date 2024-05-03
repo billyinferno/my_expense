@@ -7,11 +7,11 @@ import 'package:my_expense/api/budget_api.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/model/income_expense_model.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
+import 'package:my_expense/utils/function/date_utils.dart' as dt_utils;
 import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/globals.dart';
@@ -56,7 +56,6 @@ class _HomeListState extends State<HomeList> {
 
   late Future<List<BudgetModel>> _futureBudgets;
   late Future<List<WalletModel>> _futureWallets;
-  late Future<IncomeExpenseModel> _futureIncomeExpense;
   final ScrollController _scrollController = ScrollController();
 
   List<TransactionListModel> _transactionData = [];
@@ -150,10 +149,10 @@ class _HomeListState extends State<HomeList> {
                   _getData = _refreshTransaction(focusedDay);
                 },
                 selectedDayPredicate: (day) {
-                  return isSameDay(day, _currentFocusedDay);
+                  return dt_utils.isSameDay(day, _currentFocusedDay);
                 },
                 onDaySelected: (selectedDay, focusedDay) {
-                  if (!(isSameDay(selectedDay, _currentFocusedDay))) {
+                  if (!(dt_utils.isSameDay(selectedDay, _currentFocusedDay))) {
                     _setFocusedDay(selectedDay);
                     _getData = _refreshTransaction(selectedDay);
                   }
@@ -219,7 +218,7 @@ class _HomeListState extends State<HomeList> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    (isSameDay(_currentFocusedDay, DateTime.now())
+                    (dt_utils.isSameDay(_currentFocusedDay, DateTime.now())
                         ? "Today"
                         : DateFormat('dd MMMM yyyy').format(_currentFocusedDay.toLocal())),
                     style: const TextStyle(
@@ -491,7 +490,7 @@ class _HomeListState extends State<HomeList> {
     
     await _transactionHttp.fetchTransaction(strRefreshDay, isForce).then((value) {
       // ensure that the selectedDate and the refreshDay is the same
-      if(isSameDay(_currentFocusedDay, refreshDay)) {
+      if(dt_utils.isSameDay(_currentFocusedDay, refreshDay)) {
         Provider.of<HomeProvider>(context, listen: false).setTransactionList(value);
       }
     }).onError((error, stackTrace) {
@@ -506,7 +505,7 @@ class _HomeListState extends State<HomeList> {
   Future<void> _deleteTransaction(TransactionListModel txnDeleted) async {
     showLoaderDialog(context);
 
-    await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) {
+    await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) async {
       // pop the transaction from the provider
       Provider.of<HomeProvider>(context, listen: false)
           .popTransactionList(txnDeleted);
@@ -520,7 +519,12 @@ class _HomeListState extends State<HomeList> {
       TransactionSharedPreferences.setTransaction(date, txnListModel);
 
       // update information for txn delete
-      _updateInformation(txnDeleted);
+      await _updateInformation(txnDeleted);
+
+      // if mounted remove the loader
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }).onError((error, stackTrace) {
       debugPrint("Error when delete");
       debugPrint(error.toString());
@@ -531,10 +535,17 @@ class _HomeListState extends State<HomeList> {
 
   Future<void> _updateInformation(TransactionListModel txnInfo) async {
     _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
-    DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
-    String fromString = DateFormat('yyyy-MM-dd').format(from);
-    String toString = DateFormat('yyyy-MM-dd').format(to);
+    DateTime from;
+    DateTime to;
+    String fromString;
+    String toString;
+
+    // get the stat date
+    (from, to) = TransactionSharedPreferences.getStatDate();
+
+    // format the from and to string
+    fromString = DateFormat('yyyy-MM-dd').format(from);
+    toString = DateFormat('yyyy-MM-dd').format(to);
 
     // delete the transaction from wallet transaction
     await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.wallet.id, _refreshDay, txnInfo);
@@ -548,7 +559,6 @@ class _HomeListState extends State<HomeList> {
     await Future.wait([
       _futureWallets = _walletHTTP.fetchWallets(true, true),
       _futureBudgets = _budgetHTTP.fetchBudgetDate(txnInfo.wallet.currencyId, _refreshDay),
-      _futureIncomeExpense = _transactionHttp.fetchIncomeExpense(txnInfo.wallet.currencyId, from, to, true),
     ]).then((_) {
       // update the wallets
       _futureWallets.then((wallets) {
@@ -586,25 +596,27 @@ class _HomeListState extends State<HomeList> {
           }
         });
       }
-
-      if(txnInfo.type == "expense" || txnInfo.type == "income") {
-        _futureIncomeExpense.then((incomeExpense) {
-          Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnInfo.wallet.currencyId, incomeExpense);
-        });
-      }
-
-      // remove the loader
-      Navigator.pop(context);
     }).onError((error, stackTrace) {
-      // remove the loader
-      Navigator.pop(context);
-
       debugPrint("Error on update information");
       throw Exception(error.toString());
     });
 
-    if (txnInfo.type == 'expense' || txnInfo.type == 'income') {
-      // if expense or income then fetch the data again
+    // check if the txn date is within the from and to of the stat date
+    if (
+        dt_utils.isWithin(txnInfo.date, from, to) &&
+        (txnInfo.type == "expense" || txnInfo.type == "income")
+      ) {
+      // fetch the income expense
+      await _transactionHttp.fetchIncomeExpense(txnInfo.wallet.currencyId, from, to, true).then((result) {
+        // put on the provider and notify the listener
+        Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnInfo.wallet.currencyId, result);
+      }).onError((error, stackTrace) {
+        debugPrint("Error on fetch income expense");
+        debugPrintStack(stackTrace: stackTrace);
+        throw Exception(error.toString());
+      });
+
+      // fetch the top transaction
       await _transactionHttp.fetchTransactionTop(
         txnInfo.type,
         txnInfo.wallet.currencyId,
@@ -618,11 +630,10 @@ class _HomeListState extends State<HomeList> {
           transactionTop
         );
       }).onError((error, stackTrace) {
-        debugPrint("Error on <_fetchTopTransaction>");
-        debugPrint(error.toString());
+        debugPrint("Error on fetch top transaction");
         debugPrintStack(stackTrace: stackTrace);
-        throw Exception("Error when fetching top transaction");
-      },);
+        throw Exception(error.toString());
+      },);  
     }
   }
 
