@@ -126,6 +126,11 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     String refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnUpdate.date.year, txnUpdate.date.month, 1).toLocal());
     String prevDay = DateFormat('yyyy-MM-dd').format(DateTime(_paramsData.date.year, _paramsData.date.month, 1).toLocal());
 
+    DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
+    String fromString = DateFormat('yyyy-MM-dd').format(from);
+    String toString = DateFormat('yyyy-MM-dd').format(to);
+
     // check whether this transaction moved from one wallet to another wallet?
     // first check whether this is expense, income, or transfer?
     bool isWalletMoved = false;
@@ -181,8 +186,6 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       // we will only going to update the income expense statistic, if only this transaction
       // is perform on the same month
       if(txnUpdate.date.year == DateTime.now().year && txnUpdate.date.month == DateTime.now().month) {
-        DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
-        DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
         await _transactionHttp.fetchIncomeExpense(txnUpdate.wallet.currencyId, from, to, true).then((incomeExpense) {
           Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnUpdate.wallet.currencyId, incomeExpense);
         }).onError((error, stackTrace) {
@@ -234,5 +237,28 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       debugPrint("Error on <updateInformation>");
       throw Exception(error.toString());
     });
+
+    if (txnUpdate.type == 'expense' || txnUpdate.type == 'income') {
+      // TODO: to check with the current stats date, whether we need to refresh or not?
+      // if expense or income then fetch the top transaction information
+      await _transactionHttp.fetchTransactionTop(
+        txnUpdate.type,
+        txnUpdate.wallet.currencyId,
+        fromString,
+        toString,
+      true).then((transactionTop) {
+        // set the provide for this
+        Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
+          txnUpdate.wallet.currencyId,
+          txnUpdate.type,
+          transactionTop
+        );
+      }).onError((error, stackTrace) {
+        debugPrint("Error on <_fetchTopTransaction>");
+        debugPrint(error.toString());
+        debugPrintStack(stackTrace: stackTrace);
+        throw Exception("Error when fetching top transaction");
+      },);
+    }
   }
 }

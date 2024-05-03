@@ -533,6 +533,8 @@ class _HomeListState extends State<HomeList> {
     _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
     DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
     DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
+    String fromString = DateFormat('yyyy-MM-dd').format(from);
+    String toString = DateFormat('yyyy-MM-dd').format(to);
 
     // delete the transaction from wallet transaction
     await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.wallet.id, _refreshDay, txnInfo);
@@ -600,6 +602,28 @@ class _HomeListState extends State<HomeList> {
       debugPrint("Error on update information");
       throw Exception(error.toString());
     });
+
+    if (txnInfo.type == 'expense' || txnInfo.type == 'income') {
+      // if expense or income then fetch the data again
+      await _transactionHttp.fetchTransactionTop(
+        txnInfo.type,
+        txnInfo.wallet.currencyId,
+        fromString,
+        toString,
+      true).then((transactionTop) {
+        // set the provide for this
+        Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
+          txnInfo.wallet.currencyId,
+          txnInfo.type,
+          transactionTop
+        );
+      }).onError((error, stackTrace) {
+        debugPrint("Error on <_fetchTopTransaction>");
+        debugPrint(error.toString());
+        debugPrintStack(stackTrace: stackTrace);
+        throw Exception("Error when fetching top transaction");
+      },);
+    }
   }
 
   Widget _getTotalIncomeExpense(List<TransactionListModel> transactionData) {

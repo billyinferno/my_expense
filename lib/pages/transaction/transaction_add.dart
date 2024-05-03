@@ -269,7 +269,18 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           }
         });
       }
-      
+
+      // check if transaction year and month is the same as today?
+      // we will just assume that the stats is showed current mont
+      // TODO: to get the actual stats year and month
+      if (txnAdd.date.toLocal().month == DateTime.now().toLocal().month &&
+          txnAdd.date.toLocal().year == DateTime.now().toLocal().year) {
+        Provider.of<HomeProvider>(context, listen: false).addTopTransaction(
+          txnAdd.wallet.currencyId,
+          txnAdd.type,
+          txnAdd
+        );
+      }
 
       // lastly check whether the date being used on the transaction
       // is more or lesser than the max and min date?
