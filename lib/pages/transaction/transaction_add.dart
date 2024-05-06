@@ -270,22 +270,25 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         });
       }
 
-      // check if transaction year and month is the same as today?
-      // we will just assume that the stats is showed current mont
-      DateTime statFrom;
-      DateTime statTo;
+      // if this is income or expense then get the statistic
+      if (txnAdd.type == 'income' || txnAdd.type == 'expense') {
+        // check if transaction year and month is the same as today?
+        // we will just assume that the stats is showed current month
+        DateTime statFrom;
+        DateTime statTo;
 
-      (statFrom, statTo) = TransactionSharedPreferences.getStatDate();
+        (statFrom, statTo) = TransactionSharedPreferences.getStatDate();
 
-      // check if txnAdd is within statFrom and statTo
-      if (isWithin(txnAdd.date, statFrom, statTo)) {
-        if (txnAdd.date.toLocal().month == DateTime.now().toLocal().month &&
-            txnAdd.date.toLocal().year == DateTime.now().toLocal().year) {
-          Provider.of<HomeProvider>(context, listen: false).addTopTransaction(
-            txnAdd.wallet.currencyId,
-            txnAdd.type,
-            txnAdd
-          );
+        // check if txnAdd is within statFrom and statTo
+        if (isWithin(txnAdd.date, statFrom, statTo)) {
+          if (txnAdd.date.toLocal().month == DateTime.now().toLocal().month &&
+              txnAdd.date.toLocal().year == DateTime.now().toLocal().year) {
+            Provider.of<HomeProvider>(context, listen: false).addTopTransaction(
+              txnAdd.wallet.currencyId,
+              txnAdd.type,
+              txnAdd
+            );
+          }
         }
       }
 
