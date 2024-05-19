@@ -50,7 +50,7 @@ dependencies:
   connectivity_plus: ^6.0.1
   smooth_page_indicator: ^1.1.0
   badges: ^3.1.2
-  calendar_date_picker2: ^0.5.5
+  calendar_date_picker2: ^1.0.2
   flutter_simple_calculator: ^2.2.5
   auto_size_text: ^3.0.0
 
@@ -63,7 +63,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
