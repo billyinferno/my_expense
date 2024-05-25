@@ -61,29 +61,53 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     // then it means we need to manipulate 2 shared preferences instead of one.
     await _transactionHttp.updateTransaction(context, txn!, _paramsData).then((txnUpdate) async {
       // update necessary information after we add the transaction
-      await _updateInformation(txnUpdate).then((_) {
+      await _updateInformation(txnUpdate).then((_) async {
         // for transaction that actually add on the different date, we cannot notify the home list
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
         DateTime currentListTxnDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now());
 
-        if (isSameDay(txnUpdate.date.toLocal(), currentListTxnDate.toLocal())) {
-          String date = DateFormat('yyyy-MM-dd').format(_paramsData.date.toLocal());
+        // default the date as the same as the home list date
+        String date = DateFormat('yyyy-MM-dd').format(currentListTxnDate.toLocal());
 
+        // check if this is the same date or not?
+        // if not the same then we will need to refresh bot transaction list
+        // both on the transaction update date and the home list date.
+        if (!isSameDay(txnUpdate.date.toLocal(), currentListTxnDate.toLocal())) { 
+          // since the update transaction and current home list is different date
+          // get both data and stored it on the transaction shared preferences
+          await _refreshHomeList(
+            txnDate: txnUpdate.date.toLocal(),
+            homeListDate: currentListTxnDate.toLocal()
+          ).onError((error, stackTrace) async {
+            debugPrint("Error when update the home list transaction");
+            debugPrintStack(stackTrace: stackTrace);
+
+            // show the error dialog
+            await ShowMyDialog(
+              cancelEnabled: false,
+              confirmText: "OK",
+              dialogTitle: "Error Refresh",
+              dialogText: "Error when refresh home list."
+            ).show(context);
+          });
+        }
+        
+        // this is success, so we can pop the loader
+        if (mounted) {
           // get the transaction list from shared preferences
           List<TransactionListModel>? txnListShared = TransactionSharedPreferences.getTransaction(date);
 
           // once add on the shared preferences, we can change the
           // TransactionListModel provider so it will update the home list page
           Provider.of<HomeProvider>(context, listen: false).setTransactionList(txnListShared ?? []);
-        }
-        
-        // this is success, so we can pop the loader
-        Navigator.pop(context);
 
-        // since we already finished, we can pop again to return back to the
-        // previous page
-        Navigator.pop(context, txnUpdate);
+          Navigator.pop(context);
+
+          // since we already finished, we can pop again to return back to the
+          // previous page
+          Navigator.pop(context, txnUpdate);
+        }
       }).onError((error, stackTrace) async {
         // pop the loader
         Navigator.pop(context);
@@ -116,6 +140,25 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         dialogText: "Error when update transaction."
       ).show(context);
     });
+  }
+
+  Future<void> _refreshHomeList({required DateTime txnDate, required DateTime homeListDate}) async {
+    final dfyyyMMdd = DateFormat('yyyy-MM-dd');
+    await Future.wait([
+      _transactionHttp.fetchTransaction(dfyyyMMdd.format(txnDate), true).then((resp) {
+        // once got the response store this on the TransactionSharedPreferences
+        TransactionSharedPreferences.setTransaction(dfyyyMMdd.format(txnDate), resp);
+      }).onError((error, stackTrace) {
+        throw Exception("Error when update for $txnDate");
+      },),
+
+      _transactionHttp.fetchTransaction(dfyyyMMdd.format(homeListDate), true).then((resp) {
+        // once got the response store this on the TransactionSharedPreferences
+        TransactionSharedPreferences.setTransaction(dfyyyMMdd.format(homeListDate), resp);
+      }).onError((error, stackTrace) {
+        throw Exception("Error when update for $homeListDate");
+      },),
+    ]);
   }
 
   Future<void> _updateInformation(TransactionListModel txnUpdate) async {
