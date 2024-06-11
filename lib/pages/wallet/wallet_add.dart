@@ -85,26 +85,30 @@ class _WalletAddPageState extends State<WalletAddPage> {
             onPressed: () async {
               showLoaderDialog(context);
               await _saveWallet().then((_) {
-                // remove the loader
-                Navigator.pop(context);
+                if (context.mounted) {
+                  // remove the loader
+                  Navigator.pop(context);
 
-                // finished, so we can just go back to the previous page
-                Navigator.pop(context);
+                  // finished, so we can just go back to the previous page
+                  Navigator.pop(context);
+                }
               }).onError((error, stackTrace) async {
-                // remove the loader
-                Navigator.pop(context);
-
                 // print the error
                 debugPrint("Error: ${error.toString()}");
                 debugPrintStack(stackTrace: stackTrace);
+                
+                if (context.mounted) {
+                  // remove the loader
+                  Navigator.pop(context);
 
-                // show the error dialog
-                await ShowMyDialog(
-                  cancelEnabled: false,
-                  confirmText: "OK",
-                  dialogTitle: "Error Save",
-                  dialogText: "Unable to save wallet data."
-                ).show(context);
+                  // show the error dialog
+                  await ShowMyDialog(
+                    cancelEnabled: false,
+                    confirmText: "OK",
+                    dialogTitle: "Error Save",
+                    dialogText: "Unable to save wallet data."
+                  ).show(context);
+                }
               });
             },
             icon: const Icon(
@@ -485,12 +489,16 @@ class _WalletAddPageState extends State<WalletAddPage> {
         // set the shared preferences with this list
         WalletSharedPreferences.setWallets(walletList);
 
-        // set the provider with this
-        Provider.of<HomeProvider>(context, listen: false).setWalletList(walletList);
+        if (mounted) {
+          // set the provider with this
+          Provider.of<HomeProvider>(context, listen: false).setWalletList(walletList);
+        }
       });
 
       walletCurrencyList.then((walletsCurrency) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
+        }
       });
     }).onError((error, stackTrace) {
       debugPrint("error <saveTransaction>");

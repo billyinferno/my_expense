@@ -70,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
           // get additional information
           debugPrint("🔓 Already login");
           await _getAdditionalInfo().then((isGetAdditionalInfo) {
-            if (isGetAdditionalInfo) {
+            if (isGetAdditionalInfo && mounted) {
               // once finished get the additional information route this to home
               debugPrint("🏠 Redirect to home");
               Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
@@ -284,8 +284,10 @@ class _LoginPageState extends State<LoginPage> {
                           if (_formKey.currentState!.validate()) {
                             showLoaderDialog(context);
                             await _login(_usernameController.text, _passwordController.text).then((res) async {
-                              Navigator.pop(context);
-                              if(res) {
+                              if (mounted) {
+                                Navigator.pop(context);
+                              }
+                              if(res && mounted) {
                                 debugPrint("🏠 Login success, redirect to home");
                                 Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
                               }
@@ -408,7 +410,7 @@ class _LoginPageState extends State<LoginPage> {
           _setLoading(false);
 
           // check whether this is due to JWT token is expired or not?
-          if (_bearerToken.isNotEmpty) {
+          if (_bearerToken.isNotEmpty && mounted) {
             _isTokenExpired = true;
             debugPrint("👨🏻 User token is expired");
             ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "User token expired, please re-login"));
@@ -488,9 +490,12 @@ class _LoginPageState extends State<LoginPage> {
       // get additional information for user
       debugPrint("Get additional info for user");
 
-      showLoaderDialog(context);
+      if (mounted) {
+        showLoaderDialog(context);
+      }
+
       await _getAdditionalInfo().then((isGetAdditionalInfo) {
-        if (isGetAdditionalInfo) {
+        if (isGetAdditionalInfo && mounted) {
           // once finished get the additional information route this to home
           debugPrint("🏠 Redirect to home");
           Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
@@ -528,14 +533,20 @@ class _LoginPageState extends State<LoginPage> {
         ErrorModel errModel = parseErrorMessage(error.toString());
         if (errModel.statusCode > 0) {
           isError = true;
-          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Wrong login info"));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Wrong login info"));
+          }
         } else {
           isError = true;
-          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Services unavailable"));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Services unavailable"));
+          }
         }
 
-        // pop the loader
-        Navigator.pop(context);
+        if (mounted) {
+          // pop the loader
+          Navigator.pop(context);
+        }
       });
     }
     else {

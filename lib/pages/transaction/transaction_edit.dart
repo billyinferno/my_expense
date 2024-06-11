@@ -83,13 +83,15 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
             debugPrint("Error when update the home list transaction");
             debugPrintStack(stackTrace: stackTrace);
 
-            // show the error dialog
-            await ShowMyDialog(
-              cancelEnabled: false,
-              confirmText: "OK",
-              dialogTitle: "Error Refresh",
-              dialogText: "Error when refresh home list."
-            ).show(context);
+            if (mounted) {
+              // show the error dialog
+              await ShowMyDialog(
+                cancelEnabled: false,
+                confirmText: "OK",
+                dialogTitle: "Error Refresh",
+                dialogText: "Error when refresh home list."
+              ).show(context);
+            }
           });
         }
         
@@ -109,36 +111,40 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           Navigator.pop(context, txnUpdate);
         }
       }).onError((error, stackTrace) async {
-        // pop the loader
-        Navigator.pop(context);
-
         // print the error
         debugPrint("Error: ${error.toString()}");
         debugPrintStack(stackTrace: stackTrace);
+        
+        if (mounted) {
+          // pop the loader
+          Navigator.pop(context);
+
+          // show the error dialog
+          await ShowMyDialog(
+            cancelEnabled: false,
+            confirmText: "OK",
+            dialogTitle: "Error Refresh",
+            dialogText: "Error when refresh information."
+          ).show(context);
+        }
+      });
+    }).onError((error, stackTrace) async {
+      // print the error
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stackTrace);
+      
+      if (mounted) {
+        // pop the loader
+        Navigator.pop(context);
 
         // show the error dialog
         await ShowMyDialog(
           cancelEnabled: false,
           confirmText: "OK",
-          dialogTitle: "Error Refresh",
-          dialogText: "Error when refresh information."
+          dialogTitle: "Error Update",
+          dialogText: "Error when update transaction."
         ).show(context);
-      });
-    }).onError((error, stackTrace) async {
-      // pop the loader
-      Navigator.pop(context);
-
-      // print the error
-      debugPrint("Error: ${error.toString()}");
-      debugPrintStack(stackTrace: stackTrace);
-
-      // show the error dialog
-      await ShowMyDialog(
-        cancelEnabled: false,
-        confirmText: "OK",
-        dialogTitle: "Error Update",
-        dialogText: "Error when update transaction."
-      ).show(context);
+      }
     });
   }
 
@@ -230,7 +236,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       // is perform on the same month
       if(txnUpdate.date.year == DateTime.now().year && txnUpdate.date.month == DateTime.now().month) {
         await _transactionHttp.fetchIncomeExpense(txnUpdate.wallet.currencyId, from, to, true).then((incomeExpense) {
-          Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnUpdate.wallet.currencyId, incomeExpense);
+          if (mounted) {
+            Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnUpdate.wallet.currencyId, incomeExpense);
+          }
         }).onError((error, stackTrace) {
           debugPrint("Error when fetchIncomeExpense at <updateInformation>");
           debugPrint(error.toString());
@@ -245,14 +253,18 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     ]).then((_) {
       // got the updated wallets
       futureWallets.then((wallets) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        }
       });
 
       // got the new budgets
       futureBudgets.then((budgets) {
         // now we can set the shared preferences of budget
         BudgetSharedPreferences.setBudget(txnUpdate.wallet.currencyId, refreshDay, budgets);
-        Provider.of<HomeProvider>(context, listen: false).setBudgetList(budgets);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setBudgetList(budgets);
+        }
       }).then((_) {
         // lastly check whether the date being used on the transaction
         // is more or lesser than the max and min date?
@@ -274,7 +286,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       futureNetWorth.then((worth) {
         String dateTo = DateFormat("yyyy-MM-dd").format(DateTime(txnUpdate.date.toLocal().year, txnUpdate.date.toLocal().month+1, 1).subtract(const Duration(days: 1)));
         WalletSharedPreferences.setWalletWorth(dateTo, worth);
-        Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth);
+        }
       });
     }).onError((error, stackTrace) {
       debugPrint("Error on <updateInformation>");
@@ -298,12 +312,14 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           fromString,
           toString,
         true).then((transactionTop) {
-          // set the provide for this
-          Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
-            txnUpdate.wallet.currencyId,
-            txnUpdate.type,
-            transactionTop
-          );
+          if (mounted) {
+            // set the provide for this
+            Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
+              txnUpdate.wallet.currencyId,
+              txnUpdate.type,
+              transactionTop
+            );
+          }
         }).onError((error, stackTrace) {
           debugPrint("Error on <_fetchTopTransaction>");
           debugPrint(error.toString());

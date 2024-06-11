@@ -329,12 +329,15 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   showLoaderDialog(context);
 
                   await _fetchTransactionWallet(newDate).then((_) {
-                    // remove the loader
                     _setDate(newDate);
-                    Navigator.pop(context);
                   }).onError((error, stackTrace) {
                     debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
-                    Navigator.pop(context);
+                    debugPrintStack(stackTrace: stackTrace);
+                  }).whenComplete(() {
+                    if (mounted) {
+                      // remove the loader
+                      Navigator.pop(context);
+                    }
                   });
                 }),
                 child: Container(
@@ -379,12 +382,15 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   showLoaderDialog(context);
 
                   await _fetchTransactionWallet(newDate).then((_) {
-                    // remove the loader
                     _setDate(newDate);
-                    Navigator.pop(context);
                   }).onError((error, stackTrace) {
                     debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
-                    Navigator.pop(context);
+                    debugPrintStack(stackTrace: stackTrace);
+                  }).whenComplete(() {
+                    if (mounted) {
+                      // remove the loader
+                      Navigator.pop(context);
+                    }
                   });
                 }),
                 child: Container(
@@ -412,11 +418,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               // fetch the transaction for this date
               showLoaderDialog(context);
 
-              await _fetchTransactionWallet(_currentDate, true).then((_) {
-                Navigator.pop(context);
-              }).onError((error, stackTrace) {
+              await _fetchTransactionWallet(_currentDate, true).onError((error, stackTrace) {
                 debugPrint("Error when refresh wallet for ${_dtMMMMyyyy.format(_currentDate.toLocal())}");
-                Navigator.pop(context);
+              }).whenComplete(() {
+                if (mounted) {
+                  Navigator.pop(context);
+                }
               });
             },
             child: _generateTransactionListview(),
@@ -795,15 +802,16 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       // check if the same date or not with the transaction date that we just
       // delete
       if (isSameDay(currentListTxnDate, txnDeleted.date)) {
-        // pop the transaction from the provider
-        Provider.of<HomeProvider>(context, listen: false).popTransactionList(txnDeleted);
+        if (mounted) {
+          // pop the transaction from the provider
+          Provider.of<HomeProvider>(context, listen: false).popTransactionList(txnDeleted);
 
-        // get the current transaction on the provider
-        List<TransactionListModel> txnListModel = Provider.of<HomeProvider>(context, listen: false).transactionList;
-
-        // save the current transaction on the provider to the shared preferences
-        String date = DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
-        TransactionSharedPreferences.setTransaction(date, txnListModel);
+          // get the current transaction on the provider
+          List<TransactionListModel> txnListModel = Provider.of<HomeProvider>(context, listen: false).transactionList;
+          // save the current transaction on the provider to the shared preferences
+          String date = DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
+          TransactionSharedPreferences.setTransaction(date, txnListModel);
+        }
       }
 
       // update information for txn delete
@@ -817,11 +825,13 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       debugPrint("Error when delete");
       debugPrint(error.toString());
 
-      // since got error we need to pop from the loader
-      Navigator.pop(context);
+      if (mounted) {
+        // since got error we need to pop from the loader
+        Navigator.pop(context);
 
-      // show scaffold showing error
-      ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Error when delete ${txnDeleted.name}"));
+        // show scaffold showing error
+        ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Error when delete ${txnDeleted.name}"));
+      }
     });
   }
 
@@ -855,7 +865,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     ]).then((_) {
       // update the wallets
       _futureWallets.then((wallets) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        }
       });
 
       // store the budgets list
@@ -884,7 +896,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
           // only set the provider if only the current budget date is the same as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-          if(currentBudgetDate == refreshDay) {
+          if(currentBudgetDate == refreshDay && mounted) {
             Provider.of<HomeProvider>(context, listen: false).setBudgetList(_budgets);
           }
         });
@@ -899,7 +911,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         (txnInfo.type == 'expense' || txnInfo.type == 'income')
       ) {
       await _transactionHttp.fetchIncomeExpense(txnCurrencyId, from, to, true).then((result) {
-        Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnCurrencyId, result);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnCurrencyId, result);
+        }
       }).onError((error, stackTrace) {
         debugPrint("Error on update information");
         throw Exception(error.toString());
@@ -913,12 +927,14 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         fromString,
         toString,
       true).then((transactionTop) {
-        // set the provide for this
-        Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
-          txnCurrencyId,
-          txnInfo.type,
-          transactionTop
-        );
+        if (mounted) {
+          // set the provide for this
+          Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
+            txnCurrencyId,
+            txnInfo.type,
+            transactionTop
+          );
+        }
       }).onError((error, stackTrace) {
         debugPrint("Error on update information");
         throw Exception(error.toString());

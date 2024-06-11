@@ -717,7 +717,7 @@ class _HomeStatsState extends State<HomeStats> {
         debugPrint(error.toString());
         debugPrintStack(stackTrace: stackTrace);
         // check the loader dialog
-        if (isShowDialog) {
+        if (isShowDialog && mounted) {
           Navigator.pop(context);
         }
         throw Exception("Error when fetch statistic data");
@@ -740,8 +740,10 @@ class _HomeStatsState extends State<HomeStats> {
       // set this worth
       _setWorth(worth);
 
-      // set the provider for net worth
-      Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth);
+      if (mounted) {
+        // set the provider for net worth
+        Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth);
+      }
     }).onError((error, stackTrace) {
       debugPrint("Error on <_fetchWorth>");
       debugPrint(error.toString());
@@ -755,8 +757,10 @@ class _HomeStatsState extends State<HomeStats> {
 
     // get the data
     await _transactionHttp.fetchIncomeExpense(ccy.id, from, to, isForce).then((incomeExpense) {
-      // set the provider for income expense
-      Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(ccy.id, incomeExpense);
+      if (mounted) {
+        // set the provider for income expense
+        Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(ccy.id, incomeExpense);
+      }
     }).onError((error, stackTrace) {
       debugPrint("Error on <_fetchIncomeExpense>");
       debugPrint(error.toString());
@@ -767,8 +771,10 @@ class _HomeStatsState extends State<HomeStats> {
   Future<void> _fetchTopTransaction(String type, int ccy, [bool? force]) async {
     bool isForce = (force ?? false);
     await _transactionHttp.fetchTransactionTop(type, ccy, _fromString, _toString, isForce).then((transactionTop) {
-      // set the provide for this
-      Provider.of<HomeProvider>(context, listen: false).setTopTransaction(ccy, type, transactionTop);
+      if (mounted) {
+        // set the provide for this
+        Provider.of<HomeProvider>(context, listen: false).setTopTransaction(ccy, type, transactionTop);
+      }
     }).onError((error, stackTrace) {
       debugPrint("Error on <_fetchTopTransaction>");
       debugPrint(error.toString());

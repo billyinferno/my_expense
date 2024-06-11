@@ -101,26 +101,30 @@ class _PinRemovePageState extends State<PinRemovePage> {
 
   Future<void> _removePin() async {
     await _pinHttp.deletePin().then((_) {
-      // pop the loader
-      Navigator.pop(context);
+      if (mounted) {
+        // pop the loader
+        Navigator.pop(context);
 
-      // pin already removed, and by right it should be already updated
-      // the pin information on the shared preferences.
-      Navigator.pop(context, true);
+        // pin already removed, and by right it should be already updated
+        // the pin information on the shared preferences.
+        Navigator.pop(context, true);
+      }
     }).onError((error, stackTrace) async {
-      // pop the loader
-      Navigator.pop(context);
-
       debugPrint("Error: ${error.toString()}");
       debugPrintStack(stackTrace: stackTrace);
+      
+      if (mounted) {
+        // pop the loader
+        Navigator.pop(context);
 
-      // show the error dialog
-      await ShowMyDialog(
-        cancelEnabled: false,
-        confirmText: "OK",
-        dialogTitle: "Error",
-        dialogText: "Error when removing PIN from backend."
-      ).show(context);
+        // show the error dialog
+        await ShowMyDialog(
+          cancelEnabled: false,
+          confirmText: "OK",
+          dialogTitle: "Error",
+          dialogText: "Error when removing PIN from backend."
+        ).show(context);
+      }
     });
   }
 }

@@ -111,32 +111,36 @@ class _PinSetupPageState extends State<PinSetupPage> {
 
   Future<void> _savePin() async {
     await _pinHttp.setPin(_firstPin).then((_) {
-      // pop the loader dialog
-      Navigator.pop(context);
+      if (mounted) {
+        // pop the loader dialog
+        Navigator.pop(context);
 
-      // pin already set, so now we can pop from this page
-      // and tell it's true
-      Navigator.pop(context, true);
+        // pin already set, so now we can pop from this page
+        // and tell it's true
+        Navigator.pop(context, true);
+      }
     }).onError((error, stackTrace) async {
-      // pop the loader dialog
-      Navigator.pop(context);
-
       debugPrint("Error: ${error.toString()}");
       debugPrintStack(stackTrace: stackTrace);
 
-      // show the error dialog
-      await ShowMyDialog(
-        cancelEnabled: false,
-        confirmText: "OK",
-        dialogTitle: "Error Save",
-        dialogText: "Error when Save PIN"
-      ).show(context);
-      
       setState(() {
         _stage = 1;
         _firstPin = "";
         _secondPin = "";
       });
+      
+      if (mounted) {
+        // pop the loader dialog
+        Navigator.pop(context);
+
+        // show the error dialog
+        await ShowMyDialog(
+          cancelEnabled: false,
+          confirmText: "OK",
+          dialogTitle: "Error Save",
+          dialogText: "Error when Save PIN"
+        ).show(context);
+      }
     });
   }
 }

@@ -136,10 +136,14 @@ class _HomeWalletState extends State<HomeWallet> {
     ]).then((_) {
       // set the provider so it can tell the consumer to update/build the widget.
       walletList.then((wallets) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        }
       });
       walletCurrencyList.then((walletsCurrency) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
+        }
       });
     }).onError((error, stackTrace) {
       debugPrint("Error on <_deleteWallet>");
@@ -159,7 +163,7 @@ class _HomeWalletState extends State<HomeWallet> {
       futureWallets = _walletHttpService.fetchWallets(true, true),
     ]).then((_) {
       futureWallets.then((wallets) {
-        if(wallets.isNotEmpty) {
+        if(wallets.isNotEmpty && mounted) {
           Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
         }
       });
@@ -208,23 +212,27 @@ class _HomeWalletState extends State<HomeWallet> {
               result.then((value) async {
                 if(value == true) {
                   await _deleteWallet(wallet.id).then((_) {
-                    Navigator.pop(context);
-                    // clear all the cache for the application so we can just
-                    // fetch again all data from internet, for this let user knew
-                    // that we will delete all the cache
-                    late Future<bool?> userConfirm = ShowMyDialog(
-                        dialogTitle: "Cache Clear",
-                        dialogText: "We will clear all the cache for the application.",
-                        confirmText: "Okay",
-                        confirmColor: accentColors[0],
-                    ).show(context);
-
-                    userConfirm.then((value) {
-                      _clearCache();
-                    });
+                    if (mounted) {
+                      // clear all the cache for the application so we can just
+                      // fetch again all data from internet, for this let user knew
+                      // that we will delete all the cache
+                      late Future<bool?> userConfirm = ShowMyDialog(
+                          dialogTitle: "Cache Clear",
+                          dialogText: "We will clear all the cache for the application.",
+                          confirmText: "Okay",
+                          confirmColor: accentColors[0],
+                      ).show(context);
+                      
+                      userConfirm.then((value) {
+                        _clearCache();
+                      });
+                    }
                   }).onError((error, stackTrace) {
                     debugPrint("Error when clicking delete wallet");
-                    Navigator.pop(context);
+                  }).whenComplete(() {
+                    if (mounted) {
+                     Navigator.pop(context);
+                    }
                   });
                 }
               });
@@ -280,11 +288,15 @@ class _HomeWalletState extends State<HomeWallet> {
     ]).then((_) {
       // set the provider with the new wallets we got
       walletList.then((wallets) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        }
       });
 
       walletCurrencyList.then((walletsCurrency) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
+        }
       });
     }).onError((error, stackTrace) {
       // got error when we try to enable/disable wallet
@@ -310,11 +322,14 @@ class _HomeWalletState extends State<HomeWallet> {
       BudgetSharedPreferences.clearBudget(),
       //TODO: clear the statistic also, and then after that we can perform hard refresh to all the transaction, and budget
     ]).then((_) {
-      Navigator.pop(context);
+      // do nothing
     }).onError((error, stackTrace) {
       debugPrint("Error at _clearCache");
       debugPrint(error.toString());
-      Navigator.pop(context);
+    }).whenComplete(() {
+      if (mounted) {
+        Navigator.pop(context);
+      }
     });
   }
 }

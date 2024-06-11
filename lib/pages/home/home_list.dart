@@ -492,7 +492,7 @@ class _HomeListState extends State<HomeList> {
     
     await _transactionHttp.fetchTransaction(strRefreshDay, isForce).then((value) {
       // ensure that the selectedDate and the refreshDay is the same
-      if(dt_utils.isSameDay(_currentFocusedDay, refreshDay)) {
+      if(dt_utils.isSameDay(_currentFocusedDay, refreshDay) && mounted) {
         Provider.of<HomeProvider>(context, listen: false).setTransactionList(value);
       }
     }).onError((error, stackTrace) {
@@ -508,30 +508,30 @@ class _HomeListState extends State<HomeList> {
     showLoaderDialog(context);
 
     await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) async {
-      // pop the transaction from the provider
-      Provider.of<HomeProvider>(context, listen: false)
-          .popTransactionList(txnDeleted);
+      if (mounted) {        
+        // pop the transaction from the provider
+        Provider.of<HomeProvider>(context, listen: false)
+            .popTransactionList(txnDeleted);
 
-      // get the current transaction on the provider
-      List<TransactionListModel> txnListModel =
-          Provider.of<HomeProvider>(context, listen: false).transactionList;
+        // get the current transaction on the provider
+        List<TransactionListModel> txnListModel =
+            Provider.of<HomeProvider>(context, listen: false).transactionList;
 
-      // save the current transaction on the provider to the shared preferences
-      String date = DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
-      TransactionSharedPreferences.setTransaction(date, txnListModel);
+        // save the current transaction on the provider to the shared preferences
+        String date = DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
+        TransactionSharedPreferences.setTransaction(date, txnListModel);
+      }
 
       // update information for txn delete
       await _updateInformation(txnDeleted);
-
+    }).onError((error, stackTrace) {
+      debugPrint("Error when delete");
+      debugPrint(error.toString());
+    }).whenComplete(() {
       // if mounted remove the loader
       if (mounted) {
         Navigator.pop(context);
       }
-    }).onError((error, stackTrace) {
-      debugPrint("Error when delete");
-      debugPrint(error.toString());
-      // since got error we need to pop from the loader
-      Navigator.pop(context);
     });
   }
 
@@ -564,7 +564,9 @@ class _HomeListState extends State<HomeList> {
     ]).then((_) {
       // update the wallets
       _futureWallets.then((wallets) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        }
       });
 
       // store the budgets list
@@ -593,7 +595,7 @@ class _HomeListState extends State<HomeList> {
 
           // only set the provider if only the current budget date is the same as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-          if(currentBudgetDate == _refreshDay) {
+          if(currentBudgetDate == _refreshDay && mounted) {
             Provider.of<HomeProvider>(context, listen: false).setBudgetList(_budgets);
           }
         });
@@ -610,8 +612,10 @@ class _HomeListState extends State<HomeList> {
       ) {
       // fetch the income expense
       await _transactionHttp.fetchIncomeExpense(txnInfo.wallet.currencyId, from, to, true).then((result) {
-        // put on the provider and notify the listener
-        Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnInfo.wallet.currencyId, result);
+        if (mounted) {
+          // put on the provider and notify the listener
+          Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnInfo.wallet.currencyId, result);
+        }
       }).onError((error, stackTrace) {
         debugPrint("Error on fetch income expense");
         debugPrintStack(stackTrace: stackTrace);
@@ -625,12 +629,14 @@ class _HomeListState extends State<HomeList> {
         fromString,
         toString,
       true).then((transactionTop) {
-        // set the provide for this
-        Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
-          txnInfo.wallet.currencyId,
-          txnInfo.type,
-          transactionTop
-        );
+        if (mounted) {
+          // set the provide for this
+          Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
+            txnInfo.wallet.currencyId,
+            txnInfo.type,
+            transactionTop
+          );
+        }
       }).onError((error, stackTrace) {
         debugPrint("Error on fetch top transaction");
         debugPrintStack(stackTrace: stackTrace);

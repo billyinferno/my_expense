@@ -81,42 +81,46 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // for transaction that actually add on the different date, we cannot notify the home list
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
-        if (isSameDay(txn.date.toLocal(), _selectedDate.toLocal())) {
+        if (isSameDay(txn.date.toLocal(), _selectedDate.toLocal()) && mounted) {
           Provider.of<HomeProvider>(context, listen: false).setTransactionList(txnListShared);
         }
         
         // finished update information
       }).onError((error, stackTrace) async {
-        // pop the loader
-        Navigator.pop(context);
-
         // print the error
         debugPrint("Error: ${error.toString()}");
         debugPrintStack(stackTrace: stackTrace);
+
+        if (mounted) {
+          // pop the loader
+          Navigator.pop(context);
+          
+          // show the error dialog
+          await ShowMyDialog(
+            cancelEnabled: false,
+            confirmText: "OK",
+            dialogTitle: "Error Refresh",
+            dialogText: "Error when refresh information."
+          ).show(context);
+        }
+      });
+    }).onError((error, stackTrace) async {
+      // print the error
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stackTrace);
+      
+      if (mounted) {
+        // pop the loader
+        Navigator.pop(context);
 
         // show the error dialog
         await ShowMyDialog(
           cancelEnabled: false,
           confirmText: "OK",
-          dialogTitle: "Error Refresh",
-          dialogText: "Error when refresh information."
+          dialogTitle: "Error Add",
+          dialogText: "Error when add transaction."
         ).show(context);
-      });
-    }).onError((error, stackTrace) async {
-      // pop the loader
-      Navigator.pop(context);
-
-      // print the error
-      debugPrint("Error: ${error.toString()}");
-      debugPrintStack(stackTrace: stackTrace);
-
-      // show the error dialog
-      await ShowMyDialog(
-        cancelEnabled: false,
-        confirmText: "OK",
-        dialogTitle: "Error Add",
-        dialogText: "Error when add transaction."
-      ).show(context);
+      }
     });
   }
 
@@ -202,7 +206,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       String dateTo = DateFormat("yyyy-MM-dd").format(DateTime(txnAdd.date.toLocal().year, txnAdd.date.toLocal().month+1, 1).subtract(const Duration(days: 1)));
 
       _worth = WalletSharedPreferences.getWalletWorth(dateTo);
-      Provider.of<HomeProvider>(context, listen: false).setNetWorth(_worth);
+      if (mounted) {
+        Provider.of<HomeProvider>(context, listen: false).setNetWorth(_worth);
+      }
     }).onError((error, stackTrace) {
       // why got error here?
       debugPrint("Error when addWalletWorth at <updateInformation>");
@@ -217,8 +223,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         String dateFrom = DateFormat("yyyy-MM-dd").format(DateTime(txnAdd.date.toLocal().year, txnAdd.date.toLocal().month, 1));
         String dateTo = DateFormat("yyyy-MM-dd").format(DateTime(txnAdd.date.toLocal().year, txnAdd.date.toLocal().month+1, 1).subtract(const Duration(days: 1)));
         await TransactionSharedPreferences.addIncomeExpense(txnAdd.wallet.currencyId, dateFrom, dateTo, txnAdd).then((incomeExpense) {
-          // set the provider for this statistics
-          Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnAdd.wallet.currencyId, incomeExpense);
+          if (mounted) {            
+            // set the provider for this statistics
+            Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnAdd.wallet.currencyId, incomeExpense);
+          }
         }).onError((error, stackTrace) {
           debugPrint("Error when addIncomeExpense at <updateInformation>");
           debugPrint(error.toString());
@@ -234,7 +242,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     ]).then((_) {
       // update the wallets
       futureWallets.then((wallets) {
-        Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        }
       });
 
       // store the budgets list
@@ -264,7 +274,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           // only update the provider if, the current home budget is ed
           // the same date as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-          if (refreshDay == currentBudgetDate) {
+          if (refreshDay == currentBudgetDate && mounted) {
             Provider.of<HomeProvider>(context, listen: false).setBudgetList(budgets);
           }
         });
@@ -280,15 +290,16 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         (statFrom, statTo) = TransactionSharedPreferences.getStatDate();
 
         // check if txnAdd is within statFrom and statTo
-        if (isWithin(txnAdd.date, statFrom, statTo)) {
-          if (txnAdd.date.toLocal().month == DateTime.now().toLocal().month &&
-              txnAdd.date.toLocal().year == DateTime.now().toLocal().year) {
-            Provider.of<HomeProvider>(context, listen: false).addTopTransaction(
-              txnAdd.wallet.currencyId,
-              txnAdd.type,
-              txnAdd
-            );
-          }
+        if ( isWithin(txnAdd.date, statFrom, statTo) &&
+             mounted &&
+             ( txnAdd.date.toLocal().month == DateTime.now().toLocal().month &&
+              txnAdd.date.toLocal().year == DateTime.now().toLocal().year )
+           ) {
+          Provider.of<HomeProvider>(context, listen: false).addTopTransaction(
+            txnAdd.wallet.currencyId,
+            txnAdd.type,
+            txnAdd
+          );
         }
       }
 
@@ -307,12 +318,14 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         TransactionSharedPreferences.setTransactionMaxDate(txnAdd.date);
       }
 
-      // this is success, so we can pop the loader
-      Navigator.pop(context);
+      if (mounted) {
+        // this is success, so we can pop the loader
+        Navigator.pop(context);
 
-      // since we already finished, we can pop again to return back to the
-      // previous page
-      Navigator.pop(context);
+        // since we already finished, we can pop again to return back to the
+        // previous page
+        Navigator.pop(context);
+      }
     }).onError((error, stackTrace) {
       debugPrint("Error on update information");
       throw Exception(error.toString());

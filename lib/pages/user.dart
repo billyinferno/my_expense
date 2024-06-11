@@ -394,8 +394,10 @@ class _UserPageState extends State<UserPage> {
                       callback: (() {
                         showLoaderDialog(context);
                         _refreshTransactionTag().then((_) {
-                          // remove the loader dialog
-                          Navigator.pop(context);
+                          if (context.mounted) {
+                            // remove the loader dialog
+                            Navigator.pop(context);
+                          }
                         });
                       }),
                     ),
@@ -525,11 +527,13 @@ class _UserPageState extends State<UserPage> {
     ]).then((_) {
       // clear the JWT token
       NetUtils.clearJWT();
-      // clear provider
-      Provider.of<HomeProvider>(context, listen: false).clearProvider();
-      // navigate to the login screen
-      Navigator.pushNamedAndRemoveUntil(
-          context, '/login', (Route<dynamic> route) => false);
+      if (mounted) {
+        // clear provider
+        Provider.of<HomeProvider>(context, listen: false).clearProvider();
+        // navigate to the login screen
+        Navigator.pushNamedAndRemoveUntil(
+            context, '/login', (Route<dynamic> route) => false);
+      }
     });
   }
 
@@ -669,29 +673,33 @@ class _UserPageState extends State<UserPage> {
         newCategoryName = _currentIncomeCategory!.name;
       }
 
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Default $type updated to $newCategoryName",
-          icon: Icon(
-            Ionicons.checkmark_circle_outline,
-            color: accentColors[6],
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Default $type updated to $newCategoryName",
+            icon: Icon(
+              Ionicons.checkmark_circle_outline,
+              color: accentColors[6],
+            )
           )
-        )
-      );
+        );
+      }
     }).onError((error, stackTrace) {
       debugPrint("Got error when update default $type category!");
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
 
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Unable to update default $type",
-        )
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Unable to update default $type",
+          )
+        );
+      }
     });
   }
 
@@ -715,30 +723,35 @@ class _UserPageState extends State<UserPage> {
         BudgetSharedPreferences.setBudget(currencyID, currentBudgetDate, value);
       });
 
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Default budget currency updated",
-          icon: Icon(
-            Ionicons.checkmark_circle_outline,
-            color: accentColors[6],
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Default budget currency updated",
+            icon: Icon(
+              Ionicons.checkmark_circle_outline,
+              color: accentColors[6],
+            )
           )
-        )
-      );
+        );
+      }
     }).onError((error, stackTrace) {
       debugPrint("Got error when update default budget currency!");
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
 
       _selectedCurrency = _currentCurrency;
-      Navigator.pop(context);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Unable to update default budget currency",
-        )
-      );
+      if (mounted) {
+        Navigator.pop(context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Unable to update default budget currency",
+          )
+        );
+      }
     });
   }
 
@@ -749,31 +762,37 @@ class _UserPageState extends State<UserPage> {
     await _walletHTTP.updateDefaultWallet(walletId).then((_) {
       _refreshUserMe();
       _currentWallet = _selectedWallet!;
-      Navigator.pop(context);
-      
-      // show it success
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Default wallet updated",
-          icon: Icon(
-            Ionicons.checkmark_circle_outline,
-            color: accentColors[6],
+
+      if (mounted) {
+        Navigator.pop(context);
+        
+        // show it success
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Default wallet updated",
+            icon: Icon(
+              Ionicons.checkmark_circle_outline,
+              color: accentColors[6],
+            )
           )
-        )
-      );
+        );
+      }
     }).onError((error, stackTrace) {
       debugPrint("Got error when update default wallet!");
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
 
       _selectedWallet = _currentWallet;
-      Navigator.pop(context);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Error when updating default wallet",
-        )
-      );
+      if (mounted) {
+        Navigator.pop(context);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Error when updating default wallet",
+          )
+        );
+      }
     });
 
     // remove the bottom sheet
@@ -790,27 +809,31 @@ class _UserPageState extends State<UserPage> {
       _transactionHTTP.fetchLastTransaction("income", true),
       _transactionHTTP.fetchLastTransaction("expense", true)
     ]).then((_) {
-      // remove the loader
-      Navigator.pop(context);
+      if (mounted) {
+        // remove the loader
+        Navigator.pop(context);
 
-      // finished fetch the last transaction income and expense
-      // showed a message on the scaffold telling that the refresh is finished
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Fetching Transaction Tag Complete",
-          icon: Icon(
-            Ionicons.checkmark_circle_outline,
-            color: accentColors[6],
+        // finished fetch the last transaction income and expense
+        // showed a message on the scaffold telling that the refresh is finished
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Fetching Transaction Tag Complete",
+            icon: Icon(
+              Ionicons.checkmark_circle_outline,
+              color: accentColors[6],
+            )
           )
-        )
-      );
+        );
+      }
     }).onError((error, stackTrace) {
       debugPrint("Got error when refresh transaction tag");
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
 
-      // remove the loader
-      Navigator.pop(context);
+      if (mounted) {
+        // remove the loader
+        Navigator.pop(context);
+      }
     });
   }
 
@@ -825,7 +848,7 @@ class _UserPageState extends State<UserPage> {
 
     // check the result of the dialog box
     result.then((value) async {
-      if (value == true) {
+      if (value == true && mounted) {
         // navigate to the remove pin screen.
         final result = await Navigator.push(context, createAnimationRoute(const PinRemovePage()));
         if(result) {

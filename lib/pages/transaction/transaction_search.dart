@@ -1120,18 +1120,22 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // try to find the transaction
     await _findTransaction(_searchText, _categoryId, _type, _limit, _start).then((_) {
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }).onError((error, stackTrace) {
       debugPrint("Error: ${error.toString()}");
       debugPrintStack(stackTrace: stackTrace);
 
-      Navigator.pop(context);
-      // showed error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Error when searching transaction",
-        )
-      );
+      if (mounted) {
+        Navigator.pop(context);
+        // showed error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Error when searching transaction",
+          )
+        );
+      }
     });
   }
   
@@ -1149,19 +1153,23 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           suffixIcon: const Icon(Ionicons.arrow_forward_circle),
           onSubmitted: ((_) async {
             await _submitSearch().then((_) {
-              // remove the focus from the text
-              FocusScopeNode currentFocus = FocusScope.of(context);
-              if(!currentFocus.hasPrimaryFocus) {
-                currentFocus.unfocus();
+              if (mounted) {
+                // remove the focus from the text
+                FocusScopeNode currentFocus = FocusScope.of(context);
+                if(!currentFocus.hasPrimaryFocus) {
+                  currentFocus.unfocus();
+                }
               }
             });
           }),
           onSuffixTap: (() async {
             await _submitSearch().then((_) {
-              // remove the focus from the text
-              FocusScopeNode currentFocusSuffix = FocusScope.of(context);
-              if(!currentFocusSuffix.hasPrimaryFocus) {
-                currentFocusSuffix.unfocus();
+              if (mounted) {
+                // remove the focus from the text
+                FocusScopeNode currentFocusSuffix = FocusScope.of(context);
+                if(!currentFocusSuffix.hasPrimaryFocus) {
+                  currentFocusSuffix.unfocus();
+                }
               }
             });
           }),

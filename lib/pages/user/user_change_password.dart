@@ -163,26 +163,30 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                         minWidth: double.infinity,
                         onPressed: (() async {
                           await _updatePassword().then((value) async {
-                            // showed that we already success update the password
-                            await ShowMyDialog(
-                              cancelEnabled: false,
-                              confirmText: "OK",
-                              confirmColor: accentColors[0],
-                              dialogTitle: "Updated",
-                              dialogText: "Password update successfully."
-                            ).show(context);
+                            if (context.mounted) {
+                              // showed that we already success update the password
+                              await ShowMyDialog(
+                                cancelEnabled: false,
+                                confirmText: "OK",
+                                confirmColor: accentColors[0],
+                                dialogTitle: "Updated",
+                                dialogText: "Password update successfully."
+                              ).show(context);
+                            }
                           }).onError((error, stackTrace) async {
                             // print the error
                             debugPrint("Error: ${error.toString()}");
                             debugPrintStack(stackTrace: stackTrace);
 
-                            // show the error dialog
-                            await ShowMyDialog(
-                              cancelEnabled: false,
-                              confirmText: "OK",
-                              dialogTitle: "Error Update",
-                              dialogText: "Error when update password."
-                            ).show(context);
+                            if (context.mounted) {
+                              // show the error dialog
+                              await ShowMyDialog(
+                                cancelEnabled: false,
+                                confirmText: "OK",
+                                dialogTitle: "Error Update",
+                                dialogText: "Error when update password."
+                              ).show(context);
+                            }
                           });
                         }),
                         color: accentColors[0],
@@ -216,16 +220,17 @@ class _UserChangePasswordState extends State<UserChangePassword> {
         // before that we should show the loader
         showLoaderDialog(context);
 
-        await _userHttp.updatePassword(_userMe.username, strCurrentPassword, strNewPassword).then((_) {
-          // all finished, pop the loader
-          Navigator.pop(context);
-        }).onError((error, stackTrace) {
+        await _userHttp.updatePassword(_userMe.username, strCurrentPassword, strNewPassword).onError((error, stackTrace) {
           debugPrint(error.toString());
           debugPrintStack(stackTrace: stackTrace);
           
-          Navigator.pop(context);
           ErrorModel err = parseErrorMessage(error.toString());
           throw Exception(err.message);
+        }).whenComplete(() {
+          if (mounted) {
+            // all finished, pop the loader
+            Navigator.pop(context);
+          }
         });
       }
       else {

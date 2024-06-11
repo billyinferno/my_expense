@@ -712,9 +712,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       showLoaderDialog(context);
 
       await _fetchStats().then((_) {
-        // pop the loader
-        Navigator.pop(context);
-
         StatsDetailArgs args = StatsDetailArgs(
           type: _currentType,
           fromDate: _currentFromDate,
@@ -726,23 +723,29 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           search: _name,
         );
 
-        // navigate to stats detail
-        Navigator.pushNamed(context, '/stats/detail', arguments: args);
+        if (mounted) {
+          // navigate to stats detail
+          Navigator.pushNamed(context, '/stats/detail', arguments: args);
+        }
       }).onError((error, stackTrace) async {
-        // pop the loader
-        Navigator.pop(context);
-
         // print the error
         debugPrint("Error: ${error.toString()}");
         debugPrintStack(stackTrace: stackTrace);
 
-        // show the error dialog
-        await ShowMyDialog(
-          cancelEnabled: false,
-          confirmText: "OK",
-          dialogTitle: "Error Fetch",
-          dialogText: "Error while fetching stats information from server."
-        ).show(context);
+        if (mounted) {
+          // show the error dialog
+          await ShowMyDialog(
+            cancelEnabled: false,
+            confirmText: "OK",
+            dialogTitle: "Error Fetch",
+            dialogText: "Error while fetching stats information from server."
+          ).show(context);
+        }
+      }).whenComplete(() {
+        if (mounted) {
+          // pop the loader
+          Navigator.pop(context);
+        }
       });
     }
   }

@@ -463,10 +463,12 @@ class _HomeBudgetState extends State<HomeBudget> {
 
     // get the budget data
     await _budgetHTTP.fetchBudgetDate(_currentCurrencies!.id, budgetDate, isForce).then((value) {
-      // set the provider as we will use consumer to listen to the list
-      Provider.of<HomeProvider>(context, listen: false).setBudgetList(value);
+      if (mounted) {
+        // set the provider as we will use consumer to listen to the list
+        Provider.of<HomeProvider>(context, listen: false).setBudgetList(value);
+      }
     }).then((_) {
-      if(isShowLoader) {
+      if(isShowLoader && mounted) {
         Navigator.pop(context);
       }
     }).onError((error, stackTrace) {

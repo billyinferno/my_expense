@@ -98,7 +98,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
               // check the result of the dialog box
               result.then((value) {
-                if (value == true) {
+                if (value == true && context.mounted) {
                   Navigator.pop(context);
                 }
               });
@@ -112,20 +112,24 @@ class _BudgetListPageState extends State<BudgetListPage> {
           IconButton(
             onPressed: () async {
               await _updateBudgetList().then((_) {
-                // this is success, we can going back from this page
-                Navigator.pop(context);
+                if (context.mounted) {
+                  // this is success, we can going back from this page
+                  Navigator.pop(context);
+                }
               }).onError((error, stackTrace) async {
                 // print the error
                 debugPrint("Error ${error.toString()}");
                 debugPrintStack(stackTrace: stackTrace);
 
-                // show dialog of error
-                await ShowMyDialog(
-                  cancelEnabled: false,
-                  confirmText: "OK",
-                  dialogTitle: "Error Update Budget",
-                  dialogText: "Error while updating budget list."
-                ).show(context);
+                if (context.mounted) {
+                  // show dialog of error
+                  await ShowMyDialog(
+                    cancelEnabled: false,
+                    confirmText: "OK",
+                    dialogTitle: "Error Update Budget",
+                    dialogText: "Error while updating budget list."
+                  ).show(context);
+                }
               });
             },
             icon: const Icon(
@@ -215,28 +219,31 @@ class _BudgetListPageState extends State<BudgetListPage> {
                               // if not yet then we can add this new budget to the budget list
                               if (!_checkIfCategorySelected(_expenseCategory[key]!.id)) {
                                 await _addBudget(_expenseCategory[key]!.id,_currencyID).then((_) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    createSnackBar(
-                                      message: "Success add new category",
-                                      icon: Icon(
-                                        Ionicons.checkmark_circle_outline,
-                                        color: accentColors[6],
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      createSnackBar(
+                                        message: "Success add new category",
+                                        icon: Icon(
+                                          Ionicons.checkmark_circle_outline,
+                                          color: accentColors[6],
+                                        ),
                                       ),
-                                    ),
-                                  );
+                                    );
+                                  }
                                 }).onError((error, stackTrace) async {
                                   // print the error
                                   debugPrint("ERROR: ${error.toString()}");
                                   debugPrintStack(stackTrace: stackTrace);
 
-                                  // show error dialog
-                                  await ShowMyDialog(
-                                    cancelEnabled: false,
-                                    confirmText: "OK",
-                                    dialogTitle: "Error Add Budget",
-                                    dialogText: "Error while add budget category."
-                                  ).show(context);
-                                  // show the snack bar of error
+                                  if (context.mounted) {
+                                    // show error dialog
+                                    await ShowMyDialog(
+                                      cancelEnabled: false,
+                                      confirmText: "OK",
+                                      dialogTitle: "Error Add Budget",
+                                      dialogText: "Error while add budget category."
+                                    ).show(context);
+                                  }
                                 });
                               }
                               // remove the modal dialog
@@ -550,7 +557,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
     // fetch the budget from the web
     await _budgetHttp.fetchBudgetsList(_currencyID, isForce).then((result) {
       setBudgetList(result);
-      Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(result.budgets);
+      if (mounted) {
+        Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(result.budgets);
+      }
       setLoading(false);
     }).onError((error, stackTrace) {
       // got error
@@ -593,7 +602,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
         );
 
         setBudgetList(newBudgetList);
-        Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(newBudgetList.budgets);
+        if (mounted) {
+          Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(newBudgetList.budgets);
+        }
 
         // set the budget on the home screen, since the budget on the home screen
         // is based on date, first we need to get what is the curren date being displayed
@@ -606,20 +617,21 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
             // store back the home budget list
             BudgetSharedPreferences.setBudget(_currencyID, currentBudgetDate, homeBudgetList);
-            // after that notify the budget list on the home
-            Provider.of<HomeProvider>(context, listen: false).setBudgetList(homeBudgetList);
+            if (mounted) {
+              // after that notify the budget list on the home
+              Provider.of<HomeProvider>(context, listen: false).setBudgetList(homeBudgetList);
+            }
           }
         }
       }
-
-      // pop out the loader
-      Navigator.pop(context);
     }).onError((error, stackTrace) {
       debugPrint("Error oon <_deleteBudgetList> at BudgetList");
       debugPrint(error.toString());
-
-      // pop out the loader
-      Navigator.pop(context);
+    }).whenComplete(() {
+      if (mounted) {
+        // pop out the loader
+        Navigator.pop(context);
+      }
     });
   }
 
@@ -644,7 +656,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
       _budgetList = newBudgetList;
 
       setBudgetList(newBudgetList);
-      Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(newBudgetList.budgets);
+      if (mounted) {
+        Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(newBudgetList.budgets);
+      }
 
       // set the budget on the home screen, since the budget on the home screen
       // is based on date, first we need to get what is the curren date being displayed
@@ -654,18 +668,19 @@ class _BudgetListPageState extends State<BudgetListPage> {
       homeBudgetList.add(budget);
       // store back the home budget list
       BudgetSharedPreferences.setBudget(_currencyID, currentBudgetDate, homeBudgetList);
-      // after that notify the budget list on the home
-      Provider.of<HomeProvider>(context, listen: false).setBudgetList(homeBudgetList);
-
-      // pop out the loader
-      Navigator.pop(context);
+      if (mounted) {
+        // after that notify the budget list on the home
+        Provider.of<HomeProvider>(context, listen: false).setBudgetList(homeBudgetList);
+      }
     }).onError((error, stackTrace) {
       debugPrint("Error oon <_addBudget> at BudgetList");
       debugPrint(error.toString());
-
-      // pop out the loader
-      Navigator.pop(context);
       throw Exception("Error when adding new budgets");
+    }).whenComplete(() {
+      if (mounted) {
+        // pop out the loader
+        Navigator.pop(context);
+      }
     });
   }
 
@@ -729,20 +744,23 @@ class _BudgetListPageState extends State<BudgetListPage> {
           // set the new home list to the home list budget, so we can directly reflect the data
           BudgetSharedPreferences.setBudget(_currencyID, budgetDate, newHomeBudgetList);
           if(budgetDate == currentBudgetDate) {
-            // after that notify the budget list on the home if this is the same as the current budget
-            Provider.of<HomeProvider>(context, listen: false).setBudgetList(newHomeBudgetList);
+            if (mounted) {
+              // after that notify the budget list on the home if this is the same as the current budget
+              Provider.of<HomeProvider>(context, listen: false).setBudgetList(newHomeBudgetList);
+            }
           }
         }
 
-        // pop out the loader
-        Navigator.pop(context);
       }).onError((error, stackTrace) {
         debugPrint("Error oon <_addBudget> at BudgetList");
         debugPrint(error.toString());
-
-        // pop out the loader
-        Navigator.pop(context);
+        
         throw Exception("Cannot save budgets");
+      }).whenComplete(() {
+        if (mounted) {
+          // pop out the loader
+          Navigator.pop(context);
+        }
       });
     }
   }
