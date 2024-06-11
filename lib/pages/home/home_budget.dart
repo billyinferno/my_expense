@@ -295,36 +295,43 @@ class _HomeBudgetState extends State<HomeBudget> {
                       ),
                     ),
                     const SizedBox(height: 10,),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(
-                            height: 15,
-                            width: 30,
-                            child: Transform.scale(
-                              scale: 0.6,
-                              child: CupertinoSwitch(
-                                value: _showNotInBudget,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _showNotInBudget = value;
-                                  });
-                                },
+                    GestureDetector(
+                      onTap: (() {
+                        setState(() {
+                          _showNotInBudget = !_showNotInBudget;
+                        });
+                      }),
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(
+                              height: 15,
+                              width: 30,
+                              child: Transform.scale(
+                                scale: 0.6,
+                                child: CupertinoSwitch(
+                                  value: _showNotInBudget,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _showNotInBudget = value;
+                                    });
+                                  },
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 11,),
-                          const Text(
-                            "Not In Budget Expense",
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: textColor,
-                            ),
-                          )
-                        ],
+                            const SizedBox(width: 11,),
+                            const Text(
+                              "Not In Budget Expense",
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: textColor,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ],
