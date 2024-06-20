@@ -45,10 +45,10 @@ packages:
     dependency: "direct main"
     description:
       name: calendar_date_picker2
-      sha256: "31e8359e1da9d1c4e1b3afd10d51701e7f42f1290e269f04c77f409174a5af78"
+      sha256: a9f7887a9d3541ce530bf24cbddae35142b22dee939f95e1c62c9ef32ca6bf45
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.6"
+    version: "1.1.2"
   characters:
     dependency: transitive
     description:
@@ -348,10 +348,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_android
-      sha256: "9c96da072b421e98183f9ea7464898428e764bc0ce5567f27ec8693442e72514"
+      sha256: bca87b0165ffd7cdb9cad8edd22d18d2201e886d9a9f19b4fb3452ea7df3a72a
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.5"
+    version: "2.2.6"
   path_provider_foundation:
     dependency: transitive
     description:
