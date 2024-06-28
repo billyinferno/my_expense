@@ -480,8 +480,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             onValueChanged: ((newDate) {
               if(newDate.length == 2) {
                 setState(() {                
-                  _currentFromDate = newDate[0]!;
-                  _currentToDate = newDate[1]!;
+                  _currentFromDate = newDate[0];
+                  _currentToDate = newDate[1];
           
                   _selectedDateTime = [_currentFromDate, _currentToDate];
                 });

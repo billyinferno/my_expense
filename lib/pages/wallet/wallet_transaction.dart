@@ -3,6 +3,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:my_expense/api/budget_api.dart';
 import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/api/wallet_api.dart';
@@ -319,15 +320,21 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
             color: secondaryDark,
           ),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: (() async {
-                  DateTime newDate = DateTime(_currentDate.year, _currentDate.month - 1, 1);
-
+          child: InkWell(
+            onTap: (() async {
+              await showMonthPicker(
+                context: context,
+                initialDate: _currentDate,
+                firstDate: (_walletMinMaxDate.minDate ?? DateTime.now().toLocal()),
+                lastDate: (_walletMinMaxDate.maxDate ?? DateTime.now().toLocal()),
+                dismissible: true,
+              ).then((newDate) async {
+                if (newDate != null) {
                   // fetch the transaction for this date
-                  showLoaderDialog(context);
-
+                  if (mounted) {
+                    showLoaderDialog(context);
+                  }
+          
                   await _fetchTransactionWallet(newDate).then((_) {
                     _setDate(newDate);
                   }).onError((error, stackTrace) {
@@ -339,74 +346,117 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                       Navigator.pop(context);
                     }
                   });
-                }),
-                child: Container(
-                  width: 70,
-                  height: 50,
-                  color: Colors.transparent,
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Icon(
-                      Ionicons.caret_back,
-                      color: textColor2,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(_dtMMMMyyyy.format(_currentDate.toLocal())),
-                      RichText(
-                        text: TextSpan(
-                          children: <TextSpan>[
-                            TextSpan(text: "(${_fCCY.format(_expenseAmount)})", style: TextStyle(color: accentColors[2])),
-                            const TextSpan(text: " "),
-                            TextSpan(text: "(${_fCCY.format(_incomeAmount)})", style: TextStyle(color: accentColors[6])),
-                          ]
-                        ),
+                }
+              });
+            }),
+            onDoubleTap: (() async {
+              // set the date as today date
+              DateTime newDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+            
+              // fetch the transaction for this date
+              showLoaderDialog(context);
+      
+              await _fetchTransactionWallet(newDate).then((_) {
+                _setDate(newDate);
+              }).onError((error, stackTrace) {
+                debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
+                debugPrintStack(stackTrace: stackTrace);
+              }).whenComplete(() {
+                if (mounted) {
+                  // remove the loader
+                  Navigator.pop(context);
+                }
+              });
+            }),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: (() async {
+                    DateTime newDate = DateTime(_currentDate.year, _currentDate.month - 1, 1);
+            
+                    // fetch the transaction for this date
+                    showLoaderDialog(context);
+            
+                    await _fetchTransactionWallet(newDate).then((_) {
+                      _setDate(newDate);
+                    }).onError((error, stackTrace) {
+                      debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
+                      debugPrintStack(stackTrace: stackTrace);
+                    }).whenComplete(() {
+                      if (mounted) {
+                        // remove the loader
+                        Navigator.pop(context);
+                      }
+                    });
+                  }),
+                  child: Container(
+                    width: 70,
+                    height: 50,
+                    color: Colors.transparent,
+                    child: const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Icon(
+                        Ionicons.caret_back,
+                        color: textColor2,
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: (() async {
-                  DateTime newDate = DateTime(_currentDate.year, _currentDate.month + 1, 1);
-
-                  // fetch the transaction for this date
-                  showLoaderDialog(context);
-
-                  await _fetchTransactionWallet(newDate).then((_) {
-                    _setDate(newDate);
-                  }).onError((error, stackTrace) {
-                    debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
-                    debugPrintStack(stackTrace: stackTrace);
-                  }).whenComplete(() {
-                    if (mounted) {
-                      // remove the loader
-                      Navigator.pop(context);
-                    }
-                  });
-                }),
-                child: Container(
-                  width: 70,
-                  height: 50,
-                  color: Colors.transparent,
-                  child: const Align(
-                    alignment: Alignment.centerRight,
-                    child: Icon(
-                      Ionicons.caret_forward,
-                      color: textColor2,
                     ),
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(_dtMMMMyyyy.format(_currentDate.toLocal())),
+                        RichText(
+                          text: TextSpan(
+                            children: <TextSpan>[
+                              TextSpan(text: "(${_fCCY.format(_expenseAmount)})", style: TextStyle(color: accentColors[2])),
+                              const TextSpan(text: " "),
+                              TextSpan(text: "(${_fCCY.format(_incomeAmount)})", style: TextStyle(color: accentColors[6])),
+                            ]
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: (() async {
+                    DateTime newDate = DateTime(_currentDate.year, _currentDate.month + 1, 1);
+            
+                    // fetch the transaction for this date
+                    showLoaderDialog(context);
+            
+                    await _fetchTransactionWallet(newDate).then((_) {
+                      _setDate(newDate);
+                    }).onError((error, stackTrace) {
+                      debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
+                      debugPrintStack(stackTrace: stackTrace);
+                    }).whenComplete(() {
+                      if (mounted) {
+                        // remove the loader
+                        Navigator.pop(context);
+                      }
+                    });
+                  }),
+                  child: Container(
+                    width: 70,
+                    height: 50,
+                    color: Colors.transparent,
+                    child: const Align(
+                      alignment: Alignment.centerRight,
+                      child: Icon(
+                        Ionicons.caret_forward,
+                        color: textColor2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Expanded(

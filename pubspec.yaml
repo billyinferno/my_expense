@@ -53,6 +53,7 @@ dependencies:
   calendar_date_picker2: ^1.0.2
   flutter_simple_calculator: ^2.2.5
   auto_size_text: ^3.0.0
+  month_picker_dialog: ^4.0.0
 
 dev_dependencies:
   flutter_test:

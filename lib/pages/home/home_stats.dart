@@ -64,6 +64,9 @@ class _HomeStatsState extends State<HomeStats> {
   late bool _clampToBudget;
   late UsersMeModel _userMe;
 
+  late DateTime _minTxnDate;
+  late DateTime _maxTxnDate;
+
   final Map<String, Color> _resultPageColor = {
     'chart': accentColors[4],
     'expense': accentColors[2],
@@ -105,6 +108,10 @@ class _HomeStatsState extends State<HomeStats> {
         _currentCurrencySymbol = _currencies[0].symbol;
       }
     }
+
+    // get the min and max transaction date
+    _minTxnDate = TransactionSharedPreferences.getTransactionMinDate();
+    _maxTxnDate = TransactionSharedPreferences.getTransactionMaxDate();
 
     // force the fetch data when the page is loaded, this is to ensure we
     // are getting the latest data from server.
@@ -228,6 +235,8 @@ class _HomeStatsState extends State<HomeStats> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               MonthPrevNextCalendar(
+                minDate: _minTxnDate,
+                maxDate: _maxTxnDate,
                 initialDate: _from,
                 onPress: ((from, to) {
                   // set the new from and to date
