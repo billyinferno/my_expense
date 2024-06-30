@@ -103,6 +103,8 @@ class _TransactionInputState extends State<TransactionInput> {
   late List<LastTransactionModel> _lastExpense;
   late List<LastTransactionModel> _lastIncome;
   late List<WalletModel> _walletList;
+  late List<WalletModel> _walletListAll;
+  late bool _isDisabled;
 
   late bool _showCalendar;
   late bool _showDescription;
@@ -151,6 +153,12 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // get the list of enabled wallet
     _walletList = WalletSharedPreferences.getWallets(false);
+    
+    // get the list of disabled wallet if needed
+    _walletListAll = WalletSharedPreferences.getWallets(true);
+
+    // default the _isDisabled to false
+    _isDisabled = false;
 
     // set the show calendar as false
     _showCalendar = false;
@@ -259,50 +267,55 @@ class _TransactionInputState extends State<TransactionInput> {
         actions: <Widget>[
           IconButton(
             onPressed: () async {
-              // call parent save, all the handler on the async call should be
-              // coming from the parent instead here.
-              try {
-                TransactionModel? gen = _generateTransaction();
+              // check if transaction being disabled due to one of the wallets
+              // are disabled.
+              if (!_isDisabled) {
+                // call parent save, all the handler on the async call should be
+                // coming from the parent instead here.
+                try {
+                  TransactionModel? gen = _generateTransaction();
 
-                // if all good then check the date whether this is future date
-                // or not?
-                if (_currentDate.isAfter(_todayDate.toLocal())) {
-                  // show the dialog to ask user if they want to add future date
-                  // transaction or else?
-                  
-                  late Future<bool?> result = ShowMyDialog(
-                      dialogTitle: "Future Date",
-                      dialogText: "Are you sure want to add a future date?.",
-                      confirmText: "Add",
-                      confirmColor: accentColors[0],
-                      cancelText: "Cancel"
-                  ).show(context);
+                  // if all good then check the date whether this is future date
+                  // or not?
+                  if (_currentDate.isAfter(_todayDate.toLocal())) {
+                    // show the dialog to ask user if they want to add future date
+                    // transaction or else?
+                    
+                    late Future<bool?> result = ShowMyDialog(
+                        dialogTitle: "Future Date",
+                        dialogText: "Are you sure want to add a future date?.",
+                        confirmText: "Add",
+                        confirmColor: accentColors[0],
+                        cancelText: "Cancel"
+                    ).show(context);
 
-                  await result.then((value) {
-                    // check whether user press Add or Cancel
-                    if(value == true) {
-                      // user still want to add so add this transaction
-                      widget.saveTransaction(gen);
-                    }
-                  });
+                    await result.then((value) {
+                      // check whether user press Add or Cancel
+                      if(value == true) {
+                        // user still want to add so add this transaction
+                        widget.saveTransaction(gen);
+                      }
+                    });
+                  }
+                  else {
+                    // same date, so just save the transaction
+                    widget.saveTransaction(gen);
+                  }
                 }
-                else {
-                  // same date, so just save the transaction
-                  widget.saveTransaction(gen);
-                }
-              }
-              catch(error) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    createSnackBar(
-                      message: error.toString().replaceAll('Exception: ', ''),
-                    )
-                  );
+                catch(error) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      createSnackBar(
+                        message: error.toString().replaceAll('Exception: ', ''),
+                      )
+                    );
+                  }
                 }
               }
             },
-            icon: const Icon(
+            icon: Icon(
               Ionicons.checkmark,
+              color: (_isDisabled ? primaryLight : Colors.white),
             ),
           ),
           const SizedBox(width: 10,),
@@ -314,12 +327,27 @@ class _TransactionInputState extends State<TransactionInput> {
         children: <Widget>[
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 20),
             color: secondaryDark,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
+                Visibility(
+                  visible: _isDisabled,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: primaryDark,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Center(
+                      child: Text("Unable to edit wallet is disabled")
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10,),
                 TypeSlide(
                   type: _currentType,
                   editable: (widget.type == TransactionInputType.add ? true : false),
@@ -1232,13 +1260,18 @@ class _TransactionInputState extends State<TransactionInput> {
     }
     else {
       // loop thru wallet list and set the correct info to the wallet
-      for(int i = 0; i < _walletList.length; i++) {
+      for(int i = 0; i < _walletListAll.length; i++) {
         // check if the wallet id is the same as the one being sent?
-        if (walletId! == _walletList[i].id) {
+        if (walletId! == _walletListAll[i].id) {
           _currentWalletFromID = walletId;
-          _currentWalletFromName = _walletList[i].name;
-          _currentWalletFromType = _walletList[i].walletType.type.toLowerCase();
-          _currentWalletFromCCY = _walletList[i].currency.name.toLowerCase();  
+          _currentWalletFromName = _walletListAll[i].name;
+          _currentWalletFromType = _walletListAll[i].walletType.type.toLowerCase();
+          _currentWalletFromCCY = _walletListAll[i].currency.name.toLowerCase();
+
+          // check whether this wallet is enabled or not?
+          if (!_walletListAll[i].enabled) {
+            _isDisabled = true;
+          }
         }
       }
     }
@@ -1256,13 +1289,18 @@ class _TransactionInputState extends State<TransactionInput> {
     }
     else {
       // loop thru wallet list and set the correct info to the wallet
-      for(int i = 0; i < _walletList.length; i++) {
+      for(int i = 0; i < _walletListAll.length; i++) {
         // check if the wallet id is the same as the one being sent?
-        if (walletId! == _walletList[i].id) {
+        if (walletId! == _walletListAll[i].id) {
           _currentWalletToID = walletId;
-          _currentWalletToName = _walletList[i].name;
-          _currentWalletToType = _walletList[i].walletType.type.toLowerCase();
-          _currentWalletToCCY = _walletList[i].currency.name.toLowerCase();  
+          _currentWalletToName = _walletListAll[i].name;
+          _currentWalletToType = _walletListAll[i].walletType.type.toLowerCase();
+          _currentWalletToCCY = _walletListAll[i].currency.name.toLowerCase();
+
+          // check whether this wallet is enabled or not?
+          if (!_walletListAll[i].enabled) {
+            _isDisabled = true;
+          }
         }
       }
     }
