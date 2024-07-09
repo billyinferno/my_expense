@@ -600,10 +600,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // add the expense bar on the _summaryList
     _summaryList.add(Container(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        color: secondaryDark,
-      ),
+      color: secondaryDark,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -671,16 +668,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       _summaryList.add(_createSummaryItem(txn: txn, startDate: startDate!, endDate: endDate!, count: count));
     });
 
-    // add sized box to separate the expense and income
-    _summaryList.add(const SizedBox(height: 10,));
-
     // add the income bar on the _summaryList
     _summaryList.add(Container(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        color: secondaryDark,
-      ),
+      color: secondaryDark,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -747,16 +738,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       _summaryList.add(_createSummaryItem(txn: txn, startDate: startDate!, endDate: endDate!, count: count));
     });
 
-    // add sized box to separate the income and transfer
-    _summaryList.add(const SizedBox(height: 10,));
-
     // add the transfer bar on the _summaryList
     _summaryList.add(Container(
       padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(5),
-        color: secondaryDark,
-      ),
+      color: secondaryDark,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -862,7 +847,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     return ret;
   }
 
-  Widget _createSummaryItem({required TransactionListModel txn, required DateTime startDate, required DateTime endDate, required int count}){
+  Widget _createSummaryItem({
+    required TransactionListModel txn,
+    required DateTime startDate,
+    required DateTime endDate,
+    required int count,
+    bool? isLast,
+  }){
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       decoration: const BoxDecoration(
