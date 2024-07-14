@@ -852,7 +852,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     required DateTime startDate,
     required DateTime endDate,
     required int count,
-    bool? isLast,
   }){
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
