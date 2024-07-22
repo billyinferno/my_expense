@@ -10,7 +10,6 @@ import 'package:my_expense/utils/prefs/shared_box.dart';
 
 class UserSharedPreferences {
   static const _userMeModel = 'user_me';
-  static const _userConnectionKey = 'user_connection';
 
   static Future<void> setUserLogin(LoginModel login) async {
     if (MyBox.encryptedBox == null) {
@@ -60,13 +59,5 @@ class UserSharedPreferences {
     }
 
     return userModel;
-  }
-
-  static Future<void> setUserConnection(bool isConnect) async {
-    MyBox.putBool(_userConnectionKey, isConnect);
-  }
-
-  static bool getUserConnection() {
-    return MyBox.getBool(_userConnectionKey);
   }
 }

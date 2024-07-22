@@ -1,6 +1,4 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
@@ -29,7 +27,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final Connectivity _connectivity = Connectivity();
   final UserHTTPService _userHTTP = UserHTTPService();
   final CategoryHTTPService _categoryHTTP = CategoryHTTPService();
   final WalletHTTPService _walletHTTP = WalletHTTPService();
@@ -50,13 +47,10 @@ class _LoginPageState extends State<LoginPage> {
   
   String _bearerToken = "";
   bool _isTokenExpired = false;
-  List<ConnectivityResult> _connectivityResult = [ConnectivityResult.wifi]; // default as already have wifi connection
-  bool _isConnect = true;
 
   @override
   void initState() {
     // initialize variable needed for login
-    _isConnect = true;
     _bearerToken = "";
     _isTokenExpired = false;
 
@@ -371,61 +365,49 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<bool> _checkLogin() async {
     bool res = true;
-    // check for internet connection
-    await _checkConnection();
 
-    // check if we got connection or not?
-    if (_isConnect) {
-      debugPrint("🔐 Get Bearer Token");
-      _bearerToken = UserSharedPreferences.getJWT();
+    debugPrint("🔐 Get Bearer Token");
+    _bearerToken = UserSharedPreferences.getJWT();
 
-      // if not empty, then we can try to fecth user information
-      if (_bearerToken.isNotEmpty) {
-        debugPrint("🔑 Checking User Login");
-        // get user information
-        await _userHTTP.fetchMe().then((user) async {
-          // able to fetch information, user already login
-          debugPrint("👨🏻 User ${user.username} already login");
-        }).onError((error, stackTrace) {
-          // check whether this is due to JWT token is expired or not?
-          if (_bearerToken.isNotEmpty && mounted) {
-            _isTokenExpired = true;
-            debugPrint("👨🏻 User token is expired");
-            ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "User token expired, please re-login"));
-          }
-          else {
-            debugPrint("👨🏻 User not yet login");
-          }
-          res = false;
-        });
-
-        // check if user 
-        if (res) {
-          // try to get the additional information
-          await _getAdditionalInfo().then((isGetAdditionalInfo) {
-            if (isGetAdditionalInfo && mounted) {
-              // once finished get the additional information route this to home
-              debugPrint("🏠 Redirect to home");
-              Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
-            }
-          }).onError((error, stackTrace) {
-            // unable to get additional information
-            res = false;
-          },);
+    // if not empty, then we can try to fecth user information
+    if (_bearerToken.isNotEmpty) {
+      debugPrint("🔑 Checking User Login");
+      // get user information
+      await _userHTTP.fetchMe().then((user) async {
+        // able to fetch information, user already login
+        debugPrint("👨🏻 User ${user.username} already login");
+      }).onError((error, stackTrace) {
+        // check whether this is due to JWT token is expired or not?
+        if (_bearerToken.isNotEmpty && mounted) {
+          _isTokenExpired = true;
+          debugPrint("👨🏻 User token is expired");
+          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "User token expired, please re-login"));
         }
-      }
-      else {
-        // no bearer token
+        else {
+          debugPrint("👨🏻 User not yet login");
+        }
         res = false;
-        debugPrint("🔐 No bearer token");
+      });
+
+      // check if user 
+      if (res) {
+        // try to get the additional information
+        await _getAdditionalInfo().then((isGetAdditionalInfo) {
+          if (isGetAdditionalInfo && mounted) {
+            // once finished get the additional information route this to home
+            debugPrint("🏠 Redirect to home");
+            Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
+          }
+        }).onError((error, stackTrace) {
+          // unable to get additional information
+          res = false;
+        },);
       }
     }
     else {
-      // set loading into false.
+      // no bearer token
       res = false;
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "No internet connection"));
-      }
+      debugPrint("🔐 No bearer token");
     }
 
     // set the is login same as res
@@ -433,39 +415,6 @@ class _LoginPageState extends State<LoginPage> {
 
     // return rase to the caller
     return res;
-  }
-
-  Future<void> _checkConnection() async {
-    // check for internet connection
-    try {
-      _connectivityResult = await _connectivity.checkConnectivity();
-      if (_connectivityResult.isEmpty) {
-        debugPrint("⛔ No connection");
-      }
-      else {
-        // check if got connectivity result none or not?
-        _isConnect = true;
-        for (ConnectivityResult result in _connectivityResult) {
-          if (result == ConnectivityResult.none) {
-            _isConnect = false;
-          }
-        }
-
-        // check whether we have connection or not?
-        if (!_isConnect) {
-          debugPrint("⛔ No connection");
-        }
-        else {
-          debugPrint("🌏 Got internet connection");
-        }
-      }
-    } on PlatformException {
-      _isConnect = true;
-      debugPrint("❌ Platform not supported");
-    }
-
-    // store this on the shared preferences
-    await UserSharedPreferences.setUserConnection(_isConnect);
   }
 
   Future<void> _storeCredentials(LoginModel loginModel) async {
@@ -498,51 +447,40 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<bool> _login(String username, String password) async {
     bool isError = false;
-    // check for internet connection
-    await _checkConnection();
+    
+    // all good, showed the loading
+    if (mounted) {
+      showLoaderDialog(context);
+    }
 
-    // check if connected or not?
-    if (_isConnect) {
-      // all good, showed the loading
-      if (mounted) {
-        showLoaderDialog(context);
-      }
-
-      // try to fetch users/me endpoint to check if we have credentials to access
-      // this page or not?
-      await _userHTTP.login(username, password).then((loginModel) {
-        // login success, now we can just store this on the shared preferences
-        _storeCredentials(loginModel);
-      }).onError((error, stackTrace) {
-        // check if we got "res=" on the result or not?
-        // if got, it means that we got response from server, if not it's due
-        // connectivity error (showed error that probably services not available)
-        // print(error.toString());
-        NetErrorModel netError = error as NetErrorModel;
-        if (netError.statusCode > 0) {
-          isError = true;
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Wrong login info"));
-          }
-        } else {
-          isError = true;
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Services unavailable"));
-          }
-        }
-      }).whenComplete(() {
+    // try to fetch users/me endpoint to check if we have credentials to access
+    // this page or not?
+    await _userHTTP.login(username, password).then((loginModel) {
+      // login success, now we can just store this on the shared preferences
+      _storeCredentials(loginModel);
+    }).onError((error, stackTrace) {
+      // check if we got "res=" on the result or not?
+      // if got, it means that we got response from server, if not it's due
+      // connectivity error (showed error that probably services not available)
+      // print(error.toString());
+      NetErrorModel netError = error as NetErrorModel;
+      if (netError.statusCode > 0) {
+        isError = true;
         if (mounted) {
-          // pop the loader
-          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Wrong login info"));
         }
-      },);
-    }
-    else {
-      // showed connection error
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "No internet connection"));
+      } else {
+        isError = true;
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Services unavailable"));
+        }
       }
-    }
+    }).whenComplete(() {
+      if (mounted) {
+        // pop the loader
+        Navigator.pop(context);
+      }
+    },);
 
     return isError;
   }

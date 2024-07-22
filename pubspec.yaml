@@ -47,7 +47,6 @@ dependencies:
   hive_flutter: ^1.1.0
   crypto: ^3.0.1
   flutter_slidable: ^3.0.0
-  connectivity_plus: ^6.0.1
   smooth_page_indicator: ^1.1.0
   badges: ^3.1.2
   calendar_date_picker2: ^1.0.2
