@@ -11,11 +11,10 @@ import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/api/user_api.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/model/error_model.dart';
+import 'package:my_expense/model/error_net_model.dart';
 import 'package:my_expense/model/login_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/globals.dart';
-import 'package:my_expense/utils/misc/error_parser.dart';
 import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/net/netutils.dart';
@@ -45,17 +44,18 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late DateTime _currentDate;
   late String _currentDateString;
+
+  late Future<bool> _checkIsLogin;
+  late bool _isLogin;
   
   String _bearerToken = "";
   bool _isTokenExpired = false;
   List<ConnectivityResult> _connectivityResult = [ConnectivityResult.wifi]; // default as already have wifi connection
-  bool _isLoading = true;
   bool _isConnect = true;
 
   @override
   void initState() {
     // initialize variable needed for login
-    _isLoading = true;
     _isConnect = true;
     _bearerToken = "";
     _isTokenExpired = false;
@@ -64,28 +64,8 @@ class _LoginPageState extends State<LoginPage> {
     _currentDate = DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
     _currentDateString = DateFormat('yyyy-MM-dd').format(_currentDate);
 
-    Future.microtask(() async {
-      await _checkLogin().then((isLogin) async {
-        if (isLogin) {
-          // get additional information
-          debugPrint("🔓 Already login");
-          await _getAdditionalInfo().then((isGetAdditionalInfo) {
-            if (isGetAdditionalInfo && mounted) {
-              // once finished get the additional information route this to home
-              debugPrint("🏠 Redirect to home");
-              Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
-            }
-            else {
-              // got error when get the additional info
-              _setLoading(false);
-            }
-          });
-        }
-        else {
-          _setLoading(false);
-        }
-      });
-    });
+    _isLogin = false;
+    _checkIsLogin = _checkLogin();
 
     super.initState();
   }
@@ -102,15 +82,18 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _generateBody(),
+      body: FutureBuilder(
+        future: _checkIsLogin,
+        builder: (context, snapshot) {
+          if ((snapshot.hasData || snapshot.hasError) && !_isLogin) {
+            return _generateLoginScreen();
+          }
+          else {
+            return _generateSplashScreen();
+          }
+        },
+      ),
     );
-  }
-
-  Widget _generateBody() {
-    if (_isLoading) {
-      return _generateSplashScreen();
-    }
-    return _generateLoginScreen();
   }
 
   Widget _generateSplashScreen() {
@@ -282,17 +265,16 @@ class _LoginPageState extends State<LoginPage> {
                         height: 50,
                         onPressed: (() async {
                           if (_formKey.currentState!.validate()) {
-                            showLoaderDialog(context);
-                            await _login(_usernameController.text, _passwordController.text).then((res) async {
+                            await _login(_usernameController.text, _passwordController.text).then((error) async {
                               if (mounted) {
-                                Navigator.pop(context);
-                              }
-                              if(res && mounted) {
-                                debugPrint("🏠 Login success, redirect to home");
-                                Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
-                              }
-                              else {
-                                debugPrint("⛔ Wrong login information");
+                                // check if not error
+                                if(!error) {
+                                  debugPrint("🏠 Login success, redirect to home");
+                                  Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
+                                }
+                                else {
+                                  debugPrint("⛔ Wrong login information");
+                                }
                               }
                             });
                           }
@@ -405,10 +387,6 @@ class _LoginPageState extends State<LoginPage> {
           // able to fetch information, user already login
           debugPrint("👨🏻 User ${user.username} already login");
         }).onError((error, stackTrace) {
-          // set loading into false, it will rebuild the widget, which
-          // by right should show the login screen.
-          _setLoading(false);
-
           // check whether this is due to JWT token is expired or not?
           if (_bearerToken.isNotEmpty && mounted) {
             _isTokenExpired = true;
@@ -420,22 +398,40 @@ class _LoginPageState extends State<LoginPage> {
           }
           res = false;
         });
+
+        // check if user 
+        if (res) {
+          // try to get the additional information
+          await _getAdditionalInfo().then((isGetAdditionalInfo) {
+            if (isGetAdditionalInfo && mounted) {
+              // once finished get the additional information route this to home
+              debugPrint("🏠 Redirect to home");
+              Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
+            }
+          }).onError((error, stackTrace) {
+            // unable to get additional information
+            res = false;
+          },);
+        }
       }
       else {
         // no bearer token
         res = false;
-        _setLoading(false);
         debugPrint("🔐 No bearer token");
       }
     }
     else {
       // set loading into false.
       res = false;
-      _setLoading(false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "No internet connection"));
       }
     }
+
+    // set the is login same as res
+    _isLogin = res;
+
+    // return rase to the caller
     return res;
   }
 
@@ -488,21 +484,13 @@ class _LoginPageState extends State<LoginPage> {
       }
       
       // get additional information for user
-      debugPrint("Get additional info for user");
-
-      if (mounted) {
-        showLoaderDialog(context);
-      }
+      debugPrint("ℹ️ Get additional info for user");
 
       await _getAdditionalInfo().then((isGetAdditionalInfo) {
         if (isGetAdditionalInfo && mounted) {
           // once finished get the additional information route this to home
           debugPrint("🏠 Redirect to home");
           Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
-        }
-        else {
-          // got error when get the additional info
-          _setLoading(false);
         }
       });
     });
@@ -530,8 +518,8 @@ class _LoginPageState extends State<LoginPage> {
         // if got, it means that we got response from server, if not it's due
         // connectivity error (showed error that probably services not available)
         // print(error.toString());
-        ErrorModel errModel = parseErrorMessage(error.toString());
-        if (errModel.statusCode > 0) {
+        NetErrorModel netError = error as NetErrorModel;
+        if (netError.statusCode > 0) {
           isError = true;
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Wrong login info"));
@@ -542,12 +530,12 @@ class _LoginPageState extends State<LoginPage> {
             ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Services unavailable"));
           }
         }
-
+      }).whenComplete(() {
         if (mounted) {
           // pop the loader
           Navigator.pop(context);
         }
-      });
+      },);
     }
     else {
       // showed connection error
@@ -557,11 +545,5 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     return isError;
-  }
-
-  void _setLoading(bool value) {
-    setState(() {
-      _isLoading = value;
-    });
   }
 }

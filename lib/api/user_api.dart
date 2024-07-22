@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:my_expense/model/error_net_model.dart';
 import 'package:my_expense/model/login_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/utils/globals.dart';
@@ -31,7 +32,21 @@ class UserHTTPService {
       body: body,
       requiredJWT: false,
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      NetException netException = error as NetException;
+      NetErrorModel netError;
+      if (netException.body != null) {      
+        netError = NetErrorModel.fromJson(jsonDecode(netException.body ?? ''));
+      }
+      else {
+        netError = NetErrorModel(
+          statusCode: -1,
+          error: "Uknown error",
+          message: [],
+          data: []
+        );
+      }
+
+      throw netError;
     });
 
     // parse the login data and get the login model
