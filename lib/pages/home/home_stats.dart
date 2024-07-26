@@ -15,7 +15,6 @@ import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -26,6 +25,7 @@ import 'package:my_expense/widgets/chart/bar_chart.dart';
 import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/my_item_list.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 
 class HomeStats extends StatefulWidget {
@@ -677,13 +677,13 @@ class _HomeStatsState extends State<HomeStats> {
     double maxBudget = 0;
     String currentDataString = _df.format(DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal());
 
-    // check if we need to showe dialog
-    if (isShowDialog) {
-      showLoaderDialog(context);
-    }
-
     // check if the currencies is not empty
     if (_currencies.isNotEmpty) {
+      // check if we need to showed loading screen
+      if (isShowDialog) {
+        LoadingScreen.instance().show(context: context);
+      }
+
       // show debug print to knew that we will fetch data
       debugPrint("📈 Refresh Statistic $_from to $_to");
 
@@ -730,12 +730,12 @@ class _HomeStatsState extends State<HomeStats> {
           Navigator.pop(context);
         }
         throw Exception("Error when fetch statistic data");
-      });
-    }
-
-    // check the loader dialog
-    if (isShowDialog && mounted) {
-      Navigator.pop(context);
+      }).whenComplete(() {  
+        // remove the loading dialog if we showed it
+        if (isShowDialog) {
+          LoadingScreen.instance().hide();
+        }
+      },);
     }
 
     return true;

@@ -4,9 +4,9 @@ import 'package:my_expense/api/pin_api.dart';
 import 'package:my_expense/model/pin_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_pin.dart';
 import 'package:my_expense/widgets/input/pin_pad.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 
 class PinRemovePage extends StatefulWidget {
   const PinRemovePage({ super.key });
@@ -84,7 +84,6 @@ class _PinRemovePageState extends State<PinRemovePage> {
                     _tries += 1;
                   }),
                   onSuccess: (() {
-                    showLoaderDialog(context);
                     _removePin();
                   }),
                   // getPin: (value) {
@@ -100,11 +99,12 @@ class _PinRemovePageState extends State<PinRemovePage> {
   }
 
   Future<void> _removePin() async {
+    // show loading screen
+    LoadingScreen.instance().show(context: context);
+
+    // delete pin on the backend
     await _pinHttp.deletePin().then((_) {
       if (mounted) {
-        // pop the loader
-        Navigator.pop(context);
-
         // pin already removed, and by right it should be already updated
         // the pin information on the shared preferences.
         Navigator.pop(context, true);
@@ -114,9 +114,6 @@ class _PinRemovePageState extends State<PinRemovePage> {
       debugPrintStack(stackTrace: stackTrace);
       
       if (mounted) {
-        // pop the loader
-        Navigator.pop(context);
-
         // show the error dialog
         await ShowMyDialog(
           cancelEnabled: false,
@@ -125,6 +122,9 @@ class _PinRemovePageState extends State<PinRemovePage> {
           dialogText: "Error when removing PIN from backend."
         ).show(context);
       }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 }

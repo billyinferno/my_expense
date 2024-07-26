@@ -13,7 +13,6 @@ import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/args/budget_transaction_args.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -22,6 +21,7 @@ import 'package:my_expense/widgets/chart/budget_bar.dart';
 import 'package:my_expense/widgets/calendar/horizontal_month_calendar.dart';
 import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 
 class HomeBudget extends StatefulWidget {
@@ -83,8 +83,9 @@ class _HomeBudgetState extends State<HomeBudget> {
       // now fetch budget based on the _currentCurrencies
       BudgetSharedPreferences.setBudgetCurrent(_selectedDate);
     }
-    
+
     _getData = _fetchBudget();
+
     super.initState();
   }
 
@@ -453,12 +454,16 @@ class _HomeBudgetState extends State<HomeBudget> {
     return used;
   }
 
+  void _streamBudgetList({required List<BudgetModel> data}) {
+    Provider.of<HomeProvider>(context, listen: false).setBudgetList(data);
+  }
+
   Future<bool> _fetchBudget([bool? showLoader, bool? force]) async {
     bool isShowLoader = (showLoader ?? false);
     bool isForce = (force ?? false);
 
     if(isShowLoader) {
-      showLoaderDialog(context);
+      LoadingScreen.instance().show(context: context);
     }
 
     // fetch the budget, in case it null it will fetch the budget from the
@@ -470,13 +475,10 @@ class _HomeBudgetState extends State<HomeBudget> {
 
     // get the budget data
     await _budgetHTTP.fetchBudgetDate(_currentCurrencies!.id, budgetDate, isForce).then((value) {
-      if (mounted) {
-        // set the provider as we will use consumer to listen to the list
-        Provider.of<HomeProvider>(context, listen: false).setBudgetList(value);
-      }
-    }).then((_) {
-      if(isShowLoader && mounted) {
-        Navigator.pop(context);
+      _streamBudgetList(data: value);
+    }).whenComplete(() {
+      if(isShowLoader) {
+        LoadingScreen.instance().hide();
       }
     }).onError((error, stackTrace) {
       debugPrint("🚫 Error when fetching budget data");

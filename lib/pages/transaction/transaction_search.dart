@@ -11,13 +11,13 @@ import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/color_utils.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/my_item_list.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 
 enum PageName { summary, all, income, expense, transfer }
 
@@ -1101,7 +1101,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     }
 
     // show the loader dialog
-    showLoaderDialog(context);
+    LoadingScreen.instance().show(context: context);
 
     // initialize all the value
     _start = 0; // always start from 0
@@ -1109,11 +1109,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _transactions = [];
 
     // try to find the transaction
-    await _findTransaction(_searchText, _categoryId, _type, _limit, _start).then((_) {
-      if (mounted) {
-        Navigator.pop(context);
-      }
-    }).onError((error, stackTrace) {
+    await _findTransaction(_searchText, _categoryId, _type, _limit, _start).onError((error, stackTrace) {
       debugPrint("Error: ${error.toString()}");
       debugPrintStack(stackTrace: stackTrace);
 
@@ -1126,7 +1122,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           )
         );
       }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
   
   Widget _showSearchOrSelectionWidget() {

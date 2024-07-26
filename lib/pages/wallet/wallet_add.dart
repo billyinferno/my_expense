@@ -13,11 +13,11 @@ import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/misc/decimal_formatter.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 
 class WalletAddPage extends StatefulWidget {
@@ -83,12 +83,10 @@ class _WalletAddPageState extends State<WalletAddPage> {
         actions: <Widget>[
           IconButton(
             onPressed: () async {
-              showLoaderDialog(context);
+              // show loading screen
+              LoadingScreen.instance().show(context: context);
               await _saveWallet().then((_) {
                 if (context.mounted) {
-                  // remove the loader
-                  Navigator.pop(context);
-
                   // finished, so we can just go back to the previous page
                   Navigator.pop(context);
                 }
@@ -98,9 +96,6 @@ class _WalletAddPageState extends State<WalletAddPage> {
                 debugPrintStack(stackTrace: stackTrace);
                 
                 if (context.mounted) {
-                  // remove the loader
-                  Navigator.pop(context);
-
                   // show the error dialog
                   await ShowMyDialog(
                     cancelEnabled: false,
@@ -109,7 +104,10 @@ class _WalletAddPageState extends State<WalletAddPage> {
                     dialogText: "Unable to save wallet data."
                   ).show(context);
                 }
-              });
+              }).whenComplete(() {
+                // remove loading screen
+                LoadingScreen.instance().hide();
+              },);
             },
             icon: const Icon(
               Ionicons.checkmark,

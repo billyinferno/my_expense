@@ -13,11 +13,11 @@ import 'package:my_expense/model/error_net_model.dart';
 import 'package:my_expense/model/login_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/globals.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/net/netutils.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -260,15 +260,8 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: (() async {
                           if (_formKey.currentState!.validate()) {
                             await _login(_usernameController.text, _passwordController.text).then((error) async {
-                              if (mounted) {
-                                // check if not error
-                                if(!error) {
-                                  debugPrint("🏠 Login success, redirect to home");
-                                  Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
-                                }
-                                else {
-                                  debugPrint("⛔ Wrong login information");
-                                }
+                              if (error) {
+                                debugPrint("⛔ Wrong login information");
                               }
                             });
                           }
@@ -308,9 +301,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<bool> _getAdditionalInfo() async {
-    bool res = true;
-
+  Future<void> _getAdditionalInfo() async {
     await Future.wait([
       _userHTTP.fetchMe().then((value) {
         debugPrint("⏳ Fetch User");
@@ -342,15 +333,16 @@ class _LoginPageState extends State<LoginPage> {
       }),
     ]).then((_) {
       debugPrint("💯 Finished");
-      res = true;
+
+      // once finished get the additional information route this to home
+      debugPrint("🏠 Redirect to home");
+      if (mounted) {
+        Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
+      }
     }).onError((error, stackTrace) {
       debugPrint("🛑 Error when get additional information");
       debugPrint(error.toString());
-      res = false;
     });
-
-    // return response
-    return res;
   }
 
   Future<void> _fetchAllBudget() async {
@@ -392,13 +384,7 @@ class _LoginPageState extends State<LoginPage> {
       // check if user 
       if (res) {
         // try to get the additional information
-        await _getAdditionalInfo().then((isGetAdditionalInfo) {
-          if (isGetAdditionalInfo && mounted) {
-            // once finished get the additional information route this to home
-            debugPrint("🏠 Redirect to home");
-            Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
-          }
-        }).onError((error, stackTrace) {
+        await _getAdditionalInfo().onError((error, stackTrace) {
           // unable to get additional information
           res = false;
         },);
@@ -435,13 +421,7 @@ class _LoginPageState extends State<LoginPage> {
       // get additional information for user
       debugPrint("ℹ️ Get additional info for user");
 
-      await _getAdditionalInfo().then((isGetAdditionalInfo) {
-        if (isGetAdditionalInfo && mounted) {
-          // once finished get the additional information route this to home
-          debugPrint("🏠 Redirect to home");
-          Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
-        }
-      });
+      await _getAdditionalInfo();
     });
   }
 
@@ -449,9 +429,7 @@ class _LoginPageState extends State<LoginPage> {
     bool isError = false;
     
     // all good, showed the loading
-    if (mounted) {
-      showLoaderDialog(context);
-    }
+    LoadingScreen.instance().show(context: context);
 
     // try to fetch users/me endpoint to check if we have credentials to access
     // this page or not?
@@ -476,10 +454,7 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     }).whenComplete(() {
-      if (mounted) {
-        // pop the loader
-        Navigator.pop(context);
-      }
+      LoadingScreen.instance().hide();
     },);
 
     return isError;

@@ -6,8 +6,8 @@ import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/misc/error_parser.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 
 class UserChangePassword extends StatefulWidget {
   const UserChangePassword({super.key});
@@ -218,7 +218,7 @@ class _UserChangePasswordState extends State<UserChangePassword> {
       if(strNewPassword == strRetypeNewPassword) {
         // new password match, now call the api for updating the password.
         // before that we should show the loader
-        showLoaderDialog(context);
+        LoadingScreen.instance().show(context: context);
 
         await _userHttp.updatePassword(_userMe.username, strCurrentPassword, strNewPassword).onError((error, stackTrace) {
           debugPrint(error.toString());
@@ -227,10 +227,8 @@ class _UserChangePasswordState extends State<UserChangePassword> {
           ErrorModel err = parseErrorMessage(error.toString());
           throw Exception(err.message);
         }).whenComplete(() {
-          if (mounted) {
-            // all finished, pop the loader
-            Navigator.pop(context);
-          }
+          // remove the loading screen
+          LoadingScreen.instance().hide();
         });
       }
       else {

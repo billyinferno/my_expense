@@ -3,8 +3,8 @@ import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/pin_api.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/widgets/input/pin_pad.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 
 class PinSetupPage extends StatefulWidget {
   const PinSetupPage({ super.key });
@@ -94,7 +94,6 @@ class _PinSetupPageState extends State<PinSetupPage> {
                         }
                         else {
                           // send this to backend
-                          showLoaderDialog(context);
                           _savePin();
                         }
                       }
@@ -110,11 +109,12 @@ class _PinSetupPageState extends State<PinSetupPage> {
   }
 
   Future<void> _savePin() async {
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
+
+    // call the backend to set the PIN
     await _pinHttp.setPin(_firstPin).then((_) {
       if (mounted) {
-        // pop the loader dialog
-        Navigator.pop(context);
-
         // pin already set, so now we can pop from this page
         // and tell it's true
         Navigator.pop(context, true);
@@ -130,9 +130,6 @@ class _PinSetupPageState extends State<PinSetupPage> {
       });
       
       if (mounted) {
-        // pop the loader dialog
-        Navigator.pop(context);
-
         // show the error dialog
         await ShowMyDialog(
           cancelEnabled: false,
@@ -141,6 +138,9 @@ class _PinSetupPageState extends State<PinSetupPage> {
           dialogText: "Error when Save PIN"
         ).show(context);
       }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 }

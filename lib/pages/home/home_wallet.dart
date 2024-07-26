@@ -9,10 +9,10 @@ import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/widgets/input/wallet.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 
 class HomeWallet extends StatefulWidget {
@@ -128,9 +128,10 @@ class _HomeWalletState extends State<HomeWallet> {
     Future <List<CurrencyModel>> walletCurrencyList;
     Future <List<WalletModel>> walletList;
 
-    showLoaderDialog(context);
+    // show loading screen
+    LoadingScreen.instance().show(context: context);
 
-    Future.wait([
+    await Future.wait([
       walletList = _walletHttpService.deleteWallets(id),
       walletCurrencyList = _walletHttpService.fetchWalletCurrencies(true),
     ]).then((_) {
@@ -149,7 +150,10 @@ class _HomeWalletState extends State<HomeWallet> {
       debugPrint("Error on <_deleteWallet>");
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 
   Future<bool> _refreshWallet() async {
@@ -229,10 +233,6 @@ class _HomeWalletState extends State<HomeWallet> {
                     }
                   }).onError((error, stackTrace) {
                     debugPrint("Error when clicking delete wallet");
-                  }).whenComplete(() {
-                    if (mounted) {
-                     Navigator.pop(context);
-                    }
                   });
                 }
               });
@@ -313,7 +313,7 @@ class _HomeWalletState extends State<HomeWallet> {
     // clear the cache here, we will clear the transaction
     // provider and cache, user will be need to refresh the
     // application once finished.
-    showLoaderDialog(context);
+    LoadingScreen.instance().show(context: context);
 
     Provider.of<HomeProvider>(context, listen: false).clearTransactionList();
     Provider.of<HomeProvider>(context, listen: false).clearBudgetList();
@@ -327,9 +327,7 @@ class _HomeWalletState extends State<HomeWallet> {
       debugPrint("Error at _clearCache");
       debugPrint(error.toString());
     }).whenComplete(() {
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      LoadingScreen.instance().hide();
     });
   }
 }

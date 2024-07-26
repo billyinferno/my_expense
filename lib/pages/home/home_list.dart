@@ -17,12 +17,12 @@ import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/misc/my_callback.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/item/my_item_list.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:my_expense/themes/colors.dart';
@@ -505,7 +505,8 @@ class _HomeListState extends State<HomeList> {
   }
 
   Future<void> _deleteTransaction(TransactionListModel txnDeleted) async {
-    showLoaderDialog(context);
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
 
     await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) async {
       if (mounted) {        
@@ -528,10 +529,8 @@ class _HomeListState extends State<HomeList> {
       debugPrint("Error when delete");
       debugPrint(error.toString());
     }).whenComplete(() {
-      // if mounted remove the loader
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      // remove the loading screen
+      LoadingScreen.instance().hide();
     });
   }
 
