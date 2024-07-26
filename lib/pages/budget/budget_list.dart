@@ -14,7 +14,6 @@ import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/args/budget_detail_args.dart';
 import 'package:my_expense/utils/misc/decimal_formatter.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_box.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
@@ -22,6 +21,7 @@ import 'package:my_expense/utils/prefs/shared_category.dart';
 import 'package:my_expense/widgets/item/category_list_item.dart';
 import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 
 class BudgetListPage extends StatefulWidget {
@@ -586,8 +586,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
   }
 
   Future<void> _deleteBudgetList(int budgetId, int currencyId) async {
-    // show the loader dialog
-    showLoaderDialog(context);
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
 
     await _budgetHttp.deleteBudgetList(currencyId, budgetId).then((budget) {
       // we got the new budget, add this to the shared preferences and the
@@ -628,16 +628,14 @@ class _BudgetListPageState extends State<BudgetListPage> {
       debugPrint("Error oon <_deleteBudgetList> at BudgetList");
       debugPrint(error.toString());
     }).whenComplete(() {
-      if (mounted) {
-        // pop out the loader
-        Navigator.pop(context);
-      }
+      // remove the loading screen
+      LoadingScreen.instance().hide();
     });
   }
 
   Future<void> _addBudget(int categoryId, int currencyId) async {
-    // show the loader dialog
-    showLoaderDialog(context);
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
 
     await _budgetHttp.addBudgetList(currencyId, categoryId).then((budget) {
       // we got the new budget, add this to the shared preferences and the
@@ -677,10 +675,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
       debugPrint(error.toString());
       throw Exception("Error when adding new budgets");
     }).whenComplete(() {
-      if (mounted) {
-        // pop out the loader
-        Navigator.pop(context);
-      }
+      // remove the loading screen
+      LoadingScreen.instance().hide();
     });
   }
 
@@ -688,8 +684,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
     // we will only save if the budget length more than 0, otherwise, no need to send any
     // data to backend
     if(_budgetList!.budgets.isNotEmpty) {
-      // show the loader dialog
-      showLoaderDialog(context);
+      // show the loading screen
+      LoadingScreen.instance().show(context: context);
 
       await _budgetHttp.updateBudgetList(_currencyID, _budgetList!.budgets).then((updatedBudgetList) {
         // store back the home budget list
@@ -757,10 +753,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
         
         throw Exception("Cannot save budgets");
       }).whenComplete(() {
-        if (mounted) {
-          // pop out the loader
-          Navigator.pop(context);
-        }
+        // remove the loading screen
+        LoadingScreen.instance().hide();
       });
     }
   }

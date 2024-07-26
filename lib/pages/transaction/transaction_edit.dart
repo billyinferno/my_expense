@@ -11,11 +11,11 @@ import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/function/date_utils.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/transaction_input.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 
 class TransactionEditPage extends StatefulWidget {
@@ -53,9 +53,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
   }
 
   void _saveTransaction(TransactionModel? txn) async {
-    // show loader dialog
-    showLoaderDialog(context);
-    
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
+
     // send also the date we got from the parent widget, to see whether there
     // are any changes on the date of the transaction. If there are changes
     // then it means we need to manipulate 2 shared preferences instead of one.
@@ -104,9 +104,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           // TransactionListModel provider so it will update the home list page
           Provider.of<HomeProvider>(context, listen: false).setTransactionList(txnListShared ?? []);
 
-          Navigator.pop(context);
-
-          // since we already finished, we can pop again to return back to the
+          // since we already finished, we can pop to return back to the
           // previous page
           Navigator.pop(context, txnUpdate);
         }
@@ -116,9 +114,6 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         debugPrintStack(stackTrace: stackTrace);
         
         if (mounted) {
-          // pop the loader
-          Navigator.pop(context);
-
           // show the error dialog
           await ShowMyDialog(
             cancelEnabled: false,
@@ -134,9 +129,6 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       debugPrintStack(stackTrace: stackTrace);
       
       if (mounted) {
-        // pop the loader
-        Navigator.pop(context);
-
         // show the error dialog
         await ShowMyDialog(
           cancelEnabled: false,
@@ -145,7 +137,10 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           dialogText: "Error when update transaction."
         ).show(context);
       }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 
   Future<void> _refreshHomeList({required DateTime txnDate, required DateTime homeListDate}) async {

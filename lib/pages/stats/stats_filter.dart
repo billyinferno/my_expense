@@ -14,7 +14,6 @@ import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/args/stats_detail_args.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
@@ -23,6 +22,7 @@ import 'package:my_expense/widgets/input/user_button.dart';
 import 'package:my_expense/widgets/item/expand_animation.dart';
 import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 
 class StatsFilterPage extends StatefulWidget {
   const StatsFilterPage({ super.key });
@@ -709,7 +709,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   Future<void> _filterStats() async {
     // fetch the transaction data for this
     if(_currentCurrencies!.id >= 0 && _currentWallet != null) {
-      showLoaderDialog(context);
+      // show loading screen
+      LoadingScreen.instance().show(context: context);
 
       await _fetchStats().then((_) {
         StatsDetailArgs args = StatsDetailArgs(
@@ -742,10 +743,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           ).show(context);
         }
       }).whenComplete(() {
-        if (mounted) {
-          // pop the loader
-          Navigator.pop(context);
-        }
+        // remove the loading screen
+        LoadingScreen.instance().hide();
       });
     }
   }

@@ -21,7 +21,6 @@ import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/anim/page_transition.dart';
 import 'package:my_expense/utils/globals.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/net/netutils.dart';
 import 'package:my_expense/utils/prefs/shared_box.dart';
@@ -34,6 +33,7 @@ import 'package:my_expense/widgets/input/switch.dart';
 import 'package:my_expense/widgets/input/user_button.dart';
 import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
 import 'package:my_expense/widgets/item/simple_item.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatefulWidget {
@@ -392,12 +392,9 @@ class _UserPageState extends State<UserPage> {
                         ),
                       ),
                       callback: (() {
-                        showLoaderDialog(context);
-                        _refreshTransactionTag().then((_) {
-                          if (context.mounted) {
-                            // remove the loader dialog
-                            Navigator.pop(context);
-                          }
+                        LoadingScreen.instance().show(context: context);
+                        _refreshTransactionTag().whenComplete(() {
+                          LoadingScreen.instance().hide();
                         });
                       }),
                     ),
@@ -655,8 +652,8 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> _updateDefaultCategory(String type, int categoryID) async {
-    // show the loader dialog
-    showLoaderDialog(context);
+    // show loading screen
+    LoadingScreen.instance().show(context: context);
 
     await _categoryHTTP.updateDefaultCategory(type, categoryID).then((_) {
       String newCategoryName = '';
@@ -674,8 +671,6 @@ class _UserPageState extends State<UserPage> {
       }
 
       if (mounted) {
-        Navigator.pop(context);
-
         ScaffoldMessenger.of(context).showSnackBar(
           createSnackBar(
             message: "Default $type updated to $newCategoryName",
@@ -692,20 +687,21 @@ class _UserPageState extends State<UserPage> {
       debugPrintStack(stackTrace: stackTrace);
 
       if (mounted) {
-        Navigator.pop(context);
-
         ScaffoldMessenger.of(context).showSnackBar(
           createSnackBar(
             message: "Unable to update default $type",
           )
         );
       }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 
   Future<void> _updateBudgetCurrency(int currencyID) async {
-    // show the loader dialog
-    showLoaderDialog(context);
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
 
     // get the current date of the budget that we need to load
     String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
@@ -724,8 +720,6 @@ class _UserPageState extends State<UserPage> {
       });
 
       if (mounted) {
-        Navigator.pop(context);
-
         ScaffoldMessenger.of(context).showSnackBar(
           createSnackBar(
             message: "Default budget currency updated",
@@ -744,28 +738,27 @@ class _UserPageState extends State<UserPage> {
       _selectedCurrency = _currentCurrency;
 
       if (mounted) {
-        Navigator.pop(context);
-
         ScaffoldMessenger.of(context).showSnackBar(
           createSnackBar(
             message: "Unable to update default budget currency",
           )
         );
       }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 
   Future<void> _updateDefaultWallet(int walletId) async {
-    // show the loader dialog
-    showLoaderDialog(context);
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
 
     await _walletHTTP.updateDefaultWallet(walletId).then((_) {
       _refreshUserMe();
       _currentWallet = _selectedWallet!;
 
       if (mounted) {
-        Navigator.pop(context);
-        
         // show it success
         ScaffoldMessenger.of(context).showSnackBar(
           createSnackBar(
@@ -785,15 +778,16 @@ class _UserPageState extends State<UserPage> {
       _selectedWallet = _currentWallet;
 
       if (mounted) {
-        Navigator.pop(context);
-
         ScaffoldMessenger.of(context).showSnackBar(
           createSnackBar(
             message: "Error when updating default wallet",
           )
         );
       }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
 
     // remove the bottom sheet
     if (mounted) {
@@ -802,17 +796,14 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> _refreshTransactionTag() async {
-    // show loader dialog
-    showLoaderDialog(context);
+    // show loading screen
+    LoadingScreen.instance().show(context: context);
 
     await Future.wait([
       _transactionHTTP.fetchLastTransaction("income", true),
       _transactionHTTP.fetchLastTransaction("expense", true)
     ]).then((_) {
       if (mounted) {
-        // remove the loader
-        Navigator.pop(context);
-
         // finished fetch the last transaction income and expense
         // showed a message on the scaffold telling that the refresh is finished
         ScaffoldMessenger.of(context).showSnackBar(
@@ -829,12 +820,10 @@ class _UserPageState extends State<UserPage> {
       debugPrint("Got error when refresh transaction tag");
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
-
-      if (mounted) {
-        // remove the loader
-        Navigator.pop(context);
-      }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 
   void _showRemovePinDialog() {

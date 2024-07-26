@@ -12,11 +12,11 @@ import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/function/date_utils.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/input/transaction_input.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 
 class TransactionAddPage extends StatefulWidget {
@@ -66,8 +66,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
   }
 
   void _saveTransaction(TransactionModel? txn) async {
-    // show the loader
-    showLoaderDialog(context);
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
+
     // now we can try to send updated data to the backend
     await _transactionHttp.addTransaction(context, txn!, _selectedDate).then((result) async {
       // update necessary information after we add the transaction
@@ -85,16 +86,16 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           Provider.of<HomeProvider>(context, listen: false).setTransactionList(txnListShared);
         }
         
-        // finished update information
+        // finished update information, return back to the previous page
+        if (mounted) {
+          Navigator.pop(context);
+        }
       }).onError((error, stackTrace) async {
         // print the error
         debugPrint("Error: ${error.toString()}");
         debugPrintStack(stackTrace: stackTrace);
 
         if (mounted) {
-          // pop the loader
-          Navigator.pop(context);
-          
           // show the error dialog
           await ShowMyDialog(
             cancelEnabled: false,
@@ -110,9 +111,6 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       debugPrintStack(stackTrace: stackTrace);
       
       if (mounted) {
-        // pop the loader
-        Navigator.pop(context);
-
         // show the error dialog
         await ShowMyDialog(
           cancelEnabled: false,
@@ -121,7 +119,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           dialogText: "Error when add transaction."
         ).show(context);
       }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 
   Future<void> _updateInformation(TransactionListModel txnAdd) async {
@@ -316,15 +317,6 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // set txnAdd as current maxDate, as maxDate is lesser than current
         // transacion data date.
         TransactionSharedPreferences.setTransactionMaxDate(txnAdd.date);
-      }
-
-      if (mounted) {
-        // this is success, so we can pop the loader
-        Navigator.pop(context);
-
-        // since we already finished, we can pop again to return back to the
-        // previous page
-        Navigator.pop(context);
       }
     }).onError((error, stackTrace) {
       debugPrint("Error on update information");

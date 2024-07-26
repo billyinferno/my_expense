@@ -16,7 +16,6 @@ import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/function/date_utils.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/show_loader_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/misc/wallet_transaction_class_helper.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
@@ -24,6 +23,7 @@ import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
 import 'package:my_expense/widgets/item/card_face_item.dart';
 import 'package:my_expense/widgets/item/my_item_list.dart';
+import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 
 class WalletTransactionPage extends StatefulWidget {
@@ -278,19 +278,35 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     });
   }
 
-  Future<void> _fetchTransactionWallet(DateTime fetchDate, [bool? force]) async {
+  Future<void> _fetchTransactionWallet(
+    DateTime fetchDate,
+    [
+      bool? force,
+      bool? showLoader
+    ]
+  ) async {
     bool isForce = (force ?? false);
+
+    // show the loading screen
+    if (showLoader ?? true) {
+      LoadingScreen.instance().show(context: context);
+    }
 
     // get the transaction
     String date = _dtyyyyMMdd.format(DateTime(fetchDate.toLocal().year, fetchDate.toLocal().month, 1));
     await _transactionHttp.fetchTransactionWallet(_wallet.id, date, isForce).then((txns) async {
       await _setTransactions(txns);
       _transactions = txns.toList();
-
     }).onError((error, stackTrace) {
       debugPrint("Error when <_fetchTransactionWallet>");
       debugPrint(error.toString());
-    });
+      throw Exception('Error when fetch wallet transaction');
+    }).whenComplete(() {
+      if (showLoader ?? true) {
+        // remove the loading screen
+        LoadingScreen.instance().hide();
+      }
+    },);
   }
 
   Future<void> _fetchWalletMinMaxDate() async {
@@ -330,20 +346,17 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                 dismissible: true,
               ).then((newDate) async {
                 if (newDate != null) {
-                  // fetch the transaction for this date
-                  if (mounted) {
-                    showLoaderDialog(context);
-                  }
-          
                   await _fetchTransactionWallet(newDate).then((_) {
                     _setDate(newDate);
                   }).onError((error, stackTrace) {
                     debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
                     debugPrintStack(stackTrace: stackTrace);
-                  }).whenComplete(() {
                     if (mounted) {
-                      // remove the loader
-                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        createSnackBar(
+                          message: "Error when fetch wallet transaction"
+                        )
+                      );
                     }
                   });
                 }
@@ -353,18 +366,18 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               // set the date as today date
               DateTime newDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
             
-              // fetch the transaction for this date
-              showLoaderDialog(context);
-      
               await _fetchTransactionWallet(newDate).then((_) {
                 _setDate(newDate);
               }).onError((error, stackTrace) {
                 debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
                 debugPrintStack(stackTrace: stackTrace);
-              }).whenComplete(() {
+
                 if (mounted) {
-                  // remove the loader
-                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    createSnackBar(
+                      message: "Error when fetch wallet transaction"
+                    )
+                  );
                 }
               });
             }),
@@ -374,18 +387,18 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   onTap: (() async {
                     DateTime newDate = DateTime(_currentDate.year, _currentDate.month - 1, 1);
             
-                    // fetch the transaction for this date
-                    showLoaderDialog(context);
-            
                     await _fetchTransactionWallet(newDate).then((_) {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
                       debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
                       debugPrintStack(stackTrace: stackTrace);
-                    }).whenComplete(() {
+                      
                       if (mounted) {
-                        // remove the loader
-                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          createSnackBar(
+                            message: "Error when fetch wallet transaction"
+                          )
+                        );
                       }
                     });
                   }),
@@ -427,18 +440,18 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   onTap: (() async {
                     DateTime newDate = DateTime(_currentDate.year, _currentDate.month + 1, 1);
             
-                    // fetch the transaction for this date
-                    showLoaderDialog(context);
-            
                     await _fetchTransactionWallet(newDate).then((_) {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
                       debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
                       debugPrintStack(stackTrace: stackTrace);
-                    }).whenComplete(() {
+
                       if (mounted) {
-                        // remove the loader
-                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          createSnackBar(
+                            message: "Error when fetch wallet transaction"
+                          )
+                        );
                       }
                     });
                   }),
@@ -465,16 +478,20 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             onRefresh: () async {
               debugPrint("🔃 Refresh wallet");
 
-              // fetch the transaction for this date
-              showLoaderDialog(context);
-
               await _fetchTransactionWallet(_currentDate, true).onError((error, stackTrace) {
                 debugPrint("Error when refresh wallet for ${_dtMMMMyyyy.format(_currentDate.toLocal())}");
-              }).whenComplete(() {
+              }).onError((error, stackTrace) {
+                debugPrint("Error: ${error.toString()}");
+                debugPrintStack(stackTrace: stackTrace);
+
                 if (mounted) {
-                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    createSnackBar(
+                      message: "Error when fetch wallet transaction"
+                    )
+                  );
                 }
-              });
+              },);
             },
             child: _generateTransactionListview(),
           ),
@@ -786,7 +803,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
   Future<bool> _fetchInitData() async {
     await Future.wait([
-      _fetchTransactionWallet(_currentDate),
+      _fetchTransactionWallet(_currentDate, true, false),
       _fetchWalletMinMaxDate(),
     ]);
 
@@ -794,7 +811,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   }
 
   Future<void> _deleteTransaction(TransactionListModel txnDeleted) async {
-    showLoaderDialog(context);
+    // show loading screen
+    LoadingScreen.instance().show(context: context);
 
     await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) async {
       // get the current transaction date showed on the home list
@@ -866,23 +884,18 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
       // update information for txn delete
       await _updateInformation(txnDeleted);
-
-      // remove loader if mounted
-      if (mounted) {
-        Navigator.pop(context);
-      }
     }).onError((error, stackTrace) {
       debugPrint("Error when delete");
       debugPrint(error.toString());
 
       if (mounted) {
-        // since got error we need to pop from the loader
-        Navigator.pop(context);
-
         // show scaffold showing error
         ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Error when delete ${txnDeleted.name}"));
       }
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 
   Future<void> _updateInformation(TransactionListModel txnInfo) async {
