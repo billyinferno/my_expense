@@ -33,7 +33,6 @@ class MonthPrevNextCalendar extends StatelessWidget {
           initialDate: initialDate,
           firstDate: minDate,
           lastDate: maxDate,
-          dismissible: true,
         ).then((newDate) async {
           if (newDate != null) {
             DateTime from = DateTime(newDate.year, newDate.month, 1).toLocal();

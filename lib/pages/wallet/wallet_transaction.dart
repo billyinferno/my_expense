@@ -343,22 +343,25 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                 initialDate: _currentDate,
                 firstDate: (_walletMinMaxDate.minDate ?? DateTime.now().toLocal()),
                 lastDate: (_walletMinMaxDate.maxDate ?? DateTime.now().toLocal()),
-                dismissible: true,
               ).then((newDate) async {
                 if (newDate != null) {
-                  await _fetchTransactionWallet(newDate).then((_) {
-                    _setDate(newDate);
-                  }).onError((error, stackTrace) {
-                    debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
-                    debugPrintStack(stackTrace: stackTrace);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        createSnackBar(
-                          message: "Error when fetch wallet transaction"
-                        )
-                      );
-                    }
-                  });
+                  // ensure that the new date is different date with current date
+                  if (_currentDate.isAfter(newDate) || _currentDate.isBefore(newDate)) {
+                    // fetch the transaction wallet for this new date
+                    await _fetchTransactionWallet(newDate).then((_) {
+                      _setDate(newDate);
+                    }).onError((error, stackTrace) {
+                      debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
+                      debugPrintStack(stackTrace: stackTrace);
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          createSnackBar(
+                            message: "Error when fetch wallet transaction"
+                          )
+                        );
+                      }
+                    });
+                  }
                 }
               });
             }),
