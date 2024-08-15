@@ -8,24 +8,27 @@ import 'package:my_expense/utils/prefs/shared_box.dart';
 Future main() async {
   // run all the initialisation on the runZonedGuarded to ensure that all the
   // init already finished before we perform runApp.
-  await runZonedGuarded(() async {
-    // ensure that the flutter widget already binding
-    WidgetsFlutterBinding.ensureInitialized();
+  await runZonedGuarded(
+    () async {
+      // ensure that the flutter widget already binding
+      WidgetsFlutterBinding.ensureInitialized();
 
-    // after that we can initialize the box
-    await Future.wait([
-      dotenv.load(fileName: "conf/.dev.env"),
-      Hive.initFlutter(),
-      MyBox.init(),
-    ]);
+      // after that we can initialize the box
+      await Future.microtask(() async {
+        await dotenv.load(fileName: "conf/.dev.env");
+        await Hive.initFlutter();
+        await MyBox.init();
+      });
 
-    // run the actual application
-    debugPrint("🚀 Initialize finished, run application");
-    runApp(const MyApp());
-  }, (error, stack) {
-    debugPrint("Error: ${error.toString()}");
-    debugPrintStack(stackTrace: stack);
-  },);
+      // run the actual application
+      debugPrint("🚀 Initialize finished, run application");
+      runApp(const MyApp());
+    },
+    (error, stack) {
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stack);
+    },
+  );
 }
 
 class MyApp extends StatefulWidget {
