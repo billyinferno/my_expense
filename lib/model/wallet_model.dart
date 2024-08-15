@@ -29,32 +29,32 @@ class WalletModel {
   factory WalletModel.fromJson(Map<String, dynamic> json) {
     WalletTypeModel walletType = WalletTypeModel.fromJson(json['wallet_type']);
     CurrencyModel currency = CurrencyModel.fromJson(json['currency']);
-    UserPermissionModel userPermissionUsers = UserPermissionModel.fromJson(json['users_permissions_user']);
+    UserPermissionModel userPermissionUsers =
+        UserPermissionModel.fromJson(json['users_permissions_user']);
 
     return WalletModel(
         json['id'],
         json['name'],
-        json['startBalance'],
-        (json['changeBalance'] ?? 0.00),
-        (json['futureAmount'] ?? 0.00),
+        (json['startBalance'] ?? 0).toDouble(),
+        (json['changeBalance'] ?? 0).toDouble(),
+        (json['futureAmount'] ?? 0).toDouble(),
         json['useForStats'],
         json['enabled'],
         walletType,
         currency,
-        userPermissionUsers
-    );
+        userPermissionUsers);
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'startBalance': startBalance,
-    'changeBalance': changeBalance,
-    'futureAmount': futureAmount,
-    'useForStats': useForStats,
-    'enabled': enabled,
-    'wallet_type': walletType.toJson(),
-    'currency': currency.toJson(),
-    'users_permissions_user': userPermissionUsers.toJson(),
-  };
+        'id': id,
+        'name': name,
+        'startBalance': startBalance,
+        'changeBalance': changeBalance,
+        'futureAmount': futureAmount,
+        'useForStats': useForStats,
+        'enabled': enabled,
+        'wallet_type': walletType.toJson(),
+        'currency': currency.toJson(),
+        'users_permissions_user': userPermissionUsers.toJson(),
+      };
 }

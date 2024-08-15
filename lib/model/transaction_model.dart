@@ -1,17 +1,16 @@
 class TransactionModel {
   TransactionModel(
-    this.name,
-    this.type,
-    this.category,
-    this.date,
-    this.wallet,
-    this.cleared,
-    this.description,
-    this.usersPermissionsUser,
-    this.amount,
-    this.walletTo,
-    this.exchangeRate
-  );
+      this.name,
+      this.type,
+      this.category,
+      this.date,
+      this.wallet,
+      this.cleared,
+      this.description,
+      this.usersPermissionsUser,
+      this.amount,
+      this.walletTo,
+      this.exchangeRate);
 
   final String name;
   final String type;
@@ -29,17 +28,15 @@ class TransactionModel {
     WalletCategoryTransactionModel? category;
     WalletCategoryTransactionModel? walletTo;
 
-    if(json["category"] != null) {
+    if (json["category"] != null) {
       category = WalletCategoryTransactionModel.fromJson(json["category"]);
-    }
-    else {
+    } else {
       category = null;
     }
 
-    if(json["walletTo"] != null) {
+    if (json["walletTo"] != null) {
       walletTo = WalletCategoryTransactionModel.fromJson(json["walletTo"]);
-    }
-    else {
+    } else {
       walletTo = null;
     }
 
@@ -54,9 +51,9 @@ class TransactionModel {
       json["cleared"],
       json["description"],
       WalletCategoryTransactionModel.fromJson(json["users_permissions_user"]),
-      json["amount"].toDouble(),
+      (json["amount"] ?? 0).toDouble(),
       walletTo,
-      json["exchange_rate"]
+      (json["exchange_rate"] ?? 0).toDouble(),
     );
   }
 
@@ -87,11 +84,8 @@ class WalletCategoryTransactionModel {
 
   WalletCategoryTransactionModel(this.id);
 
-  factory WalletCategoryTransactionModel.fromJson(Map<String, dynamic> json) => WalletCategoryTransactionModel(
-    json["id"]
-  );
+  factory WalletCategoryTransactionModel.fromJson(Map<String, dynamic> json) =>
+      WalletCategoryTransactionModel(json["id"]);
 
-  Map<String, dynamic> toJson() => {
-    "id": id
-  };
+  Map<String, dynamic> toJson() => {"id": id};
 }

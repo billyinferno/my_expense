@@ -21,22 +21,22 @@ class BudgetModel {
   final CurrencyModel currency;
 
   factory BudgetModel.fromJson(Map<String, dynamic> json) => BudgetModel(
-    id: json["id"],
-    category: CategoryModel.fromJson(json["category"]),
-    totalTransaction: (json["total_transaction"] ?? 0),
-    amount: json["amount"] as double,
-    used: json["used"] as double,
-    status: (json["status"] ?? "in"),
-    currency: CurrencyModel.fromJson(json["currency"]),
-  );
+        id: json["id"],
+        category: CategoryModel.fromJson(json["category"]),
+        totalTransaction: (json["total_transaction"] ?? 0),
+        amount: (json["amount"] ?? 0).toDouble(),
+        used: (json["used"] ?? 0).toDouble(),
+        status: (json["status"] ?? "in"),
+        currency: CurrencyModel.fromJson(json["currency"]),
+      );
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "category": category.toJson(),
-    "total_transaction": totalTransaction,
-    "amount": amount,
-    "used": used,
-    "status": status,
-    "currency": currency.toJson(),
-  };
+        "id": id,
+        "category": category.toJson(),
+        "total_transaction": totalTransaction,
+        "amount": amount,
+        "used": used,
+        "status": status,
+        "currency": currency.toJson(),
+      };
 }
