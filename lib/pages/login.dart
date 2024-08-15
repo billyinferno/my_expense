@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
 
   late Future<bool> _checkIsLogin;
   late bool _isLogin;
-  
+
   String _bearerToken = "";
   bool _isTokenExpired = false;
 
@@ -55,7 +55,8 @@ class _LoginPageState extends State<LoginPage> {
     _isTokenExpired = false;
 
     // get the current date
-    _currentDate = DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
+    _currentDate =
+        DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
     _currentDateString = DateFormat('yyyy-MM-dd').format(_currentDate);
 
     _isLogin = false;
@@ -81,8 +82,7 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context, snapshot) {
           if ((snapshot.hasData || snapshot.hasError) && !_isLogin) {
             return _generateLoginScreen();
-          }
-          else {
+          } else {
             return _generateSplashScreen();
           }
         },
@@ -174,15 +174,16 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       const Text("Username"),
-                      const SizedBox(height: 5,),
+                      const SizedBox(
+                        height: 5,
+                      ),
                       TextFormField(
                         controller: _usernameController,
                         focusNode: _usernameFocus,
                         validator: ((val) {
                           if (val!.isNotEmpty) {
                             return null;
-                          }
-                          else {
+                          } else {
                             return "Please enter username";
                           }
                         }),
@@ -195,7 +196,9 @@ class _LoginPageState extends State<LoginPage> {
                           hintText: "username",
                           prefixIcon: Icon(
                             Ionicons.person,
-                            color: (_usernameFocus.hasFocus ? accentColors[6] : textColor2),
+                            color: (_usernameFocus.hasFocus
+                                ? accentColors[6]
+                                : textColor2),
                           ),
                           enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(
@@ -205,15 +208,23 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           focusedBorder: UnderlineInputBorder(
                             borderSide: BorderSide(
-                              color: (_usernameFocus.hasFocus ? accentColors[6] : textColor2),
+                              color: (_usernameFocus.hasFocus
+                                  ? accentColors[6]
+                                  : textColor2),
                               width: 1.0,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 15,),
-                      const Text("Password",),
-                      const SizedBox(height: 5,),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      const Text(
+                        "Password",
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
                       TextFormField(
                         controller: _passwordController,
                         focusNode: _passwordFocus,
@@ -224,8 +235,7 @@ class _LoginPageState extends State<LoginPage> {
                               return "Password length cannot be less than 6";
                             }
                             return null;
-                          }
-                          else {
+                          } else {
                             return "Please enter password";
                           }
                         }),
@@ -238,7 +248,9 @@ class _LoginPageState extends State<LoginPage> {
                           hintText: "password",
                           prefixIcon: Icon(
                             Ionicons.key,
-                            color: (_passwordFocus.hasFocus ? accentColors[6] : textColor2),
+                            color: (_passwordFocus.hasFocus
+                                ? accentColors[6]
+                                : textColor2),
                           ),
                           enabledBorder: const UnderlineInputBorder(
                             borderSide: BorderSide(
@@ -248,18 +260,24 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           focusedBorder: UnderlineInputBorder(
                             borderSide: BorderSide(
-                              color: (_passwordFocus.hasFocus ? accentColors[6] : textColor2),
+                              color: (_passwordFocus.hasFocus
+                                  ? accentColors[6]
+                                  : textColor2),
                               width: 1.0,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 15,),
+                      const SizedBox(
+                        height: 15,
+                      ),
                       MaterialButton(
                         height: 50,
                         onPressed: (() async {
                           if (_formKey.currentState!.validate()) {
-                            await _login(_usernameController.text, _passwordController.text).then((error) async {
+                            await _login(_usernameController.text,
+                                    _passwordController.text)
+                                .then((error) async {
                               if (error) {
                                 debugPrint("⛔ Wrong login information");
                               }
@@ -337,18 +355,21 @@ class _LoginPageState extends State<LoginPage> {
       // once finished get the additional information route this to home
       debugPrint("🏠 Redirect to home");
       if (mounted) {
-        Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
+        Navigator.restorablePushNamedAndRemoveUntil(
+            context, "/home", (_) => false);
       }
     }).onError((error, stackTrace) {
       debugPrint("🛑 Error when get additional information");
       debugPrint(error.toString());
+      debugPrintStack(stackTrace: stackTrace);
     });
   }
 
   Future<void> _fetchAllBudget() async {
     // loop thru all the currencies and get the budget
-    List<CurrencyModel> ccyLists = WalletSharedPreferences.getWalletUserCurrency();
-    for(CurrencyModel ccy in ccyLists) {
+    List<CurrencyModel> ccyLists =
+        WalletSharedPreferences.getWalletUserCurrency();
+    for (CurrencyModel ccy in ccyLists) {
       // fetch the budget for this ccy
       await _budgetHTTP.fetchBudgetDate(ccy.id, _currentDateString, true);
       debugPrint("⏳ Fetch budget at $_currentDateString for ${ccy.name}");
@@ -373,24 +394,25 @@ class _LoginPageState extends State<LoginPage> {
         if (_bearerToken.isNotEmpty && mounted) {
           _isTokenExpired = true;
           debugPrint("👨🏻 User token is expired");
-          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "User token expired, please re-login"));
-        }
-        else {
+          ScaffoldMessenger.of(context).showSnackBar(
+              createSnackBar(message: "User token expired, please re-login"));
+        } else {
           debugPrint("👨🏻 User not yet login");
         }
         res = false;
       });
 
-      // check if user 
+      // check if user
       if (res) {
         // try to get the additional information
-        await _getAdditionalInfo().onError((error, stackTrace) {
-          // unable to get additional information
-          res = false;
-        },);
+        await _getAdditionalInfo().onError(
+          (error, stackTrace) {
+            // unable to get additional information
+            res = false;
+          },
+        );
       }
-    }
-    else {
+    } else {
       // no bearer token
       res = false;
       debugPrint("🔐 No bearer token");
@@ -417,7 +439,7 @@ class _LoginPageState extends State<LoginPage> {
         // set back the token expired as false
         _isTokenExpired = false;
       }
-      
+
       // get additional information for user
       debugPrint("ℹ️ Get additional info for user");
 
@@ -427,7 +449,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<bool> _login(String username, String password) async {
     bool isError = false;
-    
+
     // all good, showed the loading
     LoadingScreen.instance().show(context: context);
 
@@ -445,17 +467,21 @@ class _LoginPageState extends State<LoginPage> {
       if (netError.statusCode > 0) {
         isError = true;
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Wrong login info"));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(createSnackBar(message: "Wrong login info"));
         }
       } else {
         isError = true;
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Services unavailable"));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(createSnackBar(message: "Services unavailable"));
         }
       }
-    }).whenComplete(() {
-      LoadingScreen.instance().hide();
-    },);
+    }).whenComplete(
+      () {
+        LoadingScreen.instance().hide();
+      },
+    );
 
     return isError;
   }
