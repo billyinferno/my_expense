@@ -18,11 +18,17 @@ Future main() async {
         await dotenv.load(fileName: "conf/.dev.env");
         await Hive.initFlutter();
         await MyBox.init();
-      });
-
-      // run the actual application
-      debugPrint("🚀 Initialize finished, run application");
-      runApp(const MyApp());
+      }).then((_) {
+        // run the actual application
+        debugPrint("🚀 Initialize finished, run application");
+      }).onError((error, stackTrace) {
+        debugPrint("Error when initialize the application");
+        debugPrint("Error: ${error.toString()}");
+        debugPrintStack(stackTrace: stackTrace);
+      },).whenComplete(() {
+        // run the application when complete
+        runApp(const MyApp());
+      },);
     },
     (error, stack) {
       debugPrint("Error: ${error.toString()}");

@@ -13,15 +13,22 @@ Future main() async {
     WidgetsFlutterBinding.ensureInitialized();
 
     // after that we can initialize the box
-    await Future.wait([
-      dotenv.load(fileName: "conf/.prod.env"),
-      Hive.initFlutter(),
-      MyBox.init(),
-    ]);
+    await Future.microtask(() async {
+      await dotenv.load(fileName: "conf/.prod.env");
+      await Hive.initFlutter();
+      await MyBox.init();
+    }).then((_) {
+      // run the actual application
+      debugPrint("🚀 Initialize finished, run application");
+    }).onError((error, stackTrace) {
+      debugPrint("Error when initialize the application");
+      debugPrint("Error: ${error.toString()}");
+      debugPrintStack(stackTrace: stackTrace);
+    },).whenComplete(() {
+      // run the application when complete
+      runApp(const MyApp());
+    },);
 
-    // run the actual application
-    debugPrint("🚀 Initialize finished, run application");
-    runApp(const MyApp());
   }, (error, stack) {
     debugPrint("Error: ${error.toString()}");
     debugPrintStack(stackTrace: stack);
