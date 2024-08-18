@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:my_expense/router.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/prefs/shared_box.dart';
 
 Future main() async {
@@ -20,19 +21,28 @@ Future main() async {
         await MyBox.init();
       }).then((_) {
         // run the actual application
-        debugPrint("🚀 Initialize finished, run application");
-      }).onError((error, stackTrace) {
-        debugPrint("Error when initialize the application");
-        debugPrint("Error: ${error.toString()}");
-        debugPrintStack(stackTrace: stackTrace);
-      },).whenComplete(() {
-        // run the application when complete
-        runApp(const MyApp());
-      },);
+        Log.success(message: "🚀 Initialize finished, run application");
+      }).onError(
+        (error, stackTrace) {
+          Log.error(
+            message: "Error when initialize the application",
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
+      ).whenComplete(
+        () {
+          // run the application when complete
+          runApp(const MyApp());
+        },
+      );
     },
     (error, stack) {
-      debugPrint("Error: ${error.toString()}");
-      debugPrintStack(stackTrace: stack);
+      Log.error(
+        message: "Error on run zone guarded",
+        error: error,
+        stackTrace: stack,
+      );
     },
   );
 }

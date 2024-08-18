@@ -6,6 +6,7 @@ import 'package:my_expense/pages/home/home_stats.dart';
 import 'package:my_expense/pages/home/home_wallet.dart';
 import 'package:my_expense/pages/home/home_budget.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_pin.dart';
 import 'package:my_expense/widgets/input/bar_button.dart';
@@ -82,7 +83,7 @@ class _HomePageState extends State<HomePage> {
               ).show(context);
             }),
             onSuccess: (() {
-              debugPrint("🏠 Show home");
+              Log.info(message: "🏠 Show home");
               setState(() {
                 _isPinEnabled = false;
               });

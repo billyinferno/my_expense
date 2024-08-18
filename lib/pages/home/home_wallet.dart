@@ -61,30 +61,33 @@ class _HomeWalletState extends State<HomeWallet> {
         builder: ((context, snapshot) {
           if (snapshot.hasError) {
             // got error when fetching the wallet data
-            return const Center(child: Text("Error when loading wallet data"),);
-          }
-          else if (snapshot.hasData) {
+            return const Center(
+              child: Text("Error when loading wallet data"),
+            );
+          } else if (snapshot.hasData) {
             // generate the main view
             return _generateWalletView();
-          }
-          else {
+          } else {
             // still loading
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SpinKitFadingCube(color: accentColors[6],),
-                  const SizedBox(height: 20,),
-                  const Text(
-                    "Loading Wallet",
-                    style: TextStyle(
-                      color: textColor2,
-                      fontSize: 10,
-                    ),
-                  )
-                ],
-              )
-            );
+                child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SpinKitFadingCube(
+                  color: accentColors[6],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Text(
+                  "Loading Wallet",
+                  style: TextStyle(
+                    color: textColor2,
+                    fontSize: 10,
+                  ),
+                )
+              ],
+            ));
           }
         }),
       ),
@@ -112,9 +115,10 @@ class _HomeWalletState extends State<HomeWallet> {
                 if (index < wallets.length) {
                   WalletModel wallet = wallets[index];
                   return _generateSlidable(wallet);
-                }
-                else {
-                  return const SizedBox(height: 30,);
+                } else {
+                  return const SizedBox(
+                    height: 30,
+                  );
                 }
               },
             ),
@@ -125,8 +129,8 @@ class _HomeWalletState extends State<HomeWallet> {
   }
 
   Future<void> _deleteWallet(int id) async {
-    Future <List<CurrencyModel>> walletCurrencyList;
-    Future <List<WalletModel>> walletList;
+    Future<List<CurrencyModel>> walletCurrencyList;
+    Future<List<WalletModel>> walletList;
 
     // show loading screen
     LoadingScreen.instance().show(context: context);
@@ -138,22 +142,26 @@ class _HomeWalletState extends State<HomeWallet> {
       // set the provider so it can tell the consumer to update/build the widget.
       walletList.then((wallets) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+          Provider.of<HomeProvider>(context, listen: false)
+              .setWalletList(wallets);
         }
       });
       walletCurrencyList.then((walletsCurrency) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
+          Provider.of<HomeProvider>(context, listen: false)
+              .setWalletCurrency(walletsCurrency);
         }
       });
     }).onError((error, stackTrace) {
       debugPrint("Error on <_deleteWallet>");
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
-    }).whenComplete(() {
-      // remove the loading screen
-      LoadingScreen.instance().hide();
-    },);
+    }).whenComplete(
+      () {
+        // remove the loading screen
+        LoadingScreen.instance().hide();
+      },
+    );
   }
 
   Future<bool> _refreshWallet() async {
@@ -162,13 +170,17 @@ class _HomeWalletState extends State<HomeWallet> {
     // showed a debug print message to knew that we refresh the wallet
     debugPrint("💳 Refresh Wallet");
 
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
+
     // fetch the new wallet data from API
     await Future.wait([
       futureWallets = _walletHttpService.fetchWallets(true, true),
     ]).then((_) {
       futureWallets.then((wallets) {
-        if(wallets.isNotEmpty && mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+        if (wallets.isNotEmpty && mounted) {
+          Provider.of<HomeProvider>(context, listen: false)
+              .setWalletList(wallets);
         }
       });
     }).onError((error, stackTrace) {
@@ -176,7 +188,12 @@ class _HomeWalletState extends State<HomeWallet> {
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
       throw Exception("Error when get wallet data");
-    });
+    }).whenComplete(
+      () {
+        // remove loading screen
+        LoadingScreen.instance().hide();
+      },
+    );
 
     return true;
   }
@@ -188,90 +205,93 @@ class _HomeWalletState extends State<HomeWallet> {
         extentRatio: 0.9,
         children: <SlidableAction>[
           SlidableAction(
-            label: 'Edit',
-            padding: const EdgeInsets.all(0),
-            foregroundColor: accentColors[1],
-            backgroundColor: primaryBackground,
-            icon: Ionicons.pencil,
-            onPressed: ((_) {
-              Navigator.pushNamed(context, '/wallet/edit', arguments: wallet);
-            })
-          ),
+              label: 'Edit',
+              padding: const EdgeInsets.all(0),
+              foregroundColor: accentColors[1],
+              backgroundColor: primaryBackground,
+              icon: Ionicons.pencil,
+              onPressed: ((_) {
+                Navigator.pushNamed(context, '/wallet/edit', arguments: wallet);
+              })),
           SlidableAction(
-            label: 'Delete',
-            padding: const EdgeInsets.all(0),
-            foregroundColor: accentColors[2],
-            backgroundColor: primaryBackground,
-            icon: Ionicons.trash,
-            onPressed: ((_) {
-              late Future<bool?> result = ShowMyDialog(
-                dialogTitle: "Delete Wallet",
-                dialogText: "Do you want to delete ${wallet.name}?\nThis will also delete all related transaction to this wallet.",
-                confirmText: "Delete",
-                confirmColor: accentColors[2],
-                cancelText: "Cancel"
-              ).show(context);
+              label: 'Delete',
+              padding: const EdgeInsets.all(0),
+              foregroundColor: accentColors[2],
+              backgroundColor: primaryBackground,
+              icon: Ionicons.trash,
+              onPressed: ((_) {
+                late Future<bool?> result = ShowMyDialog(
+                        dialogTitle: "Delete Wallet",
+                        dialogText:
+                            "Do you want to delete ${wallet.name}?\nThis will also delete all related transaction to this wallet.",
+                        confirmText: "Delete",
+                        confirmColor: accentColors[2],
+                        cancelText: "Cancel")
+                    .show(context);
 
-              // check the result of the dialog box
-              result.then((value) async {
-                if(value == true) {
-                  await _deleteWallet(wallet.id).then((_) {
-                    if (mounted) {
-                      // clear all the cache for the application so we can just
-                      // fetch again all data from internet, for this let user knew
-                      // that we will delete all the cache
-                      late Future<bool?> userConfirm = ShowMyDialog(
+                // check the result of the dialog box
+                result.then((value) async {
+                  if (value == true) {
+                    await _deleteWallet(wallet.id).then((_) {
+                      if (mounted) {
+                        // clear all the cache for the application so we can just
+                        // fetch again all data from internet, for this let user knew
+                        // that we will delete all the cache
+                        late Future<bool?> userConfirm = ShowMyDialog(
                           dialogTitle: "Cache Clear",
-                          dialogText: "We will clear all the cache for the application.",
+                          dialogText:
+                              "We will clear all the cache for the application.",
                           confirmText: "Okay",
                           confirmColor: accentColors[0],
-                      ).show(context);
-                      
-                      userConfirm.then((value) {
-                        _clearCache();
-                      });
-                    }
-                  }).onError((error, stackTrace) {
-                    debugPrint("Error when clicking delete wallet");
-                  });
-                }
-              });
-            })
-          ),
-          SlidableAction(
-            label: (wallet.enabled ? 'Disable' : 'Enable'),
-            padding: const EdgeInsets.all(0),
-            foregroundColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
-            backgroundColor: primaryBackground,
-            icon: (wallet.enabled ? Ionicons.alert : Ionicons.checkmark),
-            onPressed: ((_) {
-              late Future<bool?> result = ShowMyDialog(
-                dialogTitle: "${wallet.enabled ? 'Disable' : 'Enable'} Wallet",
-                dialogText: "Do you want to ${wallet.enabled ? 'Disable' : 'Enable'} ${wallet.name}?",
-                confirmText: (wallet.enabled ? 'Disable' : 'Enable'),
-                confirmColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
-                cancelText: "Cancel")
-                .show(context);
+                        ).show(context);
 
-              // check the result of the dialog box
-              result.then((value) {
-                if (value == true) {
-                  // enable/disable the wallet
-                  _getData = _enableDisableWallet(wallet);
-                }
-              });
-            })
-          ),
+                        userConfirm.then((value) {
+                          _clearCache();
+                        });
+                      }
+                    }).onError((error, stackTrace) {
+                      debugPrint("Error when clicking delete wallet");
+                    });
+                  }
+                });
+              })),
           SlidableAction(
-            label: 'Stat',
-            padding: const EdgeInsets.all(0),
-            foregroundColor: accentColors[3],
-            backgroundColor: primaryBackground,
-            icon: Ionicons.bar_chart,
-            onPressed: ((_) {
-              Navigator.pushNamed(context, '/wallet/stat', arguments: wallet);
-            })
-          ),
+              label: (wallet.enabled ? 'Disable' : 'Enable'),
+              padding: const EdgeInsets.all(0),
+              foregroundColor:
+                  (wallet.enabled ? accentColors[7] : accentColors[6]),
+              backgroundColor: primaryBackground,
+              icon: (wallet.enabled ? Ionicons.alert : Ionicons.checkmark),
+              onPressed: ((_) {
+                late Future<bool?> result = ShowMyDialog(
+                        dialogTitle:
+                            "${wallet.enabled ? 'Disable' : 'Enable'} Wallet",
+                        dialogText:
+                            "Do you want to ${wallet.enabled ? 'Disable' : 'Enable'} ${wallet.name}?",
+                        confirmText: (wallet.enabled ? 'Disable' : 'Enable'),
+                        confirmColor: (wallet.enabled
+                            ? accentColors[7]
+                            : accentColors[6]),
+                        cancelText: "Cancel")
+                    .show(context);
+
+                // check the result of the dialog box
+                result.then((value) {
+                  if (value == true) {
+                    // enable/disable the wallet
+                    _getData = _enableDisableWallet(wallet);
+                  }
+                });
+              })),
+          SlidableAction(
+              label: 'Stat',
+              padding: const EdgeInsets.all(0),
+              foregroundColor: accentColors[3],
+              backgroundColor: primaryBackground,
+              icon: Ionicons.bar_chart,
+              onPressed: ((_) {
+                Navigator.pushNamed(context, '/wallet/stat', arguments: wallet);
+              })),
         ],
       ),
       child: Wallet(wallet: wallet),
@@ -279,23 +299,28 @@ class _HomeWalletState extends State<HomeWallet> {
   }
 
   Future<bool> _enableDisableWallet(WalletModel wallet) async {
-    Future <List<WalletModel>> walletList;
-    Future <List<CurrencyModel>> walletCurrencyList;
+    Future<List<WalletModel>> walletList;
+    Future<List<CurrencyModel>> walletCurrencyList;
 
-    Future.wait([
+    // show loading screen
+    LoadingScreen.instance().show(context: context);
+
+    await Future.wait([
       walletList = _walletHttpService.enableWallet(wallet, !wallet.enabled),
       walletCurrencyList = _walletHttpService.fetchWalletCurrencies(true),
     ]).then((_) {
       // set the provider with the new wallets we got
       walletList.then((wallets) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+          Provider.of<HomeProvider>(context, listen: false)
+              .setWalletList(wallets);
         }
       });
 
       walletCurrencyList.then((walletsCurrency) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
+          Provider.of<HomeProvider>(context, listen: false)
+              .setWalletCurrency(walletsCurrency);
         }
       });
     }).onError((error, stackTrace) {
@@ -304,6 +329,9 @@ class _HomeWalletState extends State<HomeWallet> {
       debugPrint(error.toString());
       debugPrintStack(stackTrace: stackTrace);
       throw Exception("Error when enabling the wallet");
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
     });
 
     return true;

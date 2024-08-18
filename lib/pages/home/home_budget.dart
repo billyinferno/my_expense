@@ -8,6 +8,7 @@ import 'package:my_expense/api/budget_api.dart';
 import 'package:my_expense/model/budget_model.dart';
 import 'package:my_expense/model/currency_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
@@ -471,7 +472,7 @@ class _HomeBudgetState extends State<HomeBudget> {
     String budgetDate = DateFormat('yyyy-MM-dd').format(_selectedDate.toLocal());
 
     // show the debug print to know that we are refreshing/fetching budget
-    debugPrint("📃 Refresh Budget at $budgetDate");
+    Log.info(message: "📃 Refresh Budget at $budgetDate");
 
     // get the budget data
     await _budgetHTTP.fetchBudgetDate(_currentCurrencies!.id, budgetDate, isForce).then((value) {
@@ -481,8 +482,11 @@ class _HomeBudgetState extends State<HomeBudget> {
         LoadingScreen.instance().hide();
       }
     }).onError((error, stackTrace) {
-      debugPrint("🚫 Error when fetching budget data");
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "🚫 Error when fetching budget data",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when fetching budget data");
     },);
 

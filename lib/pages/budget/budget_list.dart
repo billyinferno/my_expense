@@ -12,6 +12,7 @@ import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/args/budget_detail_args.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/decimal_formatter.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
@@ -41,13 +42,12 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
   late BudgetListModel? _budgetList;
   late double? _budgetAmount;
+  late Future<bool> _getData;
 
   int _currencyID = -1;
   double _totalAmount = 0.0;
-  bool _isLoading = true;
   bool _isDataChanged = false;
   Map<int, CategoryModel> _expenseCategory = {};
-
 
   @override
   void initState() {
@@ -64,7 +64,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
     _expenseCategory = CategorySharedPreferences.getCategory("expense");
 
     // fetch the current budget
-    _fetchBudget(true);
+    _getData = _fetchBudget(true);
   }
 
   @override
@@ -72,7 +72,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
     _scrollController.dispose();
     _scrollControllerAddCategory.dispose();
     _amountController.dispose();
-    
+
     super.dispose();
   }
 
@@ -85,16 +85,16 @@ class _BudgetListPageState extends State<BudgetListPage> {
           icon: const Icon(Ionicons.close_outline, color: textColor),
           onPressed: (() {
             // check if got data changed already or not?
-            if(_isDataChanged) {
+            if (_isDataChanged) {
               // show a modal dialog telling that you already change data
               // and not yet save the budget list
               late Future<bool?> result = ShowMyDialog(
-                      dialogTitle: "Discard Data",
-                      dialogText: "Do you want to discard budget changes?",
-                      confirmText: "Discard",
-                      confirmColor: accentColors[2],
-                      cancelText: "Cancel")
-                  .show(context);
+                dialogTitle: "Discard Data",
+                dialogText: "Do you want to discard budget changes?",
+                confirmText: "Discard",
+                confirmColor: accentColors[2],
+                cancelText: "Cancel")
+              .show(context);
 
               // check the result of the dialog box
               result.then((value) {
@@ -102,8 +102,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                   Navigator.pop(context);
                 }
               });
-            }
-            else {
+            } else {
               Navigator.pop(context);
             }
           }),
@@ -118,8 +117,11 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 }
               }).onError((error, stackTrace) async {
                 // print the error
-                debugPrint("Error ${error.toString()}");
-                debugPrintStack(stackTrace: stackTrace);
+                Log.error(
+                  message: "Error while updating budget list",
+                  error: error,
+                  stackTrace: stackTrace,
+                );
 
                 if (context.mounted) {
                   // show dialog of error
@@ -127,8 +129,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
                     cancelEnabled: false,
                     confirmText: "OK",
                     dialogTitle: "Error Update Budget",
-                    dialogText: "Error while updating budget list."
-                  ).show(context);
+                    dialogText: "Error while updating budget list.")
+                  .show(context);
                 }
               });
             },
@@ -139,133 +141,148 @@ class _BudgetListPageState extends State<BudgetListPage> {
           ),
         ],
       ),
-      body: Container(
-        child: budgetListView(),
+      body: FutureBuilder(
+        future: _getData,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text("Error when get budget list"),);
+          }
+          else if (snapshot.hasData) {
+            return _budgetListView();
+          }
+          else {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SpinKitFadingCube(
+                  color: accentColors[6],
+                  size: 25,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                const Text(
+                  "loading...",
+                  style: TextStyle(
+                    color: textColor2,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            );
+          }
+        },
       ),
     );
   }
 
-  Widget budgetListView() {
-    if (_isLoading) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SpinKitFadingCube(
-            color: accentColors[6],
-            size: 25,
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          const Text(
-            "loading...",
-            style: TextStyle(
-              color: textColor2,
-              fontSize: 10,
-            ),
-          ),
-        ],
-      );
-    } else {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          budgetCurrencySelector(
-            ccy: (_budgetList?.currency),
-            totalAmount: _totalAmount,
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-              child: Consumer<HomeProvider>(
-                builder: ((context, homeProvider, child) {
-                  return generateListItem(homeProvider.budgetAddList);
-                }),
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Container(
-            padding: const EdgeInsets.all(10),
-            margin: const EdgeInsets.fromLTRB(0, 0, 0, 25),
-            child: MaterialButton(
-              height: 40,
-              minWidth: double.infinity,
-              onPressed: (() {
-                showModalBottomSheet<void>(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return MyBottomSheet(
-                      context: context,
-                      title: "Categories",
-                      screenRatio: 0.75,
-                      child: ListView.builder(
-                        controller: _scrollControllerAddCategory,
-                        itemCount: _expenseCategory.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          int key = _expenseCategory.keys.elementAt(index);
-                          return SimpleItem(
-                            color: IconColorList.getExpenseColor(_expenseCategory[key]!.name),
-                            title: _expenseCategory[key]!.name,
-                            isSelected: (_checkIfCategorySelected(_expenseCategory[key]!.id)),
-                            onTap: (() async {
-                              // check if this is not already added as budget or not?
-                              // if not yet then we can add this new budget to the budget list
-                              if (!_checkIfCategorySelected(_expenseCategory[key]!.id)) {
-                                await _addBudget(_expenseCategory[key]!.id,_currencyID).then((_) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      createSnackBar(
-                                        message: "Success add new category",
-                                        icon: Icon(
-                                          Ionicons.checkmark_circle_outline,
-                                          color: accentColors[6],
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }).onError((error, stackTrace) async {
-                                  // print the error
-                                  debugPrint("ERROR: ${error.toString()}");
-                                  debugPrintStack(stackTrace: stackTrace);
-
-                                  if (context.mounted) {
-                                    // show error dialog
-                                    await ShowMyDialog(
-                                      cancelEnabled: false,
-                                      confirmText: "OK",
-                                      dialogTitle: "Error Add Budget",
-                                      dialogText: "Error while add budget category."
-                                    ).show(context);
-                                  }
-                                });
-                              }
-                              // remove the modal dialog
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                              }
-                            }),
-                            icon: IconColorList.getExpenseIcon(_expenseCategory[key]!.name),
-                          );
-                        },
-                      ),
-                    );
-                  }
-                );
+  Widget _budgetListView() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        budgetCurrencySelector(
+          ccy: (_budgetList?.currency),
+          totalAmount: _totalAmount,
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Consumer<HomeProvider>(
+              builder: ((context, homeProvider, child) {
+                return generateListItem(homeProvider.budgetAddList);
               }),
-              color: accentColors[5],
-              child: const Text("Add New Category"),
             ),
           ),
-        ],
-      );
-    }
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Container(
+          padding: const EdgeInsets.all(10),
+          margin: const EdgeInsets.fromLTRB(0, 0, 0, 25),
+          child: MaterialButton(
+            height: 40,
+            minWidth: double.infinity,
+            onPressed: (() {
+              showModalBottomSheet<void>(
+                context: context,
+                builder: (BuildContext context) {
+                  return MyBottomSheet(
+                    context: context,
+                    title: "Categories",
+                    screenRatio: 0.75,
+                    child: ListView.builder(
+                      controller: _scrollControllerAddCategory,
+                      itemCount: _expenseCategory.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        int key = _expenseCategory.keys.elementAt(index);
+                        return SimpleItem(
+                          color: IconColorList.getExpenseColor(_expenseCategory[key]!.name),
+                          title: _expenseCategory[key]!.name,
+                          isSelected: (_checkIfCategorySelected(_expenseCategory[key]!.id)),
+                          onTap: (() async {
+                            // check if this is not already added as budget or not?
+                            // if not yet then we can add this new budget to the budget list
+                            if (!_checkIfCategorySelected(
+                                _expenseCategory[key]!.id)) {
+                              await _addBudget(
+                                _expenseCategory[key]!.id,
+                                _currencyID
+                              ).then((_) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    createSnackBar(
+                                      message: "Success add new category",
+                                      icon: Icon(
+                                        Ionicons.checkmark_circle_outline,
+                                        color: accentColors[6],
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }).onError((error, stackTrace) async {
+                                // print the error
+                                Log.error(
+                                  message: "Error while add budget category",
+                                  error: error,
+                                  stackTrace: stackTrace,
+                                );
+
+                                if (context.mounted) {
+                                  // show error dialog
+                                  await ShowMyDialog(
+                                    cancelEnabled: false,
+                                    confirmText: "OK",
+                                    dialogTitle: "Error Add Budget",
+                                    dialogText: "Error while add budget category.")
+                                  .show(context);
+                                }
+                              });
+                            }
+                            // remove the modal dialog
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          }),
+                          icon: IconColorList.getExpenseIcon(_expenseCategory[key]!.name),
+                        );
+                      },
+                    ),
+                  );
+                }
+              );
+            }),
+            color: accentColors[5],
+            child: const Text("Add New Category"),
+          ),
+        ),
+      ],
+    );
+
   }
 
   Widget generateListItem(List<BudgetModel> budgetList) {
@@ -289,7 +306,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
             currencySymbol: budget.currency.symbol,
             budgetAmount: budget.amount
           );
-          
+
           return CategoryListItem(
             index: index,
             budgetId: budget.id,
@@ -301,22 +318,20 @@ class _BudgetListPageState extends State<BudgetListPage> {
             currencySymbol: budget.currency.symbol,
             budgetAmount: budget.amount,
             onDelete: (() {
-              if (!_isLoading) {
-                late Future<bool?> result = ShowMyDialog(
-                        dialogTitle: "Delete Budget",
-                        dialogText: "Do you want to delete ${budget.category.name}?",
-                        confirmText: "Delete",
-                        confirmColor: accentColors[2],
-                        cancelText: "Cancel")
-                    .show(context);
+              late Future<bool?> result = ShowMyDialog(
+                dialogTitle: "Delete Budget",
+                dialogText: "Do you want to delete ${budget.category.name}?",
+                confirmText: "Delete",
+                confirmColor: accentColors[2],
+                cancelText: "Cancel")
+              .show(context);
 
-                // check the result of the dialog box
-                result.then((value) {
-                  if (value == true) {
-                    _deleteBudgetList(budget.id, budget.currency.id);
-                  }
-                });
-              }
+              // check the result of the dialog box
+              result.then((value) {
+                if (value == true) {
+                  _deleteBudgetList(budget.id, budget.currency.id);
+                }
+              });
             }),
             onTap: ((index) {
               showDialog(
@@ -324,7 +339,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 builder: ((context) {
                   // set the amount controller with the current budget
                   _amountController.text = fCCY.format(budgetArgs.budgetAmount);
-                  _budgetAmount= budgetArgs.budgetAmount;
+                  _budgetAmount = budgetArgs.budgetAmount;
 
                   return AlertDialog(
                     content: SizedBox(
@@ -342,7 +357,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
                             ),
                             child: budgetArgs.categoryIcon,
                           ),
-                          const SizedBox(width: 10,),
+                          const SizedBox(
+                            width: 10,
+                          ),
                           Expanded(
                             child: SizedBox(
                               height: 60,
@@ -351,7 +368,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: <Widget>[
                                   Text("Edit ${budgetArgs.categoryName}"),
-                                  const SizedBox(height: 5,),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
                                   TextField(
                                     controller: _amountController,
                                     showCursor: true,
@@ -371,17 +390,13 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                     ),
                                     inputFormatters: [
                                       LengthLimitingTextInputFormatter(12),
-                                      DecimalTextInputFormatter(decimalRange: 3),
+                                      DecimalTextInputFormatter(
+                                        decimalRange: 3
+                                      ),
                                     ],
                                     onChanged: ((value) {
                                       if (value.isNotEmpty) {
-                                        try {
-                                          _budgetAmount = (double.tryParse(value) ?? budgetArgs.budgetAmount);
-                                        }
-                                        catch(ex) {
-                                          // defaulted to budget amount from parent
-                                          _budgetAmount = budgetArgs.budgetAmount;
-                                        }
+                                        _budgetAmount = (double.tryParse(value) ?? budgetArgs.budgetAmount);
                                       }
                                     }),
                                   ),
@@ -419,7 +434,11 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                     size: 15,
                                   ),
                                   SizedBox(width: 10,),
-                                  Expanded(child: Center(child: Text("Cancel"))),
+                                  Expanded(
+                                    child: Center(
+                                      child: Text("Cancel")
+                                    )
+                                  ),
                                 ],
                               ),
                             ),
@@ -430,31 +449,36 @@ class _BudgetListPageState extends State<BudgetListPage> {
                               if (_budgetAmount != null) {
                                 _isDataChanged = true;
                                 List<BudgetModel> newBudgetList = [];
-                                for(int i=0; i<_budgetList!.budgets.length; i++) {
-                                  if(i == index) {
+                                for (int i = 0; i < _budgetList!.budgets.length; i++) {
+                                  if (i == index) {
                                     // special treatment
                                     newBudgetList.add(BudgetModel(
-                                        id: _budgetList!.budgets[i].id,
-                                        category: _budgetList!.budgets[i].category,
-                                        totalTransaction: _budgetList!.budgets[i].totalTransaction,
-                                        amount: (_budgetAmount ?? budgetArgs.budgetAmount),
-                                        used: _budgetList!.budgets[i].used,
-                                        status: "in",
-                                        currency: _budgetList!.budgets[i].currency,
-                                      )
-                                    );
-                                  }
-                                  else {
+                                      id: _budgetList!.budgets[i].id,
+                                      category: _budgetList!.budgets[i].category,
+                                      totalTransaction: _budgetList!.budgets[i].totalTransaction,
+                                      amount: (_budgetAmount ?? budgetArgs.budgetAmount),
+                                      used: _budgetList!.budgets[i].used,
+                                      status: "in",
+                                      currency: _budgetList!.budgets[i].currency,
+                                    ));
+                                  } else {
                                     newBudgetList.add(_budgetList!.budgets[i]);
                                   }
                                 }
 
                                 // create the new budget list model
-                                BudgetListModel newBudgetListModel = BudgetListModel(currency: _budgetList!.currency, budgets: newBudgetList);
+                                BudgetListModel newBudgetListModel =
+                                  BudgetListModel(
+                                    currency: _budgetList!.currency,
+                                    budgets: newBudgetList
+                                  );
 
                                 // set the new budget and announce
-                                setBudgetList(newBudgetListModel);
-                                Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(newBudgetListModel.budgets);
+                                _setBudgetList(newBudgetListModel);
+                                Provider.of<HomeProvider>(
+                                  context,
+                                  listen: false
+                                ).setBudgetAddList(newBudgetListModel.budgets);
 
                                 // remove the dialog
                                 Navigator.pop(context);
@@ -476,7 +500,11 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                     size: 15,
                                   ),
                                   SizedBox(width: 10,),
-                                  Expanded(child: Center(child: Text("Save"))),
+                                  Expanded(
+                                    child: Center(
+                                      child: Text("Save")
+                                    )
+                                  ),
                                 ],
                               ),
                             ),
@@ -533,7 +561,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
     }
   }
 
-  void setBudgetList(BudgetListModel budgetList) {
+  void _setBudgetList(BudgetListModel budgetList) {
     setState(() {
       _budgetList = budgetList;
 
@@ -546,27 +574,29 @@ class _BudgetListPageState extends State<BudgetListPage> {
     });
   }
 
-  void setLoading(bool isLoading) {
-    setState(() {
-      _isLoading = isLoading;
-    });
-  }
-
-  Future<void> _fetchBudget([bool? force]) async {
+  Future<bool> _fetchBudget([bool? force]) async {
     bool isForce = (force ?? false);
     // fetch the budget from the web
     await _budgetHttp.fetchBudgetsList(_currencyID, isForce).then((result) {
-      setBudgetList(result);
+      _setBudgetList(result);
       if (mounted) {
-        Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(result.budgets);
+        Provider.of<HomeProvider>(
+          context,
+          listen: false
+        ).setBudgetAddList(result.budgets);
       }
-      setLoading(false);
     }).onError((error, stackTrace) {
       // got error
-      debugPrint("Error when <_fetchBudget> at BudgetList");
-      debugPrint(error.toString());
-      setLoading(false);
+      Log.error(
+        message: "Error when <_fetchBudget> at BudgetList",
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      throw Exception('Error when retreiving budget list');
     });
+
+    return true;
   }
 
   bool _checkIfCategorySelected(int id) {
@@ -593,17 +623,23 @@ class _BudgetListPageState extends State<BudgetListPage> {
       // we got the new budget, add this to the shared preferences and the
       // provider
       if (_budgetList!.budgets.isNotEmpty) {
-        _budgetList!.budgets.removeWhere((element) => element.id == budget.id && element.currency.id == budget.currency.id);
+        _budgetList!.budgets.removeWhere((element) =>
+          element.id == budget.id &&
+          element.currency.id == budget.currency.id
+        );
 
         // create new budget list model with the new budget we added
         BudgetListModel newBudgetList = BudgetListModel(
-            currency: _budgetList!.currency,
-            budgets: _budgetList!.budgets
+          currency: _budgetList!.currency,
+          budgets: _budgetList!.budgets
         );
 
-        setBudgetList(newBudgetList);
+        _setBudgetList(newBudgetList);
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(newBudgetList.budgets);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setBudgetAddList(newBudgetList.budgets);
         }
 
         // set the budget on the home screen, since the budget on the home screen
@@ -611,22 +647,36 @@ class _BudgetListPageState extends State<BudgetListPage> {
         // on the home budget?
         String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
         List<BudgetModel>? homeBudgetList = BudgetSharedPreferences.getBudget(_currencyID, currentBudgetDate);
-        if(homeBudgetList != null) {
-          if(homeBudgetList.isNotEmpty) {
-            homeBudgetList.removeWhere((element) => element.id == budget.id && element.currency.id == budget.currency.id);
+        if (homeBudgetList != null) {
+          if (homeBudgetList.isNotEmpty) {
+            homeBudgetList.removeWhere((element) =>
+              element.id == budget.id &&
+              element.currency.id == budget.currency.id
+            );
 
             // store back the home budget list
-            BudgetSharedPreferences.setBudget(_currencyID, currentBudgetDate, homeBudgetList);
+            BudgetSharedPreferences.setBudget(
+              _currencyID,
+              currentBudgetDate,
+              homeBudgetList
+            );
+
             if (mounted) {
               // after that notify the budget list on the home
-              Provider.of<HomeProvider>(context, listen: false).setBudgetList(homeBudgetList);
+              Provider.of<HomeProvider>(
+                context,
+                listen: false
+              ).setBudgetList(homeBudgetList);
             }
           }
         }
       }
     }).onError((error, stackTrace) {
-      debugPrint("Error oon <_deleteBudgetList> at BudgetList");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error on <_deleteBudgetList> at BudgetList",
+        error: error,
+        stackTrace: stackTrace,
+      );
     }).whenComplete(() {
       // remove the loading screen
       LoadingScreen.instance().hide();
@@ -648,12 +698,12 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
       // create new budget list model with the new budget we added
       BudgetListModel newBudgetList = BudgetListModel(
-          currency: _budgetList!.currency,
-          budgets: newBudgets
+        currency: _budgetList!.currency,
+        budgets: newBudgets
       );
       _budgetList = newBudgetList;
 
-      setBudgetList(newBudgetList);
+      _setBudgetList(newBudgetList);
       if (mounted) {
         Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(newBudgetList.budgets);
       }
@@ -662,17 +712,23 @@ class _BudgetListPageState extends State<BudgetListPage> {
       // is based on date, first we need to get what is the curren date being displayed
       // on the home budget?
       String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-      List<BudgetModel>? homeBudgetList = (BudgetSharedPreferences.getBudget(_currencyID, currentBudgetDate) ?? []);
+      List<BudgetModel>? homeBudgetList = (
+        BudgetSharedPreferences.getBudget(_currencyID, currentBudgetDate) ?? []
+      );
       homeBudgetList.add(budget);
       // store back the home budget list
-      BudgetSharedPreferences.setBudget(_currencyID, currentBudgetDate, homeBudgetList);
+      BudgetSharedPreferences.setBudget(
+          _currencyID, currentBudgetDate, homeBudgetList);
       if (mounted) {
         // after that notify the budget list on the home
         Provider.of<HomeProvider>(context, listen: false).setBudgetList(homeBudgetList);
       }
     }).onError((error, stackTrace) {
-      debugPrint("Error oon <_addBudget> at BudgetList");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error on <_addBudget> at BudgetList",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when adding new budgets");
     }).whenComplete(() {
       // remove the loading screen
@@ -680,10 +736,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
     });
   }
 
-  Future <void> _updateBudgetList() async {
+  Future<void> _updateBudgetList() async {
     // we will only save if the budget length more than 0, otherwise, no need to send any
     // data to backend
-    if(_budgetList!.budgets.isNotEmpty) {
+    if (_budgetList!.budgets.isNotEmpty) {
       // show the loading screen
       LoadingScreen.instance().show(context: context);
 
@@ -706,32 +762,29 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
           // check if the current home budget list got data or not?
           // if got data then we can loop and add the new amount on the existing list
-          if(currentHomeBudgetList != null) {
+          if (currentHomeBudgetList != null) {
             // loop through the _currentHomeBudgetList and add on the _newHomeBudgetList
             for (BudgetModel element in updatedBudgetList) {
               // check if this element same to which id and store the amount
               double used = 0.0;
-              for(int i=0; i<currentHomeBudgetList.length; i++) {
-                if(element.id == currentHomeBudgetList[i].id) {
+              for (int i = 0; i < currentHomeBudgetList.length; i++) {
+                if (element.id == currentHomeBudgetList[i].id) {
                   used = currentHomeBudgetList[i].used;
                 }
               }
 
               // add the new budget
-              newHomeBudgetList.add(
-                BudgetModel(
-                  id: element.id,
-                  category: element.category,
-                  totalTransaction: element.totalTransaction,
-                  amount: element.amount,
-                  used: used,
-                  status: "in",
-                  currency: element.currency
-                )
+              newHomeBudgetList.add(BudgetModel(
+                id: element.id,
+                category: element.category,
+                totalTransaction: element.totalTransaction,
+                amount: element.amount,
+                used: used,
+                status: "in",
+                currency: element.currency)
               );
             }
-          }
-          else {
+          } else {
             // current home list is null?
             // just set the _newHomeBudget list with the _updatedBudgetList
             newHomeBudgetList = updatedBudgetList;
@@ -739,18 +792,20 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
           // set the new home list to the home list budget, so we can directly reflect the data
           BudgetSharedPreferences.setBudget(_currencyID, budgetDate, newHomeBudgetList);
-          if(budgetDate == currentBudgetDate) {
+          if (budgetDate == currentBudgetDate) {
             if (mounted) {
               // after that notify the budget list on the home if this is the same as the current budget
               Provider.of<HomeProvider>(context, listen: false).setBudgetList(newHomeBudgetList);
             }
           }
         }
-
       }).onError((error, stackTrace) {
-        debugPrint("Error oon <_addBudget> at BudgetList");
-        debugPrint(error.toString());
-        
+        Log.error(
+          message: "Error on <_addBudget> at BudgetList",
+          error: error,
+          stackTrace: stackTrace,
+        );
+
         throw Exception("Cannot save budgets");
       }).whenComplete(() {
         // remove the loading screen

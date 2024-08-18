@@ -12,6 +12,7 @@ import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/utils/function/date_utils.dart' as dt_utils;
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/utils/globals.dart';
@@ -32,8 +33,7 @@ class HomeList extends StatefulWidget {
   final MyDateTimeCallback userDateSelect;
 
   const HomeList(
-      {super.key, required this.userIconPress,
-      required this.userDateSelect});
+      {super.key, required this.userIconPress, required this.userDateSelect});
 
   @override
   State<HomeList> createState() => _HomeListState();
@@ -49,7 +49,7 @@ class _HomeListState extends State<HomeList> {
   String _refreshDay = "";
   CalendarFormat _currentCalendarFormat = CalendarFormat.week;
   Icon _currentCalendarIcon = const Icon(Ionicons.caret_down, size: 10);
-  
+
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
@@ -68,12 +68,12 @@ class _HomeListState extends State<HomeList> {
   @override
   void initState() {
     _userMe = UserSharedPreferences.getUserMe();
-    
+
     _appTitleMonth = DateFormat('MMMM').format(_currentFocusedDay.toLocal());
     _appTitleYear = DateFormat('yyyy').format(_currentFocusedDay.toLocal());
 
     _getData = _refreshTransaction(_currentFocusedDay, true);
-    
+
     super.initState();
   }
 
@@ -94,7 +94,8 @@ class _HomeListState extends State<HomeList> {
           }),
           onDoubleTap: (() {
             // go to the current date
-            _setFocusedDay(DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day));
+            _setFocusedDay(DateTime(
+                DateTime.now().year, DateTime.now().month, DateTime.now().day));
             _getData = _refreshTransaction(_currentFocusedDay);
           }),
           child: Container(
@@ -123,18 +124,6 @@ class _HomeListState extends State<HomeList> {
       body: Column(
         children: [
           GestureDetector(
-            onVerticalDragEnd: ((DragEndDetails details) {
-              double velocity = (details.primaryVelocity ?? 0);
-              debugPrint(velocity.toString());
-              if(velocity != 0) {
-                if(velocity > 0) {
-                  debugPrint("Up");
-                }
-                else if(velocity < 0) {
-                  debugPrint("Down");
-                }
-              }
-            }),
             child: Container(
               decoration: const BoxDecoration(
                 color: primaryDark,
@@ -182,10 +171,12 @@ class _HomeListState extends State<HomeList> {
               setState(() {
                 if (_currentCalendarFormat == CalendarFormat.week) {
                   _currentCalendarFormat = CalendarFormat.month;
-                  _currentCalendarIcon = const Icon(Ionicons.caret_up, size: 10);
+                  _currentCalendarIcon =
+                      const Icon(Ionicons.caret_up, size: 10);
                 } else {
                   _currentCalendarFormat = CalendarFormat.week;
-                  _currentCalendarIcon = const Icon(Ionicons.caret_down, size: 10);
+                  _currentCalendarIcon =
+                      const Icon(Ionicons.caret_down, size: 10);
                 }
               });
             },
@@ -220,7 +211,8 @@ class _HomeListState extends State<HomeList> {
                   Text(
                     (dt_utils.isSameDay(_currentFocusedDay, DateTime.now())
                         ? "Today"
-                        : DateFormat('dd MMMM yyyy').format(_currentFocusedDay.toLocal())),
+                        : DateFormat('dd MMMM yyyy')
+                            .format(_currentFocusedDay.toLocal())),
                     style: const TextStyle(
                       fontSize: 12,
                     ),
@@ -231,10 +223,10 @@ class _HomeListState extends State<HomeList> {
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: Consumer<HomeProvider>(
-                          builder: (context, homeProvider, child) {
-                            return _getTotalIncomeExpense(homeProvider.transactionList);
-                          }
-                        ),
+                            builder: (context, homeProvider, child) {
+                          return _getTotalIncomeExpense(
+                              homeProvider.transactionList);
+                        }),
                       ),
                     ),
                   ),
@@ -247,12 +239,12 @@ class _HomeListState extends State<HomeList> {
               future: _getData,
               builder: ((context, snapshot) {
                 if (snapshot.hasError) {
-                  return const Center(child: Text("Error when get transaction list"),);
-                }
-                else if (snapshot.hasData) {
+                  return const Center(
+                    child: Text("Error when get transaction list"),
+                  );
+                } else if (snapshot.hasData) {
                   return _generateView();
-                }
-                else {
+                } else {
                   // show loading
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -261,7 +253,9 @@ class _HomeListState extends State<HomeList> {
                         color: accentColors[6],
                         size: 25,
                       ),
-                      const SizedBox(height: 10,),
+                      const SizedBox(
+                        height: 10,
+                      ),
                       const Text(
                         "loading...",
                         style: TextStyle(
@@ -306,14 +300,15 @@ class _HomeListState extends State<HomeList> {
               surface: secondaryDark,
               onSurface: textColor2,
             ),
-            dialogBackgroundColor:secondaryBackground,
+            dialogBackgroundColor: secondaryBackground,
           ),
           child: child!,
         );
       }),
     ).then((newDate) {
-      if(newDate != null) {
-        _setFocusedDay(DateTime(newDate.toLocal().year, newDate.toLocal().month, newDate.toLocal().day));
+      if (newDate != null) {
+        _setFocusedDay(DateTime(newDate.toLocal().year, newDate.toLocal().month,
+            newDate.toLocal().day));
         _getData = _refreshTransaction(_currentFocusedDay);
       }
     });
@@ -326,13 +321,13 @@ class _HomeListState extends State<HomeList> {
         return GestureDetector(
           onHorizontalDragEnd: ((DragEndDetails details) {
             double velocity = (details.primaryVelocity ?? 0);
-            if(velocity != 0) {
-              if(velocity > 0) {
+            if (velocity != 0) {
+              if (velocity > 0) {
                 // go to the previous day
-                _setFocusedDay(_currentFocusedDay.subtract(const Duration(days: 1)));
+                _setFocusedDay(
+                    _currentFocusedDay.subtract(const Duration(days: 1)));
                 _getData = _refreshTransaction(_currentFocusedDay);
-              }
-              else if(velocity < 0) {
+              } else if (velocity < 0) {
                 // go to the next day
                 _setFocusedDay(_currentFocusedDay.add(const Duration(days: 1)));
                 _getData = _refreshTransaction(_currentFocusedDay);
@@ -354,9 +349,10 @@ class _HomeListState extends State<HomeList> {
                   if (index < _transactionData.length) {
                     TransactionListModel txn = _transactionData[index];
                     return _generateListItem(index, txn, context);
-                  }
-                  else {
-                    return const SizedBox(height: 30,);
+                  } else {
+                    return const SizedBox(
+                      height: 30,
+                    );
                   }
                 },
               ),
@@ -378,35 +374,35 @@ class _HomeListState extends State<HomeList> {
     });
   }
 
-  Widget _generateListItem(int index, TransactionListModel txn, BuildContext context) {
+  Widget _generateListItem(
+      int index, TransactionListModel txn, BuildContext context) {
     return Slidable(
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
         extentRatio: 0.20,
         children: <SlidableAction>[
           SlidableAction(
-            label: 'Delete',
-            padding: const EdgeInsets.all(0),
-            foregroundColor: textColor,
-            backgroundColor: accentColors[2],
-            icon: Ionicons.trash,
-            onPressed: ((_) {
-              late Future<bool?> result = ShowMyDialog(
-                      dialogTitle: "Delete Item",
-                      dialogText: "Do you want to delete ${txn.name}?",
-                      confirmText: "Delete",
-                      confirmColor: accentColors[2],
-                      cancelText: "Cancel")
-                  .show(context);
+              label: 'Delete',
+              padding: const EdgeInsets.all(0),
+              foregroundColor: textColor,
+              backgroundColor: accentColors[2],
+              icon: Ionicons.trash,
+              onPressed: ((_) {
+                late Future<bool?> result = ShowMyDialog(
+                        dialogTitle: "Delete Item",
+                        dialogText: "Do you want to delete ${txn.name}?",
+                        confirmText: "Delete",
+                        confirmColor: accentColors[2],
+                        cancelText: "Cancel")
+                    .show(context);
 
-              // check the result of the dialog box
-              result.then((value) async {
-                if (value == true) {
-                  await _deleteTransaction(txn);
-                }
-              });
-            })
-          ),
+                // check the result of the dialog box
+                result.then((value) async {
+                  if (value == true) {
+                    await _deleteTransaction(txn);
+                  }
+                });
+              })),
         ],
       ),
       child: GestureDetector(
@@ -482,22 +478,30 @@ class _HomeListState extends State<HomeList> {
     // store current transaction list date on shared preferences.
     // we can use this date when we perform edit, and if the date is not the same
     // as the current transaction list date, we don't need to refresh the provider.
-    await TransactionSharedPreferences.setTransactionListCurrentDate(refreshDay.toLocal());
+    await TransactionSharedPreferences.setTransactionListCurrentDate(
+        refreshDay.toLocal());
 
-    String strRefreshDay = DateFormat('yyyy-MM-dd').format(refreshDay.toLocal());
+    String strRefreshDay =
+        DateFormat('yyyy-MM-dd').format(refreshDay.toLocal());
 
     if (force ?? false) {
-      debugPrint("🧺 Refresh Transaction $strRefreshDay (force)");
+      Log.info(message: "🧺 Refresh Transaction $strRefreshDay (force)");
     }
-    
-    await _transactionHttp.fetchTransaction(strRefreshDay, isForce).then((value) {
+
+    await _transactionHttp
+        .fetchTransaction(strRefreshDay, isForce)
+        .then((value) {
       // ensure that the selectedDate and the refreshDay is the same
-      if(dt_utils.isSameDay(_currentFocusedDay, refreshDay) && mounted) {
-        Provider.of<HomeProvider>(context, listen: false).setTransactionList(value);
+      if (dt_utils.isSameDay(_currentFocusedDay, refreshDay) && mounted) {
+        Provider.of<HomeProvider>(context, listen: false)
+            .setTransactionList(value);
       }
     }).onError((error, stackTrace) {
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Error when refresh transaction",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when refresh transaction");
     });
 
@@ -508,8 +512,10 @@ class _HomeListState extends State<HomeList> {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
-    await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) async {
-      if (mounted) {        
+    await _transactionHttp
+        .deleteTransaction(context, txnDeleted)
+        .then((_) async {
+      if (mounted) {
         // pop the transaction from the provider
         Provider.of<HomeProvider>(context, listen: false)
             .popTransactionList(txnDeleted);
@@ -519,15 +525,19 @@ class _HomeListState extends State<HomeList> {
             Provider.of<HomeProvider>(context, listen: false).transactionList;
 
         // save the current transaction on the provider to the shared preferences
-        String date = DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
+        String date =
+            DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
         TransactionSharedPreferences.setTransaction(date, txnListModel);
       }
 
       // update information for txn delete
       await _updateInformation(txnDeleted);
     }).onError((error, stackTrace) {
-      debugPrint("Error when delete");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error when delete",
+        error: error,
+        stackTrace: stackTrace,
+      );
     }).whenComplete(() {
       // remove the loading screen
       LoadingScreen.instance().hide();
@@ -535,7 +545,8 @@ class _HomeListState extends State<HomeList> {
   }
 
   Future<void> _updateInformation(TransactionListModel txnInfo) async {
-    _refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
+    _refreshDay = DateFormat('yyyy-MM-dd').format(
+        DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
     DateTime from;
     DateTime to;
     String fromString;
@@ -549,9 +560,11 @@ class _HomeListState extends State<HomeList> {
     toString = DateFormat('yyyy-MM-dd').format(to);
 
     // delete the transaction from wallet transaction
-    await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.wallet.id, _refreshDay, txnInfo);
+    await TransactionSharedPreferences.deleteTransactionWallet(
+        txnInfo.wallet.id, _refreshDay, txnInfo);
     if (txnInfo.walletTo != null) {
-      await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.walletTo!.id, _refreshDay, txnInfo);
+      await TransactionSharedPreferences.deleteTransactionWallet(
+          txnInfo.walletTo!.id, _refreshDay, txnInfo);
     }
 
     // delete the transaction from budget
@@ -559,17 +572,19 @@ class _HomeListState extends State<HomeList> {
 
     await Future.wait([
       _futureWallets = _walletHTTP.fetchWallets(true, true),
-      _futureBudgets = _budgetHTTP.fetchBudgetDate(txnInfo.wallet.currencyId, _refreshDay),
+      _futureBudgets =
+          _budgetHTTP.fetchBudgetDate(txnInfo.wallet.currencyId, _refreshDay),
     ]).then((_) {
       // update the wallets
       _futureWallets.then((wallets) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+          Provider.of<HomeProvider>(context, listen: false)
+              .setWalletList(wallets);
         }
       });
 
       // store the budgets list
-      if(txnInfo.type == "expense") {
+      if (txnInfo.type == "expense") {
         _futureBudgets.then((value) {
           _budgets = value;
           // now loops thru budget, and see if the current category fits or not?
@@ -590,57 +605,67 @@ class _HomeListState extends State<HomeList> {
             }
           }
           // now we can set the shared preferences of budget
-          BudgetSharedPreferences.setBudget(txnInfo.wallet.currencyId, _refreshDay, _budgets);
+          BudgetSharedPreferences.setBudget(
+              txnInfo.wallet.currencyId, _refreshDay, _budgets);
 
           // only set the provider if only the current budget date is the same as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-          if(currentBudgetDate == _refreshDay && mounted) {
-            Provider.of<HomeProvider>(context, listen: false).setBudgetList(_budgets);
+          if (currentBudgetDate == _refreshDay && mounted) {
+            Provider.of<HomeProvider>(context, listen: false)
+                .setBudgetList(_budgets);
           }
         });
       }
     }).onError((error, stackTrace) {
-      debugPrint("Error on update information");
+      Log.error(
+        message: "Error on update information",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception(error.toString());
     });
 
     // check if the txn date is within the from and to of the stat date
-    if (
-        dt_utils.isWithin(txnInfo.date, from, to) &&
-        (txnInfo.type == "expense" || txnInfo.type == "income")
-      ) {
+    if (dt_utils.isWithin(txnInfo.date, from, to) &&
+        (txnInfo.type == "expense" || txnInfo.type == "income")) {
       // fetch the income expense
-      await _transactionHttp.fetchIncomeExpense(txnInfo.wallet.currencyId, from, to, true).then((result) {
+      await _transactionHttp
+          .fetchIncomeExpense(txnInfo.wallet.currencyId, from, to, true)
+          .then((result) {
         if (mounted) {
           // put on the provider and notify the listener
-          Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnInfo.wallet.currencyId, result);
+          Provider.of<HomeProvider>(context, listen: false)
+              .setIncomeExpense(txnInfo.wallet.currencyId, result);
         }
       }).onError((error, stackTrace) {
-        debugPrint("Error on fetch income expense");
-        debugPrintStack(stackTrace: stackTrace);
+        Log.error(
+          message: "Error on fetch income expense",
+          error: error,
+          stackTrace: stackTrace,
+        );
         throw Exception(error.toString());
       });
 
       // fetch the top transaction
-      await _transactionHttp.fetchTransactionTop(
-        txnInfo.type,
-        txnInfo.wallet.currencyId,
-        fromString,
-        toString,
-      true).then((transactionTop) {
+      await _transactionHttp
+          .fetchTransactionTop(txnInfo.type, txnInfo.wallet.currencyId,
+              fromString, toString, true)
+          .then((transactionTop) {
         if (mounted) {
           // set the provide for this
           Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
-            txnInfo.wallet.currencyId,
-            txnInfo.type,
-            transactionTop
-          );
+              txnInfo.wallet.currencyId, txnInfo.type, transactionTop);
         }
-      }).onError((error, stackTrace) {
-        debugPrint("Error on fetch top transaction");
-        debugPrintStack(stackTrace: stackTrace);
-        throw Exception(error.toString());
-      },);  
+      }).onError(
+        (error, stackTrace) {
+          Log.error(
+            message: "Error on fetch top transaction",
+            error: error,
+            stackTrace: stackTrace,
+          );
+          throw Exception(error.toString());
+        },
+      );
     }
   }
 
@@ -650,17 +675,16 @@ class _HomeListState extends State<HomeList> {
     double totalAmount = 0;
     Color textColor = textColor2;
 
-    if(_userMe.defaultBudgetCurrency != null) {
-      if(transactionData.isNotEmpty) {
+    if (_userMe.defaultBudgetCurrency != null) {
+      if (transactionData.isNotEmpty) {
         // compute the total amount
         for (TransactionListModel txn in transactionData) {
           // if current wallet currency same as the default budget currectr
-          if(txn.wallet.currencyId == _userMe.defaultBudgetCurrency) {
+          if (txn.wallet.currencyId == _userMe.defaultBudgetCurrency) {
             // check the transaction type
-            if(txn.type == "expense") {
+            if (txn.type == "expense") {
               totalAmount -= txn.amount;
-            }
-            else if(txn.type == "income") {
+            } else if (txn.type == "income") {
               totalAmount += txn.amount;
             }
 
@@ -673,21 +697,18 @@ class _HomeListState extends State<HomeList> {
         totalIncomeExpense = "$currencySymbol ${fCCY.format(totalAmount)}";
 
         // get the color
-        if(totalAmount < 0) {
+        if (totalAmount < 0) {
           textColor = accentColors[2];
-        }
-        else if (totalAmount > 0) {
+        } else if (totalAmount > 0) {
           textColor = accentColors[6];
         }
       }
     }
 
-    return Text(
-      totalIncomeExpense,
-      style: TextStyle(
-        fontSize: 12,
-        color: textColor,
-      )
-    );
+    return Text(totalIncomeExpense,
+        style: TextStyle(
+          fontSize: 12,
+          color: textColor,
+        ));
   }
 }

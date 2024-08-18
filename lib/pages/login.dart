@@ -13,6 +13,7 @@ import 'package:my_expense/model/error_net_model.dart';
 import 'package:my_expense/model/login_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/globals.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/net/netutils.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -275,11 +276,12 @@ class _LoginPageState extends State<LoginPage> {
                         height: 50,
                         onPressed: (() async {
                           if (_formKey.currentState!.validate()) {
-                            await _login(_usernameController.text,
-                                    _passwordController.text)
-                                .then((error) async {
+                            await _login(
+                              _usernameController.text,
+                              _passwordController.text
+                            ).then((error) async {
                               if (error) {
-                                debugPrint("⛔ Wrong login information");
+                                Log.error(message: "⛔ Wrong login information");
                               }
                             });
                           }
@@ -322,46 +324,47 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _getAdditionalInfo() async {
     await Future.wait([
       _userHTTP.fetchMe().then((value) {
-        debugPrint("⏳ Fetch User");
+        Log.success(message: "⏳ Fetch User");
       }),
       _categoryHTTP.fetchCategory().then((_) {
-        debugPrint("⏳ Fetch Category");
+        Log.success(message: "⏳ Fetch Category");
       }),
       _walletHTTP.fetchWalletTypes().then((_) {
-        debugPrint("⏳ Fetch Wallet Types");
+        Log.success(message: "⏳ Fetch Wallet Types");
       }),
       _walletHTTP.fetchCurrency().then((_) {
-        debugPrint("⏳ Fetch Currency");
+        Log.success(message: "⏳ Fetch Currency");
       }),
       _walletHTTP.fetchWalletCurrencies(true).then((_) async {
-        debugPrint("⏳ Fetch Wallet User Currency");
+        Log.success(message: "⏳ Fetch Wallet User Currency");
         await _fetchAllBudget();
       }),
       _transactionHTTP.fetchLastTransaction("expense").then((value) {
-        debugPrint("⏳ Fetch Expense Last Transaction : ${value.length}");
+        Log.success(message: "⏳ Fetch Expense Last Transaction : ${value.length}");
       }),
       _transactionHTTP.fetchLastTransaction("income").then((value) {
-        debugPrint("⏳ Fetch Income Last Transaction : ${value.length}");
+        Log.success(message: "⏳ Fetch Income Last Transaction : ${value.length}");
       }),
       _transactionHTTP.fetchMinMaxDate().then((_) {
-        debugPrint("⏳ Fetch min max transaction date");
+        Log.success(message: "⏳ Fetch min max transaction date");
       }),
       _pinHTTP.getPin(true).then((pin) {
-        debugPrint("⏳ Fetch user PIN");
+        Log.success(message: "⏳ Fetch user PIN");
       }),
     ]).then((_) {
-      debugPrint("💯 Finished");
+      Log.success(message: "💯 Finished");
 
       // once finished get the additional information route this to home
-      debugPrint("🏠 Redirect to home");
+      Log.info(message: "🏠 Redirect to home");
       if (mounted) {
-        Navigator.restorablePushNamedAndRemoveUntil(
-            context, "/home", (_) => false);
+        Navigator.restorablePushNamedAndRemoveUntil(context, "/home", (_) => false);
       }
     }).onError((error, stackTrace) {
-      debugPrint("🛑 Error when get additional information");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "🛑 Error when get additional information",
+        error: error,
+        stackTrace: stackTrace,
+      );
     });
   }
 
@@ -371,33 +374,41 @@ class _LoginPageState extends State<LoginPage> {
         WalletSharedPreferences.getWalletUserCurrency();
     for (CurrencyModel ccy in ccyLists) {
       // fetch the budget for this ccy
-      await _budgetHTTP.fetchBudgetDate(ccy.id, _currentDateString, true);
-      debugPrint("⏳ Fetch budget at $_currentDateString for ${ccy.name}");
+      await _budgetHTTP.fetchBudgetDate(
+        ccy.id,
+        _currentDateString,
+        true
+      ).then((_) {
+        Log.success(message: "⏳ Fetch budget at $_currentDateString for ${ccy.name}");
+      },);
     }
   }
 
   Future<bool> _checkLogin() async {
     bool res = true;
 
-    debugPrint("🔐 Get Bearer Token");
+    Log.info(message: "🔐 Get Bearer Token");
     _bearerToken = UserSharedPreferences.getJWT();
 
     // if not empty, then we can try to fecth user information
     if (_bearerToken.isNotEmpty) {
-      debugPrint("🔑 Checking User Login");
+      Log.info(message: "🔑 Checking User Login");
       // get user information
       await _userHTTP.fetchMe().then((user) async {
         // able to fetch information, user already login
-        debugPrint("👨🏻 User ${user.username} already login");
+        Log.success(message: "👨🏻 User ${user.username} already login");
       }).onError((error, stackTrace) {
         // check whether this is due to JWT token is expired or not?
         if (_bearerToken.isNotEmpty && mounted) {
           _isTokenExpired = true;
-          debugPrint("👨🏻 User token is expired");
+          Log.warning(message: "👨🏻 User token is expired");
           ScaffoldMessenger.of(context).showSnackBar(
-              createSnackBar(message: "User token expired, please re-login"));
+            createSnackBar(
+              message: "User token expired, please re-login"
+            )
+          );
         } else {
-          debugPrint("👨🏻 User not yet login");
+          Log.info(message: "👨🏻 User not yet login");
         }
         res = false;
       });
@@ -415,7 +426,7 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       // no bearer token
       res = false;
-      debugPrint("🔐 No bearer token");
+      Log.info(message: "🔐 No bearer token");
     }
 
     // set the is login same as res
@@ -441,7 +452,7 @@ class _LoginPageState extends State<LoginPage> {
       }
 
       // get additional information for user
-      debugPrint("ℹ️ Get additional info for user");
+      Log.info(message: "ℹ️ Get additional info for user");
 
       await _getAdditionalInfo();
     });

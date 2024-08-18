@@ -6,6 +6,7 @@ import 'package:my_expense/api/transaction_api.dart';
 import 'package:my_expense/model/transaction_list_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/args/budget_transaction_args.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/wallet_transaction_class_helper.dart';
 import 'package:my_expense/widgets/chart/budget_bar.dart';
 import 'package:my_expense/widgets/item/budget_transaction_item.dart';
@@ -302,8 +303,11 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
 
       _setLoading(false);
     }).onError((error, stackTrace) {
-      debugPrint("Error when _fetchBudget");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error when _fetchBudget",
+        error: error,
+        stackTrace: stackTrace,
+      );
 
       // assume there are no data
       setTransactions([]);

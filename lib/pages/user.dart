@@ -20,6 +20,7 @@ import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/anim/page_transition.dart';
 import 'package:my_expense/utils/globals.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/net/netutils.dart';
@@ -501,17 +502,17 @@ class _UserPageState extends State<UserPage> {
 
   Future<void> _showLogoutDialog() async {
     late Future<bool?> result = ShowMyDialog(
-            dialogTitle: "Logout",
-            dialogText: "Do you want to logout?",
-            confirmText: "Logout",
-            confirmColor: accentColors[2],
-            cancelText: "Cancel")
-        .show(context);
+      dialogTitle: "Logout",
+      dialogText: "Do you want to logout?",
+      confirmText: "Logout",
+      confirmColor: accentColors[2],
+      cancelText: "Cancel")
+    .show(context);
 
     // check the result of the dialog box
     result.then((value) async {
       if (value == true) {
-        debugPrint("logout user");
+        Log.info(message: "logout user");
         await _logout();
       }
     });
@@ -682,9 +683,11 @@ class _UserPageState extends State<UserPage> {
         );
       }
     }).onError((error, stackTrace) {
-      debugPrint("Got error when update default $type category!");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Got error when update default $type category!",
+        error: error,
+        stackTrace: stackTrace,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -731,9 +734,11 @@ class _UserPageState extends State<UserPage> {
         );
       }
     }).onError((error, stackTrace) {
-      debugPrint("Got error when update default budget currency!");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Got error when update default budget currency!",
+        error: error,
+        stackTrace: stackTrace,
+      );
 
       _selectedCurrency = _currentCurrency;
 
@@ -771,9 +776,11 @@ class _UserPageState extends State<UserPage> {
         );
       }
     }).onError((error, stackTrace) {
-      debugPrint("Got error when update default wallet!");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Got error when update default wallet!",
+        error: error,
+        stackTrace: stackTrace,
+      );
 
       _selectedWallet = _currentWallet;
 
@@ -817,9 +824,11 @@ class _UserPageState extends State<UserPage> {
         );
       }
     }).onError((error, stackTrace) {
-      debugPrint("Got error when refresh transaction tag");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Got error when refresh transaction tag",
+        error: error,
+        stackTrace: stackTrace,
+      );
     }).whenComplete(() {
       // remove the loading screen
       LoadingScreen.instance().hide();
