@@ -8,19 +8,19 @@
             "name": "my_expense",
             "request": "launch",
             "type": "dart",
-            "args": [
-                "--web-hostname=10.89.96.73"
-            ],
+            // "args": [
+            //     "--web-hostname=10.89.96.73"
+            // ],
         },
         {
             "name": "my_expense (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
-            "args": [
-                //"--web-port=56565",
-                "--web-hostname=10.89.96.73"
-            ],
+            // "args": [
+            //     //"--web-port=56565",
+            //     "--web-hostname=10.89.96.73"
+            // ],
         }
     ]
 }
