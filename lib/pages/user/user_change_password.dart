@@ -4,6 +4,7 @@ import 'package:my_expense/api/user_api.dart';
 import 'package:my_expense/model/error_model.dart';
 import 'package:my_expense/model/users_me_model.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/error_parser.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -90,35 +91,43 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                               labelText: "Current Password",
                               icon: const Icon(Ionicons.lock_closed_outline),
                               border: const UnderlineInputBorder(
-                                borderSide: BorderSide(color: secondaryBackground, width: 1.0),
+                                borderSide: BorderSide(
+                                    color: secondaryBackground, width: 1.0),
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  (_showCurrentPassword ? Ionicons.eye_off_outline : Ionicons.eye_off_outline),
+                                  (_showCurrentPassword
+                                      ? Ionicons.eye_off_outline
+                                      : Ionicons.eye_off_outline),
                                   color: secondaryLight,
                                 ),
                                 onPressed: (() {
                                   setState(() {
-                                    _showCurrentPassword = !_showCurrentPassword;
+                                    _showCurrentPassword =
+                                        !_showCurrentPassword;
                                   });
                                 }),
                               ),
                             ),
                             obscureText: (!_showCurrentPassword),
-
                           ),
-                          const SizedBox(height: 10,),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           TextFormField(
                             controller: _newPassword,
                             decoration: InputDecoration(
                               labelText: "New Password",
                               icon: const Icon(Ionicons.lock_closed_outline),
                               border: const UnderlineInputBorder(
-                                borderSide: BorderSide(color: secondaryBackground, width: 1.0),
+                                borderSide: BorderSide(
+                                    color: secondaryBackground, width: 1.0),
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  (_showNewPassword ? Ionicons.eye_off_outline : Ionicons.eye_off_outline),
+                                  (_showNewPassword
+                                      ? Ionicons.eye_off_outline
+                                      : Ionicons.eye_off_outline),
                                   color: secondaryLight,
                                 ),
                                 onPressed: (() {
@@ -130,29 +139,34 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                             ),
                             obscureText: (!_showNewPassword),
                           ),
-                          const SizedBox(height: 10,),
+                          const SizedBox(
+                            height: 10,
+                          ),
                           TextFormField(
                             controller: _retypeNewPassword,
                             decoration: InputDecoration(
                               labelText: "Retype New Password",
                               icon: const Icon(Ionicons.lock_closed_outline),
                               border: const UnderlineInputBorder(
-                                borderSide: BorderSide(color: secondaryBackground, width: 1.0),
+                                borderSide: BorderSide(
+                                    color: secondaryBackground, width: 1.0),
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  (_showRetypeNewPassword ? Ionicons.eye_off_outline : Ionicons.eye_off_outline),
+                                  (_showRetypeNewPassword
+                                      ? Ionicons.eye_off_outline
+                                      : Ionicons.eye_off_outline),
                                   color: secondaryLight,
                                 ),
                                 onPressed: (() {
                                   setState(() {
-                                    _showRetypeNewPassword = !_showRetypeNewPassword;
+                                    _showRetypeNewPassword =
+                                        !_showRetypeNewPassword;
                                   });
                                 }),
                               ),
                             ),
                             obscureText: (!_showRetypeNewPassword),
-
                           ),
                         ],
                       ),
@@ -166,17 +180,21 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                             if (context.mounted) {
                               // showed that we already success update the password
                               await ShowMyDialog(
-                                cancelEnabled: false,
-                                confirmText: "OK",
-                                confirmColor: accentColors[0],
-                                dialogTitle: "Updated",
-                                dialogText: "Password update successfully."
-                              ).show(context);
+                                      cancelEnabled: false,
+                                      confirmText: "OK",
+                                      confirmColor: accentColors[0],
+                                      dialogTitle: "Updated",
+                                      dialogText:
+                                          "Password update successfully.")
+                                  .show(context);
                             }
                           }).onError((error, stackTrace) async {
                             // print the error
-                            debugPrint("Error: ${error.toString()}");
-                            debugPrintStack(stackTrace: stackTrace);
+                            Log.error(
+                              message: "Error when update password",
+                              error: error,
+                              stackTrace: stackTrace,
+                            );
 
                             if (context.mounted) {
                               // show the error dialog
@@ -184,8 +202,8 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                                 cancelEnabled: false,
                                 confirmText: "OK",
                                 dialogTitle: "Error Update",
-                                dialogText: "Error when update password."
-                              ).show(context);
+                                dialogText: "Error when update password.")
+                              .show(context);
                             }
                           });
                         }),
@@ -210,32 +228,37 @@ class _UserChangePasswordState extends State<UserChangePassword> {
     String strNewPassword = _newPassword.text;
     String strRetypeNewPassword = _retypeNewPassword.text;
 
-    if( strCurrentPassword.trim().isNotEmpty &&
+    if (strCurrentPassword.trim().isNotEmpty &&
         strNewPassword.trim().isNotEmpty &&
-        strRetypeNewPassword.trim().isNotEmpty ) {
+        strRetypeNewPassword.trim().isNotEmpty) {
       // got data, now check if the newPassword and the retypeNewPasssword is
       // the same value or not?
-      if(strNewPassword == strRetypeNewPassword) {
+      if (strNewPassword == strRetypeNewPassword) {
         // new password match, now call the api for updating the password.
         // before that we should show the loader
         LoadingScreen.instance().show(context: context);
 
-        await _userHttp.updatePassword(_userMe.username, strCurrentPassword, strNewPassword).onError((error, stackTrace) {
-          debugPrint(error.toString());
-          debugPrintStack(stackTrace: stackTrace);
-          
+        await _userHttp.updatePassword(
+          _userMe.username,
+          strCurrentPassword,
+          strNewPassword
+        ).onError((error, stackTrace) {
+          Log.error(
+            message: "Error when update password",
+            error: error,
+            stackTrace: stackTrace,
+          );
+
           ErrorModel err = parseErrorMessage(error.toString());
           throw Exception(err.message);
         }).whenComplete(() {
           // remove the loading screen
           LoadingScreen.instance().hide();
         });
-      }
-      else {
+      } else {
         throw Exception("New Password didn't match");
       }
-    }
-    else {
+    } else {
       throw Exception("Please fill the missing fields information");
     }
   }

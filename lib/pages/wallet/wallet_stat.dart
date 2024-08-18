@@ -5,6 +5,7 @@ import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/wallet_model.dart';
 import 'package:my_expense/model/wallet_stat_model.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/number_format.dart';
 import 'package:my_expense/widgets/chart/bar.dart';
 import 'package:my_expense/widgets/chart/multi_line_chart.dart';
@@ -383,8 +384,12 @@ class _WalletStatPageState extends State<WalletStatPage> {
         _getStatData();
       });
     }
-    catch(error) {
-      debugPrint(error.toString());
+    catch(error, stackTrace) {
+      Log.error(
+        message: "Error when try to get the data from server",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw 'Error when try to get the data from server';
     }
 

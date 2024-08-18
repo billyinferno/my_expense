@@ -13,6 +13,7 @@ import 'package:my_expense/model/wallet_type_model.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
 import 'package:my_expense/utils/args/stats_detail_args.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -25,7 +26,7 @@ import 'package:my_expense/widgets/item/simple_item.dart';
 import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 
 class StatsFilterPage extends StatefulWidget {
-  const StatsFilterPage({ super.key });
+  const StatsFilterPage({super.key});
 
   @override
   State<StatsFilterPage> createState() => _StatsFilterPageState();
@@ -35,16 +36,22 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   // animation variable
   // double _currentContainerPositioned = 0;
 
-  DateTime _minDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1);
-  DateTime _maxDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1).subtract(const Duration(days: 1));
+  DateTime _minDate = DateTime(
+      DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1);
+  DateTime _maxDate = DateTime(
+          DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1)
+      .subtract(const Duration(days: 1));
 
   String _currentType = "month";
-  DateTime _currentFromDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1);
-  DateTime _currentToDate = DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1).subtract(const Duration(days: 1));
-  
+  DateTime _currentFromDate = DateTime(
+      DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1);
+  DateTime _currentToDate = DateTime(
+          DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1)
+      .subtract(const Duration(days: 1));
+
   bool _showCalendar = false;
   late String _name;
-  
+
   List<CurrencyModel> _currencies = [];
   List<WalletModel> _wallets = [];
   List<WalletModel> _currentWallets = [];
@@ -52,11 +59,12 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   late UsersMeModel _userMe;
   late CurrencyModel? _currentCurrencies;
   late WalletModel? _currentWallet;
-  IncomeExpenseCategoryModel _currentIncomeExpenseCategory = IncomeExpenseCategoryModel(expense: [], income: []);
+  IncomeExpenseCategoryModel _currentIncomeExpenseCategory =
+      IncomeExpenseCategoryModel(expense: [], income: []);
   final TextEditingController _nameController = TextEditingController();
   late ScrollController _scrollControllerCurrencies;
   late ScrollController _scrollControllerWallet;
-  
+
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final CalendarDatePicker2Config _calendarConfig = CalendarDatePicker2Config(
     calendarType: CalendarDatePicker2Type.range,
@@ -79,31 +87,41 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
     // default the name into "Any"
     _name = "Any";
-    
+
     _userMe = UserSharedPreferences.getUserMe();
 
     _currencies = WalletSharedPreferences.getWalletUserCurrency();
-    if(_userMe.defaultBudgetCurrency != null && _currencies.isNotEmpty) {
+    if (_userMe.defaultBudgetCurrency != null && _currencies.isNotEmpty) {
       // defaulted to the first currency first
       _currentCurrencies = _currencies[0];
 
       // loop through all user wallet currencies and see which one is
       // actually being set as the default for user.
-      for(int i=0; i<_currencies.length; i++) {
-        if(_currencies[i].id == _userMe.defaultBudgetCurrency) {
+      for (int i = 0; i < _currencies.length; i++) {
+        if (_currencies[i].id == _userMe.defaultBudgetCurrency) {
           _currentCurrencies = _currencies[i];
         }
       }
-    }
-    else {
+    } else {
       // just initialize as an empty data
-      _currentCurrencies = CurrencyModel(
-        -1, "", "", ""
-      );
+      _currentCurrencies = CurrencyModel(-1, "", "", "");
     }
 
     // get all user wallet information (defaulted the 1st selected as all account)
-    _wallets = [(WalletModel(-1, "All Account", 0.0, 0.0, 0.0, true, true, WalletTypeModel(-1,""), CurrencyModel(-1, "", "", ""), UserPermissionModel(-1,"",""))), ...WalletSharedPreferences.getWallets(false)];
+    _wallets = [
+      (WalletModel(
+          -1,
+          "All Account",
+          0.0,
+          0.0,
+          0.0,
+          true,
+          true,
+          WalletTypeModel(-1, ""),
+          CurrencyModel(-1, "", "", ""),
+          UserPermissionModel(-1, "", ""))),
+      ...WalletSharedPreferences.getWallets(false)
+    ];
     _filterWalletList();
 
     // get the minimum and maximum date of the transaction we have
@@ -112,9 +130,10 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
     // compare the max date with the DateTime.Now(), which one is lesser?
     // if _maxDate is lesser, then change the _maxDate with current date
-    if(_maxDate.isBefore(DateTime.now().toLocal())) {
+    if (_maxDate.isBefore(DateTime.now().toLocal())) {
       // change the maxDate
-      _maxDate = DateTime(DateTime.now().toLocal().year + 1, 1, 1).subtract(const Duration(days: 1));
+      _maxDate = DateTime(DateTime.now().toLocal().year + 1, 1, 1)
+          .subtract(const Duration(days: 1));
     }
     // set the minimum date as the 1 day of the minimum transaction date
     _minDate = DateTime(_minDate.year, 1, 1);
@@ -149,7 +168,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             onPressed: (() async {
               await _filterStats();
             }),
-            icon: const Icon(Ionicons.caret_forward_circle_outline, color: textColor),
+            icon: const Icon(Ionicons.caret_forward_circle_outline,
+                color: textColor),
           )
         ],
       ),
@@ -159,114 +179,125 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Container(
-              height: 50,
-              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-              decoration: const BoxDecoration(
-                color: secondaryDark,
-              ),
-              child: Container(
-                width: double.infinity,
                 height: 50,
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                 decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: secondaryLight, width: 1.0)),
+                  color: secondaryDark,
                 ),
                 child: Container(
-                  color: Colors.transparent,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(
-                        Ionicons.pencil,
-                        color: accentColors[1],
-                      ),
-                      const SizedBox(width: 10,),
-                      const Text(
-                        "Name",
-                        style: TextStyle(
-                          color: textColor2,
+                  width: double.infinity,
+                  height: 50,
+                  decoration: const BoxDecoration(
+                    border: Border(
+                        bottom: BorderSide(color: secondaryLight, width: 1.0)),
+                  ),
+                  child: Container(
+                    color: Colors.transparent,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Ionicons.pencil,
+                          color: accentColors[1],
                         ),
-                      ),
-                      const SizedBox(width: 10,),
-                      InkWell(
-                        onTap: (() {
-                          showModalBottomSheet<void>(
-                            context: context,
-                            builder: (BuildContext context) {
-                            return Container(
-                              height: MediaQuery.of(context).size.height * 0.35,
-                              color: secondaryDark,
-                              child: Column(
-                                children: <Widget>[
-                                  _nameButton(value: "Any"),
-                                  _nameButton(value: "Match"),
-                                  _nameButton(value: "Exact"),
-                                  const SizedBox(height: 20,),
-                                ],
-                              ),
-                            );
-                          });
-                        }),
-                        child: Container(
-                          height: 30,
-                          width: 90,
-                          padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                          decoration: BoxDecoration(
-                            color: secondaryDark,
-                            border: Border.all(
-                              color: secondaryLight,
-                              width: 1.0,
-                              style: BorderStyle.solid
-                            ),
-                            borderRadius: BorderRadius.circular(5),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        const Text(
+                          "Name",
+                          style: TextStyle(
+                            color: textColor2,
                           ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Expanded(
-                                child: Center(
-                                  child: Text(
-                                    _name,
-                                    style: const TextStyle(
-                                      overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        InkWell(
+                          onTap: (() {
+                            showModalBottomSheet<void>(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Container(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.35,
+                                    color: secondaryDark,
+                                    child: Column(
+                                      children: <Widget>[
+                                        _nameButton(value: "Any"),
+                                        _nameButton(value: "Match"),
+                                        _nameButton(value: "Exact"),
+                                        const SizedBox(
+                                          height: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                });
+                          }),
+                          child: Container(
+                            height: 30,
+                            width: 90,
+                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                            decoration: BoxDecoration(
+                              color: secondaryDark,
+                              border: Border.all(
+                                  color: secondaryLight,
+                                  width: 1.0,
+                                  style: BorderStyle.solid),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      _name,
+                                      style: const TextStyle(
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 5,),
-                              const Icon(
-                                Ionicons.chevron_down,
-                                color: secondaryLight,
-                                size: 15,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10,),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _nameController,
-                          enabled: (_name.toLowerCase() == "any" ? false : true),
-                          enableSuggestions: false,
-                          keyboardType: TextInputType.name,
-                          textAlign: TextAlign.right,
-                          decoration: const InputDecoration(
-                            hintText: "Transaction name",
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                const Icon(
+                                  Ionicons.chevron_down,
+                                  color: secondaryLight,
+                                  size: 15,
+                                ),
+                              ],
                             ),
-                            contentPadding: EdgeInsets.zero,
-                            isCollapsed: true,
                           ),
-                          textInputAction: TextInputAction.done,
                         ),
-                      ),
-                    ],
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _nameController,
+                            enabled:
+                                (_name.toLowerCase() == "any" ? false : true),
+                            enableSuggestions: false,
+                            keyboardType: TextInputType.name,
+                            textAlign: TextAlign.right,
+                            decoration: const InputDecoration(
+                              hintText: "Transaction name",
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: EdgeInsets.zero,
+                              isCollapsed: true,
+                            ),
+                            textInputAction: TextInputAction.done,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              )
-            ),
+                )),
             _generateCurrencySelector(),
             _generateCalendarDisplay(),
             _generateCalendar(),
@@ -279,7 +310,9 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                 }),
                 color: accentColors[6],
                 height: 50,
-                child: const Center(child: Text("Filter Statistics"),),
+                child: const Center(
+                  child: Text("Filter Statistics"),
+                ),
               ),
             ),
           ],
@@ -343,13 +376,13 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                 "Custom": accentColors[6],
               },
             ),
-            const SizedBox(height: 10,),
-            Expanded(child:
-              Container(
-                color: Colors.transparent,
-                child: _generateCalendarSelection()
-              )
+            const SizedBox(
+              height: 10,
             ),
+            Expanded(
+                child: Container(
+                    color: Colors.transparent,
+                    child: _generateCalendarSelection())),
           ],
         ),
       ),
@@ -357,22 +390,26 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   Widget _generateCalendarSelection() {
-    if(_currentType == "month") {
+    if (_currentType == "month") {
       // set the _currentToDate as the last day of the month
-      _currentFromDate = DateTime(_currentToDate.toLocal().year, _currentToDate.toLocal().month, 1);
-      _currentToDate = DateTime(_currentToDate.toLocal().year, _currentToDate.toLocal().month + 1, 1).subtract(const Duration(days: 1));
+      _currentFromDate = DateTime(
+          _currentToDate.toLocal().year, _currentToDate.toLocal().month, 1);
+      _currentToDate = DateTime(_currentToDate.toLocal().year,
+              _currentToDate.toLocal().month + 1, 1)
+          .subtract(const Duration(days: 1));
       return _generateMonthCalendar();
-    }
-    else if(_currentType == "year") {
+    } else if (_currentType == "year") {
       // set the _currentToDate as the last day of the year
       _currentFromDate = DateTime(_currentToDate.toLocal().year, 1, 1);
-      _currentToDate = DateTime(_currentToDate.toLocal().year + 1, 1, 1).subtract(const Duration(days: 1));
+      _currentToDate = DateTime(_currentToDate.toLocal().year + 1, 1, 1)
+          .subtract(const Duration(days: 1));
       return _generateYearCalendar();
-    }
-    else {
+    } else {
       // check if the _currentTo < _currentFrom, if so, then set _currentTo equal to _currentFrom
-      if(_currentToDate.toLocal().isBefore(_currentFromDate.toLocal())) {
-        _currentToDate = DateTime(_currentFromDate.toLocal().year, _currentFromDate.toLocal().month + 1, 1).subtract(const Duration(days: 1));
+      if (_currentToDate.toLocal().isBefore(_currentFromDate.toLocal())) {
+        _currentToDate = DateTime(_currentFromDate.toLocal().year,
+                _currentFromDate.toLocal().month + 1, 1)
+            .subtract(const Duration(days: 1));
       }
 
       // ensure _currentToDate also not more than _maxDate
@@ -393,22 +430,26 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           flex: 1,
           child: Center(
             child: CupertinoPicker(
-              scrollController: FixedExtentScrollController(initialItem: (_currentToDate.toLocal().month-1)),
+              scrollController: FixedExtentScrollController(
+                  initialItem: (_currentToDate.toLocal().month - 1)),
               itemExtent: 25,
               onSelectedItemChanged: (int value) {
                 setState(() {
-                  _currentFromDate = DateTime(_currentToDate.toLocal().year, value+1, 1);
-                  _currentToDate = DateTime(_currentToDate.toLocal().year, value+2, 1).subtract(const Duration(days: 1));
+                  _currentFromDate =
+                      DateTime(_currentToDate.toLocal().year, value + 1, 1);
+                  _currentToDate =
+                      DateTime(_currentToDate.toLocal().year, value + 2, 1)
+                          .subtract(const Duration(days: 1));
                 });
               },
               children: List.generate(12, ((index) {
                 return Text(
-                  DateFormat("MMM").format(DateTime(_currentToDate.toLocal().year, index+1, 1)),
+                  DateFormat("MMM").format(
+                      DateTime(_currentToDate.toLocal().year, index + 1, 1)),
                   style: const TextStyle(
-                    color: textColor2,
-                    fontSize: 20,
-                    fontFamily: '--apple-system'
-                  ),
+                      color: textColor2,
+                      fontSize: 20,
+                      fontFamily: '--apple-system'),
                 );
               })),
             ),
@@ -418,22 +459,28 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           flex: 1,
           child: Center(
             child: CupertinoPicker(
-              scrollController: FixedExtentScrollController(initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)),
+              scrollController: FixedExtentScrollController(
+                  initialItem: (_maxDate.toLocal().year -
+                      _currentToDate.toLocal().year)),
               itemExtent: 25,
               onSelectedItemChanged: (int value) {
                 setState(() {
-                  _currentFromDate = DateTime((_maxDate.toLocal().year-value), _currentToDate.toLocal().month, 1);
-                  _currentToDate = DateTime((_maxDate.toLocal().year-value), (_currentToDate.toLocal().month+1), 1).subtract(const Duration(days: 1));
+                  _currentFromDate = DateTime((_maxDate.toLocal().year - value),
+                      _currentToDate.toLocal().month, 1);
+                  _currentToDate = DateTime((_maxDate.toLocal().year - value),
+                          (_currentToDate.toLocal().month + 1), 1)
+                      .subtract(const Duration(days: 1));
                 });
               },
-              children: List.generate(((_maxDate.toLocal().year - _minDate.toLocal().year) + 1), ((index) {
+              children: List.generate(
+                  ((_maxDate.toLocal().year - _minDate.toLocal().year) + 1),
+                  ((index) {
                 return Text(
-                  (_maxDate.year-index).toString(),
+                  (_maxDate.year - index).toString(),
                   style: const TextStyle(
-                    color: textColor2,
-                    fontSize: 20,
-                    fontFamily: '--apple-system'
-                  ),
+                      color: textColor2,
+                      fontSize: 20,
+                      fontFamily: '--apple-system'),
                 );
               })),
             ),
@@ -446,22 +493,26 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   Widget _generateYearCalendar() {
     return Center(
       child: CupertinoPicker(
-        scrollController: FixedExtentScrollController(initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)),
+        scrollController: FixedExtentScrollController(
+            initialItem:
+                (_maxDate.toLocal().year - _currentToDate.toLocal().year)),
         itemExtent: 25,
         onSelectedItemChanged: (int value) {
           setState(() {
-            _currentFromDate = DateTime((_maxDate.toLocal().year-value), 1, 1);
-            _currentToDate = DateTime((_maxDate.toLocal().year-value)+1, 1, 1).subtract(const Duration(days: 1));
+            _currentFromDate =
+                DateTime((_maxDate.toLocal().year - value), 1, 1);
+            _currentToDate =
+                DateTime((_maxDate.toLocal().year - value) + 1, 1, 1)
+                    .subtract(const Duration(days: 1));
           });
         },
-        children: List.generate(((_maxDate.toLocal().year - _minDate.toLocal().year) + 1), ((index) {
+        children: List.generate(
+            ((_maxDate.toLocal().year - _minDate.toLocal().year) + 1),
+            ((index) {
           return Text(
-            (_maxDate.year-index).toString(),
+            (_maxDate.year - index).toString(),
             style: const TextStyle(
-              color: textColor2,
-              fontSize: 20,
-              fontFamily: '--apple-system'
-            ),
+                color: textColor2, fontSize: 20, fontFamily: '--apple-system'),
           );
         })),
       ),
@@ -478,11 +529,11 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             config: _calendarConfig,
             value: _selectedDateTime,
             onValueChanged: ((newDate) {
-              if(newDate.length == 2) {
-                setState(() {                
+              if (newDate.length == 2) {
+                setState(() {
                   _currentFromDate = newDate[0];
                   _currentToDate = newDate[1];
-          
+
                   _selectedDateTime = [_currentFromDate, _currentToDate];
                 });
               }
@@ -495,74 +546,74 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   Future<void> _showCurrencySelection() async {
     showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return MyBottomSheet(
-          context: context,
-          title: "Currencies",
-          screenRatio: 0.35,
-          child: ListView.builder(
-            controller: _scrollControllerCurrencies,
-            itemCount: _currencies.length,
-            itemBuilder: (BuildContext context, int index) {
-              return SimpleItem(
-                color: accentColors[6],
-                title: _currencies[index].description,
-                isSelected: (_currentCurrencies!.id == _currencies[index].id),
-                onTap: (() {
-                  setState(() {
-                    _currentCurrencies = _currencies[index];
-                    _filterWalletList();
-                  });
-                  Navigator.pop(context);
-                }),
-                icon: FittedBox(
-                  fit: BoxFit.contain,
-                  child: Text(_currencies[index].symbol.toUpperCase()),
-                ),
-              );
-            },
-          ),
-        );
-      }
-    );
+        context: context,
+        builder: (BuildContext context) {
+          return MyBottomSheet(
+            context: context,
+            title: "Currencies",
+            screenRatio: 0.35,
+            child: ListView.builder(
+              controller: _scrollControllerCurrencies,
+              itemCount: _currencies.length,
+              itemBuilder: (BuildContext context, int index) {
+                return SimpleItem(
+                  color: accentColors[6],
+                  title: _currencies[index].description,
+                  isSelected: (_currentCurrencies!.id == _currencies[index].id),
+                  onTap: (() {
+                    setState(() {
+                      _currentCurrencies = _currencies[index];
+                      _filterWalletList();
+                    });
+                    Navigator.pop(context);
+                  }),
+                  icon: FittedBox(
+                    fit: BoxFit.contain,
+                    child: Text(_currencies[index].symbol.toUpperCase()),
+                  ),
+                );
+              },
+            ),
+          );
+        });
   }
 
   Future<void> _showAccountSelection() async {
     // if showing calendar, then no need to showed up the modal bottom sheet
     // to select the account.
-    if(_showCalendar) {
+    if (_showCalendar) {
       return;
     }
 
     showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return MyBottomSheet(
-          context: context,
-          title: "Account",
-          screenRatio: 0.45,
-          child: ListView.builder(
-            controller: _scrollControllerWallet,
-            itemCount: _currentWallets.length,
-            itemBuilder: (BuildContext context, int index) {
-              return SimpleItem(
-                color: IconList.getColor(_currentWallets[index].walletType.type.toLowerCase()),
-                title: _currentWallets[index].name,
-                isSelected: (_currentWallet!.id == _currentWallets[index].id),
-                onTap: (() {
-                  setState(() {
-                    _currentWallet = _currentWallets[index];
-                  });
-                  Navigator.pop(context);
-                }),
-                icon: IconList.getIcon(_currentWallets[index].walletType.type.toLowerCase()),
-              );
-            },
-          ),
-        );
-      }
-    );
+        context: context,
+        builder: (BuildContext context) {
+          return MyBottomSheet(
+            context: context,
+            title: "Account",
+            screenRatio: 0.45,
+            child: ListView.builder(
+              controller: _scrollControllerWallet,
+              itemCount: _currentWallets.length,
+              itemBuilder: (BuildContext context, int index) {
+                return SimpleItem(
+                  color: IconList.getColor(
+                      _currentWallets[index].walletType.type.toLowerCase()),
+                  title: _currentWallets[index].name,
+                  isSelected: (_currentWallet!.id == _currentWallets[index].id),
+                  onTap: (() {
+                    setState(() {
+                      _currentWallet = _currentWallets[index];
+                    });
+                    Navigator.pop(context);
+                  }),
+                  icon: IconList.getIcon(
+                      _currentWallets[index].walletType.type.toLowerCase()),
+                );
+              },
+            ),
+          );
+        });
   }
 
   Widget _generateAccountSelector() {
@@ -649,22 +700,25 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const SizedBox(width: 20,),
+              const SizedBox(
+                width: 20,
+              ),
               Expanded(
-                child: Text(
-                  value
-                ),
+                child: Text(value),
               ),
-              const SizedBox(width: 10,),
+              const SizedBox(
+                width: 10,
+              ),
               Visibility(
-                visible: (_name.toLowerCase() == value.toLowerCase()),
-                child: Icon(
-                  Ionicons.checkmark_circle,
-                  size: 20,
-                  color: accentColors[0],
-                )
+                  visible: (_name.toLowerCase() == value.toLowerCase()),
+                  child: Icon(
+                    Ionicons.checkmark_circle,
+                    size: 20,
+                    color: accentColors[0],
+                  )),
+              const SizedBox(
+                width: 20,
               ),
-              const SizedBox(width: 20,),
             ],
           ),
         ),
@@ -673,13 +727,11 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   String _getTitleText() {
-    if(_currentType == "month") {
+    if (_currentType == "month") {
       return DateFormat("MMMM yyyy").format(_currentToDate.toLocal());
-    }
-    else if(_currentType == "year") {
+    } else if (_currentType == "year") {
       return DateFormat("yyyy").format(_currentToDate.toLocal());
-    }
-    else {
+    } else {
       return "${DateFormat("dd/MM/yyyy").format(_currentFromDate.toLocal())} - ${DateFormat("dd/MM/yyyy").format(_currentToDate.toLocal())}";
     }
   }
@@ -687,19 +739,17 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   void _filterWalletList() {
     // loop to get all the account that related with this currencies
     _currentWallets.clear();
-    if(_currentCurrencies!.id > 0) {
+    if (_currentCurrencies!.id > 0) {
       for (WalletModel wallet in _wallets) {
-        if(wallet.id == -1) {
+        if (wallet.id == -1) {
           _currentWallets.add(wallet);
-        }
-        else {
-          if(wallet.currency.id == _currentCurrencies!.id) {
+        } else {
+          if (wallet.currency.id == _currentCurrencies!.id) {
             _currentWallets.add(wallet);
           }
         }
       }
-    }
-    else {
+    } else {
       _currentWallets = [_wallets[0]];
     }
     // defaulted current wallet to all accounts (-1)
@@ -708,7 +758,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   Future<void> _filterStats() async {
     // fetch the transaction data for this
-    if(_currentCurrencies!.id >= 0 && _currentWallet != null) {
+    if (_currentCurrencies!.id >= 0 && _currentWallet != null) {
       // show loading screen
       LoadingScreen.instance().show(context: context);
 
@@ -720,7 +770,9 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           currency: _currentCurrencies!,
           wallet: _currentWallet!,
           incomeExpenseCategory: _currentIncomeExpenseCategory,
-          name: (_nameController.text.isEmpty ? '*' : _nameController.text.trim()),
+          name: (_nameController.text.isEmpty
+              ? '*'
+              : _nameController.text.trim()),
           search: _name,
         );
 
@@ -730,8 +782,11 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         }
       }).onError((error, stackTrace) async {
         // print the error
-        debugPrint("Error: ${error.toString()}");
-        debugPrintStack(stackTrace: stackTrace);
+        Log.error(
+          message: "Error while fetching stats information",
+          error: error,
+          stackTrace: stackTrace,
+        );
 
         if (mounted) {
           // show the error dialog
@@ -739,8 +794,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             cancelEnabled: false,
             confirmText: "OK",
             dialogTitle: "Error Fetch",
-            dialogText: "Error while fetching stats information from server."
-          ).show(context);
+            dialogText: "Error while fetching stats information from server.")
+          .show(context);
         }
       }).whenComplete(() {
         // remove the loading screen
@@ -750,11 +805,23 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   Future<void> _fetchStats() async {
-    await _transactionHttp.fetchIncomeExpenseCategory(_nameController.text, _name, _currentCurrencies!.id, _currentWallet!.id, _currentFromDate, _currentToDate).then((incomeExpenseCategory) {
+    await _transactionHttp
+        .fetchIncomeExpenseCategory(
+            _nameController.text,
+            _name,
+            _currentCurrencies!.id,
+            _currentWallet!.id,
+            _currentFromDate,
+            _currentToDate)
+        .then((incomeExpenseCategory) {
       // set current income expense category as this
       _currentIncomeExpenseCategory = incomeExpenseCategory;
     }).onError((error, stackTrace) {
-      debugPrint("Error when <_fetchStats>");
+      Log.error(
+        message: "Error when <_fetchStats>",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when trying to fetch statistics");
     });
   }

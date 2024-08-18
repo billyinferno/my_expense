@@ -11,6 +11,7 @@ import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/color_utils.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/prefs/shared_category.dart';
 import 'package:my_expense/utils/prefs/shared_wallet.dart';
@@ -33,13 +34,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final _df = DateFormat('E, dd MMM yyyy');
   final _df2 = DateFormat('dd/MM/yyyy');
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
-  final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
+  final int _limit =
+      99999; // make it to 99999 (just fetch everything, IO is not a concern)
 
   String _searchText = "";
   String _categoryId = "";
   String _type = "name";
   int _start = 0; // start from 0 page
-  
+
   int _resultPage = 1;
   PageName _resultPageName = PageName.all;
   final Map<PageName, Color> _resultPageColor = {
@@ -121,7 +123,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           ),
         ),
         actions: <Widget>[
-          Container(width: 45, color: Colors.transparent,),
+          Container(
+            width: 45,
+            color: Colors.transparent,
+          ),
         ],
       ),
       body: Column(
@@ -141,7 +146,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             ),
           ),
           _getResultPage(),
-          const SizedBox(height: 30,),
+          const SizedBox(
+            height: 30,
+          ),
         ],
       ),
     );
@@ -162,14 +169,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           Container(
             width: double.infinity,
             decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: primaryLight,
-                  width: 1.0,
-                  style: BorderStyle.solid
-                )
-              )
-            ),
+                border: Border(
+                    bottom: BorderSide(
+                        color: primaryLight,
+                        width: 1.0,
+                        style: BorderStyle.solid))),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -182,155 +186,171 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                         onValueChanged: (int? value) {
                           setState(() {
                             _resultPage = value!;
-                            switch(_resultPage) {
-                              case 0: _resultPageName = PageName.summary; break;
-                              case 1: _resultPageName = PageName.all; break;
-                              case 2: _resultPageName = PageName.income; break;
-                              case 3: _resultPageName = PageName.expense; break;
-                              case 4: _resultPageName = PageName.transfer; break;
+                            switch (_resultPage) {
+                              case 0:
+                                _resultPageName = PageName.summary;
+                                break;
+                              case 1:
+                                _resultPageName = PageName.all;
+                                break;
+                              case 2:
+                                _resultPageName = PageName.income;
+                                break;
+                              case 3:
+                                _resultPageName = PageName.expense;
+                                break;
+                              case 4:
+                                _resultPageName = PageName.transfer;
+                                break;
                             }
                           });
                         },
                         groupValue: _resultPage,
-                        thumbColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
+                        thumbColor: (_resultPageColor[_resultPageName] ??
+                            accentColors[9]),
                         children: const {
                           0: Text(
-                              "Summary",
-                              style: TextStyle(
-                                fontFamily: '--apple-system',
-                                fontSize: 11,
-                              ),
+                            "Summary",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
                             ),
+                          ),
                           1: Text(
-                              "All",
-                              style: TextStyle(
-                                fontFamily: '--apple-system',
-                                fontSize: 11,
-                              ),
+                            "All",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
                             ),
+                          ),
                           2: Text(
-                              "Income",
-                              style: TextStyle(
-                                fontFamily: '--apple-system',
-                                fontSize: 11,
-                              ),
+                            "Income",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
                             ),
+                          ),
                           3: Text(
-                              "Expense",
-                              style: TextStyle(
-                                fontFamily: '--apple-system',
-                                fontSize: 11,
-                              ),
+                            "Expense",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
                             ),
+                          ),
                           4: Text(
-                              "Transfer",
-                              style: TextStyle(
-                                fontFamily: '--apple-system',
-                                fontSize: 11,
-                              ),
+                            "Transfer",
+                            style: TextStyle(
+                              fontFamily: '--apple-system',
+                              fontSize: 11,
                             ),
+                          ),
                         },
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 5,),
+                const SizedBox(
+                  width: 5,
+                ),
                 InkWell(
                   onDoubleTap: (() {
                     // clear the wallet
                     setState(() {
                       // clear the selected wallet list
                       _selectedWalletList.clear();
-            
+
                       // filter and group the transaction
                       _filterTheTransaction();
                       _groupTransactions();
-            
                     });
                   }),
                   onTap: (() {
                     showModalBottomSheet<void>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return MyBottomSheet(
-                          context: context,
-                          title: "Account",
-                          screenRatio: 0.45,
-                          actionButton: InkWell(
-                            onTap: (() {
-                              if (_selectedWalletList.isNotEmpty) {
-                                setState(() {
-                                  // clear the selected wallet list
-                                  _selectedWalletList.clear();
-            
-                                  // filter and group the transaction
-                                  _filterTheTransaction();
-                                  _groupTransactions();
-            
-                                });
-            
-                                // close the modal dialog
-                                Navigator.pop(context);
-                              }
-                            }),
-                            child: const SizedBox(
-                              child: Icon(
-                                Ionicons.close_circle,
-                                size: 20,
-                                color: textColor,
-                              ),
-                            ),
-                          ),
-                          child: ListView.builder(
-                            controller: _walletController,
-                            itemCount: _walletList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return SimpleItem(
-                                color: IconList.getColor(_walletList[index].walletType.type.toLowerCase()),
-                                title: _walletList[index].name,
-                                isSelected: (_selectedWalletList[_walletList[index].id] ?? false),
-                                onTap: (() {
+                        context: context,
+                        builder: (BuildContext context) {
+                          return MyBottomSheet(
+                            context: context,
+                            title: "Account",
+                            screenRatio: 0.45,
+                            actionButton: InkWell(
+                              onTap: (() {
+                                if (_selectedWalletList.isNotEmpty) {
                                   setState(() {
-                                    // check if this ID previously selected or not?
-                                    if (_selectedWalletList.containsKey(_walletList[index].id)) {
-                                      // delete this data
-                                      _selectedWalletList.remove(_walletList[index].id);
-                                    }
-                                    else {
-                                      // new data, set this as true
-                                      _selectedWalletList[_walletList[index].id] = true;
-                                    }
-            
-                                    // once finished call filter the transaction
-                                    // to filter the transactions that listed
+                                    // clear the selected wallet list
+                                    _selectedWalletList.clear();
+
+                                    // filter and group the transaction
                                     _filterTheTransaction();
-            
-                                    // group the transactions
                                     _groupTransactions();
                                   });
+
+                                  // close the modal dialog
                                   Navigator.pop(context);
-                                }),
-                                icon: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
-                              );
-                            },
-                          ),
-                        );
-                      }
-                    );
+                                }
+                              }),
+                              child: const SizedBox(
+                                child: Icon(
+                                  Ionicons.close_circle,
+                                  size: 20,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                            child: ListView.builder(
+                              controller: _walletController,
+                              itemCount: _walletList.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SimpleItem(
+                                  color: IconList.getColor(_walletList[index]
+                                      .walletType
+                                      .type
+                                      .toLowerCase()),
+                                  title: _walletList[index].name,
+                                  isSelected: (_selectedWalletList[
+                                          _walletList[index].id] ??
+                                      false),
+                                  onTap: (() {
+                                    setState(() {
+                                      // check if this ID previously selected or not?
+                                      if (_selectedWalletList
+                                          .containsKey(_walletList[index].id)) {
+                                        // delete this data
+                                        _selectedWalletList
+                                            .remove(_walletList[index].id);
+                                      } else {
+                                        // new data, set this as true
+                                        _selectedWalletList[
+                                            _walletList[index].id] = true;
+                                      }
+
+                                      // once finished call filter the transaction
+                                      // to filter the transactions that listed
+                                      _filterTheTransaction();
+
+                                      // group the transactions
+                                      _groupTransactions();
+                                    });
+                                    Navigator.pop(context);
+                                  }),
+                                  icon: IconList.getIcon(_walletList[index]
+                                      .walletType
+                                      .type
+                                      .toLowerCase()),
+                                );
+                              },
+                            ),
+                          );
+                        });
                   }),
                   child: SizedBox(
                     width: 35,
                     child: badges.Badge(
                       position: badges.BadgePosition.topEnd(end: 5),
-                      badgeStyle: badges.BadgeStyle (
-                        badgeColor: accentColors[2]
-                      ),
+                      badgeStyle:
+                          badges.BadgeStyle(badgeColor: accentColors[2]),
                       badgeContent: Text(
                         _selectedWalletList.length.toString(),
-                        style: const TextStyle(
-                          color: textColor,
-                          fontSize: 10
-                        ),
+                        style: const TextStyle(color: textColor, fontSize: 10),
                       ),
                       child: const Icon(
                         Ionicons.wallet,
@@ -363,12 +383,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         );
       case PageName.summary:
         return ListView.builder(
-          controller: _scrollControllerSummary,
-          itemCount: _summaryList.length,
-          itemBuilder: ((context, index) {
-            return _summaryList[index];
-          })
-        );
+            controller: _scrollControllerSummary,
+            itemCount: _summaryList.length,
+            itemBuilder: ((context, index) {
+              return _summaryList[index];
+            }));
       case PageName.income:
         return ListView.builder(
           controller: _scrollControllerIncome,
@@ -394,13 +413,18 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           },
         );
       default:
-      // unknown just return SizedBox.shrink();
-      return const SizedBox.shrink();
+        // unknown just return SizedBox.shrink();
+        return const SizedBox.shrink();
     }
   }
 
-  Widget _categoryIcon({required String type, required String? name, double? height, double? width, double? size}) {
-    if(type == "expense") {
+  Widget _categoryIcon(
+      {required String type,
+      required String? name,
+      double? height,
+      double? width,
+      double? size}) {
+    if (type == "expense") {
       return Container(
         height: (height ?? 40),
         width: (width ?? 40),
@@ -410,8 +434,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         ),
         child: IconColorList.getExpenseIcon(name, size),
       );
-    }
-    else if(type == "income") {
+    } else if (type == "income") {
       return Container(
         height: (height ?? 40),
         width: (width ?? 40),
@@ -421,8 +444,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         ),
         child: IconColorList.getIncomeIcon(name, size),
       );
-    }
-    else {
+    } else {
       return Container(
         height: (height ?? 40),
         width: (width ?? 40),
@@ -440,7 +462,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   Widget _getAmount(TransactionListModel transaction) {
-    if(transaction.type == "expense" || transaction.type == "income") {
+    if (transaction.type == "expense" || transaction.type == "income") {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -448,13 +470,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           Text(
             "${transaction.wallet.currency} ${_fCCY.format(transaction.amount)}",
             style: TextStyle(
-              color: (transaction.type == "expense" ? accentColors[2] : accentColors[0]),
+              color: (transaction.type == "expense"
+                  ? accentColors[2]
+                  : accentColors[0]),
             ),
           ),
         ],
       );
-    }
-    else {
+    } else {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -483,7 +506,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   Future<void> _showTransactionEditScreen(TransactionListModel txn) async {
     // go to the transaction edit for this txn
-    await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((result) async {
+    await Navigator.pushNamed(context, '/transaction/edit', arguments: txn)
+        .then((result) async {
       // check if we got return
       if (result != null) {
         // set state to rebuild the widget
@@ -491,9 +515,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           // convert result to transaction list mode
           TransactionListModel txnUpdate = result as TransactionListModel;
           // update the current transaction list based on the updated transaction
-          for(int i=0; i<_filterTransactions.length; i++) {
+          for (int i = 0; i < _filterTransactions.length; i++) {
             // check which transaction is being updated
-            if(_filterTransactions[i].id == txnUpdate.id) {
+            if (_filterTransactions[i].id == txnUpdate.id) {
               _filterTransactions[i] = txnUpdate;
               break;
             }
@@ -527,17 +551,19 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // now compute the summary data so we can showed it on the summary page
     // based on the income, and expense
-    for(int i=0; i<_filterTransactions.length; i++) {
+    for (int i = 0; i < _filterTransactions.length; i++) {
       // generate the summary key
-      if (_filterTransactions[i].type == 'expense' || _filterTransactions[i].type == 'income') {
-        summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : ''}_${_filterTransactions[i].name}_${_filterTransactions[i].wallet.currency}";
-      }
-      else {
-        summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].wallet.name}_${_filterTransactions[i].wallet.currency}";
+      if (_filterTransactions[i].type == 'expense' ||
+          _filterTransactions[i].type == 'income') {
+        summaryKey =
+            "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : ''}_${_filterTransactions[i].name}_${_filterTransactions[i].wallet.currency}";
+      } else {
+        summaryKey =
+            "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].wallet.name}_${_filterTransactions[i].wallet.currency}";
       }
 
       // check which transaction is being updated
-      switch(_filterTransactions[i].type.toLowerCase()) {
+      switch (_filterTransactions[i].type.toLowerCase()) {
         case 'income':
           // check if summary key exists or not?
           if (!_summaryIncome.containsKey(summaryKey)) {
@@ -546,10 +572,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           _summaryIncome[summaryKey]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
-          if (!_totalAmountIncome.containsKey(_filterTransactions[i].wallet.currency)) {
+          if (!_totalAmountIncome
+              .containsKey(_filterTransactions[i].wallet.currency)) {
             _totalAmountIncome[_filterTransactions[i].wallet.currency] = 0;
           }
-          _totalAmountIncome[_filterTransactions[i].wallet.currency] = _totalAmountIncome[_filterTransactions[i].wallet.currency]! + _filterTransactions[i].amount;
+          _totalAmountIncome[_filterTransactions[i].wallet.currency] =
+              _totalAmountIncome[_filterTransactions[i].wallet.currency]! +
+                  _filterTransactions[i].amount;
 
           _income.add(_filterTransactions[i]);
           break;
@@ -561,10 +590,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           _summaryExpense[summaryKey]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
-          if (!_totalAmountExpense.containsKey(_filterTransactions[i].wallet.currency)) {
+          if (!_totalAmountExpense
+              .containsKey(_filterTransactions[i].wallet.currency)) {
             _totalAmountExpense[_filterTransactions[i].wallet.currency] = 0;
           }
-          _totalAmountExpense[_filterTransactions[i].wallet.currency] = _totalAmountExpense[_filterTransactions[i].wallet.currency]! + _filterTransactions[i].amount;
+          _totalAmountExpense[_filterTransactions[i].wallet.currency] =
+              _totalAmountExpense[_filterTransactions[i].wallet.currency]! +
+                  _filterTransactions[i].amount;
 
           _expense.add(_filterTransactions[i]);
           break;
@@ -576,10 +608,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           _summaryTransfer[summaryKey]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
-          if (!_totalAmountTransfer.containsKey(_filterTransactions[i].wallet.currency)) {
+          if (!_totalAmountTransfer
+              .containsKey(_filterTransactions[i].wallet.currency)) {
             _totalAmountTransfer[_filterTransactions[i].wallet.currency] = 0;
           }
-          _totalAmountTransfer[_filterTransactions[i].wallet.currency] = _totalAmountTransfer[_filterTransactions[i].wallet.currency]! + _filterTransactions[i].amount;
+          _totalAmountTransfer[_filterTransactions[i].wallet.currency] =
+              _totalAmountTransfer[_filterTransactions[i].wallet.currency]! +
+                  _filterTransactions[i].amount;
 
           _transfer.add(_filterTransactions[i]);
           break;
@@ -588,10 +623,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // sorted the total amount income and expense
     // so it will showed in the same order on the summary list
-    List<MapEntry<String, double>> sortedEntriesIncome = _totalAmountIncome.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+    List<MapEntry<String, double>> sortedEntriesIncome =
+        _totalAmountIncome.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key));
     _totalAmountIncome = Map.fromEntries(sortedEntriesIncome);
 
-    List<MapEntry<String, double>> sortedEntriesExpense = _totalAmountExpense.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+    List<MapEntry<String, double>> sortedEntriesExpense =
+        _totalAmountExpense.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key));
     _totalAmountExpense = Map.fromEntries(sortedEntriesExpense);
 
     // clear the summary list widget
@@ -612,8 +651,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               color: accentColors[2],
             ),
           ),
-          const SizedBox(height: 5,),
-          ..._generateSubSummaryBox(data: _totalAmountExpense, color: accentColors[2]),
+          const SizedBox(
+            height: 5,
+          ),
+          ..._generateSubSummaryBox(
+              data: _totalAmountExpense, color: accentColors[2]),
         ],
       ),
     ));
@@ -629,18 +671,16 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       for (TransactionListModel data in value) {
         if (startDate == null) {
           startDate = data.date;
-        }
-        else {
-          if(startDate!.isAfter(data.date)) {
+        } else {
+          if (startDate!.isAfter(data.date)) {
             startDate = data.date;
           }
         }
-        
+
         if (endDate == null) {
           endDate = data.date;
-        }
-        else {
-          if(endDate!.isBefore(data.date)) {
+        } else {
+          if (endDate!.isBefore(data.date)) {
             endDate = data.date;
           }
         }
@@ -648,24 +688,24 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         amount += data.amount;
         count++;
       }
-      
+
       // create TransactionModel based on the value
       TransactionListModel txn = TransactionListModel(
-        -1,
-        value[0].name,
-        value[0].type,
-        DateTime.now(),
-        '',
-        value[0].category,
-        value[0].wallet,
-        null,
-        value[0].usersPermissionsUser,
-        true,
-        amount,
-        1
-      );
+          -1,
+          value[0].name,
+          value[0].type,
+          DateTime.now(),
+          '',
+          value[0].category,
+          value[0].wallet,
+          null,
+          value[0].usersPermissionsUser,
+          true,
+          amount,
+          1);
 
-      _summaryList.add(_createSummaryItem(txn: txn, startDate: startDate!, endDate: endDate!, count: count));
+      _summaryList.add(_createSummaryItem(
+          txn: txn, startDate: startDate!, endDate: endDate!, count: count));
     });
 
     // add the income bar on the _summaryList
@@ -683,8 +723,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               color: accentColors[6],
             ),
           ),
-          const SizedBox(height: 5,),
-          ..._generateSubSummaryBox(data: _totalAmountIncome, color: accentColors[6]),
+          const SizedBox(
+            height: 5,
+          ),
+          ..._generateSubSummaryBox(
+              data: _totalAmountIncome, color: accentColors[6]),
         ],
       ),
     ));
@@ -699,18 +742,16 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       for (TransactionListModel data in value) {
         if (startDate == null) {
           startDate = data.date;
-        }
-        else {
-          if(startDate!.isAfter(data.date)) {
+        } else {
+          if (startDate!.isAfter(data.date)) {
             startDate = data.date;
           }
         }
-        
+
         if (endDate == null) {
           endDate = data.date;
-        }
-        else {
-          if(endDate!.isBefore(data.date)) {
+        } else {
+          if (endDate!.isBefore(data.date)) {
             endDate = data.date;
           }
         }
@@ -718,24 +759,24 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         amount += data.amount;
         count++;
       }
-      
+
       // create TransactionModel based on the value
       TransactionListModel txn = TransactionListModel(
-        -1,
-        value[0].name,
-        value[0].type,
-        DateTime.now(),
-        '',
-        value[0].category,
-        value[0].wallet,
-        null,
-        value[0].usersPermissionsUser,
-        true,
-        amount,
-        1
-      );
+          -1,
+          value[0].name,
+          value[0].type,
+          DateTime.now(),
+          '',
+          value[0].category,
+          value[0].wallet,
+          null,
+          value[0].usersPermissionsUser,
+          true,
+          amount,
+          1);
 
-      _summaryList.add(_createSummaryItem(txn: txn, startDate: startDate!, endDate: endDate!, count: count));
+      _summaryList.add(_createSummaryItem(
+          txn: txn, startDate: startDate!, endDate: endDate!, count: count));
     });
 
     // add the transfer bar on the _summaryList
@@ -753,8 +794,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               color: accentColors[4],
             ),
           ),
-          const SizedBox(height: 5,),
-          ..._generateSubSummaryBox(data: _totalAmountTransfer, color: accentColors[4]),
+          const SizedBox(
+            height: 5,
+          ),
+          ..._generateSubSummaryBox(
+              data: _totalAmountTransfer, color: accentColors[4]),
         ],
       ),
     ));
@@ -769,18 +813,16 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       for (TransactionListModel data in value) {
         if (startDate == null) {
           startDate = data.date;
-        }
-        else {
-          if(startDate!.isAfter(data.date)) {
+        } else {
+          if (startDate!.isAfter(data.date)) {
             startDate = data.date;
           }
         }
-        
+
         if (endDate == null) {
           endDate = data.date;
-        }
-        else {
-          if(endDate!.isBefore(data.date)) {
+        } else {
+          if (endDate!.isBefore(data.date)) {
             endDate = data.date;
           }
         }
@@ -788,60 +830,61 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         amount += data.amount;
         count++;
       }
-      
+
       // create TransactionModel based on the value
       TransactionListModel txn = TransactionListModel(
-        -1,
-        value[0].wallet.name,
-        value[0].type,
-        DateTime.now(),
-        '',
-        value[0].category,
-        value[0].wallet,
-        null,
-        value[0].usersPermissionsUser,
-        true,
-        amount,
-        1
-      );
+          -1,
+          value[0].wallet.name,
+          value[0].type,
+          DateTime.now(),
+          '',
+          value[0].category,
+          value[0].wallet,
+          null,
+          value[0].usersPermissionsUser,
+          true,
+          amount,
+          1);
 
-      _summaryList.add(_createSummaryItem(txn: txn, startDate: startDate!, endDate: endDate!, count: count));
+      _summaryList.add(_createSummaryItem(
+          txn: txn, startDate: startDate!, endDate: endDate!, count: count));
     });
   }
 
-  List<Widget> _generateSubSummaryBox({required Map<String, double> data, required Color color}) {
+  List<Widget> _generateSubSummaryBox(
+      {required Map<String, double> data, required Color color}) {
     List<Widget> ret = <Widget>[];
 
     data.forEach((key, value) {
-      ret.add(
-        SizedBox(
-          width: double.infinity,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                "Total $key",
-                style: TextStyle(
-                  color: color,
-                ),
+      ret.add(SizedBox(
+        width: double.infinity,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Total $key",
+              style: TextStyle(
+                color: color,
               ),
-              const SizedBox(width: 10,),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    _fCCY.format(value),
-                    style: TextStyle(
-                      color: color,
-                    ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  _fCCY.format(value),
+                  style: TextStyle(
+                    color: color,
                   ),
                 ),
-              )
-            ],
-          ),
-        )
-      );
+              ),
+            )
+          ],
+        ),
+      ));
     });
 
     return ret;
@@ -852,7 +895,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     required DateTime startDate,
     required DateTime endDate,
     required int count,
-  }){
+  }) {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       decoration: const BoxDecoration(
@@ -862,8 +905,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          _categoryIcon(name: (txn.category != null ? txn.category!.name : ''), type: txn.type),
-          const SizedBox(width: 10,),
+          _categoryIcon(
+              name: (txn.category != null ? txn.category!.name : ''),
+              type: txn.type),
+          const SizedBox(
+            width: 10,
+          ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -879,15 +926,17 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     fontSize: 10,
                   ),
                 ),
-                (txn.category == null ? const SizedBox.shrink() : 
-                  Text(
-                    (txn.category != null ? txn.category!.name : ''),
-                    style: const TextStyle(
-                      fontSize: 10,
-                    ),
-                  )
+                (txn.category == null
+                    ? const SizedBox.shrink()
+                    : Text(
+                        (txn.category != null ? txn.category!.name : ''),
+                        style: const TextStyle(
+                          fontSize: 10,
+                        ),
+                      )),
+                const SizedBox(
+                  height: 5,
                 ),
-                const SizedBox(height: 5,),
                 Text(
                   "${count.toString()} time${(count > 1 ? 's' : '')}",
                   style: const TextStyle(
@@ -897,22 +946,23 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               ],
             ),
           ),
-          const SizedBox(width: 10,),
+          const SizedBox(
+            width: 10,
+          ),
           _getAmount(txn),
         ],
       ),
     );
   }
 
-  Widget _createItem(TransactionListModel txn, [bool? canEdit]){
+  Widget _createItem(TransactionListModel txn, [bool? canEdit]) {
     return InkWell(
-      onTap: (() {
-        if (canEdit ?? true) {
-          _showTransactionEditScreen(txn);
-        }
-      }),
-      child: _createItemType(txn)
-    );
+        onTap: (() {
+          if (canEdit ?? true) {
+            _showTransactionEditScreen(txn);
+          }
+        }),
+        child: _createItemType(txn));
   }
 
   Widget _createItemType(TransactionListModel txn) {
@@ -926,7 +976,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           subTitle: _df.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
-          descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          descriptionStyle:
+              const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],
@@ -940,7 +991,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           subTitle: _df.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
-          descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          descriptionStyle:
+              const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[6],
@@ -957,7 +1009,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           subTitle: _df.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
-          descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          descriptionStyle:
+              const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[4],
@@ -973,7 +1026,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           subTitle: _df.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
-          descriptionStyle: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          descriptionStyle:
+              const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],
@@ -981,14 +1035,15 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     }
   }
 
-  void _setTransactions(List<TransactionListModel> transactions, int limit, int start) {
+  void _setTransactions(
+      List<TransactionListModel> transactions, int limit, int start) {
     setState(() {
       _transactions.clear();
       _transactions.addAll(transactions);
 
       // set also the start for the next transaction we need to fetch
       _start = start + limit;
-      
+
       // filter the transaction
       _filterTheTransaction();
 
@@ -1004,17 +1059,15 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // check if we have filter enabled or not?
     if (_selectedWalletList.isEmpty) {
       _filterTransactions.addAll(_transactions);
-    }
-    else {
+    } else {
       // loop thru transactions and see if the wallet from and to is on the
       // selected wallet or not?
-      for(int i=0; i < _transactions.length; i++) {
+      for (int i = 0; i < _transactions.length; i++) {
         // check if the wallet from and to id is in the selected wallet list
         // or not?
         if (_selectedWalletList[_transactions[i].wallet.id] ?? false) {
           _filterTransactions.add(_transactions[i]);
-        } 
-        else {
+        } else {
           // check if wallet to is not null
           if (_transactions[i].walletTo != null) {
             // check if the wallet to id is on the selected wallet list or not?
@@ -1027,13 +1080,16 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     }
   }
 
-  Future <void> _findTransaction(String searchText, String categoryId, String type, int limit, int start) async {
-    await _transactionHttp.findTransaction(type, searchText, categoryId, limit, start).then((results) {
+  Future<void> _findTransaction(String searchText, String categoryId,
+      String type, int limit, int start) async {
+    await _transactionHttp
+        .findTransaction(type, searchText, categoryId, limit, start)
+        .then((results) {
       _setTransactions(results, limit, start);
     });
   }
 
-  Future <void> _submitSearch() async {
+  Future<void> _submitSearch() async {
     // 1 will be text search only
     // 2 will be category search only
     // 3 will be both
@@ -1041,7 +1097,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // default the category id value as empty string
     _categoryId = '';
-    
+
     // check if category selected is empty or not?
     if (_categorySelected.isNotEmpty) {
       // category selected not empty
@@ -1061,34 +1117,30 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     if (_searchController.text.trim().isNotEmpty) {
       // not empty, add 1 to the determine type
       determineType += 1;
-      
+
       // set the search text as current search controller text
       _searchText = _searchController.text;
       _searchText = _searchText.trim();
 
       // ensure the searchText is more than 3
       if (_searchText.length < 3) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          createSnackBar(
-            message: "Minimum text search is 3 character",
-          )
-        );
+        ScaffoldMessenger.of(context).showSnackBar(createSnackBar(
+          message: "Minimum text search is 3 character",
+        ));
         return;
       }
     }
 
     // ensure that we already determine the type when reaching here
     if (determineType == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        createSnackBar(
-          message: "Add text or category before searching.",
-        )
-      );
+      ScaffoldMessenger.of(context).showSnackBar(createSnackBar(
+        message: "Add text or category before searching.",
+      ));
       return;
     }
 
     // now determine the _type
-    switch(determineType) {
+    switch (determineType) {
       case 1:
         _type = "name";
         break;
@@ -1109,25 +1161,34 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _transactions = [];
 
     // try to find the transaction
-    await _findTransaction(_searchText, _categoryId, _type, _limit, _start).onError((error, stackTrace) {
-      debugPrint("Error: ${error.toString()}");
-      debugPrintStack(stackTrace: stackTrace);
+    await _findTransaction(
+      _searchText,
+      _categoryId,
+      _type,
+      _limit,
+      _start
+    ).onError((error, stackTrace) {
+      Log.error(
+        message: "Error when searching transaction",
+        error: error,
+        stackTrace: stackTrace,
+      );
 
       if (mounted) {
         Navigator.pop(context);
         // showed error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          createSnackBar(
-            message: "Error when searching transaction",
-          )
-        );
+        ScaffoldMessenger.of(context).showSnackBar(createSnackBar(
+          message: "Error when searching transaction",
+        ));
       }
-    }).whenComplete(() {
-      // remove the loading screen
-      LoadingScreen.instance().hide();
-    },);
+    }).whenComplete(
+      () {
+        // remove the loading screen
+        LoadingScreen.instance().hide();
+      },
+    );
   }
-  
+
   Widget _showSearchOrSelectionWidget() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1135,17 +1196,15 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       children: <Widget>[
         CupertinoSearchTextField(
           controller: _searchController,
-          style: const TextStyle(
-            color: textColor2,
-            fontFamily: '--apple-system'
-          ),
+          style:
+              const TextStyle(color: textColor2, fontFamily: '--apple-system'),
           suffixIcon: const Icon(Ionicons.arrow_forward_circle),
           onSubmitted: ((_) async {
             await _submitSearch().then((_) {
               if (mounted) {
                 // remove the focus from the text
                 FocusScopeNode currentFocus = FocusScope.of(context);
-                if(!currentFocus.hasPrimaryFocus) {
+                if (!currentFocus.hasPrimaryFocus) {
                   currentFocus.unfocus();
                 }
               }
@@ -1156,14 +1215,16 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               if (mounted) {
                 // remove the focus from the text
                 FocusScopeNode currentFocusSuffix = FocusScope.of(context);
-                if(!currentFocusSuffix.hasPrimaryFocus) {
+                if (!currentFocusSuffix.hasPrimaryFocus) {
                   currentFocusSuffix.unfocus();
                 }
               }
             });
           }),
         ),
-        const SizedBox(height: 10,),
+        const SizedBox(
+          height: 10,
+        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -1180,37 +1241,37 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     child: Container(
                       height: 30,
                       decoration: BoxDecoration(
-                        color: primaryDark,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(10),
-                          bottomLeft: Radius.circular(10),
-                        ),
-                        border: Border.all(
-                          color: secondaryBackground,
-                          style: BorderStyle.solid,
-                          width: 1.0,
-                        )
-                      ),
+                          color: primaryDark,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            bottomLeft: Radius.circular(10),
+                          ),
+                          border: Border.all(
+                            color: secondaryBackground,
+                            style: BorderStyle.solid,
+                            width: 1.0,
+                          )),
                       child: const Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          SizedBox(width: 10,),
+                          SizedBox(
+                            width: 10,
+                          ),
                           Icon(
                             Ionicons.add,
                             size: 20,
                             color: textColor,
                           ),
-                          SizedBox(width: 10,),
+                          SizedBox(
+                            width: 10,
+                          ),
                           Expanded(
                             child: Center(
-                              child: Text(
-                                "Add",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold
-                                ),
-                              )
-                            ),
+                                child: Text(
+                              "Add",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )),
                           )
                         ],
                       ),
@@ -1220,8 +1281,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                 Expanded(
                   child: InkWell(
                     onTap: (() {
-                      setState(() {               
-                        // clear the category       
+                      setState(() {
+                        // clear the category
                         _categorySelected.clear();
 
                         // clear also the filter
@@ -1235,33 +1296,33 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     child: Container(
                       height: 30,
                       decoration: BoxDecoration(
-                        color: primaryDark,
-                        border: Border.all(
-                          color: secondaryBackground,
-                          style: BorderStyle.solid,
-                          width: 1.0,
-                        )
-                      ),
+                          color: primaryDark,
+                          border: Border.all(
+                            color: secondaryBackground,
+                            style: BorderStyle.solid,
+                            width: 1.0,
+                          )),
                       child: const Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          SizedBox(width: 10,),
+                          SizedBox(
+                            width: 10,
+                          ),
                           Icon(
                             Ionicons.trash,
                             size: 20,
                             color: textColor,
                           ),
-                          SizedBox(width: 10,),
+                          SizedBox(
+                            width: 10,
+                          ),
                           Expanded(
                             child: Center(
-                              child: Text(
-                                "Clear",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold
-                                ),
-                              )
-                            ),
+                                child: Text(
+                              "Clear",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )),
                           )
                         ],
                       ),
@@ -1276,37 +1337,37 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     child: Container(
                       height: 30,
                       decoration: BoxDecoration(
-                        color: primaryDark,
-                        borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(10),
-                          bottomRight: Radius.circular(10),
-                        ),
-                        border: Border.all(
-                          color: secondaryBackground,
-                          style: BorderStyle.solid,
-                          width: 1.0,
-                        )
-                      ),
+                          color: primaryDark,
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                          ),
+                          border: Border.all(
+                            color: secondaryBackground,
+                            style: BorderStyle.solid,
+                            width: 1.0,
+                          )),
                       child: const Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          SizedBox(width: 10,),
+                          SizedBox(
+                            width: 10,
+                          ),
                           Icon(
                             Ionicons.search,
                             size: 20,
                             color: textColor,
                           ),
-                          SizedBox(width: 10,),
+                          SizedBox(
+                            width: 10,
+                          ),
                           Expanded(
                             child: Center(
-                              child: Text(
-                                "Search",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold
-                                ),
-                              )
-                            ),
+                                child: Text(
+                              "Search",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )),
                           )
                         ],
                       ),
@@ -1315,7 +1376,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             Wrap(
               spacing: 5,
               runSpacing: 5,
@@ -1329,19 +1392,18 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   void _showCategorySelectionDialog() {
     showModalBottomSheet<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return MyBottomSheet(
-          context: context,
-          title: "Category",
-          screenRatio: 0.75,
-          child: TransactionSearchCategory(
-            categoryExpense: _categoryExpenseIcon,
-            categoryIncome: _categoryIncomeIcon,
-          ),
-        );
-      }
-    );
+        context: context,
+        builder: (BuildContext context) {
+          return MyBottomSheet(
+            context: context,
+            title: "Category",
+            screenRatio: 0.75,
+            child: TransactionSearchCategory(
+              categoryExpense: _categoryExpenseIcon,
+              categoryIncome: _categoryIncomeIcon,
+            ),
+          );
+        });
   }
 
   void _generateIconCategory() {
@@ -1359,7 +1421,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     Color iconColor;
     Icon icon;
 
-    if(category.type.toLowerCase() == "expense") {
+    if (category.type.toLowerCase() == "expense") {
       iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
       icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
     } else {
@@ -1376,10 +1438,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             _categorySelected[category.id] = category;
           });
           Navigator.pop(context);
-        }
-        else {
+        } else {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(createSnackBar(message: "Maximum selected category is 10"));
+          ScaffoldMessenger.of(context).showSnackBar(
+              createSnackBar(message: "Maximum selected category is 10"));
         }
       },
       child: Column(
@@ -1391,18 +1453,21 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               height: 40,
               width: 40,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
-                color: iconColor,
-                border: Border.all(
-                  color: (_categorySelected.containsKey(category.id) ? accentColors[4] : Colors.transparent),
-                  width: 2.0,
-                  style: BorderStyle.solid,
-                )
-              ),
+                  borderRadius: BorderRadius.circular(50),
+                  color: iconColor,
+                  border: Border.all(
+                    color: (_categorySelected.containsKey(category.id)
+                        ? accentColors[4]
+                        : Colors.transparent),
+                    width: 2.0,
+                    style: BorderStyle.solid,
+                  )),
               child: icon,
             ),
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1432,22 +1497,27 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // loop thru the category selected
     _categorySelected.forEach((key, value) {
-      result.add(
-        InkWell(
-          onTap: (() {
-            // remove this chip from the _categorySelected
-            setState(() {            
-              _categorySelected.remove(key);
-            });
-          }),
-          child: Chip(
-            avatar: _categoryIcon(type: value.type, name: value.name, height: 20, width: 20, size: 15),
-            label: Text(value.name),
-            backgroundColor: (value.type == 'expense' ? IconColorList.getExpenseColor(value.name) : IconColorList.getIncomeColor(value.name)),
-            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-          ),
-        )
-      );  
+      result.add(InkWell(
+        onTap: (() {
+          // remove this chip from the _categorySelected
+          setState(() {
+            _categorySelected.remove(key);
+          });
+        }),
+        child: Chip(
+          avatar: _categoryIcon(
+              type: value.type,
+              name: value.name,
+              height: 20,
+              width: 20,
+              size: 15),
+          label: Text(value.name),
+          backgroundColor: (value.type == 'expense'
+              ? IconColorList.getExpenseColor(value.name)
+              : IconColorList.getIncomeColor(value.name)),
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+        ),
+      ));
     });
 
     return result;
@@ -1457,14 +1527,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 class TransactionSearchCategory extends StatefulWidget {
   final List<Widget> categoryExpense;
   final List<Widget> categoryIncome;
-  const TransactionSearchCategory({
-    super.key,
-    required this.categoryExpense,
-    required this.categoryIncome
-  });
+  const TransactionSearchCategory(
+      {super.key, required this.categoryExpense, required this.categoryIncome});
 
   @override
-  State<TransactionSearchCategory> createState() => _TransactionSearchCategoryState();
+  State<TransactionSearchCategory> createState() =>
+      _TransactionSearchCategoryState();
 }
 
 class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
@@ -1484,7 +1552,8 @@ class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
           padding: const EdgeInsets.all(10),
           child: Center(
             child: CupertinoSegmentedControl<PageName>(
-              selectedColor: (_resultCategoryColor[_resultCategoryName] ?? accentColors[9]),
+              selectedColor: (_resultCategoryColor[_resultCategoryName] ??
+                  accentColors[9]),
               // Provide horizontal padding around the children.
               padding: const EdgeInsets.symmetric(horizontal: 12),
               // This represents a currently selected segmented control.
@@ -1511,7 +1580,9 @@ class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
         Expanded(
           child: GridView.count(
             crossAxisCount: 4,
-            children: (_resultCategoryName == PageName.expense ? widget.categoryExpense : widget.categoryIncome),
+            children: (_resultCategoryName == PageName.expense
+                ? widget.categoryExpense
+                : widget.categoryIncome),
           ),
         ),
       ],

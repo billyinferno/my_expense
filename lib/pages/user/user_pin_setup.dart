@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/pin_api.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/widgets/input/pin_pad.dart';
 import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 
 class PinSetupPage extends StatefulWidget {
-  const PinSetupPage({ super.key });
+  const PinSetupPage({super.key});
 
   @override
   State<PinSetupPage> createState() => _PinSetupPageState();
@@ -57,42 +58,44 @@ class _PinSetupPageState extends State<PinSetupPage> {
                     fontSize: 25,
                   ),
                 ),
-                const SizedBox(height: 5,),
+                const SizedBox(
+                  height: 5,
+                ),
                 const Text("Your passcode is required"),
-                const SizedBox(height: 25,),
+                const SizedBox(
+                  height: 25,
+                ),
                 PinPad(
                   hashPin: '',
                   hashKey: '',
                   getPin: (value) async {
                     // got the pin, check whether this is 1st or 2nd
-                    if(_firstPin.isEmpty) {
+                    if (_firstPin.isEmpty) {
                       _firstPin = value;
                       setState(() {
                         _stage = 2;
                       });
-                    }
-                    else {
-                      if(_secondPin.isEmpty) {
+                    } else {
+                      if (_secondPin.isEmpty) {
                         _secondPin = value;
 
                         // verify whether both pin is the same or not?
-                        if(_firstPin != _secondPin) {
+                        if (_firstPin != _secondPin) {
                           // show error, and reset all
                           // show the error dialog
                           await ShowMyDialog(
-                            cancelEnabled: false,
-                            confirmText: "OK",
-                            dialogTitle: "Error",
-                            dialogText: "PIN didn't match."
-                          ).show(context);
+                                  cancelEnabled: false,
+                                  confirmText: "OK",
+                                  dialogTitle: "Error",
+                                  dialogText: "PIN didn't match.")
+                              .show(context);
 
                           setState(() {
                             _stage = 1;
                             _firstPin = "";
                             _secondPin = "";
                           });
-                        }
-                        else {
+                        } else {
                           // send this to backend
                           _savePin();
                         }
@@ -120,27 +123,32 @@ class _PinSetupPageState extends State<PinSetupPage> {
         Navigator.pop(context, true);
       }
     }).onError((error, stackTrace) async {
-      debugPrint("Error: ${error.toString()}");
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Error when setup PIN",
+        error: error,
+        stackTrace: stackTrace,
+      );
 
       setState(() {
         _stage = 1;
         _firstPin = "";
         _secondPin = "";
       });
-      
+
       if (mounted) {
         // show the error dialog
         await ShowMyDialog(
           cancelEnabled: false,
           confirmText: "OK",
           dialogTitle: "Error Save",
-          dialogText: "Error when Save PIN"
-        ).show(context);
+          dialogText: "Error when Save PIN")
+        .show(context);
       }
-    }).whenComplete(() {
-      // remove the loading screen
-      LoadingScreen.instance().hide();
-    },);
+    }).whenComplete(
+      () {
+        // remove the loading screen
+        LoadingScreen.instance().hide();
+      },
+    );
   }
 }

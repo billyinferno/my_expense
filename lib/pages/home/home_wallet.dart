@@ -4,6 +4,8 @@ import 'package:ionicons/ionicons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/currency_model.dart';
+import 'package:my_expense/utils/log.dart';
+import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/widgets/appbar/home_appbar.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
@@ -153,9 +155,19 @@ class _HomeWalletState extends State<HomeWallet> {
         }
       });
     }).onError((error, stackTrace) {
-      debugPrint("Error on <_deleteWallet>");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Error on <_deleteWallet>",
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Error when deleting wallet"
+          ),
+        );
+      }
     }).whenComplete(
       () {
         // remove the loading screen
@@ -168,10 +180,7 @@ class _HomeWalletState extends State<HomeWallet> {
     Future<List<WalletModel>> futureWallets;
 
     // showed a debug print message to knew that we refresh the wallet
-    debugPrint("💳 Refresh Wallet");
-
-    // show the loading screen
-    LoadingScreen.instance().show(context: context);
+    Log.info(message: "💳 Refresh Wallet");
 
     // fetch the new wallet data from API
     await Future.wait([
@@ -184,16 +193,13 @@ class _HomeWalletState extends State<HomeWallet> {
         }
       });
     }).onError((error, stackTrace) {
-      debugPrint("Error when do <_refreshWallet>");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Error when do <_refreshWallet>",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when get wallet data");
-    }).whenComplete(
-      () {
-        // remove loading screen
-        LoadingScreen.instance().hide();
-      },
-    );
+    });
 
     return true;
   }
@@ -250,7 +256,7 @@ class _HomeWalletState extends State<HomeWallet> {
                         });
                       }
                     }).onError((error, stackTrace) {
-                      debugPrint("Error when clicking delete wallet");
+                      Log.error(message: "Error when clicking delete wallet");
                     });
                   }
                 });
@@ -325,9 +331,11 @@ class _HomeWalletState extends State<HomeWallet> {
       });
     }).onError((error, stackTrace) {
       // got error when we try to enable/disable wallet
-      debugPrint("Error <_enableWallet>");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Error <_enableWallet>",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when enabling the wallet");
     }).whenComplete(() {
       // remove the loading screen
@@ -352,8 +360,11 @@ class _HomeWalletState extends State<HomeWallet> {
     ]).then((_) {
       // do nothing
     }).onError((error, stackTrace) {
-      debugPrint("Error at _clearCache");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error at _clearCache",
+        error: error,
+        stackTrace: stackTrace,
+      );
     }).whenComplete(() {
       LoadingScreen.instance().hide();
     });

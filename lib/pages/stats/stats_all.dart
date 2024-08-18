@@ -4,6 +4,7 @@ import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/api/wallet_api.dart';
 import 'package:my_expense/model/wallet_stat_all_model.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/widgets/chart/bar.dart';
 import 'package:my_expense/widgets/chart/multi_line_chart.dart';
 import 'package:my_expense/widgets/chart/summary_box.dart';
@@ -21,7 +22,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
   final _dt = DateFormat("yyyy-MM");
   final _dt2 = DateFormat("MM/yy");
   final WalletHTTPService _walletHTTP = WalletHTTPService();
-  
+
   late Future<bool> _getData;
   late List<WalletStatAllModel> _walletStatAll;
   late List<WalletStatAllModel> _origWalletStatAll;
@@ -89,15 +90,16 @@ class _StatsAllPageState extends State<StatsAllPage> {
                     size: 25,
                   ),
                 ),
-                SizedBox(height: 5,),
+                SizedBox(
+                  height: 5,
+                ),
                 Center(
                   child: Text("Unable to load data from API"),
                 )
               ],
             ),
           );
-        }
-        else if (snapshot.hasData) {
+        } else if (snapshot.hasData) {
           return Scaffold(
             appBar: AppBar(
               title: Center(child: Text("Stat For ${_walletStatAll[0].ccy}")),
@@ -121,7 +123,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Icon(
-                          (_sortAscending ? Ionicons.arrow_up : Ionicons.arrow_down),
+                          (_sortAscending
+                              ? Ionicons.arrow_up
+                              : Ionicons.arrow_down),
                           color: textColor,
                         ),
                         Column(
@@ -152,8 +156,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
             ),
             body: _generateBarChart(),
           );
-        }
-        else {
+        } else {
           return const Scaffold(
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -181,7 +184,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           MultiLineChart(
             data: _walletLineChartData,
             color: [accentColors[5], accentColors[0], accentColors[2]],
@@ -189,7 +194,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
             height: 200,
             dateOffset: _dateOffset,
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -202,27 +209,31 @@ class _StatsAllPageState extends State<StatsAllPage> {
                   value: _fCCY.format(_totalIncome),
                   count: _countIncome,
                 ),
-                const SizedBox(width: 10,),
-                SummaryBox(
-                  color: accentColors[2],
-                  text: "Expense",
-                  value: _fCCY.format(_totalExpense),
-                  count: _countExpense
+                const SizedBox(
+                  width: 10,
                 ),
+                SummaryBox(
+                    color: accentColors[2],
+                    text: "Expense",
+                    value: _fCCY.format(_totalExpense),
+                    count: _countExpense),
               ],
             ),
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(
+            height: 10,
+          ),
           Expanded(
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: _walletStatAll[0].data.length,
               itemBuilder: ((context, index) {
                 Color indicator = Colors.white;
-                if (_walletStatAll[0].data[index].income! > _walletStatAll[0].data[index].expense!) {
+                if (_walletStatAll[0].data[index].income! >
+                    _walletStatAll[0].data[index].expense!) {
                   indicator = accentColors[0];
-                }
-                else if (_walletStatAll[0].data[index].income! < _walletStatAll[0].data[index].expense!) {
+                } else if (_walletStatAll[0].data[index].income! <
+                    _walletStatAll[0].data[index].expense!) {
                   indicator = accentColors[2];
                 }
 
@@ -243,12 +254,11 @@ class _StatsAllPageState extends State<StatsAllPage> {
                         width: 10,
                         height: 65,
                         decoration: BoxDecoration(
-                          color: indicator,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(5),
-                            bottomLeft: Radius.circular(5),
-                          )
-                        ),
+                            color: indicator,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(5),
+                              bottomLeft: Radius.circular(5),
+                            )),
                       ),
                       // date,
                       Container(
@@ -269,13 +279,30 @@ class _StatsAllPageState extends State<StatsAllPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Bar(amount: _walletStatAll[0].data[index].income!, maxAmount: _maxAmount, text: _fCCY.format(_walletStatAll[0].data[index].income!), color: accentColors[0]),
-                            Bar(amount: _walletStatAll[0].data[index].expense!, maxAmount: _maxAmount, text: _fCCY.format(_walletStatAll[0].data[index].expense!),color: accentColors[2]),
-                            Bar(amount: _walletStatAll[0].data[index].balance!, maxAmount: _maxAmount, text: _fCCY.format(_walletStatAll[0].data[index].balance!),color: accentColors[4]),
+                            Bar(
+                                amount: _walletStatAll[0].data[index].income!,
+                                maxAmount: _maxAmount,
+                                text: _fCCY.format(
+                                    _walletStatAll[0].data[index].income!),
+                                color: accentColors[0]),
+                            Bar(
+                                amount: _walletStatAll[0].data[index].expense!,
+                                maxAmount: _maxAmount,
+                                text: _fCCY.format(
+                                    _walletStatAll[0].data[index].expense!),
+                                color: accentColors[2]),
+                            Bar(
+                                amount: _walletStatAll[0].data[index].balance!,
+                                maxAmount: _maxAmount,
+                                text: _fCCY.format(
+                                    _walletStatAll[0].data[index].balance!),
+                                color: accentColors[4]),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 5,),
+                      const SizedBox(
+                        width: 5,
+                      ),
                     ],
                   ),
                 );
@@ -319,8 +346,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
         if (data.income! > data.expense!) {
           _countIncome += 1;
-        }
-        else if (data.income! < data.expense!) {
+        } else if (data.income! < data.expense!) {
           _countExpense += 1;
         }
 
@@ -354,8 +380,18 @@ class _StatsAllPageState extends State<StatsAllPage> {
         _origWalletStatAll.addAll(resp);
 
         if (_origWalletStatAll[0].data.isNotEmpty) {
-          _minDate = DateTime(_origWalletStatAll[0].data[0].date.year, _origWalletStatAll[0].data[0].date.month, 1);
-          _maxDate = DateTime(_origWalletStatAll[0].data[_origWalletStatAll[0].data.length - 1].date.year, _origWalletStatAll[0].data[_origWalletStatAll[0].data.length - 1].date.month, 1);
+          _minDate = DateTime(_origWalletStatAll[0].data[0].date.year,
+              _origWalletStatAll[0].data[0].date.month, 1);
+          _maxDate = DateTime(
+              _origWalletStatAll[0]
+                  .data[_origWalletStatAll[0].data.length - 1]
+                  .date
+                  .year,
+              _origWalletStatAll[0]
+                  .data[_origWalletStatAll[0].data.length - 1]
+                  .date
+                  .month,
+              1);
 
           // generate the list of date beased on _min and _max date
           DateTime startDate = _minDate;
@@ -374,9 +410,12 @@ class _StatsAllPageState extends State<StatsAllPage> {
         // get the statistic data
         _getStatData();
       });
-    }
-    catch(error) {
-      debugPrint(error.toString());
+    } catch (error, stackTrace) {
+      Log.error(
+        message: "Error when get wallet stat data",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw 'Error when try to get the data from server';
     }
 
@@ -384,13 +423,11 @@ class _StatsAllPageState extends State<StatsAllPage> {
   }
 
   void _sortWalletStat() {
-    setState(() 
-    {
+    setState(() {
       _walletStatAll.clear();
       if (_sortAscending) {
         _walletStatAll.addAll(_origWalletStatAll.toList());
-      }
-      else {
+      } else {
         _walletStatAll.addAll(_origWalletStatAll.reversed.toList());
       }
     });

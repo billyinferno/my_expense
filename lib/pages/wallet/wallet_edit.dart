@@ -12,6 +12,7 @@ import 'package:my_expense/model/wallet_type_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/themes/icon_list.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/decimal_formatter.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -118,8 +119,11 @@ class _WalletEditPageState extends State<WalletEditPage> {
                 }
               }).onError((error, stackTrace) async {
                 // print the error
-                debugPrint("Error: ${error.toString()}");
-                debugPrintStack(stackTrace: stackTrace);
+                Log.error(
+                  message: "Error when update wallet data",
+                  error: error,
+                  stackTrace: stackTrace,
+                );
                 
                 if (context.mounted) {
                   // show the error dialog
@@ -533,9 +537,11 @@ class _WalletEditPageState extends State<WalletEditPage> {
         }
       });
     }).onError((error, stackTrace) {
-      debugPrint("error <updateTransaction>");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "error <updateTransaction>",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when edit wallet");
     });
   }

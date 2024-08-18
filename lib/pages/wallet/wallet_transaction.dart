@@ -15,6 +15,7 @@ import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/function/date_utils.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/misc/show_dialog.dart';
 import 'package:my_expense/utils/misc/snack_bar.dart';
 import 'package:my_expense/utils/misc/wallet_transaction_class_helper.dart';
@@ -298,8 +299,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       await _setTransactions(txns);
       _transactions = txns.toList();
     }).onError((error, stackTrace) {
-      debugPrint("Error when <_fetchTransactionWallet>");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error when <_fetchTransactionWallet>",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception('Error when fetch wallet transaction');
     }).whenComplete(() {
       if (showLoader ?? true) {
@@ -312,10 +316,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   Future<void> _fetchWalletMinMaxDate() async {
     await _transactionHttp.fetchWalletMinMaxDate(_wallet.id).then((walletTxnDate) async {
       _walletMinMaxDate = walletTxnDate;
-
     }).onError((error, stackTrace) {
-      debugPrint("Error when <_fetchWalletMinMaxDate>");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error when <_fetchWalletMinMaxDate>",
+        error: error,
+        stackTrace: stackTrace,
+      );
     });
   }
 
@@ -351,8 +357,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                     await _fetchTransactionWallet(newDate).then((_) {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
-                      debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
-                      debugPrintStack(stackTrace: stackTrace);
+                      Log.error(
+                        message: "Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}",
+                        error: error,
+                        stackTrace: stackTrace,
+                      );
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           createSnackBar(
@@ -372,8 +381,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               await _fetchTransactionWallet(newDate).then((_) {
                 _setDate(newDate);
               }).onError((error, stackTrace) {
-                debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
-                debugPrintStack(stackTrace: stackTrace);
+                Log.error(
+                  message: "Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}",
+                  error: error,
+                  stackTrace: stackTrace,
+                );
 
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -393,8 +405,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                     await _fetchTransactionWallet(newDate).then((_) {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
-                      debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
-                      debugPrintStack(stackTrace: stackTrace);
+                      Log.error(
+                        message: "Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}",
+                        error: error,
+                        stackTrace: stackTrace,
+                      );
                       
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -446,8 +461,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                     await _fetchTransactionWallet(newDate).then((_) {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
-                      debugPrint("Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}");
-                      debugPrintStack(stackTrace: stackTrace);
+                      Log.error(
+                        message: "Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}",
+                        error: error,
+                        stackTrace: stackTrace,
+                      );
 
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -479,13 +497,17 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           child: RefreshIndicator(
             color: accentColors[6],
             onRefresh: () async {
-              debugPrint("🔃 Refresh wallet");
+              Log.info(message: "🔃 Refresh wallet");
 
-              await _fetchTransactionWallet(_currentDate, true).onError((error, stackTrace) {
-                debugPrint("Error when refresh wallet for ${_dtMMMMyyyy.format(_currentDate.toLocal())}");
-              }).onError((error, stackTrace) {
-                debugPrint("Error: ${error.toString()}");
-                debugPrintStack(stackTrace: stackTrace);
+              await _fetchTransactionWallet(
+                _currentDate,
+                true
+              ).onError((error, stackTrace) {
+                Log.error(
+                  message: "Error when refresh wallet for ${_dtMMMMyyyy.format(_currentDate.toLocal())}",
+                  error: error,
+                  stackTrace: stackTrace,
+                );
 
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -572,8 +594,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                           // rebuild widget after finished
                           await _setTransactions(_transactions);
                         }
-                        catch(error) {
-                          debugPrint("Error: ${error.toString()}");
+                        catch(error, stackTrace) {
+                          Log.error(
+                            message: "Error when delete transaction",
+                            error: error,
+                            stackTrace: stackTrace,
+                          );
                         }
                       }
                     });
@@ -888,8 +914,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       // update information for txn delete
       await _updateInformation(txnDeleted);
     }).onError((error, stackTrace) {
-      debugPrint("Error when delete");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error when delete",
+        error: error,
+        stackTrace: stackTrace,
+      );
 
       if (mounted) {
         // show scaffold showing error
@@ -968,7 +997,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         });
       }
     }).onError((error, stackTrace) {
-      debugPrint("Error on update information");
+      Log.error(
+        message: "Error on update information",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception(error.toString());
     });
 
@@ -981,7 +1014,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnCurrencyId, result);
         }
       }).onError((error, stackTrace) {
-        debugPrint("Error on update information");
+        Log.error(
+          message: "Error on update information",
+          error: error,
+          stackTrace: stackTrace,
+        );
         throw Exception(error.toString());
       });
 
@@ -1002,7 +1039,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           );
         }
       }).onError((error, stackTrace) {
-        debugPrint("Error on update information");
+        Log.error(
+          message: "Error on update information",
+          error: error,
+          stackTrace: stackTrace,
+        );
         throw Exception(error.toString());
       },);
     }

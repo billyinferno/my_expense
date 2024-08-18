@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:my_expense/utils/log.dart';
 
 class MyBox {
   static Box<dynamic>? keyBox;
   static Box<dynamic>? encryptedBox;
 
   static Future<void> init() async {
-    debugPrint("⌛ Init Box");
+    Log.info(message: "⌛ Init Box");
 
     // generate hive box for stored the jwt token
     if (keyBox == null) {
@@ -14,7 +15,7 @@ class MyBox {
     }
     else {
       // we already have keyBox, so we can compact it, close and re-open it?
-      debugPrint("🗜 Compacting Box on init");
+      Log.info(message: "🗜 Compacting Box on init");
       await keyBox!.compact();
     }
 

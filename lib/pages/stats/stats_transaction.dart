@@ -7,6 +7,7 @@ import 'package:my_expense/model/transaction_stats_detail_model.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/args/stats_transaction_args.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/widgets/chart/budget_bar.dart';
 
 class StatsTransactionPage extends StatefulWidget {
@@ -206,8 +207,11 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     ).then((result) {
       _transactions = result;
     }).onError((error, stackTrace) {
-      debugPrint("Error on <_fetchStatsDetail>");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error on <_fetchStatsDetail>",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when fetching statistic");
     });
 

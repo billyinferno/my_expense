@@ -15,6 +15,7 @@ import 'package:my_expense/model/worth_model.dart';
 import 'package:my_expense/provider/home_provider.dart';
 import 'package:my_expense/themes/category_icon_list.dart';
 import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/utils/log.dart';
 import 'package:my_expense/utils/prefs/shared_budget.dart';
 import 'package:my_expense/utils/prefs/shared_transaction.dart';
 import 'package:my_expense/utils/prefs/shared_user.dart';
@@ -685,7 +686,7 @@ class _HomeStatsState extends State<HomeStats> {
       }
 
       // show debug print to knew that we will fetch data
-      debugPrint("📈 Refresh Statistic $_from to $_to");
+      Log.info(message: "📈 Refresh Statistic $_from to $_to");
 
       // clear the current transaction top map
       _transactionTop.clear();
@@ -722,15 +723,18 @@ class _HomeStatsState extends State<HomeStats> {
           });
         }
       }).onError((error, stackTrace) {
-        debugPrint("Error on _fetchData");
-        debugPrint(error.toString());
-        debugPrintStack(stackTrace: stackTrace);
+        Log.error(
+          message: "Error on _fetchData",
+          error: error,
+          stackTrace: stackTrace,
+        );
+
         // check the loader dialog
         if (isShowDialog && mounted) {
           Navigator.pop(context);
         }
         throw Exception("Error when fetch statistic data");
-      }).whenComplete(() {  
+      }).whenComplete(() {
         // remove the loading dialog if we showed it
         if (isShowDialog) {
           LoadingScreen.instance().hide();
@@ -746,6 +750,7 @@ class _HomeStatsState extends State<HomeStats> {
 
     // get the data
     await _walletHttp.fetchWalletsWorth(to, isForce).then((worth) {
+      Log.success(message: "💯 fetching wallet worth");
       // set this worth
       _setWorth(worth);
 
@@ -754,9 +759,11 @@ class _HomeStatsState extends State<HomeStats> {
         Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth);
       }
     }).onError((error, stackTrace) {
-      debugPrint("Error on <_fetchWorth>");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Error on <_fetchWorth>",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when fetching worth");
     },);
   }
@@ -771,8 +778,11 @@ class _HomeStatsState extends State<HomeStats> {
         Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(ccy.id, incomeExpense);
       }
     }).onError((error, stackTrace) {
-      debugPrint("Error on <_fetchIncomeExpense>");
-      debugPrint(error.toString());
+      Log.error(
+        message: "Error on <_fetchIncomeExpense>",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when fetching income/expense");
     },);
   }
@@ -785,9 +795,11 @@ class _HomeStatsState extends State<HomeStats> {
         Provider.of<HomeProvider>(context, listen: false).setTopTransaction(ccy, type, transactionTop);
       }
     }).onError((error, stackTrace) {
-      debugPrint("Error on <_fetchTopTransaction>");
-      debugPrint(error.toString());
-      debugPrintStack(stackTrace: stackTrace);
+      Log.error(
+        message: "Error on <_fetchTopTransaction>",
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw Exception("Error when fetching top transaction");
     },);
   }
