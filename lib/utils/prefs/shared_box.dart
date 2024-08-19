@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:my_expense/utils/log.dart';
+import 'package:my_expense/_index.g.dart';
 
 class MyBox {
   static Box<dynamic>? keyBox;

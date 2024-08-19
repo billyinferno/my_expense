@@ -1,4 +1,4 @@
-bool isSameDay(DateTime dt1, DateTime dt2) {
+bool isSameDate(DateTime dt1, DateTime dt2) {
   // check if year same or not?
   if (dt1.year == dt2.year) {
     // same, now check if month is the same or not?

@@ -1,15 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/wallet_api.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/model/wallet_stat_model.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/number_format.dart';
-import 'package:my_expense/widgets/chart/bar.dart';
-import 'package:my_expense/widgets/chart/multi_line_chart.dart';
-import 'package:my_expense/widgets/chart/summary_box.dart';
+import 'package:my_expense/_index.g.dart';
 
 class WalletStatPage extends StatefulWidget {
   final Object? wallet;

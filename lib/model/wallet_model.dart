@@ -1,6 +1,4 @@
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/model/user_permission_model.dart';
-import 'package:my_expense/model/wallet_type_model.dart';
+import 'package:my_expense/_index.g.dart';
 
 class WalletModel {
   final int id;

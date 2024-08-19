@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/model/income_expense_category_model.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/args/stats_detail_args.dart';
-import 'package:my_expense/utils/args/stats_transaction_args.dart';
-import 'package:my_expense/widgets/chart/budget_bar.dart';
-import 'package:my_expense/widgets/chart/pie_chart/my_pie_chart.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:my_expense/_index.g.dart';
 
 class StatsDetailPage extends StatefulWidget {
   final Object? args;

@@ -1,11 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'package:my_expense/model/income_expense_model.dart';
-import 'package:my_expense/model/last_transaction_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/transaction_top_model.dart';
-import 'package:my_expense/utils/prefs/shared_box.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:my_expense/_index.g.dart';
 
 class TransactionSharedPreferences {
   static const _transactionKey = "trx";
@@ -238,7 +233,7 @@ class TransactionSharedPreferences {
           transaction[j] = swp;
         }
         else {
-          if(isSameDay(transaction[i].date.toLocal(), transaction[j].date.toLocal())) {
+          if(isSameDate(transaction[i].date.toLocal(), transaction[j].date.toLocal())) {
             // check which ID is bigger
             if(transaction[i].id > transaction[j].id) {
               // swap the data

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/_index.g.dart';
 
 class BarButton extends StatelessWidget {
   final int index;

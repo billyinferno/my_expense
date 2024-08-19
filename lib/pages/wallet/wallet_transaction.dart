@@ -4,28 +4,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
-import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/api/transaction_api.dart';
-import 'package:my_expense/api/wallet_api.dart';
-import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/transaction_wallet_minmax_date_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/function/date_utils.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
-import 'package:my_expense/utils/misc/wallet_transaction_class_helper.dart';
-import 'package:my_expense/utils/prefs/shared_budget.dart';
-import 'package:my_expense/utils/prefs/shared_transaction.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/item/card_face_item.dart';
-import 'package:my_expense/widgets/item/my_item_list.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
+import 'package:my_expense/_index.g.dart';
 
 class WalletTransactionPage extends StatefulWidget {
   final Object? wallet;
@@ -257,7 +237,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         // loop thru the transactions that have the same date and add this to the list
         isLoop = true;
         while(idx < txnList.length && isLoop) {
-          if (isSameDay(txnList[idx].date.toLocal(), key.toLocal())) {
+          if (isSameDate(txnList[idx].date.toLocal(), key.toLocal())) {
             // add to the transaction list
             WalletTransactionList data = WalletTransactionList();
             data.type = WalletListType.item;
@@ -898,7 +878,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
       // check if the same date or not with the transaction date that we just
       // delete
-      if (isSameDay(currentListTxnDate, txnDeleted.date)) {
+      if (isSameDate(currentListTxnDate, txnDeleted.date)) {
         if (mounted) {
           // pop the transaction from the provider
           Provider.of<HomeProvider>(context, listen: false).popTransactionList(txnDeleted);

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/themes/color_utils.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/themes/icon_list.dart';
+import 'package:my_expense/_index.g.dart';
 
 class Wallet extends StatelessWidget {
   final WalletModel wallet;

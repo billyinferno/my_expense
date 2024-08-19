@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_expense/model/transaction_wallet_minmax_date_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/themes/color_utils.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/themes/icon_list.dart';
+import 'package:my_expense/_index.g.dart';
 
 class CardFace extends StatelessWidget {
   final WalletModel wallet;

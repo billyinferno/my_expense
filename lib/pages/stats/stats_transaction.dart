@@ -2,13 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/transaction_api.dart';
-import 'package:my_expense/model/transaction_stats_detail_model.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/args/stats_transaction_args.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/widgets/chart/budget_bar.dart';
+import 'package:my_expense/_index.g.dart';
 
 class StatsTransactionPage extends StatefulWidget {
   final Object? args;

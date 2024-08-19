@@ -2,20 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:my_expense/api/wallet_api.dart';
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
-import 'package:my_expense/widgets/appbar/home_appbar.dart';
-import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/prefs/shared_budget.dart';
-import 'package:my_expense/utils/prefs/shared_transaction.dart';
-import 'package:my_expense/widgets/input/wallet.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
+import 'package:my_expense/_index.g.dart';
 
 class HomeWallet extends StatefulWidget {
   const HomeWallet({super.key});

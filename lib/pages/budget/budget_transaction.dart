@@ -2,15 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/transaction_api.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/args/budget_transaction_args.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/wallet_transaction_class_helper.dart';
-import 'package:my_expense/widgets/chart/budget_bar.dart';
-import 'package:my_expense/widgets/item/budget_transaction_item.dart';
-import 'package:table_calendar/table_calendar.dart';
+import 'package:my_expense/_index.g.dart';
 
 class BudgetTransactionPage extends StatefulWidget {
   final Object? arguments;
@@ -268,7 +260,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
         // loop thru the transactions that have the same date and add this to the list
         isLoop = true;
         while(idx < txnList.length && isLoop) {
-          if (isSameDay(txnList[idx].date.toLocal(), key.toLocal())) {
+          if (isSameDate(txnList[idx].date.toLocal(), key.toLocal())) {
             // add to the transaction list
             WalletTransactionList data = WalletTransactionList();
             data.type = WalletListType.item;

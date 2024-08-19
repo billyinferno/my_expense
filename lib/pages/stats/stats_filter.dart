@@ -3,27 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/transaction_api.dart';
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/model/income_expense_category_model.dart';
-import 'package:my_expense/model/user_permission_model.dart';
-import 'package:my_expense/model/users_me_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/model/wallet_type_model.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/themes/icon_list.dart';
-import 'package:my_expense/utils/args/stats_detail_args.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/prefs/shared_transaction.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/input/type_slide.dart';
-import 'package:my_expense/widgets/input/user_button.dart';
-import 'package:my_expense/widgets/item/expand_animation.dart';
-import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
-import 'package:my_expense/widgets/item/simple_item.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
+import 'package:my_expense/_index.g.dart';
 
 class StatsFilterPage extends StatefulWidget {
   const StatsFilterPage({super.key});

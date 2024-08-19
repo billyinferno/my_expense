@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_expense/themes/color_utils.dart';
-import 'package:my_expense/themes/colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:my_expense/_index.g.dart';
 
 class IconColorList {
   static Icon getExpenseIcon(String name, [double? size]) {

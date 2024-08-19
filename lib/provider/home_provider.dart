@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/model/income_expense_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/transaction_top_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/model/worth_model.dart';
+import 'package:my_expense/_index.g.dart';
 
 class HomeProvider extends ChangeNotifier {
   List<TransactionListModel> transactionList = [];

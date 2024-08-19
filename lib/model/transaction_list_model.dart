@@ -1,4 +1,4 @@
-import 'package:my_expense/model/user_permission_model.dart';
+import 'package:my_expense/_index.g.dart';
 
 class TransactionListModel {
   final int id;

@@ -1,7 +1,5 @@
 import 'dart:convert';
-
-import 'package:my_expense/model/pin_model.dart';
-import 'package:my_expense/utils/prefs/shared_box.dart';
+import 'package:my_expense/_index.g.dart';
 
 class PinSharedPreferences {
   static const _pinModel = 'pin';

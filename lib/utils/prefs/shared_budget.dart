@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:intl/intl.dart';
-import 'package:my_expense/model/budget_list_model.dart';
-import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/utils/prefs/shared_box.dart';
+import 'package:my_expense/_index.g.dart';
 
 class BudgetSharedPreferences {
   static const _keyBudgetModel = 'budget_'; // key will be budget_{ccy}_{date}

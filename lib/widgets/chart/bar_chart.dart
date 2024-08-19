@@ -2,8 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_expense/model/income_expense_model.dart';
-import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/_index.g.dart';
 
 class BarChart extends StatelessWidget {
   final DateTime from;

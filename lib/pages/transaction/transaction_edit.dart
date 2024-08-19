@@ -1,23 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/api/transaction_api.dart';
-import 'package:my_expense/api/wallet_api.dart';
-import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/transaction_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/model/worth_model.dart';
-import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/utils/function/date_utils.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/prefs/shared_budget.dart';
-import 'package:my_expense/utils/prefs/shared_transaction.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/input/transaction_input.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
+import 'package:my_expense/_index.g.dart';
 
 class TransactionEditPage extends StatefulWidget {
   final Object? params;
@@ -79,7 +63,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         // check if this is the same date or not?
         // if not the same then we will need to refresh bot transaction list
         // both on the transaction update date and the home list date.
-        if (!isSameDay(
+        if (!isSameDate(
             txnUpdate.date.toLocal(), currentListTxnDate.toLocal())) {
           // since the update transaction and current home list is different date
           // get both data and stored it on the transaction shared preferences

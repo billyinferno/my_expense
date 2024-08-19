@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
-import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/_index.g.dart';
 
 class BudgetTransactionItem extends StatelessWidget {
   final String itemName;

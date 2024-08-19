@@ -1,9 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:my_expense/model/error_model.dart';
-import 'package:my_expense/utils/globals.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
+import 'package:my_expense/_index.g.dart';
 
 enum NetType {
   initialize,

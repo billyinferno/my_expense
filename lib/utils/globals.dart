@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/_index.g.dart';
 
 class Globals {
   static String apiURL = (dotenv.env['API_URL'] ?? 'http://192.168.1.176:1337/');

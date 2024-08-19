@@ -1,24 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/api/transaction_api.dart';
-import 'package:my_expense/api/wallet_api.dart';
-import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/model/last_transaction_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/transaction_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/model/worth_model.dart';
-import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/utils/function/date_utils.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/prefs/shared_budget.dart';
-import 'package:my_expense/utils/prefs/shared_transaction.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/input/transaction_input.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
+import 'package:my_expense/_index.g.dart';
 
 class TransactionAddPage extends StatefulWidget {
   final Object? params;
@@ -87,7 +70,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // for transaction that actually add on the different date, we cannot notify the home list
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
-        if (isSameDay(txn.date.toLocal(), _selectedDate.toLocal()) && mounted) {
+        if (isSameDate(txn.date.toLocal(), _selectedDate.toLocal()) && mounted) {
           Provider.of<HomeProvider>(context, listen: false)
               .setTransactionList(txnListShared);
         }

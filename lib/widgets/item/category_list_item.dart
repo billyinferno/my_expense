@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/_index.g.dart';
 
 class CategoryListItem extends StatelessWidget {
   final int index;

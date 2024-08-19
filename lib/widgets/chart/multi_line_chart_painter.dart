@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/misc/number_format.dart';
+import 'package:my_expense/_index.g.dart';
 
 class MultiLineChartPainter extends CustomPainter {
   final double min;

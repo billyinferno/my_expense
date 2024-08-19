@@ -2,23 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/api/category_api.dart';
-import 'package:my_expense/api/pin_api.dart';
-import 'package:my_expense/api/transaction_api.dart';
-import 'package:my_expense/api/user_api.dart';
-import 'package:my_expense/api/wallet_api.dart';
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/model/error_net_model.dart';
-import 'package:my_expense/model/login_model.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/globals.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
-import 'package:my_expense/utils/net/netutils.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
+import 'package:my_expense/_index.g.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

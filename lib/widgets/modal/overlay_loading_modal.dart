@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_controller.dart';
+import 'package:my_expense/_index.g.dart';
 
 class LoadingScreen {
   LoadingScreen._shareInstance();

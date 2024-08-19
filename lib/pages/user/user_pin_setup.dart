@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/pin_api.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/widgets/input/pin_pad.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
+import 'package:my_expense/_index.g.dart';
 
 class PinSetupPage extends StatefulWidget {
   const PinSetupPage({super.key});

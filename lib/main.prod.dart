@@ -2,9 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:my_expense/router.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/prefs/shared_box.dart';
+import 'package:my_expense/_index.g.dart';
 
 Future main() async {
   // run all the initialisation on the runZonedGuarded to ensure that all the

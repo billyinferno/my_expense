@@ -1,11 +1,6 @@
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/model/wallet_type_model.dart';
-import 'package:my_expense/model/worth_model.dart';
-import 'package:my_expense/utils/prefs/shared_box.dart';
+import 'package:my_expense/_index.g.dart';
 
 class WalletSharedPreferences {
   static const _walletKey = "wallet";

@@ -4,26 +4,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/model/users_me_model.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/widgets/appbar/home_appbar.dart';
-import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/args/budget_transaction_args.dart';
-import 'package:my_expense/utils/prefs/shared_budget.dart';
-import 'package:my_expense/utils/prefs/shared_transaction.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/chart/budget_bar.dart';
-import 'package:my_expense/widgets/calendar/horizontal_month_calendar.dart';
-import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
-import 'package:my_expense/widgets/item/simple_item.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
+import 'package:my_expense/_index.g.dart';
 
 class HomeBudget extends StatefulWidget {
   const HomeBudget({super.key});

@@ -1,29 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_expense/pages/budget/budget_list.dart';
-import 'package:my_expense/pages/budget/budget_stat.dart';
-import 'package:my_expense/pages/budget/budget_transaction.dart';
-import 'package:my_expense/pages/home.dart';
-import 'package:my_expense/pages/login.dart';
-import 'package:my_expense/pages/stats/stats_all.dart';
-import 'package:my_expense/pages/stats/stats_details.dart';
-import 'package:my_expense/pages/stats/stats_filter.dart';
-import 'package:my_expense/pages/stats/stats_transaction.dart';
-import 'package:my_expense/pages/transaction/transaction_add.dart';
-import 'package:my_expense/pages/transaction/transaction_edit.dart';
-import 'package:my_expense/pages/transaction/transaction_search.dart';
-import 'package:my_expense/pages/user.dart';
-import 'package:my_expense/pages/user/user_change_password.dart';
-import 'package:my_expense/pages/wallet/wallet_add.dart';
-import 'package:my_expense/pages/wallet/wallet_edit.dart';
-import 'package:my_expense/pages/wallet/wallet_stat.dart';
-import 'package:my_expense/pages/wallet/wallet_transaction.dart';
-import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/anim/page_transition.dart';
-import 'package:my_expense/utils/globals.dart';
-import 'package:my_expense/utils/misc/custom_scroll_behaviour.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
 import 'package:provider/provider.dart';
+import 'package:my_expense/_index.g.dart';
 
 class RouterPage extends StatefulWidget {
   const RouterPage({super.key});

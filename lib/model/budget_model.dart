@@ -1,5 +1,4 @@
-import 'package:my_expense/model/category_model.dart';
-import 'package:my_expense/model/currency_model.dart';
+import 'package:my_expense/_index.g.dart';
 
 class BudgetModel {
   BudgetModel({

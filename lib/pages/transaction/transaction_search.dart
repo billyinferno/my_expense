@@ -3,22 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/transaction_api.dart';
-import 'package:my_expense/model/category_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
-import 'package:my_expense/themes/color_utils.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/themes/icon_list.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
-import 'package:my_expense/utils/prefs/shared_category.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
-import 'package:my_expense/widgets/item/my_item_list.dart';
-import 'package:my_expense/widgets/item/simple_item.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
+import 'package:my_expense/_index.g.dart';
 
 enum PageName { summary, all, income, expense, transfer }
 

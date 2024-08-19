@@ -5,29 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_simple_calculator/flutter_simple_calculator.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/model/category_model.dart';
-import 'package:my_expense/model/last_transaction_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/transaction_model.dart';
-import 'package:my_expense/model/users_me_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/themes/icon_list.dart';
-import 'package:my_expense/utils/misc/decimal_formatter.dart';
-import 'package:my_expense/utils/misc/my_callback.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
-import 'package:my_expense/utils/prefs/shared_category.dart';
-import 'package:my_expense/utils/prefs/shared_transaction.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/input/type_slide.dart';
-import 'package:my_expense/widgets/item/expand_animation.dart';
-import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
-import 'package:my_expense/widgets/item/simple_item.dart';
-import 'package:table_calendar/table_calendar.dart';
-
+import 'package:my_expense/_index.g.dart';
 
 enum TransactionInputType {
   add, edit
@@ -1239,7 +1217,7 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   String _calendarText() {
-    if(isSameDay(_currentDate.toLocal(), DateTime.now().toLocal())) {
+    if(isSameDate(_currentDate.toLocal(), DateTime.now().toLocal())) {
       return "Today";
     }
     else {

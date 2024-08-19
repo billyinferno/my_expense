@@ -3,27 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/model/budget_list_model.dart';
-import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/model/category_model.dart';
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/args/budget_detail_args.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/decimal_formatter.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/misc/snack_bar.dart';
-import 'package:my_expense/utils/prefs/shared_box.dart';
-import 'package:my_expense/utils/prefs/shared_budget.dart';
-import 'package:my_expense/utils/prefs/shared_category.dart';
-import 'package:my_expense/widgets/item/category_list_item.dart';
-import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
-import 'package:my_expense/widgets/item/simple_item.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
+import 'package:my_expense/_index.g.dart';
 
 class BudgetListPage extends StatefulWidget {
   final Object? currencyId;

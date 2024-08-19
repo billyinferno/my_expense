@@ -1,23 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_expense/model/budget_stat_model.dart';
-import 'package:my_expense/model/income_expense_category_model.dart';
-import 'package:my_expense/model/income_expense_model.dart';
-import 'package:my_expense/model/last_transaction_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/transaction_model.dart';
-import 'package:my_expense/model/transaction_stats_detail_model.dart';
-import 'package:my_expense/model/transaction_top_model.dart';
-import 'package:my_expense/model/transaction_wallet_minmax_date_model.dart';
-import 'package:my_expense/utils/function/date_utils.dart';
-import 'package:my_expense/utils/globals.dart';
-import 'package:my_expense/utils/net/netutils.dart';
-import 'package:my_expense/utils/prefs/shared_transaction.dart';
+import 'package:my_expense/_index.g.dart';
 
 class TransactionHTTPService {
   Future<TransactionListModel> updateTransaction(BuildContext context, TransactionModel txn, TransactionListModel prevTxn) async {
-    bool sameDate = isSameDay(txn.date.toLocal(), prevTxn.date.toLocal());
+    bool sameDate = isSameDate(txn.date.toLocal(), prevTxn.date.toLocal());
     String date = DateFormat('yyyy-MM-dd').format(prevTxn.date.toLocal());
     
     // send the request to update the transaction

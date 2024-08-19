@@ -3,30 +3,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/budget_api.dart';
-import 'package:my_expense/api/transaction_api.dart';
-import 'package:my_expense/api/wallet_api.dart';
-import 'package:my_expense/model/budget_model.dart';
-import 'package:my_expense/model/transaction_list_model.dart';
-import 'package:my_expense/model/users_me_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/themes/category_icon_list.dart';
-import 'package:my_expense/utils/function/date_utils.dart' as dt_utils;
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/widgets/appbar/home_appbar.dart';
-import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/utils/globals.dart';
-import 'package:my_expense/utils/misc/my_callback.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/prefs/shared_budget.dart';
-import 'package:my_expense/utils/prefs/shared_transaction.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/item/my_item_list.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/_index.g.dart';
 
 class HomeList extends StatefulWidget {
   final VoidCallback userIconPress;
@@ -138,10 +117,10 @@ class _HomeListState extends State<HomeList> {
                   _getData = _refreshTransaction(focusedDay);
                 },
                 selectedDayPredicate: (day) {
-                  return dt_utils.isSameDay(day, _currentFocusedDay);
+                  return isSameDate(day, _currentFocusedDay);
                 },
                 onDaySelected: (selectedDay, focusedDay) {
-                  if (!(dt_utils.isSameDay(selectedDay, _currentFocusedDay))) {
+                  if (!(isSameDate(selectedDay, _currentFocusedDay))) {
                     _setFocusedDay(selectedDay);
                     _getData = _refreshTransaction(selectedDay);
                   }
@@ -209,7 +188,7 @@ class _HomeListState extends State<HomeList> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    (dt_utils.isSameDay(_currentFocusedDay, DateTime.now())
+                    (isSameDate(_currentFocusedDay, DateTime.now())
                         ? "Today"
                         : DateFormat('dd MMMM yyyy')
                             .format(_currentFocusedDay.toLocal())),
@@ -492,7 +471,7 @@ class _HomeListState extends State<HomeList> {
         .fetchTransaction(strRefreshDay, isForce)
         .then((value) {
       // ensure that the selectedDate and the refreshDay is the same
-      if (dt_utils.isSameDay(_currentFocusedDay, refreshDay) && mounted) {
+      if (isSameDate(_currentFocusedDay, refreshDay) && mounted) {
         Provider.of<HomeProvider>(context, listen: false)
             .setTransactionList(value);
       }
@@ -626,7 +605,7 @@ class _HomeListState extends State<HomeList> {
     });
 
     // check if the txn date is within the from and to of the stat date
-    if (dt_utils.isWithin(txnInfo.date, from, to) &&
+    if (isWithin(txnInfo.date, from, to) &&
         (txnInfo.type == "expense" || txnInfo.type == "income")) {
       // fetch the income expense
       await _transactionHttp

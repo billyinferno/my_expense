@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/utils/misc/my_callback.dart';
+import 'package:my_expense/_index.g.dart';
 
 class HorizontalMonthCalendar extends StatefulWidget {
   final DateTime firstDay;

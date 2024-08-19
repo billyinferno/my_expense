@@ -4,9 +4,7 @@
  */
 
 import 'dart:convert';
-import 'package:my_expense/model/login_model.dart';
-import 'package:my_expense/model/users_me_model.dart';
-import 'package:my_expense/utils/prefs/shared_box.dart';
+import 'package:my_expense/_index.g.dart';
 
 class UserSharedPreferences {
   static const _userMeModel = 'user_me';

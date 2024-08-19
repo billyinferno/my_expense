@@ -1,11 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:my_expense/model/error_net_model.dart';
-import 'package:my_expense/model/login_model.dart';
-import 'package:my_expense/model/users_me_model.dart';
-import 'package:my_expense/utils/globals.dart';
-import 'package:my_expense/utils/net/netutils.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
+import 'package:my_expense/_index.g.dart';
 
 class UserHTTPService {
   Future<UsersMeModel> fetchMe() async {

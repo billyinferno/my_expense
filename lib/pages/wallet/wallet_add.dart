@@ -2,24 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/api/wallet_api.dart';
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/model/user_permission_model.dart';
-import 'package:my_expense/model/users_me_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/model/wallet_type_model.dart';
-import 'package:my_expense/provider/home_provider.dart';
-import 'package:my_expense/themes/colors.dart';
-import 'package:my_expense/themes/icon_list.dart';
-import 'package:my_expense/utils/log.dart';
-import 'package:my_expense/utils/misc/decimal_formatter.dart';
-import 'package:my_expense/utils/misc/show_dialog.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
-import 'package:my_expense/widgets/item/my_bottom_sheet.dart';
-import 'package:my_expense/widgets/item/simple_item.dart';
-import 'package:my_expense/widgets/modal/overlay_loading_modal.dart';
 import 'package:provider/provider.dart';
+import 'package:my_expense/_index.g.dart';
 
 class WalletAddPage extends StatefulWidget {
   const WalletAddPage({super.key});

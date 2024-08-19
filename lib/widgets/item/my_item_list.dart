@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
-import 'package:my_expense/themes/color_utils.dart';
-import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/_index.g.dart';
 
 class MyItemList extends StatelessWidget {
   final String type;

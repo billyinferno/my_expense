@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_expense/themes/color_utils.dart';
+import 'package:my_expense/_index.g.dart';
 
 class RadiantGradientMask extends StatelessWidget {
   const RadiantGradientMask({super.key, required this.child, required this.color, this.endColor, this.align, this.radius, this.tileMode});

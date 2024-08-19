@@ -1,17 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:intl/intl.dart';
-import 'package:my_expense/model/currency_model.dart';
-import 'package:my_expense/model/users_me_model.dart';
-import 'package:my_expense/model/wallet_model.dart';
-import 'package:my_expense/model/wallet_stat_all_model.dart';
-import 'package:my_expense/model/wallet_stat_model.dart';
-import 'package:my_expense/model/wallet_type_model.dart';
-import 'package:my_expense/model/worth_model.dart';
-import 'package:my_expense/utils/globals.dart';
-import 'package:my_expense/utils/net/netutils.dart';
-import 'package:my_expense/utils/prefs/shared_user.dart';
-import 'package:my_expense/utils/prefs/shared_wallet.dart';
+import 'package:my_expense/_index.g.dart';
 
 class WalletHTTPService {
   Future<List<WalletModel>> fetchWallets(bool showDisabled, [bool? force]) async {

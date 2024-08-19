@@ -1,6 +1,5 @@
 import 'dart:convert';
-
-import 'package:my_expense/model/error_model.dart';
+import 'package:my_expense/_index.g.dart';
 
 ErrorModel parseErrorMessage(String errorMessage) {
   // first check if we got string "res=" inside of it or not?

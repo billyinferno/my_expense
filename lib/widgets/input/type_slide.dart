@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_expense/themes/colors.dart';
+import 'package:my_expense/_index.g.dart';
 
 class TypeSlide extends StatefulWidget {
   final Function(String) onChange;
@@ -10,7 +10,17 @@ class TypeSlide extends StatefulWidget {
   final String? type;
   final Color? textActive;
   final Color? textInactive;
-  const TypeSlide({ super.key, required this.onChange, required this.items, this.height, this.width, this.editable, this.type, this.textActive, this.textInactive });
+  const TypeSlide({
+    super.key,
+    required this.onChange,
+    required this.items,
+    this.height,
+    this.width,
+    this.editable,
+    this.type,
+    this.textActive,
+    this.textInactive
+  });
 
   @override
   State<TypeSlide> createState() => _TypeSlideState();
