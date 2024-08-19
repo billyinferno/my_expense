@@ -8,6 +8,12 @@ class Log {
       errorMethodCount: 8, // Number of method calls if stacktrace is provided
       colors: true, // Colorful log messages
       printEmojis: true, // Print an emoji for each log message
+      levelEmojis: {
+        Level.info: "ℹ️",
+        Level.warning: "⚠️",
+        Level.fatal: "💀",
+        Level.error: "🛑",
+      },
       noBoxingByDefault: true,
     )
   );
