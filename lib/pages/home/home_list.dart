@@ -84,7 +84,7 @@ class _HomeListState extends State<HomeList> {
               child: Container(
                 color: Colors.transparent,
                 child: Text(
-                  "${_appTitleMonth} $_appTitleYear",
+                  "$_appTitleMonth $_appTitleYear",
                   textAlign: TextAlign.right,
                 ),
               ),

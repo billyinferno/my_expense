@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class BudgetSharedPreferences {
