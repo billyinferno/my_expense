@@ -468,41 +468,41 @@ class _WalletEditPageState extends State<WalletEditPage> {
     // all is good, we can generate a wallet data here before passed it to the
     // wallet API for add the transaction
     WalletTypeModel walletType = WalletTypeModel(
-        _currentWalletTypeID,
-        _currentWalletTypeName
+      _currentWalletTypeID,
+      _currentWalletTypeName
     );
 
     CurrencyModel walletCurrency = CurrencyModel(
-        _currentWalletCurrencyID,
-        "",
-        _currentWalletCurrencyDescription,
-        _currentWalletCurrencySymbol
+      _currentWalletCurrencyID,
+      "",
+      _currentWalletCurrencyDescription,
+      _currentWalletCurrencySymbol
     );
 
     UserPermissionModel userPermission = UserPermissionModel(
-        _userMe!.id,
-        _userMe!.username,
-        _userMe!.email
+      _userMe!.id,
+      _userMe!.username,
+      _userMe!.email
     );
 
     WalletModel wallet = WalletModel(
-        _currentWalletID,
-        _nameController.text,
-        _currentStartBalance,
-        0,
-        0,
-        _currentUseForStats,
-        _currentEnabled,
-        walletType,
-        walletCurrency,
-        userPermission
+      _currentWalletID,
+      _nameController.text,
+      _currentStartBalance,
+      0,
+      0,
+      _currentUseForStats,
+      _currentEnabled,
+      walletType,
+      walletCurrency,
+      userPermission
     );
 
     // call the wallet API for add
     Future <WalletModel> walletEdit;
     Future <List<CurrencyModel>> walletCurrencyList;
 
-    Future.wait([
+    await Future.wait([
       walletEdit = _walletHttp.updateWallet(wallet),
       walletCurrencyList = _walletHttp.fetchWalletCurrencies(true),
     ]).then((_) {
@@ -527,13 +527,19 @@ class _WalletEditPageState extends State<WalletEditPage> {
 
         if (mounted) {
           // set the provider with this
-          Provider.of<HomeProvider>(context, listen: false).setWalletList(walletList);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(walletList);
         }
       });
 
       walletCurrencyList.then((walletsCurrency) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setWalletCurrency(walletsCurrency);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletCurrency(walletsCurrency);
         }
       });
     }).onError((error, stackTrace) {

@@ -30,7 +30,6 @@ class TransactionListModel {
   );
 
   factory TransactionListModel.fromJson(Map<String, dynamic> json) {
-    //print(json.toString());
     CategoryTransactionModel? cat;
     if (json["category"] != null) {
       cat = CategoryTransactionModel.fromJson(json["category"]);
@@ -44,11 +43,6 @@ class TransactionListModel {
     } else {
       walletTo = null;
     }
-
-    // print(json["date"]);
-    // print(DateTime.parse("2021-08-16T16:00:00.000Z").toLocal().toString());
-    // print(DateTime.parse(json["date"]).timeZoneName);
-    // print(DateTime.parse(json["date"]).timeZoneOffset.toString());
 
     return TransactionListModel(
       json["id"],
@@ -67,19 +61,19 @@ class TransactionListModel {
   }
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "type": type,
-        "date": date.toIso8601String(),
-        "description": description,
-        "category": (category?.toJson()),
-        "wallet": wallet.toJson(),
-        "walletTo": (walletTo?.toJson()),
-        "users_permissions_user": usersPermissionsUser.toJson(),
-        "cleared": cleared,
-        "amount": amount,
-        "exchange_rate": exchangeRate,
-      };
+    "id": id,
+    "name": name,
+    "type": type,
+    "date": date.toIso8601String(),
+    "description": description,
+    "category": (category?.toJson()),
+    "wallet": wallet.toJson(),
+    "walletTo": (walletTo?.toJson()),
+    "users_permissions_user": usersPermissionsUser.toJson(),
+    "cleared": cleared,
+    "amount": amount,
+    "exchange_rate": exchangeRate,
+  };
 }
 
 class CategoryTransactionModel {
@@ -106,7 +100,12 @@ class WalletTransactionModel {
   final String symbol;
 
   WalletTransactionModel(
-      this.id, this.name, this.currencyId, this.currency, this.symbol);
+    this.id,
+    this.name,
+    this.currencyId,
+    this.currency,
+    this.symbol
+  );
 
   factory WalletTransactionModel.fromJson(Map<String, dynamic> json) {
     return WalletTransactionModel(
@@ -119,10 +118,10 @@ class WalletTransactionModel {
   }
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "currencyId": currencyId,
-        "currency": currency,
-        "symbol": symbol
-      };
+    "id": id,
+    "name": name,
+    "currencyId": currencyId,
+    "currency": currency,
+    "symbol": symbol
+  };
 }

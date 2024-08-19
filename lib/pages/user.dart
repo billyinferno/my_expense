@@ -519,7 +519,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> _logout() async {
-    Future.wait([
+    await Future.wait([
       // clear the box
       MyBox.clear(),
     ]).then((_) {
@@ -550,7 +550,6 @@ class _UserPageState extends State<UserPage> {
 
     return GestureDetector(
       onTap: () {
-        // print("Select category");
         setState(() {
           if (category.type.toLowerCase() == "expense") {
             _selectedExpenseCategory = category;

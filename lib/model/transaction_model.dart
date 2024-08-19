@@ -40,8 +40,6 @@ class TransactionModel {
       walletTo = null;
     }
 
-    // print(json.toString());
-
     return TransactionModel(
       json["name"],
       json["type"],

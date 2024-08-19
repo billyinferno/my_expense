@@ -473,7 +473,6 @@ class _LoginPageState extends State<LoginPage> {
       // check if we got "res=" on the result or not?
       // if got, it means that we got response from server, if not it's due
       // connectivity error (showed error that probably services not available)
-      // print(error.toString());
       NetErrorModel netError = error as NetErrorModel;
       if (netError.statusCode > 0) {
         isError = true;

@@ -7,5 +7,13 @@ class BudgetTransactionArgs {
   final DateTime selectedDate;
   final int currencyId;
 
-  BudgetTransactionArgs({required this.categoryid, required this.categoryName, required this.currencySymbol, required this.budgetUsed, required this.budgetAmount, required this.selectedDate, required this.currencyId});
+  BudgetTransactionArgs({
+    required this.categoryid,
+    required this.categoryName,
+    required this.currencySymbol,
+    required this.budgetUsed,
+    required this.budgetAmount,
+    required this.selectedDate,
+    required this.currencyId
+  });
 }

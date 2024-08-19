@@ -13,5 +13,17 @@ class StatsTransactionArgs {
   final String name;
   final String search;
 
-  StatsTransactionArgs({required this.type, required this.categoryId, required this.categoryName, required this.currency, required this.walletId, required this.fromDate, required this.toDate, required this.amount, required this.total, required this.name, required this.search});
+  StatsTransactionArgs({
+    required this.type,
+    required this.categoryId,
+    required this.categoryName,
+    required this.currency,
+    required this.walletId,
+    required this.fromDate,
+    required this.toDate,
+    required this.amount,
+    required this.total,
+    required this.name,
+    required this.search
+  });
 }

@@ -20,7 +20,7 @@ class CategorySharedPreferences {
       jsonIncome = income.map((e) => jsonEncode(e.toJson())).toList();
     }
 
-    Future.wait([
+    await Future.wait([
       MyBox.putStringList(_keyCategoryExpenseModel, jsonExpense),
       MyBox.putStringList(_keyCategoryIncomeModel, jsonIncome),
     ]);

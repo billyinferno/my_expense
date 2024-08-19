@@ -108,11 +108,10 @@ class _WalletAddPageState extends State<WalletAddPage> {
                     dialogText: "Unable to save wallet data.")
                   .show(context);
                 }
-              }).whenComplete(
-                () {
-                  // remove loading screen
-                  LoadingScreen.instance().hide();
-                },
+              }).whenComplete(() {
+                // remove loading screen
+                LoadingScreen.instance().hide();
+              },
               );
             },
             icon: const Icon(
@@ -153,21 +152,23 @@ class _WalletAddPageState extends State<WalletAddPage> {
                               itemBuilder: (BuildContext context, int index) {
                                 return SimpleItem(
                                   color: IconList.getColor(
-                                      _walletType[index].type.toLowerCase()),
+                                    _walletType[index].type.toLowerCase()
+                                  ),
                                   title: _walletType[index].type,
-                                  isSelected: (_currentWalletTypeID ==
-                                      _walletType[index].id),
+                                  isSelected: (
+                                    _currentWalletTypeID ==
+                                    _walletType[index].id
+                                  ),
                                   onTap: (() {
                                     setState(() {
-                                      _currentWalletTypeID =
-                                          _walletType[index].id;
-                                      _currentWalletTypeName =
-                                          _walletType[index].type;
+                                      _currentWalletTypeID = _walletType[index].id;
+                                      _currentWalletTypeName = _walletType[index].type;
                                     });
                                     Navigator.pop(context);
                                   }),
                                   icon: IconList.getIcon(
-                                      _walletType[index].type.toLowerCase()),
+                                    _walletType[index].type.toLowerCase()
+                                  ),
                                 );
                               },
                             ),
@@ -175,9 +176,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                         });
                   },
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
+                const SizedBox(width: 10,),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,9 +193,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                           isCollapsed: true,
                         ),
                       ),
-                      const SizedBox(
-                        height: 5,
-                      ),
+                      const SizedBox(height: 5,),
                       Text(
                         (_currentWalletTypeID < 0
                             ? "Account type"
@@ -283,72 +280,73 @@ class _WalletAddPageState extends State<WalletAddPage> {
                     height: 50,
                     decoration: const BoxDecoration(
                       border: Border(
-                          bottom: BorderSide(color: primaryLight, width: 1.0)),
+                        bottom: BorderSide(
+                          color: primaryLight,
+                          width: 1.0
+                        )
+                      ),
                     ),
                     child: Row(
-                      children: [
+                      children: <Widget>[
                         const Icon(
                           CupertinoIcons.money_dollar_circle,
                           size: 20,
                           color: textColor,
                         ),
-                        const SizedBox(
-                          width: 10,
+                        const SizedBox(width: 10,),
+                        Text(
+                          (_currentWalletCurrencyID < 0 ? "Currency" : "$_currentWalletCurrencyDescription ($_currentWalletCurrencySymbol)")
                         ),
-                        Text((_currentWalletCurrencyID < 0
-                            ? "Currency"
-                            : "$_currentWalletCurrencyDescription ($_currentWalletCurrencySymbol)")),
                       ],
                     ),
                   ),
                   onTap: () {
                     showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return MyBottomSheet(
-                            context: context,
-                            title: "Currencies",
-                            screenRatio: 0.55,
-                            child: ListView.builder(
-                              controller: _scrollControllerCurrencies,
-                              itemCount: _currencies.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SimpleItem(
-                                  color: accentColors[6],
-                                  title: _currencies[index].description,
-                                  isSelected: _currentWalletCurrencyID ==
-                                      _currencies[index].id,
-                                  onTap: (() {
-                                    setState(() {
-                                      _currentWalletCurrencyID =
-                                          _currencies[index].id;
-                                      _currentWalletCurrencyDescription =
-                                          _currencies[index].description;
-                                      _currentWalletCurrencySymbol =
-                                          _currencies[index]
-                                              .symbol
-                                              .toUpperCase();
-                                    });
-                                    Navigator.pop(context);
-                                  }),
-                                  icon: FittedBox(
-                                    fit: BoxFit.contain,
-                                    child: Text(_currencies[index]
-                                        .symbol
-                                        .toUpperCase()),
+                      context: context,
+                      builder: (BuildContext context) {
+                        return MyBottomSheet(
+                          context: context,
+                          title: "Currencies",
+                          screenRatio: 0.55,
+                          child: ListView.builder(
+                            controller: _scrollControllerCurrencies,
+                            itemCount: _currencies.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return SimpleItem(
+                                color: accentColors[6],
+                                title: _currencies[index].description,
+                                isSelected: _currentWalletCurrencyID == _currencies[index].id,
+                                onTap: (() {
+                                  setState(() {
+                                    _currentWalletCurrencyID = _currencies[index].id;
+                                    _currentWalletCurrencyDescription = _currencies[index].description;
+                                    _currentWalletCurrencySymbol = _currencies[index].symbol.toUpperCase();
+                                  });
+                                  Navigator.pop(context);
+                                }),
+                                icon: FittedBox(
+                                  fit: BoxFit.contain,
+                                  child: Text(
+                                    _currencies[index].symbol.toUpperCase()
                                   ),
-                                );
-                              },
-                            ),
-                          );
-                        });
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }
+                    );
                   },
                 ),
                 Container(
                   height: 50,
                   decoration: const BoxDecoration(
                     border: Border(
-                        bottom: BorderSide(color: primaryLight, width: 1.0)),
+                      bottom: BorderSide(
+                        color: primaryLight,
+                        width: 1.0
+                      )
+                    ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -378,7 +376,11 @@ class _WalletAddPageState extends State<WalletAddPage> {
                   height: 50,
                   decoration: const BoxDecoration(
                     border: Border(
-                        bottom: BorderSide(color: primaryLight, width: 1.0)),
+                      bottom: BorderSide(
+                        color: primaryLight,
+                        width: 1.0
+                      )
+                    ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -468,32 +470,42 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
     // all is good, we can generate a wallet data here before passed it to the
     // wallet API for add the transaction
-    WalletTypeModel walletType =
-        WalletTypeModel(_currentWalletTypeID, _currentWalletTypeName);
+    WalletTypeModel walletType = WalletTypeModel(
+      _currentWalletTypeID,
+      _currentWalletTypeName
+    );
 
-    CurrencyModel walletCurrency = CurrencyModel(_currentWalletCurrencyID, "",
-        _currentWalletCurrencyDescription, _currentWalletCurrencySymbol);
+    CurrencyModel walletCurrency = CurrencyModel(
+      _currentWalletCurrencyID,
+      "",
+      _currentWalletCurrencyDescription,
+      _currentWalletCurrencySymbol
+    );
 
-    UserPermissionModel userPermission =
-        UserPermissionModel(_userMe!.id, _userMe!.username, _userMe!.email);
+    UserPermissionModel userPermission = UserPermissionModel(
+      _userMe!.id,
+      _userMe!.username,
+      _userMe!.email
+    );
 
     WalletModel wallet = WalletModel(
-        -1,
-        _nameController.text,
-        _currentStartBalance,
-        0,
-        0,
-        _currentUseForStats,
-        _currentEnabled,
-        walletType,
-        walletCurrency,
-        userPermission);
+      -1,
+      _nameController.text,
+      _currentStartBalance,
+      0,
+      0,
+      _currentUseForStats,
+      _currentEnabled,
+      walletType,
+      walletCurrency,
+      userPermission
+    );
 
     // call the wallet API for add
     Future<WalletModel> walletAdd;
     Future<List<CurrencyModel>> walletCurrencyList;
 
-    Future.wait([
+    await Future.wait([
       walletAdd = _walletHttp.addWallet(wallet),
       walletCurrencyList = _walletHttp.fetchWalletCurrencies(true),
     ]).then((_) {
@@ -509,15 +521,19 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
         if (mounted) {
           // set the provider with this
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletList(walletList);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(walletList);
         }
       });
 
       walletCurrencyList.then((walletsCurrency) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletCurrency(walletsCurrency);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletCurrency(walletsCurrency);
         }
       });
     }).onError((error, stackTrace) {

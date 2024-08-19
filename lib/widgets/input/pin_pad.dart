@@ -343,9 +343,6 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
     var pinBytes = utf8.encode(_pinInput + widget.hashKey + _pinInput);
     var pinDigest = sha256.convert(pinBytes);
 
-    // print("Digest as bytes: ${pinDigest.bytes}");
-    // print("Digest as hex string: $pinDigest");
-
     // check if the pinDigest the same as the hashPin given
     if(pinDigest.toString() == widget.hashPin) {
       return true;
@@ -364,8 +361,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
         onTap: (() {
           if(onPress != null) {
             onPress();
-          // ignore: empty_statements
-          };
+          }
         }),
         child: Container(
           height: currentHeight,

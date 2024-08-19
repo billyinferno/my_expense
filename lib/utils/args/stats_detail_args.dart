@@ -12,5 +12,14 @@ class StatsDetailArgs {
   final String name;
   final String search;
 
-  StatsDetailArgs({required this.type, required this.fromDate, required this.toDate, required this.currency, required this.wallet, required this.incomeExpenseCategory, required this.name, required this.search});
+  StatsDetailArgs({
+    required this.type,
+    required this.fromDate,
+    required this.toDate,
+    required this.currency,
+    required this.wallet,
+    required this.incomeExpenseCategory,
+    required this.name,
+    required this.search
+  });
 }
