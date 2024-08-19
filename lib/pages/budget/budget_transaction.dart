@@ -15,7 +15,6 @@ class BudgetTransactionPage extends StatefulWidget {
 class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   final ScrollController _scrollController = ScrollController();
   final fCCY = NumberFormat("#,##0.00", "en_US");
-  final DateFormat _dtDayMonthYear = DateFormat("dd MMM yyyy");
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   
   DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
@@ -173,7 +172,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                         children: <Widget>[
                           Expanded(
                             child: Text(
-                              _dtDayMonthYear.format(header.date.toLocal())
+                              Globals.dfddMMMyyyy.format(header.date.toLocal())
                             ),
                           ),
                           Text(
@@ -288,7 +287,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   Future<void> _fetchBudget([bool? force]) async {
     bool isForce = (force ?? false);
 
-    String date = DateFormat('yyyy-MM-dd').format(_selectedDate.toLocal());
+    String date = Globals.dfyyyyMMdd.format(_selectedDate.toLocal());
     await _transactionHttp.fetchTransactionBudget(_categoryId, date, _currencyId, isForce).then((value) async {
       await setTransactions(value.reversed.toList());
       _transactions = value.reversed.toList();

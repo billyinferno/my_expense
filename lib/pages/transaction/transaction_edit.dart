@@ -57,8 +57,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
                 DateTime.now());
 
         // default the date as the same as the home list date
-        String date =
-            DateFormat('yyyy-MM-dd').format(currentListTxnDate.toLocal());
+        String date = Globals.dfyyyyMMdd.format(currentListTxnDate.toLocal());
 
         // check if this is the same date or not?
         // if not the same then we will need to refresh bot transaction list
@@ -147,27 +146,35 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     );
   }
 
-  Future<void> _refreshHomeList(
-      {required DateTime txnDate, required DateTime homeListDate}) async {
-    final dfyyyMMdd = DateFormat('yyyy-MM-dd');
+  Future<void> _refreshHomeList({
+    required DateTime txnDate,
+    required DateTime homeListDate
+  }) async {
     await Future.wait([
-      _transactionHttp
-          .fetchTransaction(dfyyyMMdd.format(txnDate), true)
-          .then((resp) {
+      _transactionHttp.fetchTransaction(
+        Globals.dfyyyyMMdd.format(txnDate),
+        true
+      ).then((resp) {
         // once got the response store this on the TransactionSharedPreferences
         TransactionSharedPreferences.setTransaction(
-            dfyyyMMdd.format(txnDate), resp);
+          Globals.dfyyyyMMdd.format(txnDate),
+          resp
+        );
       }).onError(
         (error, stackTrace) {
           throw Exception("Error when update for $txnDate");
         },
       ),
-      _transactionHttp
-          .fetchTransaction(dfyyyMMdd.format(homeListDate), true)
-          .then((resp) {
+
+      _transactionHttp.fetchTransaction(
+        Globals.dfyyyyMMdd.format(homeListDate),
+        true
+      ).then((resp) {
         // once got the response store this on the TransactionSharedPreferences
         TransactionSharedPreferences.setTransaction(
-            dfyyyMMdd.format(homeListDate), resp);
+          Globals.dfyyyyMMdd.format(homeListDate),
+          resp
+        );
       }).onError(
         (error, stackTrace) {
           throw Exception("Error when update for $homeListDate");
@@ -181,16 +188,16 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     Future<List<WalletModel>> futureWallets;
     Future<List<WorthModel>> futureNetWorth;
 
-    String refreshDay = DateFormat('yyyy-MM-dd').format(
+    String refreshDay = Globals.dfyyyyMMdd.format(
         DateTime(txnUpdate.date.year, txnUpdate.date.month, 1).toLocal());
-    String prevDay = DateFormat('yyyy-MM-dd').format(
+    String prevDay = Globals.dfyyyyMMdd.format(
         DateTime(_paramsData.date.year, _paramsData.date.month, 1).toLocal());
 
     DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
     DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1)
         .subtract(const Duration(days: 1));
-    String fromString = DateFormat('yyyy-MM-dd').format(from);
-    String toString = DateFormat('yyyy-MM-dd').format(to);
+    String fromString = Globals.dfyyyyMMdd.format(from);
+    String toString = Globals.dfyyyyMMdd.format(to);
 
     // check whether this transaction moved from one wallet to another wallet?
     // first check whether this is expense, income, or transfer?
@@ -308,11 +315,11 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       });
 
       futureNetWorth.then((worth) {
-        String dateTo = DateFormat("yyyy-MM-dd").format(DateTime(
-                txnUpdate.date.toLocal().year,
-                txnUpdate.date.toLocal().month + 1,
-                1)
-            .subtract(const Duration(days: 1)));
+        String dateTo = Globals.dfyyyyMMdd.format(DateTime(
+          txnUpdate.date.toLocal().year,
+          txnUpdate.date.toLocal().month + 1,
+          1
+        ).subtract(const Duration(days: 1)));
         WalletSharedPreferences.setWalletWorth(dateTo, worth);
         if (mounted) {
           Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth);

@@ -61,7 +61,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       // update necessary information after we add the transaction
       await _updateInformation(result).then((_) {
         // get the transaction edit date
-        String date = DateFormat('yyyy-MM-dd').format(txn.date.toLocal());
+        String date = Globals.dfyyyyMMdd.format(txn.date.toLocal());
 
         // get the transaction list from this date
         List<TransactionListModel> txnListShared =
@@ -124,7 +124,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     Future<List<BudgetModel>> futureBudgets;
     Future<List<WalletModel>> futureWallets;
     List<BudgetModel> budgets = [];
-    String refreshDay = DateFormat('yyyy-MM-dd').format(
+    String refreshDay = Globals.dfyyyyMMdd.format(
         DateTime(txnAdd.date.toLocal().year, txnAdd.date.toLocal().month, 1));
     bool isExists = false;
 
@@ -205,7 +205,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
     // add the transaction to the statisctics
     await WalletSharedPreferences.addWalletWorth(txnAdd).then((_) {
-      String dateTo = DateFormat("yyyy-MM-dd").format(DateTime(
+      String dateTo = Globals.dfyyyyMMdd.format(DateTime(
               txnAdd.date.toLocal().year, txnAdd.date.toLocal().month + 1, 1)
           .subtract(const Duration(days: 1)));
 
@@ -228,9 +228,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       // otherwise we can ignore, as we will not display the statistics on the home stats screen.
       if (txnAdd.date.year == DateTime.now().year &&
           txnAdd.date.month == DateTime.now().month) {
-        String dateFrom = DateFormat("yyyy-MM-dd").format(DateTime(
+        String dateFrom = Globals.dfyyyyMMdd.format(DateTime(
             txnAdd.date.toLocal().year, txnAdd.date.toLocal().month, 1));
-        String dateTo = DateFormat("yyyy-MM-dd").format(DateTime(
+        String dateTo = Globals.dfyyyyMMdd.format(DateTime(
                 txnAdd.date.toLocal().year, txnAdd.date.toLocal().month + 1, 1)
             .subtract(const Duration(days: 1)));
         await TransactionSharedPreferences.addIncomeExpense(

@@ -23,8 +23,6 @@ class MonthPrevNextCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DateFormat df = DateFormat("MMMM yyyy");
-
     return InkWell(
       onTap: (() async {
         // show the month dialog
@@ -84,7 +82,7 @@ class MonthPrevNextCalendar extends StatelessWidget {
             Expanded(
               child: Container(
                 color: Colors.transparent,
-                child: Center(child: Text(df.format(initialDate)),),
+                child: Center(child: Text(Globals.dfMMMMyyyy.format(initialDate)),),
               ),
             ),
             InkWell(

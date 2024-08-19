@@ -424,7 +424,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
               },
               children: List.generate(12, ((index) {
                 return Text(
-                  DateFormat("MMM").format(
+                  Globals.dfMMM.format(
                       DateTime(_currentToDate.toLocal().year, index + 1, 1)),
                   style: const TextStyle(
                       color: textColor2,
@@ -708,11 +708,11 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   String _getTitleText() {
     if (_currentType == "month") {
-      return DateFormat("MMMM yyyy").format(_currentToDate.toLocal());
+      return Globals.dfMMMMyyyy.format(_currentToDate.toLocal());
     } else if (_currentType == "year") {
-      return DateFormat("yyyy").format(_currentToDate.toLocal());
+      return Globals.dfyyyy.format(_currentToDate.toLocal());
     } else {
-      return "${DateFormat("dd/MM/yyyy").format(_currentFromDate.toLocal())} - ${DateFormat("dd/MM/yyyy").format(_currentToDate.toLocal())}";
+      return "${Globals.dfddMMyyyy.format(_currentFromDate.toLocal())} - ${Globals.dfddMMyyyy.format(_currentToDate.toLocal())}";
     }
   }
 

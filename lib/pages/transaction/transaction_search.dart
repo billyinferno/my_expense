@@ -16,8 +16,6 @@ class TransactionSearchPage extends StatefulWidget {
 
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final _fCCY = NumberFormat("#,##0.00", "en_US");
-  final _df = DateFormat('E, dd MMM yyyy');
-  final _df2 = DateFormat('dd/MM/yyyy');
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final int _limit =
       99999; // make it to 99999 (just fetch everything, IO is not a concern)
@@ -906,7 +904,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  "${_df2.format(startDate.toLocal())} - ${_df2.format(endDate.toLocal())}",
+                  "${Globals.dfddMMyyyy.format(startDate.toLocal())} - ${Globals.dfddMMyyyy.format(endDate.toLocal())}",
                   style: const TextStyle(
                     fontSize: 10,
                   ),
@@ -958,7 +956,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: IconColorList.getExpenseIcon((txn.category!.name)),
           type: txn.type.toLowerCase(),
           title: txn.name,
-          subTitle: _df.format(txn.date.toLocal()),
+          subTitle: Globals.dfeddMMMyyyy.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
           descriptionStyle:
@@ -973,7 +971,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: IconColorList.getIncomeIcon((txn.category!.name)),
           type: txn.type.toLowerCase(),
           title: txn.name,
-          subTitle: _df.format(txn.date.toLocal()),
+          subTitle: Globals.dfeddMMMyyyy.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
           descriptionStyle:
@@ -991,7 +989,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           ),
           type: txn.type.toLowerCase(),
           title: '-',
-          subTitle: _df.format(txn.date.toLocal()),
+          subTitle: Globals.dfeddMMMyyyy.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
           descriptionStyle:
@@ -1008,7 +1006,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: IconColorList.getExpenseIcon((txn.category!.name)),
           type: txn.type.toLowerCase(),
           title: txn.name,
-          subTitle: _df.format(txn.date.toLocal()),
+          subTitle: Globals.dfeddMMMyyyy.format(txn.date.toLocal()),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
           descriptionStyle:

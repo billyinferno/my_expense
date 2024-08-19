@@ -765,7 +765,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           "${_budgetStat.monthly[_budgetStat.monthly.length - 1].date}-01");
       _monthlyDateRange.clear();
       while (lastDate.isBefore(nextDate)) {
-        _monthlyDateRange[DateFormat("yyyy-MM").format(lastDate)] = 0;
+        _monthlyDateRange[Globals.dfyyyyMM.format(lastDate)] = 0;
         lastDate = DateTime(lastDate.year, lastDate.month + 1, 1);
       }
       if (_monthlyDateRange.length > 12) {
@@ -779,7 +779,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           "${_budgetStat.yearly[_budgetStat.yearly.length - 1].date}-12-01");
       _yearlyDateRange.clear();
       while (lastDate.isBefore(nextDate)) {
-        _yearlyDateRange[DateFormat("yyyy").format(lastDate)] = 0;
+        _yearlyDateRange[Globals.dfyyyy.format(lastDate)] = 0;
         lastDate = DateTime(lastDate.year + 1, 12, 1);
       }
       if (_yearlyDateRange.length > 12) {

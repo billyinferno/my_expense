@@ -118,7 +118,7 @@ class WalletSharedPreferences {
 
   static Future<void> addWalletWorth(TransactionListModel txn) async {
     // get the date of the transaction
-    String dateTo = DateFormat('yyyy-MM-dd').format(txn.date.toLocal());
+    String dateTo = Globals.dfyyyyMMdd.format(txn.date.toLocal());
     List<WorthModel> worth = getWalletWorth(dateTo);
     double amount = 0.0;
     double amountTo = 0.0;
@@ -176,7 +176,7 @@ class WalletSharedPreferences {
 
   static Future<void> deleteWalletWorth(TransactionListModel txn) async {
     // get the date of the transaction
-    String dateTo = DateFormat('yyyy-MM-dd').format(txn.date.toLocal());
+    String dateTo = Globals.dfyyyyMMdd.format(txn.date.toLocal());
     List<WorthModel> worth = getWalletWorth(dateTo);
     double amount = 0.0;
     double amountTo = 0.0;

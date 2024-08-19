@@ -117,7 +117,7 @@ class BarChart extends StatelessWidget {
     required double maxExpense,
     required NumberFormat fCCY,
   }) {
-    String dateText = DateFormat('dd/MM').format(date.toLocal());
+    String dateText = Globals.dfddMM.format(date.toLocal());
 
     // compute the income and expense length for the bar chart
     int incomeLength;

@@ -13,8 +13,6 @@ class StatsAllPage extends StatefulWidget {
 
 class _StatsAllPageState extends State<StatsAllPage> {
   final _fCCY = NumberFormat("#,##0.00", "en_US");
-  final _dt = DateFormat("yyyy-MM");
-  final _dt2 = DateFormat("MM/yy");
   final WalletHTTPService _walletHTTP = WalletHTTPService();
 
   late Future<bool> _getData;
@@ -263,7 +261,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                         child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                            _dt.format(_walletStatAll[0].data[index].date),
+                            Globals.dfyyyyMM.format(_walletStatAll[0].data[index].date),
                           ),
                         ),
                       ),
@@ -321,19 +319,19 @@ class _StatsAllPageState extends State<StatsAllPage> {
     // loop thru all the stat all date to add as key on the wallet list income
     // expense, and total
     _walletDateRange.forEach((key, value) {
-      walletListIncome[_dt2.format(key)] = 0;
-      walletListExpense[_dt2.format(key)] = 0;
-      walletListTotal[_dt2.format(key)] = 0;
+      walletListIncome[Globals.dfMMyy.format(key)] = 0;
+      walletListExpense[Globals.dfMMyy.format(key)] = 0;
+      walletListTotal[Globals.dfMMyy.format(key)] = 0;
     });
 
     for (WalletStatAllModel ccy in _walletStatAll) {
       for (Datum data in ccy.data) {
         // generate the wallet list income, expense, and total
-        walletListIncome[_dt2.format(data.date)] = (data.income ?? 0);
-        walletListExpense[_dt2.format(data.date)] = (data.expense ?? 0);
+        walletListIncome[Globals.dfMMyy.format(data.date)] = (data.income ?? 0);
+        walletListExpense[Globals.dfMMyy.format(data.date)] = (data.expense ?? 0);
 
         total += (data.diff ?? 0);
-        walletListTotal[_dt2.format(data.date)] = total;
+        walletListTotal[Globals.dfMMyy.format(data.date)] = total;
 
         _totalIncome += data.income!;
         _totalExpense += data.expense!;

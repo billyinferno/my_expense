@@ -1222,7 +1222,7 @@ class _TransactionInputState extends State<TransactionInput> {
     }
     else {
       // format selected date with Day, dd MMM yyyy
-      return DateFormat('E, MMMM dd, yyyy').format(_currentDate.toLocal());
+      return Globals.dfeMMMMddyyyy.format(_currentDate.toLocal());
     }
   }
 

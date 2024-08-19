@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
     // get the current date
     _currentDate =
         DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
-    _currentDateString = DateFormat('yyyy-MM-dd').format(_currentDate);
+    _currentDateString = Globals.dfyyyyMMdd.format(_currentDate);
 
     _isLogin = false;
     _checkIsLogin = _checkLogin();

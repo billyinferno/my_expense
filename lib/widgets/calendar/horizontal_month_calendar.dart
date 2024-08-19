@@ -89,7 +89,7 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
             children: <Widget>[
               Center(
                 child: Text(
-                  DateFormat('MMM yyyy').format(dt.toLocal()),
+                  Globals.dfMMMyyyy.format(dt.toLocal()),
                   style: TextStyle(
                     color: (_isSameDate(dt, DateTime.now()) ? (_isSameDate(dt, widget.selectedDate) ? textColor : accentColors[1]) : textColor),
                   ),

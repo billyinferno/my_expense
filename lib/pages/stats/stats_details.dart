@@ -357,13 +357,13 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
 
   String _getTitleText() {
     if(_stats.type == "month") {
-      return DateFormat("MMMM yyyy").format(_stats.toDate.toLocal());
+      return Globals.dfMMMMyyyy.format(_stats.toDate.toLocal());
     }
     else if(_stats.type == "year") {
-      return DateFormat("yyyy").format(_stats.toDate.toLocal());
+      return Globals.dfyyyy.format(_stats.toDate.toLocal());
     }
     else {
-      return "${DateFormat("dd MMM yyyy").format(_stats.fromDate.toLocal())} - ${DateFormat("dd MMM yyyy").format(_stats.toDate.toLocal())}";
+      return "${Globals.dfddMMMyyyy.format(_stats.fromDate.toLocal())} - ${Globals.dfddMMMyyyy.format(_stats.toDate.toLocal())}";
     }
   }
 

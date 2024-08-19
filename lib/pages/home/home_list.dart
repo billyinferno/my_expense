@@ -48,8 +48,8 @@ class _HomeListState extends State<HomeList> {
   void initState() {
     _userMe = UserSharedPreferences.getUserMe();
 
-    _appTitleMonth = DateFormat('MMMM').format(_currentFocusedDay.toLocal());
-    _appTitleYear = DateFormat('yyyy').format(_currentFocusedDay.toLocal());
+    _appTitleMonth = Globals.dfMMMM.format(_currentFocusedDay.toLocal());
+    _appTitleYear = Globals.dfyyyy.format(_currentFocusedDay.toLocal());
 
     _getData = _refreshTransaction(_currentFocusedDay, true);
 
@@ -84,7 +84,7 @@ class _HomeListState extends State<HomeList> {
               child: Container(
                 color: Colors.transparent,
                 child: Text(
-                  "$_appTitleMonth $_appTitleYear",
+                  "${_appTitleMonth} $_appTitleYear",
                   textAlign: TextAlign.right,
                 ),
               ),
@@ -131,7 +131,7 @@ class _HomeListState extends State<HomeList> {
                     return Container(
                       alignment: Alignment.center,
                       child: Text(
-                        DateFormat('d').format(day.toLocal()),
+                        Globals.dfd.format(day.toLocal()),
                         style: TextStyle(
                           color: accentColors[1],
                         ),
@@ -189,9 +189,9 @@ class _HomeListState extends State<HomeList> {
                 children: <Widget>[
                   Text(
                     (isSameDate(_currentFocusedDay, DateTime.now())
-                        ? "Today"
-                        : DateFormat('dd MMMM yyyy')
-                            .format(_currentFocusedDay.toLocal())),
+                      ? "Today"
+                      : Globals.dfddMMMMyyyy.format(_currentFocusedDay.toLocal())
+                    ),
                     style: const TextStyle(
                       fontSize: 12,
                     ),
@@ -345,8 +345,8 @@ class _HomeListState extends State<HomeList> {
   void _setFocusedDay(DateTime focusedDay) {
     setState(() {
       _currentFocusedDay = focusedDay;
-      _appTitleMonth = DateFormat('MMMM').format(_currentFocusedDay.toLocal());
-      _appTitleYear = DateFormat('yyyy').format(_currentFocusedDay.toLocal());
+      _appTitleMonth = Globals.dfMMMM.format(_currentFocusedDay.toLocal());
+      _appTitleYear = Globals.dfyyyy.format(_currentFocusedDay.toLocal());
 
       // return back the selected date to the router
       widget.userDateSelect(_currentFocusedDay.toLocal());
@@ -461,7 +461,7 @@ class _HomeListState extends State<HomeList> {
         refreshDay.toLocal());
 
     String strRefreshDay =
-        DateFormat('yyyy-MM-dd').format(refreshDay.toLocal());
+        Globals.dfyyyyMMdd.format(refreshDay.toLocal());
 
     if (force ?? false) {
       Log.info(message: "🧺 Refresh Transaction $strRefreshDay (force)");
@@ -505,7 +505,7 @@ class _HomeListState extends State<HomeList> {
 
         // save the current transaction on the provider to the shared preferences
         String date =
-            DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
+            Globals.dfyyyyMMdd.format(txnDeleted.date.toLocal());
         TransactionSharedPreferences.setTransaction(date, txnListModel);
       }
 
@@ -524,7 +524,7 @@ class _HomeListState extends State<HomeList> {
   }
 
   Future<void> _updateInformation(TransactionListModel txnInfo) async {
-    _refreshDay = DateFormat('yyyy-MM-dd').format(
+    _refreshDay = Globals.dfyyyyMMdd.format(
         DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
     DateTime from;
     DateTime to;
@@ -535,8 +535,8 @@ class _HomeListState extends State<HomeList> {
     (from, to) = TransactionSharedPreferences.getStatDate();
 
     // format the from and to string
-    fromString = DateFormat('yyyy-MM-dd').format(from);
-    toString = DateFormat('yyyy-MM-dd').format(to);
+    fromString = Globals.dfyyyyMMdd.format(from);
+    toString = Globals.dfyyyyMMdd.format(to);
 
     // delete the transaction from wallet transaction
     await TransactionSharedPreferences.deleteTransactionWallet(

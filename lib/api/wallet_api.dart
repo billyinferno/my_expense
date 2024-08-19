@@ -95,7 +95,7 @@ class WalletHTTPService {
 
   Future<List<WorthModel>> fetchWalletsWorth(DateTime to, [bool? force]) async {
     bool isForce = (force ?? false);
-    String dateTo = DateFormat('yyyy-MM-dd').format(to.toLocal());
+    String dateTo = Globals.dfyyyyMMdd.format(to.toLocal());
     
     // check if we need to force to get the wallet or not?
     // if not need, it means we will just load it from shared preferences

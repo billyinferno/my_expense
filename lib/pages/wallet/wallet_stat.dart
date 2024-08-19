@@ -13,8 +13,6 @@ class WalletStatPage extends StatefulWidget {
 
 class _WalletStatPageState extends State<WalletStatPage> {
   final _fCCY = NumberFormat("#,##0.00", "en_US");
-  final _dt = DateFormat("yyyy-MM");
-  final _dt2 = DateFormat("MM/yy");
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   bool _sortAscending = true;
   late WalletModel _wallet;
@@ -247,7 +245,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              _dt.format(_walletStat[index].date.toLocal()),
+                              Globals.dfyyyyMM.format(_walletStat[index].date.toLocal()),
                               style: const TextStyle(
                                 fontSize: 11,
                               ),
@@ -302,15 +300,15 @@ class _WalletStatPageState extends State<WalletStatPage> {
     _maxAmount = double.infinity * -1;
 
     _walletDateRange.forEach((key, value) {
-      walletListIncome[_dt2.format(key)] = 0;
-      walletListExpense[_dt2.format(key)] = 0;
-      walletListTotal[_dt2.format(key)] = 0;
+      walletListIncome[Globals.dfMMyy.format(key)] = 0;
+      walletListExpense[Globals.dfMMyy.format(key)] = 0;
+      walletListTotal[Globals.dfMMyy.format(key)] = 0;
     });
 
     for (WalletStatModel data in _walletStat) {
       // generate the wallet list income, expense, and total
-      walletListIncome[_dt2.format(data.date)] = (data.income ?? 0);
-      walletListExpense[_dt2.format(data.date)] = (data.expense ?? 0);
+      walletListIncome[Globals.dfMMyy.format(data.date)] = (data.income ?? 0);
+      walletListExpense[Globals.dfMMyy.format(data.date)] = (data.expense ?? 0);
       
       _totalIncome += data.income!;
       _totalExpense += data.expense!;
@@ -332,8 +330,8 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
     // loop thru _walletDataRange again to calculate the total
     _walletDateRange.forEach((key, value) {
-      total += walletListIncome[_dt2.format(key)]! - walletListExpense[_dt2.format(key)]!;
-      walletListTotal[_dt2.format(key)] = total;
+      total += walletListIncome[Globals.dfMMyy.format(key)]! - walletListExpense[Globals.dfMMyy.format(key)]!;
+      walletListTotal[Globals.dfMMyy.format(key)] = total;
     });
 
     _dateOffset = walletListTotal.length ~/ 8;

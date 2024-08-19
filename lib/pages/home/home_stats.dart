@@ -18,7 +18,6 @@ class _HomeStatsState extends State<HomeStats> {
   late List<CurrencyModel> _currencies;
 
   final _fCCY = NumberFormat("#,##0.00", "en_US");
-  final _df = DateFormat('yyyy-MM-dd');
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
@@ -64,8 +63,8 @@ class _HomeStatsState extends State<HomeStats> {
     // initialize the from and to variable
     _from = DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
     _to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1)).toLocal();
-    _fromString = _df.format(_from.toLocal());
-    _toString = _df.format(_to.toLocal());
+    _fromString = Globals.dfyyyyMMdd.format(_from.toLocal());
+    _toString = Globals.dfyyyyMMdd.format(_to.toLocal());
     
     // get the currencies
     _currencies = WalletSharedPreferences.getWalletUserCurrency();
@@ -223,8 +222,8 @@ class _HomeStatsState extends State<HomeStats> {
                   _to = to;
           
                   // set the current from and to string
-                  _fromString = _df.format(_from.toLocal());
-                  _toString = _df.format(_to.toLocal());
+                  _fromString = Globals.dfyyyyMMdd.format(_from.toLocal());
+                  _toString = Globals.dfyyyyMMdd.format(_to.toLocal());
 
                   // stored the from and to on the shared preferences
                   TransactionSharedPreferences.setStatDate(from, to);
@@ -654,7 +653,7 @@ class _HomeStatsState extends State<HomeStats> {
     bool isShowDialog = (showDialog ?? false);
     List<BudgetModel> currentBudget = [];
     double maxBudget = 0;
-    String currentDataString = _df.format(DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal());
+    String currentDataString = Globals.dfyyyyMMdd.format(DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal());
 
     // check if the currencies is not empty
     if (_currencies.isNotEmpty) {

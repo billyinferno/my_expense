@@ -110,13 +110,12 @@ class CardFace extends StatelessWidget {
   }
 
   Widget _dateText(DateTime? date) {
-    final DateFormat dtDayMonthYear = DateFormat("dd MMM yyyy");
     if (date == null) {
       return const SizedBox.shrink();
     }
     else {
       return Text(
-        dtDayMonthYear.format(date),
+        Globals.dfddMMMyyyy.format(date),
         style: const TextStyle(
           fontSize: 10,
         ),

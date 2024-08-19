@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class Globals {
@@ -7,6 +8,25 @@ class Globals {
   static int apiTimeOut = 10;
   static String appVersion = (dotenv.env['APP_VERSION'] ?? '0.0.1');
   static String flutterVersion = (dotenv.env['FLUTTER_VERSION'] ?? 'beta');
+
+  static DateFormat dfyyyyMMdd = DateFormat('yyyy-MM-dd');
+  static DateFormat dfyyyyMM = DateFormat('yyyy-MM');
+  static DateFormat dfddMMyyyy = DateFormat('dd/MM/yyyy');
+  static DateFormat dfddMMyy = DateFormat('dd/MM/yy');
+  static DateFormat dfddMMMyyyy = DateFormat('dd MMM yyyy');
+  static DateFormat dfddMMMMyyyy = DateFormat('dd MMMM yyyy');
+  static DateFormat dfyyyy = DateFormat('yyyy');
+  static DateFormat dfMMM = DateFormat('MMM');
+  static DateFormat dfMMMM = DateFormat('MMMM');
+  static DateFormat dfMMyy = DateFormat('MM/yy');
+  static DateFormat dfMMMyyyy = DateFormat('MMM yyyy');
+  static DateFormat dfMMMMyyyy = DateFormat('MMMM yyyy');
+  static DateFormat dfeddMMMyyyy = DateFormat('E, dd MMM yyyy');
+  static DateFormat dfeMMMMddyyyy = DateFormat('E, MMMM dd, yyyy');
+  static DateFormat dfd = DateFormat('d');
+  static DateFormat dfddMM = DateFormat('dd/MM');
+
+
   static ThemeData themeData = ThemeData(
       fontFamily: '--apple-system',
       brightness: Brightness.dark,

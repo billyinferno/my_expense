@@ -21,10 +21,6 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
 
-  final DateFormat _dtDayMonthYear = DateFormat("dd MMM yyyy");
-  final DateFormat _dtyyyyMMdd = DateFormat("yyyy-MM-dd");
-  final DateFormat _dtMMMMyyyy = DateFormat("MMMM yyyy");
-
   late Future<List<BudgetModel>> _futureBudgets;
   late Future<List<WalletModel>> _futureWallets;
   
@@ -274,7 +270,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     }
 
     // get the transaction
-    String date = _dtyyyyMMdd.format(DateTime(fetchDate.toLocal().year, fetchDate.toLocal().month, 1));
+    String date = Globals.dfyyyyMMdd.format(DateTime(fetchDate.toLocal().year, fetchDate.toLocal().month, 1));
     await _transactionHttp.fetchTransactionWallet(_wallet.id, date, isForce).then((txns) async {
       await _setTransactions(txns);
       _transactions = txns.toList();
@@ -338,7 +334,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
                       Log.error(
-                        message: "Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}",
+                        message: "Error when fetch wallet for ${Globals.dfMMMMyyyy.format(newDate.toLocal())}",
                         error: error,
                         stackTrace: stackTrace,
                       );
@@ -362,7 +358,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                 _setDate(newDate);
               }).onError((error, stackTrace) {
                 Log.error(
-                  message: "Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}",
+                  message: "Error when fetch wallet for ${Globals.dfMMMMyyyy.format(newDate.toLocal())}",
                   error: error,
                   stackTrace: stackTrace,
                 );
@@ -386,7 +382,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
                       Log.error(
-                        message: "Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}",
+                        message: "Error when fetch wallet for ${Globals.dfMMMMyyyy.format(newDate.toLocal())}",
                         error: error,
                         stackTrace: stackTrace,
                       );
@@ -420,7 +416,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Text(_dtMMMMyyyy.format(_currentDate.toLocal())),
+                        Text(Globals.dfMMMMyyyy.format(_currentDate.toLocal())),
                         RichText(
                           text: TextSpan(
                             children: <TextSpan>[
@@ -442,7 +438,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
                       Log.error(
-                        message: "Error when fetch wallet for ${_dtMMMMyyyy.format(newDate.toLocal())}",
+                        message: "Error when fetch wallet for ${Globals.dfMMMMyyyy.format(newDate.toLocal())}",
                         error: error,
                         stackTrace: stackTrace,
                       );
@@ -484,7 +480,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                 true
               ).onError((error, stackTrace) {
                 Log.error(
-                  message: "Error when refresh wallet for ${_dtMMMMyyyy.format(_currentDate.toLocal())}",
+                  message: "Error when refresh wallet for ${Globals.dfMMMMyyyy.format(_currentDate.toLocal())}",
                   error: error,
                   stackTrace: stackTrace,
                 );
@@ -524,7 +520,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               children: <Widget>[
                 Expanded(
                   child: Text(
-                    _dtDayMonthYear.format(header.date.toLocal())
+                    Globals.dfddMMMyyyy.format(header.date.toLocal())
                   ),
                 ),
                 Text(
@@ -886,7 +882,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           // get the current transaction on the provider
           List<TransactionListModel> txnListModel = Provider.of<HomeProvider>(context, listen: false).transactionList;
           // save the current transaction on the provider to the shared preferences
-          String date = DateFormat('yyyy-MM-dd').format(txnDeleted.date.toLocal());
+          String date = Globals.dfyyyyMMdd.format(txnDeleted.date.toLocal());
           TransactionSharedPreferences.setTransaction(date, txnListModel);
         }
       }
@@ -911,7 +907,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   }
 
   Future<void> _updateInformation(TransactionListModel txnInfo) async {
-    String refreshDay = DateFormat('yyyy-MM-dd').format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
+    String refreshDay = Globals.dfyyyyMMdd.format(DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
     DateTime from;
     DateTime to;
     String fromString;
@@ -922,8 +918,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     (from, to) = TransactionSharedPreferences.getStatDate();
 
     // format the from and to string
-    fromString = DateFormat('yyyy-MM-dd').format(from);
-    toString = DateFormat('yyyy-MM-dd').format(to);
+    fromString = Globals.dfyyyyMMdd.format(from);
+    toString = Globals.dfyyyyMMdd.format(to);
 
     // delete the transaction from wallet transaction
     await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.wallet.id, refreshDay, txnInfo);
