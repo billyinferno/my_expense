@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
@@ -450,32 +451,99 @@ class _LoginPageState extends State<LoginPage> {
 
     // try to fetch users/me endpoint to check if we have credentials to access
     // this page or not?
-    await _userHTTP.login(username, password).then((loginModel) {
-      // login success, now we can just store this on the shared preferences
-      _storeCredentials(loginModel);
-    }).onError((error, stackTrace) {
-      // check if we got "res=" on the result or not?
-      // if got, it means that we got response from server, if not it's due
-      // connectivity error (showed error that probably services not available)
-      NetErrorModel netError = error as NetErrorModel;
+    try {
+      await _userHTTP.login(username, password).then((loginModel) {
+        // login success, now we can just store this on the shared preferences
+        _storeCredentials(loginModel);
+      }).whenComplete(
+        () {
+          LoadingScreen.instance().hide();
+        },
+      );
+    }
+    on NetErrorModel catch (netError, stackTrace) {
+      Log.error(
+        message: "Error during login",
+        error: netError,
+        stackTrace: stackTrace,
+      );
+
       if (netError.statusCode > 0) {
         isError = true;
         if (mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(createSnackBar(message: "Wrong login info"));
+          ScaffoldMessenger.of(context).showSnackBar(
+            createSnackBar(
+              message: "Wrong login info"
+            )
+          );
         }
       } else {
         isError = true;
         if (mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(createSnackBar(message: "Services unavailable"));
+          ScaffoldMessenger.of(context).showSnackBar(
+            createSnackBar(
+              message: "Services unavailable"
+            )
+          );
         }
       }
-    }).whenComplete(
-      () {
-        LoadingScreen.instance().hide();
-      },
-    );
+    }
+    on NetException catch(error, stackTrace) {
+      Log.error(
+        message: error.message,
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        // check whether this is rejected with 400
+        if (error.code == 400) {
+          // then it means that the rejection is due to the invalid identifier
+          ScaffoldMessenger.of(context).showSnackBar(
+            createSnackBar(
+              message: "Invalid identifier",
+            )
+          );
+        }
+        else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            createSnackBar(
+              message: "Got error: ${error.message}",
+            )
+          );
+        }
+      }
+    }
+    on ClientException catch (error, stackTrace) {
+      Log.error(
+        message: error.message,
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Got error: ${error.message}",
+          )
+        );
+      }
+    }
+    catch (error, stackTrace) {
+      Log.error(
+        message: "Generic error during login",
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Unexpected error during login",
+          )
+        );
+      }
+    }
 
     return isError;
   }

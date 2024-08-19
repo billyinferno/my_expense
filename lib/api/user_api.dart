@@ -7,9 +7,7 @@ class UserHTTPService {
     // get user information from API
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}users/me',
-    ).onError((error, stackTrace) {
-      throw Exception(error);
-    });
+    );
 
     // fetch the user information once we got it from API
     UsersMeModel userModel = UsersMeModel.fromJson(jsonDecode(result));
@@ -26,23 +24,7 @@ class UserHTTPService {
       url: '${Globals.apiURL}auth/local',
       body: body,
       requiredJWT: false,
-    ).onError((error, stackTrace) {
-      NetException netException = error as NetException;
-      NetErrorModel netError;
-      if (netException.body != null) {      
-        netError = NetErrorModel.fromJson(jsonDecode(netException.body ?? ''));
-      }
-      else {
-        netError = NetErrorModel(
-          statusCode: -1,
-          error: "Uknown error",
-          message: [],
-          data: []
-        );
-      }
-
-      throw netError;
-    });
+    );
 
     // parse the login data and get the login model
     LoginModel loginModel = LoginModel.fromJson(jsonDecode(result));
@@ -63,9 +45,7 @@ class UserHTTPService {
     final String result = await NetUtils.post(
       url: '${Globals.apiURL}password',
       body: body,
-    ).onError((error, stackTrace) {
-      throw Exception(error);
-    });
+    );
 
     // this will response back our JWT token
     LoginModel loginModel = LoginModel.fromJson(jsonDecode(result));
