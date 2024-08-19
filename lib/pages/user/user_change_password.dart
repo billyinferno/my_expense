@@ -84,19 +84,21 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                               icon: const Icon(Ionicons.lock_closed_outline),
                               border: const UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color: secondaryBackground, width: 1.0),
+                                  color: secondaryBackground,
+                                  width: 1.0
+                                ),
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   (_showCurrentPassword
-                                      ? Ionicons.eye_off_outline
-                                      : Ionicons.eye_off_outline),
+                                    ? Ionicons.eye_off_outline
+                                    : Ionicons.eye_off_outline
+                                  ),
                                   color: secondaryLight,
                                 ),
                                 onPressed: (() {
                                   setState(() {
-                                    _showCurrentPassword =
-                                        !_showCurrentPassword;
+                                    _showCurrentPassword = !_showCurrentPassword;
                                   });
                                 }),
                               ),
@@ -113,13 +115,16 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                               icon: const Icon(Ionicons.lock_closed_outline),
                               border: const UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color: secondaryBackground, width: 1.0),
+                                  color: secondaryBackground,
+                                  width: 1.0
+                                ),
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   (_showNewPassword
-                                      ? Ionicons.eye_off_outline
-                                      : Ionicons.eye_off_outline),
+                                    ? Ionicons.eye_off_outline
+                                    : Ionicons.eye_off_outline
+                                  ),
                                   color: secondaryLight,
                                 ),
                                 onPressed: (() {
@@ -141,19 +146,21 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                               icon: const Icon(Ionicons.lock_closed_outline),
                               border: const UnderlineInputBorder(
                                 borderSide: BorderSide(
-                                    color: secondaryBackground, width: 1.0),
+                                  color: secondaryBackground,
+                                  width: 1.0
+                                ),
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  (_showRetypeNewPassword
-                                      ? Ionicons.eye_off_outline
-                                      : Ionicons.eye_off_outline),
+                                  ( _showRetypeNewPassword
+                                    ? Ionicons.eye_off_outline
+                                    : Ionicons.eye_off_outline
+                                  ),
                                   color: secondaryLight,
                                 ),
                                 onPressed: (() {
                                   setState(() {
-                                    _showRetypeNewPassword =
-                                        !_showRetypeNewPassword;
+                                    _showRetypeNewPassword = !_showRetypeNewPassword;
                                   });
                                 }),
                               ),
@@ -172,13 +179,12 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                             if (context.mounted) {
                               // showed that we already success update the password
                               await ShowMyDialog(
-                                      cancelEnabled: false,
-                                      confirmText: "OK",
-                                      confirmColor: accentColors[0],
-                                      dialogTitle: "Updated",
-                                      dialogText:
-                                          "Password update successfully.")
-                                  .show(context);
+                                cancelEnabled: false,
+                                confirmText: "OK",
+                                confirmColor: accentColors[0],
+                                dialogTitle: "Updated",
+                                dialogText: "Password update successfully."
+                              ).show(context);
                             }
                           }).onError((error, stackTrace) async {
                             // print the error
