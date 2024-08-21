@@ -343,10 +343,10 @@ packages:
     dependency: "direct main"
     description:
       name: month_picker_dialog
-      sha256: a13bbe6d53d3441077dfc83e1589d569894609edeb2f43634f610f4292656cc1
+      sha256: cf3b0acb0252d557e13eb6759b8afd6c14371fe85e802ed85b7a178ef25e651b
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.0"
+    version: "5.1.2"
   nested:
     dependency: transitive
     description:
