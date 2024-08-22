@@ -27,18 +27,14 @@ class Globals {
   static DateFormat dfd = DateFormat('d');
   static DateFormat dfddMM = DateFormat('dd/MM');
 
-  static bool isWasm() {
+  static String runAs() {
     if (kIsWasm) {
-      return true;
+      return " run as WASM";
     }
-    return false;
-  }
-
-  static bool isWeb() {
     if (kIsWeb) {
-      return true;
+      return " run as JS";
     }
-    return false;
+    return "";
   }
 
   static ThemeData themeData = ThemeData(

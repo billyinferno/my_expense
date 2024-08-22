@@ -410,7 +410,7 @@ class _UserPageState extends State<UserPage> {
                       value: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          Globals.appVersion,
+                          '${Globals.appVersion}${Globals.runAs()}',
                           style: const TextStyle(
                             color: textColor,
                           ),

@@ -40,13 +40,8 @@ class _LoginPageState extends State<LoginPage> {
     _bearerToken = "";
     _isTokenExpired = false;
 
-    // check the type
-    if (Globals.isWasm()) {
-      _type = "Wasm";
-    }
-    else if (Globals.isWeb()) {
-      _type = "JS";
-    }
+    // get the type of the application running now (whether WASM or JS)
+    _type = Globals.runAs();
 
     // get the current date
     _currentDate =
@@ -109,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         Center(
           child: Text(
-            'version - ${Globals.appVersion}${_type.isNotEmpty ? 'run as $_type' : ''}',
+            'version - ${Globals.appVersion}$_type',
             style: const TextStyle(
               color: textColor2,
               fontSize: 10,
@@ -299,7 +294,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: Text(
-                    "version - ${Globals.appVersion}${_type.isNotEmpty ? ' run as $_type' : ''}",
+                    "version - ${Globals.appVersion}$_type",
                     style: const TextStyle(
                       color: primaryLight,
                       fontSize: 10,
