@@ -47,9 +47,14 @@ class SlideButton extends StatelessWidget {
                 size: (iconSize ?? 20),
                 color: iconColor,
               ),
+              (
+                text != null ?
+                const SizedBox(height: 5,) :
+                const SizedBox.shrink()
+              ),
               _textWidget(
                 text: text,
-                textColor: textColor,
+                textColor: (textColor ?? iconColor),
                 textSize: textSize,
               ),
             ],
