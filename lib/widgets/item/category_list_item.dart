@@ -44,18 +44,16 @@ class CategoryListItem extends StatelessWidget {
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
           extentRatio: 0.20,
-          children: <SlidableAction>[
-            SlidableAction(
-              label: 'Delete',
-              padding: const EdgeInsets.all(0),
-              foregroundColor: textColor,
-              backgroundColor: accentColors[2],
+          children: <Widget>[
+            SlideButton(
               icon: Ionicons.trash,
-              onPressed: (_) {
+              iconColor: accentColors[2],
+              text: 'Delete',
+              onTap: () {
                 if (onDelete != null) {
                   onDelete!();
                 }
-              }
+              },
             ),
           ],
         ),

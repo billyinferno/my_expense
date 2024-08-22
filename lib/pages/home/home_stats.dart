@@ -243,26 +243,22 @@ class _HomeStatsState extends State<HomeStats> {
                       endActionPane: ActionPane(
                         motion: const DrawerMotion(),
                         extentRatio: 0.35,
-                        children: <SlidableAction>[
-                          SlidableAction(
-                            label: 'Stat',
-                            padding: const EdgeInsets.all(0),
-                            foregroundColor: accentColors[3],
-                            backgroundColor: secondaryDark,
+                        children: <Widget>[
+                          SlideButton(
                             icon: Ionicons.bar_chart,
-                            onPressed: ((_) {
+                            iconColor: accentColors[3],
+                            text: 'Stat',
+                            onTap: () {
                               Navigator.pushNamed(context, '/stats/all', arguments: _currentCurrencyId);
-                            })
+                            },
                           ),
-                          SlidableAction(
-                            label: 'Refresh',
-                            padding: const EdgeInsets.all(0),
-                            foregroundColor: accentColors[6],
-                            backgroundColor: secondaryDark,
+                          SlideButton(
                             icon: Ionicons.refresh,
-                            onPressed: ((_) async {
+                            iconColor: accentColors[6],
+                            text: 'Stat',
+                            onTap: () {
                               _getStat = _fetchData(showDialog: true);
-                            })
+                            },
                           ),
                         ],
                       ),

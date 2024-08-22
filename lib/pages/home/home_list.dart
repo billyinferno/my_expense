@@ -359,29 +359,28 @@ class _HomeListState extends State<HomeList> {
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
         extentRatio: 0.20,
-        children: <SlidableAction>[
-          SlidableAction(
-              label: 'Delete',
-              padding: const EdgeInsets.all(0),
-              foregroundColor: textColor,
-              backgroundColor: accentColors[2],
-              icon: Ionicons.trash,
-              onPressed: ((_) {
-                late Future<bool?> result = ShowMyDialog(
-                        dialogTitle: "Delete Item",
-                        dialogText: "Do you want to delete ${txn.name}?",
-                        confirmText: "Delete",
-                        confirmColor: accentColors[2],
-                        cancelText: "Cancel")
-                    .show(context);
+        children: <Widget>[
+          SlideButton(
+            icon: Ionicons.trash,
+            iconColor: textColor,
+            text: 'Delete',
+            onTap: () {
+              late Future<bool?> result = ShowMyDialog(
+                dialogTitle: "Delete Item",
+                dialogText: "Do you want to delete ${txn.name}?",
+                confirmText: "Delete",
+                confirmColor: accentColors[2],
+                cancelText: "Cancel")
+              .show(context);
 
-                // check the result of the dialog box
-                result.then((value) async {
-                  if (value == true) {
-                    await _deleteTransaction(txn);
-                  }
-                });
-              })),
+              // check the result of the dialog box
+              result.then((value) async {
+                if (value == true) {
+                  await _deleteTransaction(txn);
+                }
+              });
+            },
+          ),
         ],
       ),
       child: GestureDetector(

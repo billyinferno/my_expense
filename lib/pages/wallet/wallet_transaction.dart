@@ -544,14 +544,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             endActionPane: ActionPane(
               motion: const DrawerMotion(),
               extentRatio: 0.20,
-              children: <SlidableAction>[
-                SlidableAction(
-                  label: 'Delete',
-                  padding: const EdgeInsets.all(0),
-                  foregroundColor: textColor,
-                  backgroundColor: accentColors[2],
+              children: <Widget>[
+                SlideButton(
                   icon: Ionicons.trash,
-                  onPressed: ((_) {
+                  iconColor: accentColors[2],
+                  text: 'Delete',
+                  onTap: () {
                     late Future<bool?> result = ShowMyDialog(
                       dialogTitle: "Delete Item",
                       dialogText: "Do you want to delete ${txn.name}?",
@@ -579,7 +577,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                         }
                       }
                     });
-                  })
+                  },
                 ),
               ],
             ),

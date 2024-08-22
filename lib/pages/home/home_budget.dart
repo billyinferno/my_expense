@@ -195,14 +195,12 @@ class _HomeBudgetState extends State<HomeBudget> {
                       endActionPane: ActionPane(
                         motion: const DrawerMotion(),
                         extentRatio: 0.2,
-                        children: <SlidableAction>[
-                          SlidableAction(
-                            label: 'Stat',
-                            padding: const EdgeInsets.all(0),
-                            foregroundColor: accentColors[3],
-                            backgroundColor: Colors.transparent,
+                        children: <Widget>[
+                          SlideButton(
                             icon: Ionicons.bar_chart,
-                            onPressed: ((_) {
+                            iconColor: accentColors[3],
+                            text: 'Stat',
+                            onTap: () {
                               // create budget transaction arguments that can be passed to other pages
                               BudgetTransactionArgs args = BudgetTransactionArgs(
                                 categoryid: -1,
@@ -215,7 +213,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                               );
 
                               Navigator.pushNamed(context, '/budget/stat', arguments: args);
-                            })
+                            },
                           ),
                         ],
                       ),
@@ -356,16 +354,14 @@ class _HomeBudgetState extends State<HomeBudget> {
                           endActionPane: ActionPane(
                             motion: const DrawerMotion(),
                             extentRatio: 0.2,
-                            children: <SlidableAction>[
-                              SlidableAction(
-                                label: 'Stat',
-                                padding: const EdgeInsets.all(0),
-                                foregroundColor: accentColors[3],
-                                backgroundColor: primaryBackground,
+                            children: <Widget>[
+                              SlideButton(
                                 icon: Ionicons.bar_chart,
-                                onPressed: ((_) {
+                                iconColor: accentColors[3],
+                                text: 'Stat',
+                                onTap: () {
                                   Navigator.pushNamed(context, '/budget/stat', arguments: args);
-                                })
+                                },
                               ),
                             ],
                           ),
