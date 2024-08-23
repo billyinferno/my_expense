@@ -117,7 +117,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         future: _getData,
         builder: (context, snapshopt) {
           if (snapshopt.hasData) {
-            return _generateTransactionList();
+            return MySafeArea(
+              child: _generateTransactionList()
+            );
           }
           else if (snapshopt.hasError) {
             return Column(
@@ -497,7 +499,6 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             child: _generateTransactionListview(),
           ),
         ),
-        const SizedBox(height: 30,),
       ],
     );
   }
@@ -547,7 +548,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               children: <Widget>[
                 SlideButton(
                   icon: Ionicons.trash,
-                  iconColor: accentColors[2],
+                  iconColor: textColor,
+                  bgColor: accentColors[2],
                   text: 'Delete',
                   onTap: () {
                     late Future<bool?> result = ShowMyDialog(

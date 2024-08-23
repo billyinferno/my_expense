@@ -143,7 +143,9 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
               child: Text("Error when get budget stat data"),
             );
           } else if (snapshot.hasData) {
-            return _generatePage();
+            return MySafeArea(
+              child: _generatePage()
+            );
           } else {
             return const Center(
               child: Text("Loading budget stat data"),
@@ -179,9 +181,6 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           height: 5,
         ),
         Expanded(child: _generateSubPage()),
-        const SizedBox(
-          height: 35,
-        ),
       ],
     );
   }

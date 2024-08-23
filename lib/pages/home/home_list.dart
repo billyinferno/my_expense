@@ -11,8 +11,11 @@ class HomeList extends StatefulWidget {
   final VoidCallback userIconPress;
   final MyDateTimeCallback userDateSelect;
 
-  const HomeList(
-      {super.key, required this.userIconPress, required this.userDateSelect});
+  const HomeList({
+    super.key,
+    required this.userIconPress,
+    required this.userDateSelect}
+  );
 
   @override
   State<HomeList> createState() => _HomeListState();
@@ -73,8 +76,13 @@ class _HomeListState extends State<HomeList> {
           }),
           onDoubleTap: (() {
             // go to the current date
-            _setFocusedDay(DateTime(
-                DateTime.now().year, DateTime.now().month, DateTime.now().day));
+            _setFocusedDay(
+              DateTime(DateTime.now().year,
+              DateTime.now().month,
+              DateTime.now().day)
+            );
+
+            // get the data
             _getData = _refreshTransaction(_currentFocusedDay);
           }),
           child: Container(
@@ -363,6 +371,7 @@ class _HomeListState extends State<HomeList> {
           SlideButton(
             icon: Ionicons.trash,
             iconColor: textColor,
+            bgColor: accentColors[2],
             text: 'Delete',
             onTap: () {
               late Future<bool?> result = ShowMyDialog(

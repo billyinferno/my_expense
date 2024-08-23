@@ -43,17 +43,19 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     // send also the date we got from the parent widget, to see whether there
     // are any changes on the date of the transaction. If there are changes
     // then it means we need to manipulate 2 shared preferences instead of one.
-    await _transactionHttp
-        .updateTransaction(context, txn!, _paramsData)
-        .then((txnUpdate) async {
+    await _transactionHttp.updateTransaction(
+      txn!,
+      _paramsData
+    ).then((txnUpdate) async {
       // update necessary information after we add the transaction
       await _updateInformation(txnUpdate).then((_) async {
         // for transaction that actually add on the different date, we cannot notify the home list
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
-        DateTime currentListTxnDate =
-            (TransactionSharedPreferences.getTransactionListCurrentDate() ??
-                DateTime.now());
+        DateTime currentListTxnDate = (
+          TransactionSharedPreferences.getTransactionListCurrentDate() ??
+          DateTime.now()
+        );
 
         // default the date as the same as the home list date
         String date = Globals.dfyyyyMMdd.format(currentListTxnDate.toLocal());
@@ -66,9 +68,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           // since the update transaction and current home list is different date
           // get both data and stored it on the transaction shared preferences
           await _refreshHomeList(
-                  txnDate: txnUpdate.date.toLocal(),
-                  homeListDate: currentListTxnDate.toLocal())
-              .onError((error, stackTrace) async {
+            txnDate: txnUpdate.date.toLocal(),
+            homeListDate: currentListTxnDate.toLocal())
+          .onError((error, stackTrace) async {
             Log.error(
               message: "Error when update the home list transaction",
               error: error,
@@ -78,11 +80,11 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
             if (mounted) {
               // show the error dialog
               await ShowMyDialog(
-                      cancelEnabled: false,
-                      confirmText: "OK",
-                      dialogTitle: "Error Refresh",
-                      dialogText: "Error when refresh home list.")
-                  .show(context);
+                cancelEnabled: false,
+                confirmText: "OK",
+                dialogTitle: "Error Refresh",
+                dialogText: "Error when refresh home list.")
+              .show(context);
             }
           });
         }
@@ -90,13 +92,14 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         // this is success, so we can pop the loader
         if (mounted) {
           // get the transaction list from shared preferences
-          List<TransactionListModel>? txnListShared =
-              TransactionSharedPreferences.getTransaction(date);
+          List<TransactionListModel>? txnListShared = TransactionSharedPreferences.getTransaction(date);
 
           // once add on the shared preferences, we can change the
           // TransactionListModel provider so it will update the home list page
-          Provider.of<HomeProvider>(context, listen: false)
-              .setTransactionList(txnListShared ?? []);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setTransactionList(txnListShared ?? []);
 
           // since we already finished, we can pop to return back to the
           // previous page
@@ -113,11 +116,11 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         if (mounted) {
           // show the error dialog
           await ShowMyDialog(
-                  cancelEnabled: false,
-                  confirmText: "OK",
-                  dialogTitle: "Error Refresh",
-                  dialogText: "Error when refresh information.")
-              .show(context);
+            cancelEnabled: false,
+            confirmText: "OK",
+            dialogTitle: "Error Refresh",
+            dialogText: "Error when refresh information.")
+          .show(context);
         }
       });
     }).onError((error, stackTrace) async {
@@ -137,8 +140,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           dialogText: "Error when update transaction.")
         .show(context);
       }
-    }).whenComplete(
-      () {
+    }).whenComplete(() {
         // remove the loading screen
         LoadingScreen.instance().hide();
       },
@@ -188,13 +190,27 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     Future<List<WorthModel>> futureNetWorth;
 
     String refreshDay = Globals.dfyyyyMMdd.format(
-        DateTime(txnUpdate.date.year, txnUpdate.date.month, 1).toLocal());
+      DateTime(
+        txnUpdate.date.year,
+        txnUpdate.date.month,
+        1
+      ).toLocal()
+    );
+
     String prevDay = Globals.dfyyyyMMdd.format(
-        DateTime(_paramsData.date.year, _paramsData.date.month, 1).toLocal());
+      DateTime(
+        _paramsData.date.year,
+        _paramsData.date.month,
+        1
+      ).toLocal()
+    );
 
     DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1)
-        .subtract(const Duration(days: 1));
+    DateTime to = DateTime(
+      DateTime.now().year,
+      DateTime.now().month + 1,
+      1
+    ).subtract(const Duration(days: 1));
     String fromString = Globals.dfyyyyMMdd.format(from);
     String toString = Globals.dfyyyyMMdd.format(to);
 
@@ -223,19 +239,31 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     if (!isWalletMoved) {
       // update the new transaction to the wallet transaction
       await TransactionSharedPreferences.updateTransactionWallet(
-          txnUpdate.wallet.id, refreshDay, txnUpdate);
+        txnUpdate.wallet.id,
+        refreshDay,
+        txnUpdate
+      );
       if (txnUpdate.walletTo != null) {
         await TransactionSharedPreferences.updateTransactionWallet(
-            txnUpdate.walletTo!.id, refreshDay, txnUpdate);
+          txnUpdate.walletTo!.id,
+          refreshDay,
+          txnUpdate
+        );
       }
     } else {
       // check which wallet is being moved
       if (_paramsData.wallet.id != txnUpdate.wallet.id) {
         // moved the transaction from previous wallet to the new wallet
         await TransactionSharedPreferences.deleteTransactionWallet(
-            _paramsData.wallet.id, prevDay, _paramsData);
+          _paramsData.wallet.id,
+          prevDay,
+          _paramsData
+        );
         await TransactionSharedPreferences.addTransactionWallet(
-            txnUpdate.wallet.id, refreshDay, txnUpdate);
+          txnUpdate.wallet.id,
+          refreshDay,
+          txnUpdate
+        );
       }
 
       if (txnUpdate.walletTo != null) {
@@ -243,9 +271,15 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         if (_paramsData.walletTo!.id != txnUpdate.walletTo!.id) {
           // moved the transaction from previous wallet to the new wallet
           await TransactionSharedPreferences.deleteTransactionWallet(
-              _paramsData.walletTo!.id, prevDay, _paramsData);
+            _paramsData.walletTo!.id,
+            prevDay,
+            _paramsData
+          );
           await TransactionSharedPreferences.addTransactionWallet(
-              txnUpdate.walletTo!.id, refreshDay, txnUpdate);
+            txnUpdate.walletTo!.id,
+            refreshDay,
+            txnUpdate
+          );
         }
       }
     }
@@ -256,12 +290,17 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       // is perform on the same month
       if (txnUpdate.date.year == DateTime.now().year &&
           txnUpdate.date.month == DateTime.now().month) {
-        await _transactionHttp
-            .fetchIncomeExpense(txnUpdate.wallet.currencyId, from, to, true)
-            .then((incomeExpense) {
+        await _transactionHttp.fetchIncomeExpense(
+          txnUpdate.wallet.currencyId,
+          from,
+          to,
+          true
+        ).then((incomeExpense) {
           if (mounted) {
-            Provider.of<HomeProvider>(context, listen: false)
-                .setIncomeExpense(txnUpdate.wallet.currencyId, incomeExpense);
+            Provider.of<HomeProvider>(
+              context,
+              listen: false
+            ).setIncomeExpense(txnUpdate.wallet.currencyId, incomeExpense);
           }
         }).onError((error, stackTrace) {
           Log.error(
@@ -276,14 +315,19 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     await Future.wait([
       futureWallets = _walletHttp.fetchWallets(true, true),
       futureBudgets = _budgetHttp.fetchBudgetDate(
-          txnUpdate.wallet.currencyId, refreshDay, true),
+        txnUpdate.wallet.currencyId,
+        refreshDay,
+        true
+      ),
       futureNetWorth = _walletHttp.fetchWalletsWorth(txnUpdate.date, true),
     ]).then((_) {
       // got the updated wallets
       futureWallets.then((wallets) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletList(wallets);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(wallets);
         }
       });
 
@@ -291,10 +335,16 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       futureBudgets.then((budgets) {
         // now we can set the shared preferences of budget
         BudgetSharedPreferences.setBudget(
-            txnUpdate.wallet.currencyId, refreshDay, budgets);
+          txnUpdate.wallet.currencyId,
+          refreshDay,
+          budgets
+        );
+
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setBudgetList(budgets);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setBudgetList(budgets);
         }
       }).then((_) {
         // lastly check whether the date being used on the transaction
@@ -344,14 +394,23 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
 
       // check if txn update is within stat from and to date
       if (isWithin(txnUpdate.date, statFrom, statTo)) {
-        await _transactionHttp
-            .fetchTransactionTop(txnUpdate.type, txnUpdate.wallet.currencyId,
-                fromString, toString, true)
-            .then((transactionTop) {
+        await _transactionHttp.fetchTransactionTop(
+          txnUpdate.type, 
+          txnUpdate.wallet.currencyId,
+          fromString,
+          toString,
+          true
+        ).then((transactionTop) {
           if (mounted) {
             // set the provide for this
-            Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
-                txnUpdate.wallet.currencyId, txnUpdate.type, transactionTop);
+            Provider.of<HomeProvider>(
+              context,
+              listen: false
+            ).setTopTransaction(
+              txnUpdate.wallet.currencyId,
+              txnUpdate.type,
+              transactionTop
+            );
           }
         }).onError(
           (error, stackTrace) {

@@ -54,9 +54,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     LoadingScreen.instance().show(context: context);
 
     // now we can try to send updated data to the backend
-    await _transactionHttp
-        .addTransaction(context, txn!, _selectedDate)
-        .then((result) async {
+    await _transactionHttp.addTransaction(
+      txn!,
+      _selectedDate
+    ).then((result) async {
       // update necessary information after we add the transaction
       await _updateInformation(result).then((_) {
         // get the transaction edit date
@@ -70,8 +71,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
         if (isSameDate(txn.date.toLocal(), _selectedDate.toLocal()) && mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setTransactionList(txnListShared);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setTransactionList(txnListShared);
         }
 
         // finished update information, return back to the previous page
@@ -89,11 +92,11 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         if (mounted) {
           // show the error dialog
           await ShowMyDialog(
-                  cancelEnabled: false,
-                  confirmText: "OK",
-                  dialogTitle: "Error Refresh",
-                  dialogText: "Error when refresh information.")
-              .show(context);
+            cancelEnabled: false,
+            confirmText: "OK",
+            dialogTitle: "Error Refresh",
+            dialogText: "Error when refresh information.")
+          .show(context);
         }
       });
     }).onError((error, stackTrace) async {
@@ -124,7 +127,12 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     Future<List<WalletModel>> futureWallets;
     List<BudgetModel> budgets = [];
     String refreshDay = Globals.dfyyyyMMdd.format(
-        DateTime(txnAdd.date.toLocal().year, txnAdd.date.toLocal().month, 1));
+      DateTime(
+        txnAdd.date.toLocal().year,
+        txnAdd.date.toLocal().month,
+        1
+      )
+    );
     bool isExists = false;
 
     // try to get the transaction date data from the storage, and see whether we got null or not?
@@ -140,12 +148,13 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     // check for the last transaction list, and add the last transaction if the transaction is not
     // on the last transaction list?
     if (txnAdd.type == "expense" || txnAdd.type == "income") {
-      List<LastTransactionModel>? lastTransaction =
-          TransactionSharedPreferences.getLastTransaction(txnAdd.type);
+      List<LastTransactionModel>? lastTransaction = TransactionSharedPreferences.getLastTransaction(txnAdd.type);
       LastTransactionModel lastTxn = LastTransactionModel(
         name: txnAdd.name,
         category: CategoryLastTransaction(
-            id: txnAdd.category!.id, name: txnAdd.category!.name),
+          id: txnAdd.category!.id,
+          name: txnAdd.category!.name
+        ),
       );
 
       // get the index  for the last transaction if transaction exists
@@ -181,7 +190,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
           // then save the _newLastTransaction to shared preferences
           TransactionSharedPreferences.setLastTransaction(
-              txnAdd.type, newLastTransaction);
+            txnAdd.type,
+            newLastTransaction
+          );
         }
       } else {
         // means this is the first one?
@@ -190,23 +201,36 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
         // then save the _lastTransaction to shared preferences
         TransactionSharedPreferences.setLastTransaction(
-            txnAdd.type, lastTransaction);
+          txnAdd.type,
+          lastTransaction
+        );
       }
     }
 
     // add the new transaction to the wallet transaction
     await TransactionSharedPreferences.addTransactionWallet(
-        txnAdd.wallet.id, refreshDay, txnAdd);
+      txnAdd.wallet.id,
+      refreshDay,
+      txnAdd
+    );
+
     if (txnAdd.walletTo != null) {
       await TransactionSharedPreferences.addTransactionWallet(
-          txnAdd.walletTo!.id, refreshDay, txnAdd);
+        txnAdd.walletTo!.id,
+        refreshDay,
+        txnAdd
+      );
     }
 
     // add the transaction to the statisctics
     await WalletSharedPreferences.addWalletWorth(txnAdd).then((_) {
-      String dateTo = Globals.dfyyyyMMdd.format(DateTime(
-              txnAdd.date.toLocal().year, txnAdd.date.toLocal().month + 1, 1)
-          .subtract(const Duration(days: 1)));
+      String dateTo = Globals.dfyyyyMMdd.format(
+        DateTime(
+          txnAdd.date.toLocal().year,
+          txnAdd.date.toLocal().month + 1,
+          1
+        ).subtract(const Duration(days: 1))
+      );
 
       _worth = WalletSharedPreferences.getWalletWorth(dateTo);
       if (mounted) {
@@ -227,18 +251,34 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       // otherwise we can ignore, as we will not display the statistics on the home stats screen.
       if (txnAdd.date.year == DateTime.now().year &&
           txnAdd.date.month == DateTime.now().month) {
-        String dateFrom = Globals.dfyyyyMMdd.format(DateTime(
-            txnAdd.date.toLocal().year, txnAdd.date.toLocal().month, 1));
-        String dateTo = Globals.dfyyyyMMdd.format(DateTime(
-                txnAdd.date.toLocal().year, txnAdd.date.toLocal().month + 1, 1)
-            .subtract(const Duration(days: 1)));
+        String dateFrom = Globals.dfyyyyMMdd.format(
+          DateTime(
+            txnAdd.date.toLocal().year,
+            txnAdd.date.toLocal().month,
+            1
+          )
+        );
+
+        String dateTo = Globals.dfyyyyMMdd.format(
+          DateTime(
+            txnAdd.date.toLocal().year,
+            txnAdd.date.toLocal().month + 1,
+            1
+          ).subtract(const Duration(days: 1))
+        );
+
         await TransactionSharedPreferences.addIncomeExpense(
-                txnAdd.wallet.currencyId, dateFrom, dateTo, txnAdd)
-            .then((incomeExpense) {
+          txnAdd.wallet.currencyId,
+          dateFrom,
+          dateTo,
+          txnAdd
+        ).then((incomeExpense) {
           if (mounted) {
             // set the provider for this statistics
-            Provider.of<HomeProvider>(context, listen: false)
-                .setIncomeExpense(txnAdd.wallet.currencyId, incomeExpense);
+            Provider.of<HomeProvider>(
+              context,
+              listen: false
+            ).setIncomeExpense(txnAdd.wallet.currencyId, incomeExpense);
           }
         }).onError((error, stackTrace) {
           Log.error(
@@ -253,15 +293,18 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     // fetch wallets
     await Future.wait([
       futureWallets = _walletHttp.fetchWallets(true, true),
-      futureBudgets =
-          _budgetHttp.fetchBudgetDate(txnAdd.wallet.currencyId, refreshDay),
-      // update the wallet transaction list
+      futureBudgets = _budgetHttp.fetchBudgetDate(
+        txnAdd.wallet.currencyId,
+        refreshDay
+      ),
     ]).then((_) {
       // update the wallets
       futureWallets.then((wallets) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletList(wallets);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(wallets);
         }
       });
 
@@ -288,14 +331,19 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           }
           // now we can set the shared preferences of budget
           BudgetSharedPreferences.setBudget(
-              txnAdd.wallet.currencyId, refreshDay, budgets);
+            txnAdd.wallet.currencyId,
+            refreshDay,
+            budgets
+          );
 
           // only update the provider if, the current home budget is ed
           // the same date as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
           if (refreshDay == currentBudgetDate && mounted) {
-            Provider.of<HomeProvider>(context, listen: false)
-                .setBudgetList(budgets);
+            Provider.of<HomeProvider>(
+              context,
+              listen: false
+            ).setBudgetList(budgets);
           }
         });
       }
@@ -310,12 +358,18 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         (statFrom, statTo) = TransactionSharedPreferences.getStatDate();
 
         // check if txnAdd is within statFrom and statTo
-        if (isWithin(txnAdd.date, statFrom, statTo) &&
-            mounted &&
-            (txnAdd.date.toLocal().month == DateTime.now().toLocal().month &&
-                txnAdd.date.toLocal().year == DateTime.now().toLocal().year)) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .addTopTransaction(txnAdd.wallet.currencyId, txnAdd.type, txnAdd);
+        if (mounted) {
+          if (isWithin(txnAdd.date, statFrom, statTo) &&
+            (
+              txnAdd.date.toLocal().month == DateTime.now().toLocal().month &&
+              txnAdd.date.toLocal().year == DateTime.now().toLocal().year
+            )
+          ) {
+            Provider.of<HomeProvider>(
+              context,
+              listen: false
+            ).addTopTransaction(txnAdd.wallet.currencyId, txnAdd.type, txnAdd);
+          }
         }
       }
 

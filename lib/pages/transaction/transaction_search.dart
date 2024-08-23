@@ -17,8 +17,7 @@ class TransactionSearchPage extends StatefulWidget {
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final _fCCY = NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
-  final int _limit =
-      99999; // make it to 99999 (just fetch everything, IO is not a concern)
+  final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
 
   String _searchText = "";
   String _categoryId = "";
@@ -101,9 +100,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           onPressed: () {
             Navigator.maybePop(context, false);
           },
-          icon: const Icon(
-            Ionicons.close,
-          ),
+          icon: const Icon(Ionicons.close,),
         ),
         actions: <Widget>[
           Container(
@@ -112,27 +109,26 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
-            color: secondaryDark,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                _showSearchOrSelectionWidget(),
-              ],
+      body: MySafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              color: secondaryDark,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  _showSearchOrSelectionWidget(),
+                ],
+              ),
             ),
-          ),
-          _getResultPage(),
-          const SizedBox(
-            height: 30,
-          ),
-        ],
+            _getResultPage(),
+          ],
+        ),
       ),
     );
   }

@@ -64,48 +64,62 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
           Container(width: 50, color: Colors.transparent,),
         ],
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-              color: secondaryDark,
-              border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
+      body: _checkBodyData(),
+    );
+  }
+
+  Widget _checkBodyData() {
+    // if both empty, then we need to showed there are no data for this month
+    if(
+        _stats.incomeExpenseCategory.income.isEmpty &&
+        _stats.incomeExpenseCategory.expense.isEmpty
+      ) {
+      return const Center(child: Text("No Data"));
+    }
+    else {
+      return MySafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: const BoxDecoration(
+                color: secondaryDark,
+                border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
+              ),
+              child: Center(child: Text(_getTitleText())),
             ),
-            child: Center(child: Text(_getTitleText())),
-          ),
-          _generatePieChart(),
-          const SizedBox(height: 10,),
-          Visibility(
-            visible: (_totalPage > 0),
-            child: Center(
-              child: SmoothPageIndicator(
-                controller: _pageController,
-                count: _totalPage,
-                effect: const WormEffect(
-                  dotHeight: 10,
-                  dotWidth: 10,
-                  type: WormType.normal,
-                  activeDotColor: primaryDark,
-                  dotColor: secondaryBackground,
+            _generatePieChart(),
+            const SizedBox(height: 10,),
+            Visibility(
+              visible: (_totalPage > 0),
+              child: Center(
+                child: SmoothPageIndicator(
+                  controller: _pageController,
+                  count: _totalPage,
+                  effect: const WormEffect(
+                    dotHeight: 10,
+                    dotWidth: 10,
+                    type: WormType.normal,
+                    activeDotColor: primaryDark,
+                    dotColor: secondaryBackground,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 10,),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              children:_generatePageView(),
+            const SizedBox(height: 10,),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                children:_generatePageView(),
+              ),
             ),
-          ),
-          const SizedBox(height: 20,),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    }
   }
 
   List<Widget> _generatePageView() {
@@ -116,11 +130,6 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
     }
     if(_stats.incomeExpenseCategory.expense.isNotEmpty) {
       page.add(_generateListView("expense", _stats.currency.symbol, _stats.incomeExpenseCategory.expense, _expenseController));
-    }
-
-    if(page.isEmpty) {
-      // nothing to add? then showed no data
-      page.add(const Center(child: Text("No Data")));
     }
 
     return page;
@@ -209,16 +218,6 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
   Widget _generatePieChart() {
     List<double> incomeDataMap = _generateDataMap(_stats.incomeExpenseCategory.income);
     List<double> expenseDataMap = _generateDataMap(_stats.incomeExpenseCategory.expense);
-
-    // check if both data map is empty?
-    // if both empty, then we need to showed there are no data for this month
-    if(incomeDataMap.isEmpty && expenseDataMap.isEmpty) {
-      return const Expanded(
-        child: Center(
-          child: Text("No data"),
-        ),
-      );
-    }
 
     // set the visibility of each chart based on the data
     return Container(

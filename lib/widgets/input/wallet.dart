@@ -16,14 +16,13 @@ class Wallet extends StatelessWidget {
       },
       child: Container(
         padding: const EdgeInsets.all(12),
-        margin: const EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           gradient: LinearGradient(
-              colors: <Color>[
-                (wallet.enabled ? IconList.getColor(wallet.walletType.type) : secondaryDark),
-                (wallet.enabled ? lighten(IconList.getDarkColor(wallet.walletType.type),0.1) : secondaryBackground),
-              ]
+            colors: <Color>[
+              (wallet.enabled ? IconList.getColor(wallet.walletType.type) : secondaryDark),
+              (wallet.enabled ? lighten(IconList.getDarkColor(wallet.walletType.type),0.1) : secondaryBackground),
+            ]
           ),
         ),
         width: double.infinity,

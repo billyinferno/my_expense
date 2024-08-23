@@ -12,38 +12,9 @@ class StatsFilterPage extends StatefulWidget {
 }
 
 class _StatsFilterPageState extends State<StatsFilterPage> {
-  // animation variable
-  // double _currentContainerPositioned = 0;
-
-  DateTime _minDate = DateTime(
-      DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1);
-  DateTime _maxDate = DateTime(
-          DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1)
-      .subtract(const Duration(days: 1));
-
-  String _currentType = "month";
-  DateTime _currentFromDate = DateTime(
-      DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1);
-  DateTime _currentToDate = DateTime(
-          DateTime.now().toLocal().year, DateTime.now().toLocal().month + 1, 1)
-      .subtract(const Duration(days: 1));
-
-  bool _showCalendar = false;
-  late String _name;
-
-  List<CurrencyModel> _currencies = [];
-  List<WalletModel> _wallets = [];
-  List<WalletModel> _currentWallets = [];
-
-  late UsersMeModel _userMe;
-  late CurrencyModel? _currentCurrencies;
-  late WalletModel? _currentWallet;
-  IncomeExpenseCategoryModel _currentIncomeExpenseCategory =
-      IncomeExpenseCategoryModel(expense: [], income: []);
   final TextEditingController _nameController = TextEditingController();
-  late ScrollController _scrollControllerCurrencies;
-  late ScrollController _scrollControllerWallet;
-
+  final ScrollController _scrollControllerCurrencies = ScrollController();
+  final ScrollController _scrollControllerWallet = ScrollController();
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final CalendarDatePicker2Config _calendarConfig = CalendarDatePicker2Config(
     calendarType: CalendarDatePicker2Type.range,
@@ -58,6 +29,42 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       fontWeight: FontWeight.bold,
     ),
   );
+
+  DateTime _minDate = DateTime(
+    DateTime.now().toLocal().year,
+    DateTime.now().toLocal().month,
+    1
+  );
+  
+  DateTime _maxDate = DateTime(
+    DateTime.now().toLocal().year,
+    DateTime.now().toLocal().month + 1,
+    1
+  ).subtract(const Duration(days: 1));
+
+  String _currentType = "month";
+  DateTime _currentFromDate = DateTime(
+    DateTime.now().toLocal().year,
+    DateTime.now().toLocal().month,
+    1
+  );
+  DateTime _currentToDate = DateTime(
+    DateTime.now().toLocal().year,
+    DateTime.now().toLocal().month + 1,
+    1
+  ).subtract(const Duration(days: 1));
+
+  bool _showCalendar = false;
+  late String _searchType;
+
+  late List<CurrencyModel> _currencies;
+  late List<WalletModel> _wallets;
+  late List<WalletModel> _currentWallets;
+
+  late UsersMeModel _userMe;
+  late CurrencyModel? _currentCurrencies;
+  late WalletModel? _currentWallet;
+  late IncomeExpenseCategoryModel _currentIncomeExpenseCategory;
   late List<DateTime> _selectedDateTime;
 
   @override
@@ -65,9 +72,15 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     super.initState();
 
     // default the name into "Any"
-    _name = "Any";
+    _searchType = "Any";
 
     _userMe = UserSharedPreferences.getUserMe();
+
+    // default current income expense category into empty array
+    _currentIncomeExpenseCategory = IncomeExpenseCategoryModel(
+      expense: [],
+      income: []
+    );
 
     _currencies = WalletSharedPreferences.getWalletUserCurrency();
     if (_userMe.defaultBudgetCurrency != null && _currencies.isNotEmpty) {
@@ -88,19 +101,24 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
     // get all user wallet information (defaulted the 1st selected as all account)
     _wallets = [
+      // mock result for all account
       (WalletModel(
-          -1,
-          "All Account",
-          0.0,
-          0.0,
-          0.0,
-          true,
-          true,
-          WalletTypeModel(-1, ""),
-          CurrencyModel(-1, "", "", ""),
-          UserPermissionModel(-1, "", ""))),
+        -1,
+        "All Account",
+        0.0,
+        0.0,
+        0.0,
+        true,
+        true,
+        WalletTypeModel(-1, ""),
+        CurrencyModel(-1, "", "", ""),
+        UserPermissionModel(-1, "", ""))
+      ),
       ...WalletSharedPreferences.getWallets(false)
     ];
+
+    // default current wallets to empty array and filter wallet list
+    _currentWallets = [];
     _filterWalletList();
 
     // get the minimum and maximum date of the transaction we have
@@ -111,16 +129,14 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     // if _maxDate is lesser, then change the _maxDate with current date
     if (_maxDate.isBefore(DateTime.now().toLocal())) {
       // change the maxDate
-      _maxDate = DateTime(DateTime.now().toLocal().year + 1, 1, 1)
-          .subtract(const Duration(days: 1));
+      _maxDate = DateTime(
+        DateTime.now().toLocal().year + 1, 1, 1
+      ).subtract(const Duration(days: 1));
     }
     // set the minimum date as the 1 day of the minimum transaction date
     _minDate = DateTime(_minDate.year, 1, 1);
 
     _selectedDateTime = [];
-
-    _scrollControllerCurrencies = ScrollController();
-    _scrollControllerWallet = ScrollController();
   }
 
   @override
@@ -147,8 +163,10 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             onPressed: (() async {
               await _filterStats();
             }),
-            icon: const Icon(Ionicons.caret_forward_circle_outline,
-                color: textColor),
+            icon: const Icon(
+              Ionicons.caret_forward_circle_outline,
+              color: textColor
+            ),
           )
         ],
       ),
@@ -168,7 +186,11 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                   height: 50,
                   decoration: const BoxDecoration(
                     border: Border(
-                        bottom: BorderSide(color: secondaryLight, width: 1.0)),
+                      bottom: BorderSide(
+                        color: secondaryLight,
+                        width: 1.0
+                      )
+                    ),
                   ),
                   child: Container(
                     color: Colors.transparent,
@@ -179,39 +201,35 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                           Ionicons.pencil,
                           color: accentColors[1],
                         ),
-                        const SizedBox(
-                          width: 10,
-                        ),
+                        const SizedBox(width: 10,),
                         const Text(
                           "Name",
                           style: TextStyle(
                             color: textColor2,
                           ),
                         ),
-                        const SizedBox(
-                          width: 10,
-                        ),
+                        const SizedBox(width: 10,),
                         InkWell(
                           onTap: (() {
                             showModalBottomSheet<void>(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Container(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.35,
-                                    color: secondaryDark,
-                                    child: Column(
-                                      children: <Widget>[
-                                        _nameButton(value: "Any"),
-                                        _nameButton(value: "Match"),
-                                        _nameButton(value: "Exact"),
-                                        const SizedBox(
-                                          height: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                });
+                              context: context,
+                              builder: (BuildContext context) {
+                                return MyBottomSheet(
+                                  context: context,
+                                  title: 'Search Type',
+                                  screenRatio: 0.35,
+                                  child:  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      _nameButton(value: "Any"),
+                                      _nameButton(value: "Match"),
+                                      _nameButton(value: "Exact"),
+                                    ],
+                                  )
+                                );
+                              }
+                            );
                           }),
                           child: Container(
                             height: 30,
@@ -220,9 +238,10 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                             decoration: BoxDecoration(
                               color: secondaryDark,
                               border: Border.all(
-                                  color: secondaryLight,
-                                  width: 1.0,
-                                  style: BorderStyle.solid),
+                                color: secondaryLight,
+                                width: 1.0,
+                                style: BorderStyle.solid
+                              ),
                               borderRadius: BorderRadius.circular(5),
                             ),
                             child: Row(
@@ -232,7 +251,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                                 Expanded(
                                   child: Center(
                                     child: Text(
-                                      _name,
+                                      _searchType,
                                       style: const TextStyle(
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -257,8 +276,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                         Expanded(
                           child: TextFormField(
                             controller: _nameController,
-                            enabled:
-                                (_name.toLowerCase() == "any" ? false : true),
+                            enabled: (_searchType.toLowerCase() == "any" ? false : true),
                             enableSuggestions: false,
                             keyboardType: TextInputType.name,
                             textAlign: TextAlign.right,
@@ -355,13 +373,13 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                 "Custom": accentColors[6],
               },
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10,),
             Expanded(
-                child: Container(
-                    color: Colors.transparent,
-                    child: _generateCalendarSelection())),
+              child: Container(
+                color: Colors.transparent,
+                child: _generateCalendarSelection()
+              )
+            ),
           ],
         ),
       ),
@@ -372,23 +390,29 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     if (_currentType == "month") {
       // set the _currentToDate as the last day of the month
       _currentFromDate = DateTime(
-          _currentToDate.toLocal().year, _currentToDate.toLocal().month, 1);
-      _currentToDate = DateTime(_currentToDate.toLocal().year,
-              _currentToDate.toLocal().month + 1, 1)
-          .subtract(const Duration(days: 1));
+        _currentToDate.toLocal().year, _currentToDate.toLocal().month, 1
+      );
+      _currentToDate = DateTime(
+        _currentToDate.toLocal().year,_currentToDate.toLocal().month + 1, 1
+      ).subtract(const Duration(days: 1));
+      
       return _generateMonthCalendar();
     } else if (_currentType == "year") {
       // set the _currentToDate as the last day of the year
       _currentFromDate = DateTime(_currentToDate.toLocal().year, 1, 1);
-      _currentToDate = DateTime(_currentToDate.toLocal().year + 1, 1, 1)
-          .subtract(const Duration(days: 1));
+      _currentToDate = DateTime(
+        _currentToDate.toLocal().year + 1, 1, 1
+      ).subtract(const Duration(days: 1));
+      
       return _generateYearCalendar();
     } else {
       // check if the _currentTo < _currentFrom, if so, then set _currentTo equal to _currentFrom
       if (_currentToDate.toLocal().isBefore(_currentFromDate.toLocal())) {
-        _currentToDate = DateTime(_currentFromDate.toLocal().year,
-                _currentFromDate.toLocal().month + 1, 1)
-            .subtract(const Duration(days: 1));
+        _currentToDate = DateTime(
+          _currentFromDate.toLocal().year,
+          _currentFromDate.toLocal().month + 1,
+          1
+        ).subtract(const Duration(days: 1));
       }
 
       // ensure _currentToDate also not more than _maxDate
@@ -410,25 +434,27 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           child: Center(
             child: CupertinoPicker(
               scrollController: FixedExtentScrollController(
-                  initialItem: (_currentToDate.toLocal().month - 1)),
+                initialItem: (_currentToDate.toLocal().month - 1)
+              ),
               itemExtent: 25,
               onSelectedItemChanged: (int value) {
                 setState(() {
-                  _currentFromDate =
-                      DateTime(_currentToDate.toLocal().year, value + 1, 1);
-                  _currentToDate =
-                      DateTime(_currentToDate.toLocal().year, value + 2, 1)
-                          .subtract(const Duration(days: 1));
+                  _currentFromDate = DateTime(
+                    _currentToDate.toLocal().year, value + 1, 1
+                  );
+                  _currentToDate = DateTime(
+                    _currentToDate.toLocal().year, value + 2, 1
+                  ).subtract(const Duration(days: 1));
                 });
               },
               children: List.generate(12, ((index) {
                 return Text(
-                  Globals.dfMMM.format(
-                      DateTime(_currentToDate.toLocal().year, index + 1, 1)),
+                  Globals.dfMMM.format(DateTime(_currentToDate.toLocal().year, index + 1, 1)),
                   style: const TextStyle(
-                      color: textColor2,
-                      fontSize: 20,
-                      fontFamily: '--apple-system'),
+                    color: textColor2,
+                    fontSize: 20,
+                    fontFamily: '--apple-system'
+                  ),
                 );
               })),
             ),
@@ -439,29 +465,36 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           child: Center(
             child: CupertinoPicker(
               scrollController: FixedExtentScrollController(
-                  initialItem: (_maxDate.toLocal().year -
-                      _currentToDate.toLocal().year)),
+                initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)
+              ),
               itemExtent: 25,
               onSelectedItemChanged: (int value) {
                 setState(() {
-                  _currentFromDate = DateTime((_maxDate.toLocal().year - value),
-                      _currentToDate.toLocal().month, 1);
-                  _currentToDate = DateTime((_maxDate.toLocal().year - value),
-                          (_currentToDate.toLocal().month + 1), 1)
-                      .subtract(const Duration(days: 1));
+                  _currentFromDate = DateTime(
+                    (_maxDate.toLocal().year - value),
+                    _currentToDate.toLocal().month,
+                    1
+                  );
+                  
+                  _currentToDate = DateTime(
+                    (_maxDate.toLocal().year - value),
+                    (_currentToDate.toLocal().month + 1),
+                    1
+                  ).subtract(const Duration(days: 1));
                 });
               },
               children: List.generate(
-                  ((_maxDate.toLocal().year - _minDate.toLocal().year) + 1),
-                  ((index) {
-                return Text(
-                  (_maxDate.year - index).toString(),
-                  style: const TextStyle(
-                      color: textColor2,
-                      fontSize: 20,
-                      fontFamily: '--apple-system'),
-                );
-              })),
+                ((_maxDate.toLocal().year - _minDate.toLocal().year) + 1),
+                ((index) {
+                  return Text(
+                    (_maxDate.year - index).toString(),
+                    style: const TextStyle(
+                        color: textColor2,
+                        fontSize: 20,
+                        fontFamily: '--apple-system'),
+                  );
+                })
+              ),
             ),
           ),
         )
@@ -473,27 +506,34 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     return Center(
       child: CupertinoPicker(
         scrollController: FixedExtentScrollController(
-            initialItem:
-                (_maxDate.toLocal().year - _currentToDate.toLocal().year)),
+          initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)
+        ),
         itemExtent: 25,
         onSelectedItemChanged: (int value) {
           setState(() {
-            _currentFromDate =
-                DateTime((_maxDate.toLocal().year - value), 1, 1);
-            _currentToDate =
-                DateTime((_maxDate.toLocal().year - value) + 1, 1, 1)
-                    .subtract(const Duration(days: 1));
+            _currentFromDate = DateTime(
+              (_maxDate.toLocal().year - value), 1, 1
+            );
+            _currentToDate = DateTime(
+              (_maxDate.toLocal().year - value) + 1, 1, 1
+            ).subtract(const Duration(days: 1));
           });
         },
         children: List.generate(
-            ((_maxDate.toLocal().year - _minDate.toLocal().year) + 1),
-            ((index) {
-          return Text(
-            (_maxDate.year - index).toString(),
-            style: const TextStyle(
-                color: textColor2, fontSize: 20, fontFamily: '--apple-system'),
-          );
-        })),
+          (
+            (_maxDate.toLocal().year - _minDate.toLocal().year) + 1
+          ),
+          ((index) {
+            return Text(
+              (_maxDate.year - index).toString(),
+              style: const TextStyle(
+                color: textColor2,
+                fontSize: 20,
+                fontFamily: '--apple-system'
+              ),
+            );
+          }),
+        ),
       ),
     );
   }
@@ -525,36 +565,37 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   Future<void> _showCurrencySelection() async {
     showModalBottomSheet<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return MyBottomSheet(
-            context: context,
-            title: "Currencies",
-            screenRatio: 0.35,
-            child: ListView.builder(
-              controller: _scrollControllerCurrencies,
-              itemCount: _currencies.length,
-              itemBuilder: (BuildContext context, int index) {
-                return SimpleItem(
-                  color: accentColors[6],
-                  title: _currencies[index].description,
-                  isSelected: (_currentCurrencies!.id == _currencies[index].id),
-                  onTap: (() {
-                    setState(() {
-                      _currentCurrencies = _currencies[index];
-                      _filterWalletList();
-                    });
-                    Navigator.pop(context);
-                  }),
-                  icon: FittedBox(
-                    fit: BoxFit.contain,
-                    child: Text(_currencies[index].symbol.toUpperCase()),
-                  ),
-                );
-              },
-            ),
-          );
-        });
+      context: context,
+      builder: (BuildContext context) {
+        return MyBottomSheet(
+          context: context,
+          title: "Currencies",
+          screenRatio: 0.35,
+          child: ListView.builder(
+            controller: _scrollControllerCurrencies,
+            itemCount: _currencies.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SimpleItem(
+                color: accentColors[6],
+                title: _currencies[index].description,
+                isSelected: (_currentCurrencies!.id == _currencies[index].id),
+                onTap: (() {
+                  setState(() {
+                    _currentCurrencies = _currencies[index];
+                    _filterWalletList();
+                  });
+                  Navigator.pop(context);
+                }),
+                icon: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Text(_currencies[index].symbol.toUpperCase()),
+                ),
+              );
+            },
+          ),
+        );
+      }
+    );
   }
 
   Future<void> _showAccountSelection() async {
@@ -565,34 +606,37 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     }
 
     showModalBottomSheet<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return MyBottomSheet(
-            context: context,
-            title: "Account",
-            screenRatio: 0.45,
-            child: ListView.builder(
-              controller: _scrollControllerWallet,
-              itemCount: _currentWallets.length,
-              itemBuilder: (BuildContext context, int index) {
-                return SimpleItem(
-                  color: IconList.getColor(
-                      _currentWallets[index].walletType.type.toLowerCase()),
-                  title: _currentWallets[index].name,
-                  isSelected: (_currentWallet!.id == _currentWallets[index].id),
-                  onTap: (() {
-                    setState(() {
-                      _currentWallet = _currentWallets[index];
-                    });
-                    Navigator.pop(context);
-                  }),
-                  icon: IconList.getIcon(
-                      _currentWallets[index].walletType.type.toLowerCase()),
-                );
-              },
-            ),
-          );
-        });
+      context: context,
+      builder: (BuildContext context) {
+        return MyBottomSheet(
+          context: context,
+          title: "Account",
+          screenRatio: 0.45,
+          child: ListView.builder(
+            controller: _scrollControllerWallet,
+            itemCount: _currentWallets.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SimpleItem(
+                color: IconList.getColor(
+                  _currentWallets[index].walletType.type.toLowerCase()
+                ),
+                title: _currentWallets[index].name,
+                isSelected: (_currentWallet!.id == _currentWallets[index].id),
+                onTap: (() {
+                  setState(() {
+                    _currentWallet = _currentWallets[index];
+                  });
+                  Navigator.pop(context);
+                }),
+                icon: IconList.getIcon(
+                  _currentWallets[index].walletType.type.toLowerCase()
+                ),
+              );
+            },
+          ),
+        );
+      }
+    );
   }
 
   Widget _generateAccountSelector() {
@@ -654,9 +698,15 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   Widget _nameButton({required String value}) {
     return Container(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       height: 60,
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+        border: Border(
+          bottom: BorderSide(
+            color: primaryLight,
+            width: 1.0
+          )
+        ),
       ),
       child: InkWell(
         onTap: (() {
@@ -667,7 +717,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
           // rebuild widget
           setState(() {
-            _name = value;
+            _searchType = value;
           });
 
           // remove the popup modal dialog
@@ -679,24 +729,17 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const SizedBox(
-                width: 20,
-              ),
               Expanded(
                 child: Text(value),
               ),
-              const SizedBox(
-                width: 10,
-              ),
+              const SizedBox(width: 10,),
               Visibility(
-                  visible: (_name.toLowerCase() == value.toLowerCase()),
-                  child: Icon(
-                    Ionicons.checkmark_circle,
-                    size: 20,
-                    color: accentColors[0],
-                  )),
-              const SizedBox(
-                width: 20,
+                visible: (_searchType.toLowerCase() == value.toLowerCase()),
+                child: Icon(
+                  Ionicons.checkmark_circle,
+                  size: 20,
+                  color: accentColors[0],
+                )
               ),
             ],
           ),
@@ -752,7 +795,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           name: (_nameController.text.isEmpty
               ? '*'
               : _nameController.text.trim()),
-          search: _name,
+          search: _searchType,
         );
 
         if (mounted) {
@@ -784,15 +827,16 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   Future<void> _fetchStats() async {
-    await _transactionHttp
-        .fetchIncomeExpenseCategory(
-            _nameController.text,
-            _name,
-            _currentCurrencies!.id,
-            _currentWallet!.id,
-            _currentFromDate,
-            _currentToDate)
-        .then((incomeExpenseCategory) {
+    String name = _nameController.text.trim();
+    
+    await _transactionHttp.fetchIncomeExpenseCategory(
+      name,
+      _searchType,
+      _currentCurrencies!.id,
+      _currentWallet!.id,
+      _currentFromDate,
+      _currentToDate
+    ).then((incomeExpenseCategory) {
       // set current income expense category as this
       _currentIncomeExpenseCategory = incomeExpenseCategory;
     }).onError((error, stackTrace) {

@@ -146,7 +146,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
                 ),
               ],
             ),
-            body: _generateBarChart(),
+            body: MySafeArea(
+              child: _generateBarChart()
+            ),
           );
         } else {
           return const Scaffold(
@@ -171,7 +173,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
   Widget _generateBarChart() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 30),
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -221,11 +223,15 @@ class _StatsAllPageState extends State<StatsAllPage> {
               itemCount: _walletStatAll[0].data.length,
               itemBuilder: ((context, index) {
                 Color indicator = Colors.white;
-                if (_walletStatAll[0].data[index].income! >
-                    _walletStatAll[0].data[index].expense!) {
+                if (
+                  _walletStatAll[0].data[index].income! >
+                  _walletStatAll[0].data[index].expense!
+                ) {
                   indicator = accentColors[0];
-                } else if (_walletStatAll[0].data[index].income! <
-                    _walletStatAll[0].data[index].expense!) {
+                } else if (
+                  _walletStatAll[0].data[index].income! <
+                  _walletStatAll[0].data[index].expense!
+                ) {
                   indicator = accentColors[2];
                 }
 
@@ -246,11 +252,12 @@ class _StatsAllPageState extends State<StatsAllPage> {
                         width: 10,
                         height: 65,
                         decoration: BoxDecoration(
-                            color: indicator,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(5),
-                              bottomLeft: Radius.circular(5),
-                            )),
+                          color: indicator,
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(5),
+                            bottomLeft: Radius.circular(5),
+                          )
+                        ),
                       ),
                       // date,
                       Container(
@@ -272,29 +279,33 @@ class _StatsAllPageState extends State<StatsAllPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Bar(
-                                amount: _walletStatAll[0].data[index].income!,
-                                maxAmount: _maxAmount,
-                                text: _fCCY.format(
-                                    _walletStatAll[0].data[index].income!),
-                                color: accentColors[0]),
+                              amount: _walletStatAll[0].data[index].income!,
+                              maxAmount: _maxAmount,
+                              text: _fCCY.format(
+                                _walletStatAll[0].data[index].income!
+                              ),
+                              color: accentColors[0]
+                            ),
                             Bar(
-                                amount: _walletStatAll[0].data[index].expense!,
-                                maxAmount: _maxAmount,
-                                text: _fCCY.format(
-                                    _walletStatAll[0].data[index].expense!),
-                                color: accentColors[2]),
+                              amount: _walletStatAll[0].data[index].expense!,
+                              maxAmount: _maxAmount,
+                              text: _fCCY.format(
+                                _walletStatAll[0].data[index].expense!
+                              ),
+                              color: accentColors[2]
+                            ),
                             Bar(
-                                amount: _walletStatAll[0].data[index].balance!,
-                                maxAmount: _maxAmount,
-                                text: _fCCY.format(
-                                    _walletStatAll[0].data[index].balance!),
-                                color: accentColors[4]),
+                              amount: _walletStatAll[0].data[index].balance!,
+                              maxAmount: _maxAmount,
+                              text: _fCCY.format(
+                                _walletStatAll[0].data[index].balance!
+                              ),
+                              color: accentColors[4]
+                            ),
                           ],
                         ),
                       ),
-                      const SizedBox(
-                        width: 5,
-                      ),
+                      const SizedBox(width: 5,),
                     ],
                   ),
                 );
@@ -372,18 +383,17 @@ class _StatsAllPageState extends State<StatsAllPage> {
         _origWalletStatAll.addAll(resp);
 
         if (_origWalletStatAll[0].data.isNotEmpty) {
-          _minDate = DateTime(_origWalletStatAll[0].data[0].date.year,
-              _origWalletStatAll[0].data[0].date.month, 1);
+          _minDate = DateTime(
+            _origWalletStatAll[0].data[0].date.year,
+            _origWalletStatAll[0].data[0].date.month,
+            1
+          );
+          
           _maxDate = DateTime(
-              _origWalletStatAll[0]
-                  .data[_origWalletStatAll[0].data.length - 1]
-                  .date
-                  .year,
-              _origWalletStatAll[0]
-                  .data[_origWalletStatAll[0].data.length - 1]
-                  .date
-                  .month,
-              1);
+            _origWalletStatAll[0].data[_origWalletStatAll[0].data.length - 1].date.year,
+            _origWalletStatAll[0].data[_origWalletStatAll[0].data.length - 1].date.month,
+            1
+          );
 
           // generate the list of date beased on _min and _max date
           DateTime startDate = _minDate;

@@ -59,29 +59,28 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
       future: _getData,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  color: secondaryDark,
-                  border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
+          return MySafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    color: secondaryDark,
+                    border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
+                  ),
+                  child: BudgetBar(
+                    title: _args.categoryName,
+                    symbol: _args.currency.symbol,
+                    budgetUsed: (_args.amount < 0 ? _args.amount * (-1) : _args.amount),
+                    budgetTotal: (_args.total < 0 ? _args.total * (-1) : _args.total),
+                    barColor: (_args.type == "expense" ? IconColorList.getExpenseColor(_args.categoryName) : IconColorList.getIncomeColor(_args.categoryName)),
+                    showLeftText: false,
+                  ),
                 ),
-                child: BudgetBar(
-                  title: _args.categoryName,
-                  symbol: _args.currency.symbol,
-                  budgetUsed: (_args.amount < 0 ? _args.amount * (-1) : _args.amount),
-                  budgetTotal: (_args.total < 0 ? _args.total * (-1) : _args.total),
-                  barColor: (_args.type == "expense" ? IconColorList.getExpenseColor(_args.categoryName) : IconColorList.getIncomeColor(_args.categoryName)),
-                  showLeftText: false,
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                Expanded(
                   child: ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
                     controller: _scrollController,
@@ -92,9 +91,8 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
                     },
                   ),
                 ),
-              ),
-              const SizedBox(height: 25,),
-            ],
+              ],
+            ),
           ); 
         }
         else if (snapshot.hasError) {
@@ -129,7 +127,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     return Container(
       height: 60,
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       decoration: const BoxDecoration(
         border: Border(
           bottom: BorderSide(

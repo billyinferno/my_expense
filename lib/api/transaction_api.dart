@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_expense/_index.g.dart';
 
 class TransactionHTTPService {
-  Future<TransactionListModel> updateTransaction(BuildContext context, TransactionModel txn, TransactionListModel prevTxn) async {
+  Future<TransactionListModel> updateTransaction(TransactionModel txn, TransactionListModel prevTxn) async {
     bool sameDate = isSameDate(txn.date.toLocal(), prevTxn.date.toLocal());
     String date = Globals.dfyyyyMMdd.format(prevTxn.date.toLocal());
     
@@ -72,7 +72,7 @@ class TransactionHTTPService {
     return txnUpdate;
   }
 
-  Future<TransactionListModel> addTransaction(BuildContext context, TransactionModel txn, DateTime selectedDate) async {
+  Future<TransactionListModel> addTransaction(TransactionModel txn, DateTime selectedDate) async {
     String date = Globals.dfyyyyMMdd.format(txn.date.toLocal());
 
     // send the request to add the transaction

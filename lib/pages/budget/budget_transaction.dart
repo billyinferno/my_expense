@@ -24,17 +24,14 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   double _budgetUsed = 0.0;
   double _budgetAmount = 0.0;
   int _currencyId = -1;
-  bool _isLoading = true;
   bool _sortAscending = true;
   final Map<DateTime, WalletTransactionExpenseIncome> _totalDate = {};
   final List<WalletTransactionList> _list = [];
   List<TransactionListModel> _transactions = [];
-
+  late Future<bool> _getData;
 
   @override
   void initState() {
-    super.initState();
-    
     // convert the parameter being sent from main
     BudgetTransactionArgs args = widget.arguments as BudgetTransactionArgs;
     _selectedDate = args.selectedDate;
@@ -45,13 +42,16 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     _budgetAmount = args.budgetAmount;
     _currencyId = args.currencyId;
 
-    _fetchBudget(true);
+    // get data from server
+    _getData = _fetchBudget(true);
+
+    super.initState();
   }
 
   @override
   void dispose() {
-    super.dispose();
     _scrollController.dispose();
+    super.dispose();
   }
   
   @override
@@ -114,97 +114,112 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   }
 
   Widget _createBody() {
-    if(_isLoading) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SpinKitFadingCube(
-            color: accentColors[6],
-            size: 25,
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          const Text(
-            "loading...",
-            style: TextStyle(
-              color: textColor2,
-              fontSize: 10,
-            ),
-          ),
-        ],
-      );
-    }
-    else {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            color: secondaryDark,
-            padding: const EdgeInsets.all(10),
-            child: BudgetBar(
-              title: _categoryName,
-              symbol: _categorySymbol,
-              budgetUsed: _budgetUsed,
-              budgetTotal: _budgetAmount,
-            )
-          ),
-          Expanded(
-            child: RefreshIndicator(
-              color: accentColors[6],
-              onRefresh: (() async {
-                _setLoading(true);
-                await _fetchBudget(true);
-              }),
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _list.length,
-                itemBuilder: (context, index) {
-                  if (_list[index].type == WalletListType.header) {
-                    WalletTransactionExpenseIncome header = _list[index].data as WalletTransactionExpenseIncome;
-                    return Container(
-                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                      color: secondaryDark,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(
-                              Globals.dfddMMMyyyy.format(header.date.toLocal())
-                            ),
-                          ),
-                          Text(
-                            "(${fCCY.format(header.expense)})",
-                            style: TextStyle(color: accentColors[2])
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  else if(_list[index].type == WalletListType.item) {
-                    TransactionListModel currTxn = _list[index].data as TransactionListModel;
-                    return BudgetTransactionItem(
-                      itemName: currTxn.name,
-                      itemDate: currTxn.date,
-                      itemSymbol: currTxn.wallet.symbol,
-                      itemAmount: currTxn.amount,
-                      categoryName: _categoryName,
-                    );
-                  }
-                  else {
-                    // if not header or item, then just showed shrink sized box
-                    return const SizedBox.shrink();
-                  }
-                },
+    return FutureBuilder(
+      future: _getData,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return MySafeArea(
+            child: _body()
+          );
+        }
+        else if (snapshot.hasError) {
+          return const Center(
+            child: Text("Error when fetch budget transaction"),
+          );
+        }
+        else {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SpinKitFadingCube(
+                color: accentColors[6],
+                size: 25,
               ),
+              const SizedBox(
+                height: 10,
+              ),
+              const Text(
+                "loading...",
+                style: TextStyle(
+                  color: textColor2,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+
+  Widget _body() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          color: secondaryDark,
+          padding: const EdgeInsets.all(10),
+          child: BudgetBar(
+            title: _categoryName,
+            symbol: _categorySymbol,
+            budgetUsed: _budgetUsed,
+            budgetTotal: _budgetAmount,
+          )
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            color: accentColors[6],
+            onRefresh: (() async {
+              _getData = _fetchBudget(true);
+            }),
+            child: ListView.builder(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: _list.length,
+              itemBuilder: (context, index) {
+                if (_list[index].type == WalletListType.header) {
+                  WalletTransactionExpenseIncome header = _list[index].data as WalletTransactionExpenseIncome;
+                  return Container(
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    color: secondaryDark,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            Globals.dfddMMMyyyy.format(header.date.toLocal())
+                          ),
+                        ),
+                        Text(
+                          "(${fCCY.format(header.expense)})",
+                          style: TextStyle(color: accentColors[2])
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                else if(_list[index].type == WalletListType.item) {
+                  TransactionListModel currTxn = _list[index].data as TransactionListModel;
+                  return BudgetTransactionItem(
+                    itemName: currTxn.name,
+                    itemDate: currTxn.date,
+                    itemSymbol: currTxn.wallet.symbol,
+                    itemAmount: currTxn.amount,
+                    categoryName: _categoryName,
+                  );
+                }
+                else {
+                  // if not header or item, then just showed shrink sized box
+                  return const SizedBox.shrink();
+                }
+              },
             ),
           ),
-          const SizedBox(height: 30,),
-        ],
-      );
-    }
+        ),
+      ],
+    );
   }
 
   Future<void> setTransactions(List<TransactionListModel> transactions) async {
@@ -277,22 +292,13 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
       },);
     });
   }
-
-  void _setLoading(bool isLoading) {
-    setState(() {
-      _isLoading = isLoading;
-    });
-  }
-
-  Future<void> _fetchBudget([bool? force]) async {
+  Future<bool> _fetchBudget([bool? force]) async {
     bool isForce = (force ?? false);
 
     String date = Globals.dfyyyyMMdd.format(_selectedDate.toLocal());
     await _transactionHttp.fetchTransactionBudget(_categoryId, date, _currencyId, isForce).then((value) async {
       await setTransactions(value.reversed.toList());
       _transactions = value.reversed.toList();
-
-      _setLoading(false);
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error when _fetchBudget",
@@ -302,7 +308,9 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
 
       // assume there are no data
       setTransactions([]);
-      _setLoading(false);
+      throw Exception('Error when loading budget');
     });
+
+    return true;
   }
 }

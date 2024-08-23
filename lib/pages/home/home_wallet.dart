@@ -193,95 +193,98 @@ class _HomeWalletState extends State<HomeWallet> {
   }
 
   Widget _generateSlidable(WalletModel wallet) {
-    return Slidable(
-      endActionPane: ActionPane(
-        motion: const DrawerMotion(),
-        extentRatio: 0.9,
-        children: <Widget>[
-          SlideButton(
-            icon: Ionicons.pencil,
-            iconColor: accentColors[1],
-            text: 'Edit',
-            onTap: () {
-              Navigator.pushNamed(context, '/wallet/edit', arguments: wallet);
-            },
-          ),
-          SlideButton(
-            icon: Ionicons.trash,
-            iconColor: accentColors[2],
-            text: 'Delete',
-            onTap: () {
-              late Future<bool?> result = ShowMyDialog(
-                dialogTitle: "Delete Wallet",
-                dialogText: "Do you want to delete ${wallet.name}?\nThis will also delete all related transaction to this wallet.",
-                confirmText: "Delete",
-                confirmColor: accentColors[2],
-                cancelText: "Cancel")
-              .show(context);
-
-              // check the result of the dialog box
-              result.then((value) async {
-                if (value == true) {
-                  await _deleteWallet(wallet.id).then((_) {
-                    if (mounted) {
-                      // clear all the cache for the application so we can just
-                      // fetch again all data from internet, for this let user knew
-                      // that we will delete all the cache
-                      late Future<bool?> userConfirm = ShowMyDialog(
-                        dialogTitle: "Cache Clear",
-                        dialogText: "We will clear all the cache for the application.",
-                        confirmText: "Okay",
-                        confirmColor: accentColors[0],
-                      ).show(context);
-
-                      userConfirm.then((value) {
-                        _clearCache();
-                      });
-                    }
-                  }).onError((error, stackTrace) {
-                    Log.error(message: "Error when clicking delete wallet");
-                  });
-                }
-              });
-            },
-          ),
-          SlideButton(
-            icon: (wallet.enabled ? Ionicons.alert : Ionicons.checkmark),
-            iconColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
-            text: (wallet.enabled ? 'Disable' : 'Enable'),
-            onTap: () {
-              late Future<bool?> result = ShowMyDialog(
-                dialogTitle: "${wallet.enabled ? 'Disable' : 'Enable'} Wallet",
-                dialogText: "Do you want to ${wallet.enabled ? 'Disable' : 'Enable'} ${wallet.name}?",
-                confirmText: (wallet.enabled ? 'Disable' : 'Enable'),
-                confirmColor: (
-                  wallet.enabled
-                  ? accentColors[7]
-                  : accentColors[6]
-                ),
-                cancelText: "Cancel"
-              ).show(context);
-
-              // check the result of the dialog box
-              result.then((value) {
-                if (value == true) {
-                  // enable/disable the wallet
-                  _getData = _enableDisableWallet(wallet);
-                }
-              });
-            },
-          ),
-          SlideButton(
-            icon: Ionicons.bar_chart,
-            iconColor: accentColors[3],
-            text: 'Stat',
-            onTap: () {
-              Navigator.pushNamed(context, '/wallet/stat', arguments: wallet);
-            },
-          ),
-        ],
+    return Container(
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+      child: Slidable(
+        endActionPane: ActionPane(
+          motion: const DrawerMotion(),
+          extentRatio: 0.9,
+          children: <Widget>[
+            SlideButton(
+              icon: Ionicons.pencil,
+              iconColor: accentColors[1],
+              text: 'Edit',
+              onTap: () {
+                Navigator.pushNamed(context, '/wallet/edit', arguments: wallet);
+              },
+            ),
+            SlideButton(
+              icon: Ionicons.trash,
+              iconColor: accentColors[2],
+              text: 'Delete',
+              onTap: () {
+                late Future<bool?> result = ShowMyDialog(
+                  dialogTitle: "Delete Wallet",
+                  dialogText: "Do you want to delete ${wallet.name}?\nThis will also delete all related transaction to this wallet.",
+                  confirmText: "Delete",
+                  confirmColor: accentColors[2],
+                  cancelText: "Cancel")
+                .show(context);
+      
+                // check the result of the dialog box
+                result.then((value) async {
+                  if (value == true) {
+                    await _deleteWallet(wallet.id).then((_) {
+                      if (mounted) {
+                        // clear all the cache for the application so we can just
+                        // fetch again all data from internet, for this let user knew
+                        // that we will delete all the cache
+                        late Future<bool?> userConfirm = ShowMyDialog(
+                          dialogTitle: "Cache Clear",
+                          dialogText: "We will clear all the cache for the application.",
+                          confirmText: "Okay",
+                          confirmColor: accentColors[0],
+                        ).show(context);
+      
+                        userConfirm.then((value) {
+                          _clearCache();
+                        });
+                      }
+                    }).onError((error, stackTrace) {
+                      Log.error(message: "Error when clicking delete wallet");
+                    });
+                  }
+                });
+              },
+            ),
+            SlideButton(
+              icon: (wallet.enabled ? Ionicons.alert : Ionicons.checkmark),
+              iconColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
+              text: (wallet.enabled ? 'Disable' : 'Enable'),
+              onTap: () {
+                late Future<bool?> result = ShowMyDialog(
+                  dialogTitle: "${wallet.enabled ? 'Disable' : 'Enable'} Wallet",
+                  dialogText: "Do you want to ${wallet.enabled ? 'Disable' : 'Enable'} ${wallet.name}?",
+                  confirmText: (wallet.enabled ? 'Disable' : 'Enable'),
+                  confirmColor: (
+                    wallet.enabled
+                    ? accentColors[7]
+                    : accentColors[6]
+                  ),
+                  cancelText: "Cancel"
+                ).show(context);
+      
+                // check the result of the dialog box
+                result.then((value) {
+                  if (value == true) {
+                    // enable/disable the wallet
+                    _getData = _enableDisableWallet(wallet);
+                  }
+                });
+              },
+            ),
+            SlideButton(
+              icon: Ionicons.bar_chart,
+              iconColor: accentColors[3],
+              text: 'Stat',
+              onTap: () {
+                Navigator.pushNamed(context, '/wallet/stat', arguments: wallet);
+              },
+            ),
+          ],
+        ),
+        child: Wallet(wallet: wallet),
       ),
-      child: Wallet(wallet: wallet),
     );
   }
 

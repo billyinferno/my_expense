@@ -129,7 +129,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
             return const Center(child: Text("Error when get budget list"),);
           }
           else if (snapshot.hasData) {
-            return _budgetListView();
+            return MySafeArea(
+              child: _budgetListView()
+            );
           }
           else {
             return Column(
@@ -179,12 +181,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
             ),
           ),
         ),
-        const SizedBox(
-          height: 10,
-        ),
         Container(
           padding: const EdgeInsets.all(10),
-          margin: const EdgeInsets.fromLTRB(0, 0, 0, 25),
           child: MaterialButton(
             height: 40,
             minWidth: double.infinity,

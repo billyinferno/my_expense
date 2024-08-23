@@ -247,7 +247,6 @@ class _HomeStatsState extends State<HomeStats> {
                           SlideButton(
                             icon: Ionicons.bar_chart,
                             iconColor: accentColors[3],
-                            text: 'Stat',
                             onTap: () {
                               Navigator.pushNamed(context, '/stats/all', arguments: _currentCurrencyId);
                             },
@@ -255,7 +254,6 @@ class _HomeStatsState extends State<HomeStats> {
                           SlideButton(
                             icon: Ionicons.refresh,
                             iconColor: accentColors[6],
-                            text: 'Stat',
                             onTap: () {
                               _getStat = _fetchData(showDialog: true);
                             },

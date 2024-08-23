@@ -47,7 +47,8 @@ class CategoryListItem extends StatelessWidget {
           children: <Widget>[
             SlideButton(
               icon: Ionicons.trash,
-              iconColor: accentColors[2],
+              iconColor: textColor,
+              bgColor: accentColors[2],
               text: 'Delete',
               onTap: () {
                 if (onDelete != null) {

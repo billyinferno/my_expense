@@ -139,7 +139,9 @@ class _WalletStatPageState extends State<WalletStatPage> {
           );
         }
         else if (snapshot.hasData) {
-          return _generateBarChart();
+          return MySafeArea(
+            child: _generateBarChart()
+          );
         }
         else {
           return const Column(
@@ -162,7 +164,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
   Widget _generateBarChart() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 30),
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
