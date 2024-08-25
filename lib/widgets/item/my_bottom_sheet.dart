@@ -19,43 +19,42 @@ class MyBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MySafeArea(
+    return Container(
+      height: MediaQuery.of(context).size.height * (screenRatio ?? 0.45),
       color: secondaryDark,
-      child: Container(
-        height: MediaQuery.of(context).size.height * (screenRatio ?? 0.45),
-        color: secondaryDark,
-        child: Column(
-          children: <Widget>[
-            Container(
-              height: 40,
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: primaryLight,
-                    width: 1.0
-                  )
-                ),
+      child: Column(
+        children: <Widget>[
+          Container(
+            height: 40,
+            decoration: const BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: primaryLight,
+                  width: 1.0
+                )
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Expanded(
-                    child: Center(
-                      child: Text(title),
-                    ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  child: Center(
+                    child: Text(title),
                   ),
-                  const SizedBox(width: 5,),
-                  (actionButton ?? const SizedBox.shrink()),
-                  (actionButton != null ? const SizedBox(width: 10,) : const SizedBox.shrink()),
-                ],
-              ),
+                ),
+                const SizedBox(width: 5,),
+                (actionButton ?? const SizedBox.shrink()),
+                (actionButton != null ? const SizedBox(width: 10,) : const SizedBox.shrink()),
+              ],
             ),
-            Expanded(
-              child: child,
+          ),
+          Expanded(
+            child: MySafeArea(
+              child: child
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
