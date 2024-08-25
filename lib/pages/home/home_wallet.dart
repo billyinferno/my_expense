@@ -95,7 +95,7 @@ class _HomeWalletState extends State<HomeWallet> {
           child: RefreshIndicator(
             color: accentColors[6],
             onRefresh: () async {
-              _getData = _refreshWallet();
+              _getData = _refreshWallet(showDialog: true);
             },
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -164,11 +164,17 @@ class _HomeWalletState extends State<HomeWallet> {
     );
   }
 
-  Future<bool> _refreshWallet() async {
+  Future<bool> _refreshWallet({
+    bool showDialog = false,
+  }) async {
     Future<List<WalletModel>> futureWallets;
 
     // showed a debug print message to knew that we refresh the wallet
     Log.info(message: "💳 Refresh Wallet");
+
+    if (showDialog) {
+      LoadingScreen.instance().show(context: context);
+    }
 
     // fetch the new wallet data from API
     await Future.wait([
@@ -176,8 +182,10 @@ class _HomeWalletState extends State<HomeWallet> {
     ]).then((_) {
       futureWallets.then((wallets) {
         if (wallets.isNotEmpty && mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletList(wallets);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(wallets);
         }
       });
     }).onError((error, stackTrace) {
@@ -187,6 +195,10 @@ class _HomeWalletState extends State<HomeWallet> {
         stackTrace: stackTrace,
       );
       throw Exception("Error when get wallet data");
+    }).whenComplete(() {
+      if (showDialog) {
+        LoadingScreen.instance().hide();
+      }
     });
 
     return true;
@@ -302,15 +314,19 @@ class _HomeWalletState extends State<HomeWallet> {
       // set the provider with the new wallets we got
       walletList.then((wallets) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletList(wallets);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(wallets);
         }
       });
 
       walletCurrencyList.then((walletsCurrency) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletCurrency(walletsCurrency);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletCurrency(walletsCurrency);
         }
       });
     }).onError((error, stackTrace) {

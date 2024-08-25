@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -45,8 +44,6 @@ class _HomeListState extends State<HomeList> {
   late UsersMeModel _userMe;
   late Future<bool> _getData;
 
-  final fCCY = NumberFormat("#,##0.00", "en_US");
-
   @override
   void initState() {
     _userMe = UserSharedPreferences.getUserMe();
@@ -54,7 +51,10 @@ class _HomeListState extends State<HomeList> {
     _appTitleMonth = Globals.dfMMMM.format(_currentFocusedDay.toLocal());
     _appTitleYear = Globals.dfyyyy.format(_currentFocusedDay.toLocal());
 
-    _getData = _refreshTransaction(_currentFocusedDay, true);
+    _getData = _refreshTransaction(
+      refreshDay: _currentFocusedDay,
+      force: true
+    );
 
     super.initState();
   }
@@ -83,7 +83,10 @@ class _HomeListState extends State<HomeList> {
             );
 
             // get the data
-            _getData = _refreshTransaction(_currentFocusedDay);
+            _getData = _refreshTransaction(
+              refreshDay: _currentFocusedDay,
+              showLoading: true,
+            );
           }),
           child: Container(
             width: double.infinity,
@@ -122,7 +125,10 @@ class _HomeListState extends State<HomeList> {
                 calendarFormat: _currentCalendarFormat,
                 onPageChanged: (focusedDay) {
                   _setFocusedDay(focusedDay);
-                  _getData = _refreshTransaction(focusedDay);
+                  _getData = _refreshTransaction(
+                    refreshDay: focusedDay,
+                    showLoading: true,
+                  );
                 },
                 selectedDayPredicate: (day) {
                   return isSameDate(day, _currentFocusedDay);
@@ -130,7 +136,10 @@ class _HomeListState extends State<HomeList> {
                 onDaySelected: (selectedDay, focusedDay) {
                   if (!(isSameDate(selectedDay, _currentFocusedDay))) {
                     _setFocusedDay(selectedDay);
-                    _getData = _refreshTransaction(selectedDay);
+                    _getData = _refreshTransaction(
+                      refreshDay: selectedDay,
+                      showLoading: true,
+                    );
                   }
                 },
                 headerVisible: false,
@@ -296,7 +305,10 @@ class _HomeListState extends State<HomeList> {
       if (newDate != null) {
         _setFocusedDay(DateTime(newDate.toLocal().year, newDate.toLocal().month,
             newDate.toLocal().day));
-        _getData = _refreshTransaction(_currentFocusedDay);
+        _getData = _refreshTransaction(
+          refreshDay: _currentFocusedDay,
+          showLoading: true,
+        );
       }
     });
   }
@@ -311,13 +323,20 @@ class _HomeListState extends State<HomeList> {
             if (velocity != 0) {
               if (velocity > 0) {
                 // go to the previous day
-                _setFocusedDay(
-                    _currentFocusedDay.subtract(const Duration(days: 1)));
-                _getData = _refreshTransaction(_currentFocusedDay);
+                _setFocusedDay(_currentFocusedDay.subtract(
+                  const Duration(days: 1))
+                );
+                _getData = _refreshTransaction(
+                  refreshDay: _currentFocusedDay,
+                  showLoading: true
+                );
               } else if (velocity < 0) {
                 // go to the next day
                 _setFocusedDay(_currentFocusedDay.add(const Duration(days: 1)));
-                _getData = _refreshTransaction(_currentFocusedDay);
+                _getData = _refreshTransaction(
+                  refreshDay: _currentFocusedDay,
+                  showLoading: true,
+                );
               }
             }
           }),
@@ -326,7 +345,11 @@ class _HomeListState extends State<HomeList> {
             child: RefreshIndicator(
               color: accentColors[6],
               onRefresh: () async {
-                _getData = _refreshTransaction(_currentFocusedDay, true);
+                _getData = _refreshTransaction(
+                  refreshDay: _currentFocusedDay,
+                  force: true,
+                  showLoading: true,
+                );
               },
               child: ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -459,29 +482,39 @@ class _HomeListState extends State<HomeList> {
     }
   }
 
-  Future<bool> _refreshTransaction(DateTime refreshDay, [bool? force]) async {
-    bool isForce = (force ?? false);
+  Future<bool> _refreshTransaction({
+    required DateTime refreshDay,
+    bool force = false,
+    bool showLoading = false,
+  }) async {
+    // check if we need to show the loading screen or not?
+    if (showLoading) {
+      LoadingScreen.instance().show(context: context);
+    }
 
     // store current transaction list date on shared preferences.
     // we can use this date when we perform edit, and if the date is not the same
     // as the current transaction list date, we don't need to refresh the provider.
     await TransactionSharedPreferences.setTransactionListCurrentDate(
-        refreshDay.toLocal());
+      refreshDay.toLocal()
+    );
 
-    String strRefreshDay =
-        Globals.dfyyyyMMdd.format(refreshDay.toLocal());
+    String strRefreshDay = Globals.dfyyyyMMdd.format(refreshDay.toLocal());
 
-    if (force ?? false) {
+    if (force) {
       Log.info(message: "🧺 Refresh Transaction $strRefreshDay (force)");
     }
 
-    await _transactionHttp
-        .fetchTransaction(strRefreshDay, isForce)
-        .then((value) {
+    await _transactionHttp.fetchTransaction(
+      strRefreshDay,
+      force
+    ).then((value) {
       // ensure that the selectedDate and the refreshDay is the same
       if (isSameDate(_currentFocusedDay, refreshDay) && mounted) {
-        Provider.of<HomeProvider>(context, listen: false)
-            .setTransactionList(value);
+        Provider.of<HomeProvider>(
+          context,
+          listen: false
+        ).setTransactionList(value);
       }
     }).onError((error, stackTrace) {
       Log.error(
@@ -490,7 +523,9 @@ class _HomeListState extends State<HomeList> {
         stackTrace: stackTrace,
       );
       throw Exception("Error when refresh transaction");
-    });
+    }).whenComplete(() {
+      LoadingScreen.instance().hide();
+    },);
 
     return true;
   }
@@ -681,7 +716,7 @@ class _HomeListState extends State<HomeList> {
         }
 
         // format the amount
-        totalIncomeExpense = "$currencySymbol ${fCCY.format(totalAmount)}";
+        totalIncomeExpense = "$currencySymbol ${Globals.fCCY.format(totalAmount)}";
 
         // get the color
         if (totalAmount < 0) {
