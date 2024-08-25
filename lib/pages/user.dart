@@ -772,8 +772,8 @@ class _UserPageState extends State<UserPage> {
     LoadingScreen.instance().show(context: context);
 
     await Future.wait([
-      _transactionHTTP.fetchLastTransaction("income", true),
-      _transactionHTTP.fetchLastTransaction("expense", true)
+      _transactionHTTP.fetchLastTransaction(type: "income", force: true),
+      _transactionHTTP.fetchLastTransaction(type: "expense", force: true),
     ]).then((_) {
       if (mounted) {
         // finished fetch the last transaction income and expense

@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:my_expense/_index.g.dart';
 
 class PinHTTPService {
-  Future<PinModel> getPin([bool? force]) async {
-    bool isForce = (force ?? false);
-
+  Future<PinModel> getPin({
+    bool force = false,
+  }) async {
     // check if we got data on the sharedPreferences or not?
-    if (!isForce) {
+    if (!force) {
       PinModel? pinPref = PinSharedPreferences.getPin();
       if (pinPref != null) {
         // check if we got data on the pin or not?
@@ -29,7 +29,9 @@ class PinHTTPService {
     return pin;
   }
 
-  Future<PinModel> setPin(String pinNumber) async {
+  Future<PinModel> setPin({
+    required String pinNumber
+  }) async {
     // send the request to set the PIN to API
     final String result = await NetUtils.post(
       url: '${Globals.apiURL}pins',
@@ -45,7 +47,9 @@ class PinHTTPService {
     return pin;
   }
 
-  Future<PinModel> updatePin(String pinNumber) async {
+  Future<PinModel> updatePin({
+    required String pinNumber
+  }) async {
     // send the request to update the PIN to API
     final String result = await NetUtils.put(
       url: '${Globals.apiURL}pins',

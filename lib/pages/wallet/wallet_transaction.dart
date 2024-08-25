@@ -267,7 +267,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
     // get the transaction
     String date = Globals.dfyyyyMMdd.format(DateTime(fetchDate.toLocal().year, fetchDate.toLocal().month, 1));
-    await _transactionHttp.fetchTransactionWallet(_wallet.id, date, force).then((txns) async {
+    await _transactionHttp.fetchTransactionWallet(
+      walletId: _wallet.id,
+      date: date,
+      force: force
+    ).then((txns) async {
       await _setTransactions(txns);
       _transactions = txns.toList();
     }).onError((error, stackTrace) {
@@ -286,7 +290,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   }
 
   Future<void> _fetchWalletMinMaxDate() async {
-    await _transactionHttp.fetchWalletMinMaxDate(_wallet.id).then((walletTxnDate) async {
+    await _transactionHttp.fetchWalletMinMaxDate(
+      walletId: _wallet.id
+    ).then((walletTxnDate) async {
       _walletMinMaxDate = walletTxnDate;
     }).onError((error, stackTrace) {
       Log.error(
@@ -827,7 +833,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     // show loading screen
     LoadingScreen.instance().show(context: context);
 
-    await _transactionHttp.deleteTransaction(context, txnDeleted).then((_) async {
+    await _transactionHttp.deleteTransaction(txn: txnDeleted).then((_) async {
       // get the current transaction date showed on the home list
       DateTime currentListTxnDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now());
 
@@ -993,7 +999,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         (isWithin(txnInfo.date, from, to)) &&
         (txnInfo.type == 'expense' || txnInfo.type == 'income')
       ) {
-      await _transactionHttp.fetchIncomeExpense(txnCurrencyId, from, to, true).then((result) {
+      await _transactionHttp.fetchIncomeExpense(
+        ccyId: txnCurrencyId,
+        from: from,
+        to: to,
+        force: true
+      ).then((result) {
         if (mounted) {
           Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnCurrencyId, result);
         }
@@ -1009,11 +1020,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       // refresh top transaction
       // fetch the top transaction
       await _transactionHttp.fetchTransactionTop(
-        txnInfo.type,
-        txnCurrencyId,
-        fromString,
-        toString,
-      true).then((transactionTop) {
+        type: txnInfo.type,
+        ccy: txnCurrencyId,
+        from: fromString,
+        to: toString,
+        force: true
+      ).then((transactionTop) {
         if (mounted) {
           // set the provide for this
           Provider.of<HomeProvider>(context, listen: false).setTopTransaction(

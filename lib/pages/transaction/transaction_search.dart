@@ -1057,11 +1057,20 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     }
   }
 
-  Future<void> _findTransaction(String searchText, String categoryId,
-      String type, int limit, int start) async {
-    await _transactionHttp
-        .findTransaction(type, searchText, categoryId, limit, start)
-        .then((results) {
+  Future<void> _findTransaction(
+    String searchText,
+    String categoryId,
+    String type,
+    int limit,
+    int start
+  ) async {
+    await _transactionHttp.findTransaction(
+      type: type,
+      name: searchText,
+      category: categoryId,
+      limit: limit,
+      start: start
+    ).then((results) {
       _setTransactions(results, limit, start);
     });
   }

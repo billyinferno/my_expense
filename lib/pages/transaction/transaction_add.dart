@@ -55,8 +55,8 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
     // now we can try to send updated data to the backend
     await _transactionHttp.addTransaction(
-      txn!,
-      _selectedDate
+      txn: txn!,
+      selectedDate: _selectedDate
     ).then((result) async {
       // update necessary information after we add the transaction
       await _updateInformation(result).then((_) {
@@ -65,7 +65,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
         // get the transaction list from this date
         List<TransactionListModel> txnListShared =
-            (TransactionSharedPreferences.getTransaction(date) ?? []);
+          (TransactionSharedPreferences.getTransaction(date) ?? []);
 
         // for transaction that actually add on the different date, we cannot notify the home list
         // to show this transaction, because currently we are in a different date between the transaction

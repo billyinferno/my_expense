@@ -44,8 +44,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     // are any changes on the date of the transaction. If there are changes
     // then it means we need to manipulate 2 shared preferences instead of one.
     await _transactionHttp.updateTransaction(
-      txn!,
-      _paramsData
+      txn: txn!,
+      prevTxn: _paramsData
     ).then((txnUpdate) async {
       // update necessary information after we add the transaction
       await _updateInformation(txnUpdate).then((_) async {
@@ -153,8 +153,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
   }) async {
     await Future.wait([
       _transactionHttp.fetchTransaction(
-        Globals.dfyyyyMMdd.format(txnDate),
-        true
+        date: Globals.dfyyyyMMdd.format(txnDate),
+        force: true
       ).then((resp) {
         // once got the response store this on the TransactionSharedPreferences
         TransactionSharedPreferences.setTransaction(
@@ -168,8 +168,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       ),
 
       _transactionHttp.fetchTransaction(
-        Globals.dfyyyyMMdd.format(homeListDate),
-        true
+        date: Globals.dfyyyyMMdd.format(homeListDate),
+        force: true
       ).then((resp) {
         // once got the response store this on the TransactionSharedPreferences
         TransactionSharedPreferences.setTransaction(
@@ -291,10 +291,10 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       if (txnUpdate.date.year == DateTime.now().year &&
           txnUpdate.date.month == DateTime.now().month) {
         await _transactionHttp.fetchIncomeExpense(
-          txnUpdate.wallet.currencyId,
-          from,
-          to,
-          true
+          ccyId: txnUpdate.wallet.currencyId,
+          from: from,
+          to: to,
+          force: true
         ).then((incomeExpense) {
           if (mounted) {
             Provider.of<HomeProvider>(
@@ -395,11 +395,11 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       // check if txn update is within stat from and to date
       if (isWithin(txnUpdate.date, statFrom, statTo)) {
         await _transactionHttp.fetchTransactionTop(
-          txnUpdate.type, 
-          txnUpdate.wallet.currencyId,
-          fromString,
-          toString,
-          true
+          type: txnUpdate.type, 
+          ccy: txnUpdate.wallet.currencyId,
+          from: fromString,
+          to: toString,
+          force: true
         ).then((transactionTop) {
           if (mounted) {
             // set the provide for this

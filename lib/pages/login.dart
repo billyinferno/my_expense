@@ -327,16 +327,16 @@ class _LoginPageState extends State<LoginPage> {
         Log.success(message: "⏳ Fetch Wallet User Currency");
         await _fetchAllBudget();
       }),
-      _transactionHTTP.fetchLastTransaction("expense").then((value) {
+      _transactionHTTP.fetchLastTransaction(type: "expense").then((value) {
         Log.success(message: "⏳ Fetch Expense Last Transaction : ${value.length}");
       }),
-      _transactionHTTP.fetchLastTransaction("income").then((value) {
+      _transactionHTTP.fetchLastTransaction(type: "income").then((value) {
         Log.success(message: "⏳ Fetch Income Last Transaction : ${value.length}");
       }),
       _transactionHTTP.fetchMinMaxDate().then((_) {
         Log.success(message: "⏳ Fetch min max transaction date");
       }),
-      _pinHTTP.getPin(true).then((pin) {
+      _pinHTTP.getPin(force: true).then((pin) {
         Log.success(message: "⏳ Fetch user PIN");
       }),
     ]).then((_) {

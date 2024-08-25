@@ -221,7 +221,8 @@ class _HomeListState extends State<HomeList> {
                         child: Consumer<HomeProvider>(
                             builder: (context, homeProvider, child) {
                           return _getTotalIncomeExpense(
-                              homeProvider.transactionList);
+                            transactionData: homeProvider.transactionList
+                          );
                         }),
                       ),
                     ),
@@ -408,7 +409,7 @@ class _HomeListState extends State<HomeList> {
               // check the result of the dialog box
               result.then((value) async {
                 if (value == true) {
-                  await _deleteTransaction(txn);
+                  await _deleteTransaction(txnDeleted: txn);
                 }
               });
             },
@@ -506,8 +507,8 @@ class _HomeListState extends State<HomeList> {
     }
 
     await _transactionHttp.fetchTransaction(
-      strRefreshDay,
-      force
+      date: strRefreshDay,
+      force: force,
     ).then((value) {
       // ensure that the selectedDate and the refreshDay is the same
       if (isSameDate(_currentFocusedDay, refreshDay) && mounted) {
@@ -530,30 +531,33 @@ class _HomeListState extends State<HomeList> {
     return true;
   }
 
-  Future<void> _deleteTransaction(TransactionListModel txnDeleted) async {
+  Future<void> _deleteTransaction({
+    required TransactionListModel txnDeleted
+  }) async {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
-    await _transactionHttp
-        .deleteTransaction(context, txnDeleted)
-        .then((_) async {
+    await _transactionHttp.deleteTransaction(txn: txnDeleted).then((_) async {
       if (mounted) {
         // pop the transaction from the provider
-        Provider.of<HomeProvider>(context, listen: false)
-            .popTransactionList(txnDeleted);
+        Provider.of<HomeProvider>(
+          context,
+          listen: false
+        ).popTransactionList(txnDeleted);
 
         // get the current transaction on the provider
-        List<TransactionListModel> txnListModel =
-            Provider.of<HomeProvider>(context, listen: false).transactionList;
+        List<TransactionListModel> txnListModel = Provider.of<HomeProvider>(
+          context,
+          listen: false
+        ).transactionList;
 
         // save the current transaction on the provider to the shared preferences
-        String date =
-            Globals.dfyyyyMMdd.format(txnDeleted.date.toLocal());
+        String date = Globals.dfyyyyMMdd.format(txnDeleted.date.toLocal());
         TransactionSharedPreferences.setTransaction(date, txnListModel);
       }
 
       // update information for txn delete
-      await _updateInformation(txnDeleted);
+      await _updateInformation(txnInfo: txnDeleted);
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error when delete",
@@ -566,9 +570,17 @@ class _HomeListState extends State<HomeList> {
     });
   }
 
-  Future<void> _updateInformation(TransactionListModel txnInfo) async {
+  Future<void> _updateInformation({
+    required TransactionListModel txnInfo
+  }) async {
     _refreshDay = Globals.dfyyyyMMdd.format(
-        DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1));
+      DateTime(
+        txnInfo.date.toLocal().year,
+        txnInfo.date.toLocal().month,
+        1
+      )
+    );
+
     DateTime from;
     DateTime to;
     String fromString;
@@ -583,10 +595,17 @@ class _HomeListState extends State<HomeList> {
 
     // delete the transaction from wallet transaction
     await TransactionSharedPreferences.deleteTransactionWallet(
-        txnInfo.wallet.id, _refreshDay, txnInfo);
+      txnInfo.wallet.id,
+      _refreshDay,
+      txnInfo
+    );
+
     if (txnInfo.walletTo != null) {
       await TransactionSharedPreferences.deleteTransactionWallet(
-          txnInfo.walletTo!.id, _refreshDay, txnInfo);
+        txnInfo.walletTo!.id,
+        _refreshDay,
+        txnInfo
+      );
     }
 
     // delete the transaction from budget
@@ -614,13 +633,15 @@ class _HomeListState extends State<HomeList> {
             if (txnInfo.category!.id == _budgets[i].category.id) {
               // as this is expense, subtract total transaction and the amount
               BudgetModel newBudget = BudgetModel(
-                  id: _budgets[i].id,
-                  category: _budgets[i].category,
-                  totalTransaction: (_budgets[i].totalTransaction - 1),
-                  amount: _budgets[i].amount,
-                  used: _budgets[i].used - txnInfo.amount,
-                  status: _budgets[i].status,
-                  currency: _budgets[i].currency);
+                id: _budgets[i].id,
+                category: _budgets[i].category,
+                totalTransaction: (_budgets[i].totalTransaction - 1),
+                amount: _budgets[i].amount,
+                used: _budgets[i].used - txnInfo.amount,
+                status: _budgets[i].status,
+                currency: _budgets[i].currency
+              );
+
               _budgets[i] = newBudget;
               // break from for loop
               break;
@@ -633,8 +654,10 @@ class _HomeListState extends State<HomeList> {
           // only set the provider if only the current budget date is the same as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
           if (currentBudgetDate == _refreshDay && mounted) {
-            Provider.of<HomeProvider>(context, listen: false)
-                .setBudgetList(_budgets);
+            Provider.of<HomeProvider>(
+              context,
+              listen: false
+            ).setBudgetList(_budgets);
           }
         });
       }
@@ -651,13 +674,18 @@ class _HomeListState extends State<HomeList> {
     if (isWithin(txnInfo.date, from, to) &&
         (txnInfo.type == "expense" || txnInfo.type == "income")) {
       // fetch the income expense
-      await _transactionHttp
-          .fetchIncomeExpense(txnInfo.wallet.currencyId, from, to, true)
-          .then((result) {
+      await _transactionHttp.fetchIncomeExpense(
+        ccyId: txnInfo.wallet.currencyId,
+        from: from,
+        to: to,
+        force: true,
+      ).then((result) {
         if (mounted) {
           // put on the provider and notify the listener
-          Provider.of<HomeProvider>(context, listen: false)
-              .setIncomeExpense(txnInfo.wallet.currencyId, result);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setIncomeExpense(txnInfo.wallet.currencyId, result);
         }
       }).onError((error, stackTrace) {
         Log.error(
@@ -669,14 +697,23 @@ class _HomeListState extends State<HomeList> {
       });
 
       // fetch the top transaction
-      await _transactionHttp
-          .fetchTransactionTop(txnInfo.type, txnInfo.wallet.currencyId,
-              fromString, toString, true)
-          .then((transactionTop) {
+      await _transactionHttp.fetchTransactionTop(
+        type: txnInfo.type,
+        ccy: txnInfo.wallet.currencyId,
+        from: fromString,
+        to: toString,
+        force: true
+      ).then((transactionTop) {
         if (mounted) {
           // set the provide for this
-          Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
-              txnInfo.wallet.currencyId, txnInfo.type, transactionTop);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setTopTransaction(
+            txnInfo.wallet.currencyId,
+            txnInfo.type,
+            transactionTop
+          );
         }
       }).onError(
         (error, stackTrace) {
@@ -691,7 +728,9 @@ class _HomeListState extends State<HomeList> {
     }
   }
 
-  Widget _getTotalIncomeExpense(List<TransactionListModel> transactionData) {
+  Widget _getTotalIncomeExpense({
+    required List<TransactionListModel> transactionData
+  }) {
     String totalIncomeExpense = "";
     String currencySymbol = "";
     double totalAmount = 0;
@@ -727,10 +766,12 @@ class _HomeListState extends State<HomeList> {
       }
     }
 
-    return Text(totalIncomeExpense,
-        style: TextStyle(
-          fontSize: 12,
-          color: textColor,
-        ));
+    return Text(
+      totalIncomeExpense,
+      style: TextStyle(
+        fontSize: 12,
+        color: textColor,
+      )
+    );
   }
 }

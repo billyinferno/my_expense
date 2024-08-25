@@ -111,7 +111,7 @@ class _PinSetupPageState extends State<PinSetupPage> {
     LoadingScreen.instance().show(context: context);
 
     // call the backend to set the PIN
-    await _pinHttp.setPin(_firstPin).then((_) {
+    await _pinHttp.setPin(pinNumber: _firstPin).then((_) {
       if (mounted) {
         // pin already set, so now we can pop from this page
         // and tell it's true

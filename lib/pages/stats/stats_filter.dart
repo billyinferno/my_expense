@@ -830,12 +830,12 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     String name = _nameController.text.trim();
     
     await _transactionHttp.fetchIncomeExpenseCategory(
-      name,
-      _searchType,
-      _currentCurrencies!.id,
-      _currentWallet!.id,
-      _currentFromDate,
-      _currentToDate
+      name: name,
+      search: _searchType,
+      ccyId: _currentCurrencies!.id,
+      walletId: _currentWallet!.id,
+      from: _currentFromDate,
+      to: _currentToDate
     ).then((incomeExpenseCategory) {
       // set current income expense category as this
       _currentIncomeExpenseCategory = incomeExpenseCategory;

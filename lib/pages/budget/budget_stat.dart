@@ -745,7 +745,9 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       } else {
         // this will get specific category
         _budgetStat = await _transactionHttp.fetchTransactionBudgetStat(
-            _budgetTransaction.categoryid, _budgetTransaction.currencyId);
+          categoryId: _budgetTransaction.categoryid,
+          currencyId: _budgetTransaction.currencyId
+        );
       }
 
       // generate the monthly and yearly data

@@ -1,9 +1,11 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:my_expense/_index.g.dart';
 
 class TransactionHTTPService {
-  Future<TransactionListModel> updateTransaction(TransactionModel txn, TransactionListModel prevTxn) async {
+  Future<TransactionListModel> updateTransaction({
+    required TransactionModel txn,
+    required TransactionListModel prevTxn
+  }) async {
     bool sameDate = isSameDate(txn.date.toLocal(), prevTxn.date.toLocal());
     String date = Globals.dfyyyyMMdd.format(prevTxn.date.toLocal());
     
@@ -61,7 +63,7 @@ class TransactionHTTPService {
         String txnUpdateDate = Globals.dfyyyyMMdd.format(txnUpdate.date.toLocal());
         
         // ensure to force fetch the transaction
-        await fetchTransaction(txnUpdateDate, true);
+        await fetchTransaction(date: txnUpdateDate, force: true);
       }
     }
 
@@ -72,7 +74,10 @@ class TransactionHTTPService {
     return txnUpdate;
   }
 
-  Future<TransactionListModel> addTransaction(TransactionModel txn, DateTime selectedDate) async {
+  Future<TransactionListModel> addTransaction({
+    required TransactionModel txn,
+    required DateTime selectedDate
+  }) async {
     String date = Globals.dfyyyyMMdd.format(txn.date.toLocal());
 
     // send the request to add the transaction
@@ -103,13 +108,15 @@ class TransactionHTTPService {
     return txnAdd;
   }
 
-  Future<List<TransactionListModel>> fetchTransaction(String date, [bool? force]) async {
-    bool isForce = (force ?? false);
-
+  Future<List<TransactionListModel>> fetchTransaction({
+    required String date,
+    bool force = false,
+  }) async {
     // check if we got data on the sharedPreferences or not?
-    if (!isForce) {
+    if (!force) {
       List<TransactionListModel>? transactionPref =
-          TransactionSharedPreferences.getTransaction(date);
+        TransactionSharedPreferences.getTransaction(date);
+      
       if (transactionPref != null) {
         return transactionPref;
       }
@@ -125,16 +132,18 @@ class TransactionHTTPService {
     // parse the result and return the transaction list
     List<dynamic> jsonData = jsonDecode(result);
     List<TransactionListModel> transactionModel =
-        jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
+      jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
     TransactionSharedPreferences.setTransaction(date, transactionModel);
+    
     return transactionModel;
   }
 
-  Future<List<LastTransactionModel>> fetchLastTransaction(String type, [bool? force]) async {
-    bool isForce = (force ?? false);
-
+  Future<List<LastTransactionModel>> fetchLastTransaction({
+    required String type,
+    bool force = false,
+  }) async {
     // check if we got data on the sharedPreferences or not?
-    if (!isForce) {
+    if (!force) {
       List<LastTransactionModel>? transactionPref = TransactionSharedPreferences.getLastTransaction(type);
       if (transactionPref != null) {
         // check if the transaction preference got data or not?
@@ -160,11 +169,14 @@ class TransactionHTTPService {
     return transactionModel;
   }
 
-  Future<List<TransactionListModel>> fetchTransactionBudget(int categoryId, String date, int currencyId, [bool? force]) async {
-    bool isForce = (force ?? false);
-
+  Future<List<TransactionListModel>> fetchTransactionBudget({
+    required int categoryId,
+    required String date,
+    required int currencyId,
+    bool force = false,
+  }) async {
     // check if we got data on the sharedPreferences or not?
-    if (!isForce) {
+    if (!force) {
       List<TransactionListModel>? transactionPref = TransactionSharedPreferences.getTransactionBudget(categoryId, date);
       if (transactionPref != null) {
         return transactionPref;
@@ -186,7 +198,10 @@ class TransactionHTTPService {
     return transactionModel;
   }
 
-  Future<BudgetStatModel> fetchTransactionBudgetStat(int categoryId, int currencyId) async {
+  Future<BudgetStatModel> fetchTransactionBudgetStat({
+    required int categoryId,
+    required int currencyId
+  }) async {
     // send the request to get the transaction statistic
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/budget/stat/$categoryId/currency/$currencyId',
@@ -199,7 +214,9 @@ class TransactionHTTPService {
     return budgetStatModel;
   }
 
-  Future<BudgetStatModel> fetchTransactionBudgetStatSummary(int currencyId) async {
+  Future<BudgetStatModel> fetchTransactionBudgetStatSummary(
+    int currencyId
+  ) async {
     // send the request to get the transaction summary
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/budget/stat/currency/$currencyId',
@@ -212,11 +229,13 @@ class TransactionHTTPService {
     return budgetStatModel;
   }
 
-  Future<List<TransactionListModel>> fetchTransactionWallet(int walletId, String date, [bool? force]) async {
-    bool isForce = (force ?? false);
-
+  Future<List<TransactionListModel>> fetchTransactionWallet({
+    required int walletId,
+    required String date,
+    bool force = false,
+  }) async {
     // check if we got data on the sharedPreferences or not?
-    if (!isForce) {
+    if (!force) {
       List<TransactionListModel>? transactionPref = TransactionSharedPreferences.getTransactionWallet(walletId, date);
       if (transactionPref != null) {
         return transactionPref;
@@ -238,7 +257,13 @@ class TransactionHTTPService {
     return transactionModel;
   }
 
-  Future<List<TransactionListModel>> findTransaction(String type, String name, String category, int limit, int start) async {
+  Future<List<TransactionListModel>> findTransaction({
+    required String type,
+    required String name,
+    required String category,
+    required int limit,
+    required int start
+  }) async {
     String url = '${Globals.apiURL}transactions/search/type/$type';
     
     // check the type, if both then add both name and category, if name then only name, if category then only category
@@ -262,13 +287,17 @@ class TransactionHTTPService {
     return transactionModel;
   }
 
-  Future<IncomeExpenseModel> fetchIncomeExpense(int ccyId, DateTime from, DateTime to, [bool? force]) async {
-    bool isForce = (force ?? false);
+  Future<IncomeExpenseModel> fetchIncomeExpense({
+    required int ccyId,
+    required DateTime from,
+    required DateTime to,
+    bool force = false,
+  }) async {
     String dateFrom = Globals.dfyyyyMMdd.format(from.toLocal());
     String dateTo = Globals.dfyyyyMMdd.format(to.toLocal());
 
     // check if we got data on the sharedPreferences or not?
-    if (!isForce) {
+    if (!force) {
       IncomeExpenseModel? transactionPref = TransactionSharedPreferences.getIncomeExpense(ccyId, dateFrom, dateTo);
       if (transactionPref != null) {
         return transactionPref;
@@ -290,7 +319,14 @@ class TransactionHTTPService {
     return incomeExpense;
   }
 
-  Future<IncomeExpenseCategoryModel> fetchIncomeExpenseCategory(String name, String search, int ccyId, int walletId, DateTime from, DateTime to) async {
+  Future<IncomeExpenseCategoryModel> fetchIncomeExpenseCategory({
+    required String name,
+    required String search,
+    required int ccyId,
+    required int walletId,
+    required DateTime from,
+    required DateTime to
+  }) async {
     String dateFrom = Globals.dfyyyyMMdd.format(from.toLocal());
     String dateTo = Globals.dfyyyyMMdd.format(to.toLocal());
 
@@ -308,7 +344,16 @@ class TransactionHTTPService {
     return incomeExpenseCategory;
   }
 
-  Future<List<TransactionStatsDetailModel>> fetchIncomeExpenseCategoryDetail(String name, String search, String type, int categoryId, int ccyId, int walletId, DateTime from, DateTime to) async {
+  Future<List<TransactionStatsDetailModel>> fetchIncomeExpenseCategoryDetail({
+    required String name,
+    required String search,
+    required String type,
+    required int categoryId,
+    required int ccyId,
+    required int walletId,
+    required DateTime from,
+    required DateTime to
+  }) async {
     String dateFrom = Globals.dfyyyyMMdd.format(from.toLocal());
     String dateTo = Globals.dfyyyyMMdd.format(to.toLocal());
 
@@ -352,7 +397,9 @@ class TransactionHTTPService {
     }
   }
 
-  Future<TransactionWalletMinMaxDateModel> fetchWalletMinMaxDate(int walletId) async {
+  Future<TransactionWalletMinMaxDateModel> fetchWalletMinMaxDate({
+    required int walletId
+  }) async {
     // send the request to get the min and max user wallet date
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/minmax/wallet/$walletId',
@@ -368,7 +415,9 @@ class TransactionHTTPService {
     return ret;
   }
 
-  Future<void> deleteTransaction(BuildContext context, TransactionListModel txn) async {
+  Future<void> deleteTransaction({
+    required TransactionListModel txn
+  }) async {
     // send the request to get the min and max user wallet date
     await NetUtils.delete(
       url: '${Globals.apiURL}transactions/${txn.id}',
@@ -377,11 +426,15 @@ class TransactionHTTPService {
     });
   }
 
-  Future<List<TransactionTopModel>> fetchTransactionTop(String type, int ccy, String from, String to, [bool? force]) async {
-    bool isForce = (force ?? false);
-
+  Future<List<TransactionTopModel>> fetchTransactionTop({
+    required String type,
+    required int ccy,
+    required String from,
+    required String to,
+    bool force = false,
+  }) async {
     // check if we got data on the sharedPreferences or not?
-    if (!isForce) {
+    if (!force) {
       List<TransactionTopModel>? transactionPref =
           TransactionSharedPreferences.getTransactionTop(from, type);
       if (transactionPref != null) {
@@ -398,8 +451,7 @@ class TransactionHTTPService {
 
     // parse the result and return the transaction list
     List<dynamic> jsonData = jsonDecode(result);
-    List<TransactionTopModel> transactionModel =
-        jsonData.map((e) => TransactionTopModel.fromJson(e)).toList();
+    List<TransactionTopModel> transactionModel = jsonData.map((e) => TransactionTopModel.fromJson(e)).toList();
     TransactionSharedPreferences.setTransactionTop(from, type, transactionModel);
     return transactionModel;
   }

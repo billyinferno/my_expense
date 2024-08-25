@@ -740,7 +740,12 @@ class _HomeStatsState extends State<HomeStats> {
     bool isForce = (force ?? false);
 
     // get the data
-    await _transactionHttp.fetchIncomeExpense(ccy.id, from, to, isForce).then((incomeExpense) {
+    await _transactionHttp.fetchIncomeExpense(
+      ccyId: ccy.id,
+      from: from,
+      to: to,
+      force: isForce
+    ).then((incomeExpense) {
       if (mounted) {
         // set the provider for income expense
         Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(ccy.id, incomeExpense);
@@ -757,7 +762,13 @@ class _HomeStatsState extends State<HomeStats> {
 
   Future<void> _fetchTopTransaction(String type, int ccy, [bool? force]) async {
     bool isForce = (force ?? false);
-    await _transactionHttp.fetchTransactionTop(type, ccy, _fromString, _toString, isForce).then((transactionTop) {
+    await _transactionHttp.fetchTransactionTop(
+      type: type,
+      ccy: ccy,
+      from: _fromString,
+      to: _toString,
+      force: isForce
+    ).then((transactionTop) {
       if (mounted) {
         // set the provide for this
         Provider.of<HomeProvider>(context, listen: false).setTopTransaction(ccy, type, transactionTop);

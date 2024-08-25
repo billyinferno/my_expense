@@ -294,7 +294,12 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     bool isForce = (force ?? false);
 
     String date = Globals.dfyyyyMMdd.format(_selectedDate.toLocal());
-    await _transactionHttp.fetchTransactionBudget(_categoryId, date, _currencyId, isForce).then((value) async {
+    await _transactionHttp.fetchTransactionBudget(
+      categoryId: _categoryId,
+      date: date,
+      currencyId: _currencyId,
+      force: isForce
+    ).then((value) async {
       await setTransactions(value.reversed.toList());
       _transactions = value.reversed.toList();
     }).onError((error, stackTrace) {
