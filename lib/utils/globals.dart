@@ -10,22 +10,26 @@ class Globals {
   static String appVersion = (dotenv.env['APP_VERSION'] ?? '0.0.1');
   static String flutterVersion = (dotenv.env['FLUTTER_VERSION'] ?? 'beta');
 
-  static DateFormat dfyyyyMMdd = DateFormat('yyyy-MM-dd');
-  static DateFormat dfyyyyMM = DateFormat('yyyy-MM');
-  static DateFormat dfddMMyyyy = DateFormat('dd/MM/yyyy');
-  static DateFormat dfddMMyy = DateFormat('dd/MM/yy');
-  static DateFormat dfddMMMyyyy = DateFormat('dd MMM yyyy');
-  static DateFormat dfddMMMMyyyy = DateFormat('dd MMMM yyyy');
-  static DateFormat dfyyyy = DateFormat('yyyy');
-  static DateFormat dfMMM = DateFormat('MMM');
-  static DateFormat dfMMMM = DateFormat('MMMM');
-  static DateFormat dfMMyy = DateFormat('MM/yy');
-  static DateFormat dfMMMyyyy = DateFormat('MMM yyyy');
-  static DateFormat dfMMMMyyyy = DateFormat('MMMM yyyy');
-  static DateFormat dfeddMMMyyyy = DateFormat('E, dd MMM yyyy');
-  static DateFormat dfeMMMMddyyyy = DateFormat('E, MMMM dd, yyyy');
-  static DateFormat dfd = DateFormat('d');
-  static DateFormat dfddMM = DateFormat('dd/MM');
+  static final DateFormat dfyyyyMMdd = DateFormat('yyyy-MM-dd');
+  static final DateFormat dfyyyyMM = DateFormat('yyyy-MM');
+  static final DateFormat dfddMMyyyy = DateFormat('dd/MM/yyyy');
+  static final DateFormat dfddMMyy = DateFormat('dd/MM/yy');
+  static final DateFormat dfddMMMyyyy = DateFormat('dd MMM yyyy');
+  static final DateFormat dfddMMMMyyyy = DateFormat('dd MMMM yyyy');
+  static final DateFormat dfyyyy = DateFormat('yyyy');
+  static final DateFormat dfMMM = DateFormat('MMM');
+  static final DateFormat dfMMMM = DateFormat('MMMM');
+  static final DateFormat dfMMyy = DateFormat('MM/yy');
+  static final DateFormat dfMMMyyyy = DateFormat('MMM yyyy');
+  static final DateFormat dfMMMMyyyy = DateFormat('MMMM yyyy');
+  static final DateFormat dfeddMMMyyyy = DateFormat('E, dd MMM yyyy');
+  static final DateFormat dfeMMMMddyyyy = DateFormat('E, MMMM dd, yyyy');
+  static final DateFormat dfd = DateFormat('d');
+  static final DateFormat dfddMM = DateFormat('dd/MM');
+
+  static final NumberFormat fCCY = NumberFormat("#,##0.00", "en_US");
+  static final NumberFormat fCCY2 = NumberFormat("0.00", "en_US");
+  static final NumberFormat fCCYnf = NumberFormat.decimalPattern("en_US")..maximumFractionDigits = 2;
 
   static String runAs() {
     if (kIsWasm) {
