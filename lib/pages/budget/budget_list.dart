@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
@@ -19,7 +18,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
   final TextEditingController _amountController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ScrollController _scrollControllerAddCategory = ScrollController();
-  final fCCY = NumberFormat("#,##0.00", "en_US");
 
   late BudgetListModel? _budgetList;
   late double? _budgetAmount;
@@ -313,52 +311,49 @@ class _BudgetListPageState extends State<BudgetListPage> {
               });
             }),
             onTap: ((index) {
-              showDialog(
-                context: context,
-                builder: ((context) {
-                  // set the amount controller with the current budget
-                  _amountController.text = fCCY.format(budgetArgs.budgetAmount);
-                  _budgetAmount = budgetArgs.budgetAmount;
+              // set the amount controller with the current budget
+              _amountController.text = Globals.fCCY2.format(budgetArgs.budgetAmount);
+              _budgetAmount = budgetArgs.budgetAmount;
 
-                  return AlertDialog(
-                    content: SizedBox(
-                      width: 300,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+              showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return MyBottomSheet(
+                    context: context,
+                    title: "Edit ${budgetArgs.categoryName}".toUpperCase(),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      height: 300,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: budgetArgs.categoryColor,
-                              borderRadius: BorderRadius.circular(40),
-                            ),
-                            child: budgetArgs.categoryIcon,
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: SizedBox(
-                              height: 60,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Text("Edit ${budgetArgs.categoryName}"),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  TextField(
+                          const SizedBox(height: 10,),
+                          SizedBox(
+                            width: double.infinity,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: <Widget>[
+                                const Text("Amount"),
+                                const SizedBox(width: 10,),
+                                Expanded(
+                                  child: TextField(
                                     controller: _amountController,
                                     showCursor: true,
                                     textAlign: TextAlign.right,
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     decoration: const InputDecoration(
                                       hintText: "0.00",
+                                      hintStyle: TextStyle(
+                                        color: primaryLight
+                                      ),
                                       border: OutlineInputBorder(
-                                        borderSide: BorderSide.none,
+                                        borderSide: BorderSide(
+                                          color: primaryLight,
+                                          width: 1.0,
+                                          style: BorderStyle.solid,
+                                        ),
                                       ),
                                       contentPadding: EdgeInsets.zero,
                                       isCollapsed: true,
@@ -379,120 +374,122 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                       }
                                     }),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
+                          const SizedBox(height: 30,),
+                          SizedBox(
+                            width: double.infinity,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: (() {
+                                      // don't care with data changes, if user press
+                                      // cancel then just pop.
+                                      Navigator.pop(context);
+                                    }),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.red,
+                                      ),
+                                      child: const Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: <Widget>[
+                                          Icon(
+                                            Ionicons.close,
+                                            size: 15,
+                                          ),
+                                          SizedBox(width: 10,),
+                                          Expanded(
+                                            child: Center(
+                                              child: Text("Cancel")
+                                            )
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 20,),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: (() {
+                                      if (_budgetAmount != null) {
+                                        _isDataChanged = true;
+                                        List<BudgetModel> newBudgetList = [];
+                                        for (int i = 0; i < _budgetList!.budgets.length; i++) {
+                                          if (i == index) {
+                                            // special treatment
+                                            newBudgetList.add(BudgetModel(
+                                              id: _budgetList!.budgets[i].id,
+                                              category: _budgetList!.budgets[i].category,
+                                              totalTransaction: _budgetList!.budgets[i].totalTransaction,
+                                              amount: (_budgetAmount ?? budgetArgs.budgetAmount),
+                                              used: _budgetList!.budgets[i].used,
+                                              status: "in",
+                                              currency: _budgetList!.budgets[i].currency,
+                                            ));
+                                          } else {
+                                            newBudgetList.add(_budgetList!.budgets[i]);
+                                          }
+                                        }
+                                  
+                                        // create the new budget list model
+                                        BudgetListModel newBudgetListModel =
+                                          BudgetListModel(
+                                            currency: _budgetList!.currency,
+                                            budgets: newBudgetList
+                                          );
+                                  
+                                        // set the new budget and announce
+                                        _setBudgetList(newBudgetListModel);
+                                        Provider.of<HomeProvider>(
+                                          context,
+                                          listen: false
+                                        ).setBudgetAddList(newBudgetListModel.budgets);
+                                  
+                                        // remove the dialog
+                                        Navigator.pop(context);
+                                      }
+                                    }),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.green,
+                                      ),
+                                      child: const Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        children: <Widget>[
+                                          Icon(
+                                            Ionicons.checkbox,
+                                            size: 15,
+                                          ),
+                                          SizedBox(width: 10,),
+                                          Expanded(
+                                            child: Center(
+                                              child: Text("Save")
+                                            )
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
                         ],
                       ),
-                    ),
-                    actions: <Widget>[
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          GestureDetector(
-                            onTap: (() {
-                              // don't care with data changes, if user press
-                              // cancel then just pop.
-                              Navigator.pop(context);
-                            }),
-                            child: Container(
-                              width: 100,
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(10)
-                              ),
-                              child: const Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Icon(
-                                    Ionicons.close,
-                                    size: 15,
-                                  ),
-                                  SizedBox(width: 10,),
-                                  Expanded(
-                                    child: Center(
-                                      child: Text("Cancel")
-                                    )
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10,),
-                          GestureDetector(
-                            onTap: (() {
-                              if (_budgetAmount != null) {
-                                _isDataChanged = true;
-                                List<BudgetModel> newBudgetList = [];
-                                for (int i = 0; i < _budgetList!.budgets.length; i++) {
-                                  if (i == index) {
-                                    // special treatment
-                                    newBudgetList.add(BudgetModel(
-                                      id: _budgetList!.budgets[i].id,
-                                      category: _budgetList!.budgets[i].category,
-                                      totalTransaction: _budgetList!.budgets[i].totalTransaction,
-                                      amount: (_budgetAmount ?? budgetArgs.budgetAmount),
-                                      used: _budgetList!.budgets[i].used,
-                                      status: "in",
-                                      currency: _budgetList!.budgets[i].currency,
-                                    ));
-                                  } else {
-                                    newBudgetList.add(_budgetList!.budgets[i]);
-                                  }
-                                }
-
-                                // create the new budget list model
-                                BudgetListModel newBudgetListModel =
-                                  BudgetListModel(
-                                    currency: _budgetList!.currency,
-                                    budgets: newBudgetList
-                                  );
-
-                                // set the new budget and announce
-                                _setBudgetList(newBudgetListModel);
-                                Provider.of<HomeProvider>(
-                                  context,
-                                  listen: false
-                                ).setBudgetAddList(newBudgetListModel.budgets);
-
-                                // remove the dialog
-                                Navigator.pop(context);
-                              }
-                            }),
-                            child: Container(
-                              width: 100,
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(10)
-                              ),
-                              child: const Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: <Widget>[
-                                  Icon(
-                                    Ionicons.checkbox,
-                                    size: 15,
-                                  ),
-                                  SizedBox(width: 10,),
-                                  Expanded(
-                                    child: Center(
-                                      child: Text("Save")
-                                    )
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
+                    )
                   );
-                })
+                },
               );
             }),
           );
@@ -531,7 +528,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
             const SizedBox(
               width: 10,
             ),
-            Text("(${ccy.symbol} ${fCCY.format(totalAmount)})"),
+            Text("(${ccy.symbol} ${Globals.fCCY.format(totalAmount)})"),
           ],
         ),
       );
