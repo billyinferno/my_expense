@@ -1,7 +1,6 @@
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -15,7 +14,6 @@ class TransactionSearchPage extends StatefulWidget {
 }
 
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
-  final _fCCY = NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
 
@@ -447,7 +445,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            "${transaction.wallet.currency} ${_fCCY.format(transaction.amount)}",
+            "${transaction.wallet.currency} ${Globals.fCCY.format(transaction.amount)}",
             style: TextStyle(
               color: (transaction.type == "expense"
                   ? accentColors[2]
@@ -462,7 +460,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            "${transaction.wallet.currency} ${_fCCY.format(transaction.amount)}",
+            "${transaction.wallet.currency} ${Globals.fCCY.format(transaction.amount)}",
             style: TextStyle(
               color: accentColors[5],
             ),
@@ -471,7 +469,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           Visibility(
             visible: (transaction.walletTo != null),
             child: Text(
-              "${transaction.walletTo != null ? transaction.walletTo!.currency : ''} ${_fCCY.format(transaction.amount * transaction.exchangeRate)}",
+              "${transaction.walletTo != null ? transaction.walletTo!.currency : ''} ${Globals.fCCY.format(transaction.amount * transaction.exchangeRate)}",
               style: TextStyle(
                 color: lighten(accentColors[5], 0.25),
               ),
@@ -854,7 +852,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  _fCCY.format(value),
+                  Globals.fCCY.format(value),
                   style: TextStyle(
                     color: color,
                   ),

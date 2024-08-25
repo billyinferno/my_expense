@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class BarChart extends StatelessWidget {
@@ -79,7 +78,6 @@ class BarChart extends StatelessWidget {
   }
 
   List<Widget> _generateBarCharts() {
-    final fCCY = NumberFormat("#,##0.00", "en_US");
     final List<Widget> bars = [];
     DateTime currDate;
     double income = 0;
@@ -102,7 +100,6 @@ class BarChart extends StatelessWidget {
           expense: expense,
           maxIncome: maxIncome,
           maxExpense: maxExpense,
-          fCCY: fCCY,
         )
       );
     }
@@ -115,7 +112,6 @@ class BarChart extends StatelessWidget {
     required double expense,
     required double maxIncome,
     required double maxExpense,
-    required NumberFormat fCCY,
   }) {
     String dateText = Globals.dfddMM.format(date.toLocal());
 
@@ -264,7 +260,7 @@ class BarChart extends StatelessWidget {
                     top: 2,
                     left: 5,
                     child: Text(
-                      fCCY.format(income),
+                      Globals.fCCY.format(income),
                       style: const TextStyle(
                         fontSize: 10,
                         color: textColor2,
@@ -275,7 +271,7 @@ class BarChart extends StatelessWidget {
                     top: 2,
                     right: 5,
                     child: Text(
-                      fCCY.format(expense),
+                      Globals.fCCY.format(expense),
                       style: const TextStyle(
                         fontSize: 10,
                         color: textColor2,

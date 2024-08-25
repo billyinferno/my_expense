@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -15,7 +14,6 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final ScrollController _monthlyScroller = ScrollController();
   final ScrollController _yearlyScroller = ScrollController();
-  final fCCY = NumberFormat("#,##0.00", "en_US");
 
   late BudgetTransactionArgs _budgetTransaction;
   late BudgetStatModel _budgetStat;

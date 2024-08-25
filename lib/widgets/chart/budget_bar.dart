@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class BudgetBar extends StatelessWidget {
@@ -14,20 +13,19 @@ class BudgetBar extends StatelessWidget {
   final Color? barColor;
   final String? type;
 
-  BudgetBar(
-      {super.key,
-      this.icon,
-      this.iconColor,
-      this.showLeftText,
-      this.barColor,
-      required this.title,
-      this.subTitle,
-      required this.symbol,
-      required this.budgetUsed,
-      required this.budgetTotal,
-      this.type});
-
-  final _fCCY = NumberFormat("#,##0.00", "en_US");
+  const BudgetBar({
+    super.key,
+    this.icon,
+    this.iconColor,
+    this.showLeftText,
+    this.barColor,
+    required this.title,
+    this.subTitle,
+    required this.symbol,
+    required this.budgetUsed,
+    required this.budgetTotal,
+    this.type
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +92,7 @@ class BudgetBar extends StatelessWidget {
                   Visibility(
                     visible: (showLeftText == null ? true : showLeftText!),
                     child: Text(
-                      "$symbol ${_fCCY.format(budgetTotal - budgetUsed)}${budgetTotal >= budgetUsed ? " left" : " over"}",
+                      "$symbol ${Globals.fCCY.format(budgetTotal - budgetUsed)}${budgetTotal >= budgetUsed ? " left" : " over"}",
                       textAlign: TextAlign.right,
                     ),
                   )
@@ -135,7 +133,7 @@ class BudgetBar extends StatelessWidget {
                     Container(
                       margin: const EdgeInsets.only(left: 10),
                       child: Text(
-                        "$symbol ${_fCCY.format(budgetUsed)} of $symbol ${_fCCY.format(budgetTotal)}",
+                        "$symbol ${Globals.fCCY.format(budgetUsed)} of $symbol ${Globals.fCCY.format(budgetTotal)}",
                         style: const TextStyle(
                           fontSize: 12,
                           color: textColor2,

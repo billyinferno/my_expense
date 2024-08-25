@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +15,6 @@ class WalletTransactionPage extends StatefulWidget {
 }
 
 class _WalletTransactionPageState extends State<WalletTransactionPage> {
-  final _fCCY = NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
@@ -257,23 +255,19 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     });
   }
 
-  Future<void> _fetchTransactionWallet(
-    DateTime fetchDate,
-    [
-      bool? force,
-      bool? showLoader
-    ]
-  ) async {
-    bool isForce = (force ?? false);
-
+  Future<void> _fetchTransactionWallet({
+    required DateTime fetchDate,
+    bool force = false,
+    bool showLoader = true
+  }) async {
     // show the loading screen
-    if (showLoader ?? true) {
+    if (showLoader) {
       LoadingScreen.instance().show(context: context);
     }
 
     // get the transaction
     String date = Globals.dfyyyyMMdd.format(DateTime(fetchDate.toLocal().year, fetchDate.toLocal().month, 1));
-    await _transactionHttp.fetchTransactionWallet(_wallet.id, date, isForce).then((txns) async {
+    await _transactionHttp.fetchTransactionWallet(_wallet.id, date, force).then((txns) async {
       await _setTransactions(txns);
       _transactions = txns.toList();
     }).onError((error, stackTrace) {
@@ -284,7 +278,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       );
       throw Exception('Error when fetch wallet transaction');
     }).whenComplete(() {
-      if (showLoader ?? true) {
+      if (showLoader) {
         // remove the loading screen
         LoadingScreen.instance().hide();
       }
@@ -332,7 +326,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   // ensure that the new date is different date with current date
                   if (_currentDate.isAfter(newDate) || _currentDate.isBefore(newDate)) {
                     // fetch the transaction wallet for this new date
-                    await _fetchTransactionWallet(newDate).then((_) {
+                    await _fetchTransactionWallet(fetchDate: newDate).then((_) {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
                       Log.error(
@@ -356,7 +350,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               // set the date as today date
               DateTime newDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
             
-              await _fetchTransactionWallet(newDate).then((_) {
+              await _fetchTransactionWallet(fetchDate: newDate).then((_) {
                 _setDate(newDate);
               }).onError((error, stackTrace) {
                 Log.error(
@@ -380,7 +374,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   onTap: (() async {
                     DateTime newDate = DateTime(_currentDate.year, _currentDate.month - 1, 1);
             
-                    await _fetchTransactionWallet(newDate).then((_) {
+                    await _fetchTransactionWallet(fetchDate: newDate).then((_) {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
                       Log.error(
@@ -422,9 +416,19 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                         RichText(
                           text: TextSpan(
                             children: <TextSpan>[
-                              TextSpan(text: "(${_fCCY.format(_expenseAmount)})", style: TextStyle(color: accentColors[2])),
+                              TextSpan(
+                                text: "(${Globals.fCCY.format(_expenseAmount)})",
+                                style: TextStyle(
+                                  color: accentColors[2]
+                                )
+                              ),
                               const TextSpan(text: " "),
-                              TextSpan(text: "(${_fCCY.format(_incomeAmount)})", style: TextStyle(color: accentColors[6])),
+                              TextSpan(
+                                text: "(${Globals.fCCY.format(_incomeAmount)})",
+                                style: TextStyle(
+                                  color: accentColors[6]
+                                )
+                              ),
                             ]
                           ),
                         ),
@@ -436,7 +440,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   onTap: (() async {
                     DateTime newDate = DateTime(_currentDate.year, _currentDate.month + 1, 1);
             
-                    await _fetchTransactionWallet(newDate).then((_) {
+                    await _fetchTransactionWallet(fetchDate: newDate).then((_) {
                       _setDate(newDate);
                     }).onError((error, stackTrace) {
                       Log.error(
@@ -478,8 +482,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               Log.info(message: "🔃 Refresh wallet");
 
               await _fetchTransactionWallet(
-                _currentDate,
-                true
+                fetchDate: _currentDate,
+                force: true,
               ).onError((error, stackTrace) {
                 Log.error(
                   message: "Error when refresh wallet for ${Globals.dfMMMMyyyy.format(_currentDate.toLocal())}",
@@ -525,12 +529,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   ),
                 ),
                 Text(
-                  "(${_fCCY.format(header.expense)})",
+                  "(${Globals.fCCY.format(header.expense)})",
                   style: TextStyle(color: accentColors[2])
                 ),
                 const SizedBox(width: 5,),
                 Text(
-                  "(${_fCCY.format(header.income)})",
+                  "(${Globals.fCCY.format(header.income)})",
                   style: TextStyle(color: accentColors[6])
                 ),
               ],
@@ -808,7 +812,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
   Future<bool> _fetchInitData() async {
     await Future.wait([
-      _fetchTransactionWallet(_currentDate, true, false),
+      _fetchTransactionWallet(
+        fetchDate: _currentDate,
+        force: true,
+        showLoader: false,
+      ),
       _fetchWalletMinMaxDate(),
     ]);
 

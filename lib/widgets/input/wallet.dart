@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class Wallet extends StatelessWidget {
@@ -7,9 +6,7 @@ class Wallet extends StatelessWidget {
   const Wallet({super.key, required this.wallet});
 
   @override
-  Widget build(BuildContext context) {
-    final fCCY = NumberFormat("#,##0.00", "en_US");
-    
+  Widget build(BuildContext context) {    
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/wallet/transaction', arguments: wallet);
@@ -61,7 +58,7 @@ class Wallet extends StatelessWidget {
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
-                (wallet.futureAmount == 0 ? "" : "${wallet.currency.symbol} ${fCCY.format(wallet.futureAmount)}"),
+                (wallet.futureAmount == 0 ? "" : "${wallet.currency.symbol} ${Globals.fCCY.format(wallet.futureAmount)}"),
                 textAlign: TextAlign.right,
                 style: const TextStyle(
                   fontSize: 10,
@@ -71,7 +68,7 @@ class Wallet extends StatelessWidget {
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
-                "${wallet.currency.symbol} ${fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1))}",
+                "${wallet.currency.symbol} ${Globals.fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1))}",
                 textAlign: TextAlign.right,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,

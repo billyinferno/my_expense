@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -33,8 +32,6 @@ class CategoryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fCCY = NumberFormat("#,##0.00", "en_US");
-    
     return Container(
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(width: 1.0, color: primaryLight)),
@@ -88,7 +85,7 @@ class CategoryListItem extends StatelessWidget {
               ),
               Expanded(child: Text(categoryName)),
               const SizedBox(width: 10,),
-              Text("$currencySymbol ${fCCY.format(budgetAmount)}"),
+              Text("$currencySymbol ${Globals.fCCY.format(budgetAmount)}"),
               const SizedBox(width: 5,),
             ],
           ),

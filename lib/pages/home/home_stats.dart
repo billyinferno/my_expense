@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
@@ -16,8 +15,6 @@ class HomeStats extends StatefulWidget {
 
 class _HomeStatsState extends State<HomeStats> {
   late List<CurrencyModel> _currencies;
-
-  final _fCCY = NumberFormat("#,##0.00", "en_US");
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
@@ -293,7 +290,7 @@ class _HomeStatsState extends State<HomeStats> {
                             ),
                             const SizedBox(width: 11,),
                             Text(
-                              "Clamp to avg daily budget ($_currentCurrencySymbol ${_fCCY.format(_maxBudget[_currentCurrencyId] ?? 0)})",
+                              "Clamp to avg daily budget ($_currentCurrencySymbol ${Globals.fCCY.format(_maxBudget[_currentCurrencyId] ?? 0)})",
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: textColor,
@@ -447,7 +444,7 @@ class _HomeStatsState extends State<HomeStats> {
                 children: <Widget>[
                   Text(_currentWorth.currenciesDescription),
                   Text(
-                    "${_currentWorth.currenciesSymbol} ${_fCCY.format(amount)}",
+                    "${_currentWorth.currenciesSymbol} ${Globals.fCCY.format(amount)}",
                     style: TextStyle(
                       color: (amount >= 0 ? accentColors[6] : accentColors[2]),
                       fontSize: 20,
@@ -455,7 +452,7 @@ class _HomeStatsState extends State<HomeStats> {
                     ),
                   ),
                   Text(
-                    "(${_fCCY.format(totalCurrentWorth)})",
+                    "(${Globals.fCCY.format(totalCurrentWorth)})",
                     style: TextStyle(
                       fontSize: 10,
                       color: (totalCurrentWorth < 0 ? accentColors[2] : accentColors[6]),
@@ -479,7 +476,7 @@ class _HomeStatsState extends State<HomeStats> {
                               ),
                             ),
                             Text(
-                              "${_currentWorth.currenciesSymbol} ${_fCCY.format(currentWorthIncome)}",
+                              "${_currentWorth.currenciesSymbol} ${Globals.fCCY.format(currentWorthIncome)}",
                               style: TextStyle(
                                 color: accentColors[6],
                               ),
@@ -500,7 +497,7 @@ class _HomeStatsState extends State<HomeStats> {
                               ),
                             ),
                             Text(
-                              "${_currentWorth.currenciesSymbol} ${_fCCY.format(currentWorthExpense)}",
+                              "${_currentWorth.currenciesSymbol} ${Globals.fCCY.format(currentWorthExpense)}",
                               style: TextStyle(
                                 color: accentColors[2],
                               ),

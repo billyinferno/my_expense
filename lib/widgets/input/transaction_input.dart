@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_simple_calculator/flutter_simple_calculator.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -43,9 +42,6 @@ class _TransactionInputState extends State<TransactionInput> {
   final TextEditingController _exchangeController = TextEditingController();
 
   final FocusNode _nameFocus = FocusNode();
-  
-  final NumberFormat _fCCY = NumberFormat("0.00", "en_US");
-  final NumberFormat _nf = NumberFormat.decimalPattern("en_US")..maximumFractionDigits = 2;
 
   late UsersMeModel _userMe;
 
@@ -179,7 +175,7 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // set exchange rate as 1 (assuming that we will always send the same CCY)
     _currentExchangeRate = 1;
-    _exchangeController.text = _fCCY.format(_currentExchangeRate);
+    _exchangeController.text = Globals.fCCY2.format(_currentExchangeRate);
 
     // set default user from and to
     _getUserFromWalletInfo(walletId: _userMe.defaultWallet);
@@ -201,7 +197,7 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // set the exchange rate
     _currentExchangeRate = widget.currentTransaction!.exchangeRate;
-    _exchangeController.text = _fCCY.format(_currentExchangeRate);
+    _exchangeController.text = Globals.fCCY2.format(_currentExchangeRate);
 
     // set the description
     _descriptionController.text = widget.currentTransaction!.description;
@@ -670,7 +666,7 @@ class _TransactionInputState extends State<TransactionInput> {
               await _showCalculator();
             }),
             child: AutoSizeText(
-              _fCCY.format(_currentAmount),
+              Globals.fCCY.format(_currentAmount),
               style: const TextStyle(
                 fontSize: 25,
                 color: textColor,
@@ -774,7 +770,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     operatorColor: Colors.orange[600],
                   ),
                   maximumDigits: 14,
-                  numberFormat: _nf,
+                  numberFormat: Globals.fCCYnf,
                   onChanged: (key, value, expression) {
                     setState(() {
                       // set the current amount as previous current amount if value is null

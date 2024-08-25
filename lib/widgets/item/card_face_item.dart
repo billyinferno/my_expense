@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class CardFace extends StatelessWidget {
@@ -8,9 +7,7 @@ class CardFace extends StatelessWidget {
   const CardFace({super.key, required this.wallet, this.minMaxDate});
 
   @override
-  Widget build(BuildContext context) {
-    final fCCY = NumberFormat("#,##0.00", "en_US");
-    
+  Widget build(BuildContext context) {    
     return Center(
       child: Container(
         height: 150,
@@ -62,7 +59,7 @@ class CardFace extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerRight,
                 child: Text(
-                  "${wallet.currency.symbol} ${fCCY.format(wallet.futureAmount)}",
+                  "${wallet.currency.symbol} ${Globals.fCCY.format(wallet.futureAmount)}",
                   style: const TextStyle(
                     fontSize: 10,
                   ),
@@ -72,7 +69,7 @@ class CardFace extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: Text(
-                "${wallet.currency.symbol} ${fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1))}",
+                "${wallet.currency.symbol} ${Globals.fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1))}",
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

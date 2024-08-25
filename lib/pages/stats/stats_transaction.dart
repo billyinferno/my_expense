@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -13,7 +12,6 @@ class StatsTransactionPage extends StatefulWidget {
 }
 
 class _StatsTransactionPageState extends State<StatsTransactionPage> {
-  final _fCCY = NumberFormat("#,##0.00", "en_US");
   final _transactionHttp = TransactionHTTPService();
 
   final ScrollController _scrollController = ScrollController();
@@ -174,7 +172,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: <Widget>[
               Text(
-                "${_args.currency.symbol} ${_fCCY.format(txn.amount)}",
+                "${_args.currency.symbol} ${Globals.fCCY.format(txn.amount)}",
                 style: TextStyle(
                   color: (_args.type == "expense" ? accentColors[2] : accentColors[6]),
                 ),

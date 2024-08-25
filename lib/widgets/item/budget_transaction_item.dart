@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class BudgetTransactionItem extends StatelessWidget {
@@ -12,8 +11,6 @@ class BudgetTransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fCCY = NumberFormat("#,##0.00", "en_US");
-    
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
       decoration: const BoxDecoration(
@@ -52,7 +49,7 @@ class BudgetTransactionItem extends StatelessWidget {
           ),
           const SizedBox(width: 10,),
           Text(
-            "$itemSymbol ${fCCY.format(itemAmount)}",
+            "$itemSymbol ${Globals.fCCY.format(itemAmount)}",
             style: const TextStyle(
               color: textColor2,
               fontWeight: FontWeight.bold,

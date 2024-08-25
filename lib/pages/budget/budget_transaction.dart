@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -14,7 +13,6 @@ class BudgetTransactionPage extends StatefulWidget {
 
 class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   final ScrollController _scrollController = ScrollController();
-  final fCCY = NumberFormat("#,##0.00", "en_US");
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   
   DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
@@ -193,7 +191,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                           ),
                         ),
                         Text(
-                          "(${fCCY.format(header.expense)})",
+                          "(${Globals.fCCY.format(header.expense)})",
                           style: TextStyle(color: accentColors[2])
                         ),
                       ],

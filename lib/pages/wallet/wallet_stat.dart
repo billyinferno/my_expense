@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -12,7 +11,6 @@ class WalletStatPage extends StatefulWidget {
 }
 
 class _WalletStatPageState extends State<WalletStatPage> {
-  final _fCCY = NumberFormat("#,##0.00", "en_US");
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   bool _sortAscending = true;
   late WalletModel _wallet;
@@ -186,14 +184,14 @@ class _WalletStatPageState extends State<WalletStatPage> {
                 SummaryBox(
                   color: accentColors[0],
                   text: "Income",
-                  value: _fCCY.format(_totalIncome),
+                  value: Globals.fCCY.format(_totalIncome),
                   count: _countIncome,
                 ),
                 const SizedBox(width: 10,),
                 SummaryBox(
                   color: accentColors[2],
                   text: "Expense",
-                  value: _fCCY.format(_totalExpense),
+                  value: Globals.fCCY.format(_totalExpense),
                   count: _countExpense
                 ),
               ],
@@ -274,8 +272,22 @@ class _WalletStatPageState extends State<WalletStatPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Bar(amount: _walletStat[index].income!, maxAmount: _maxAmount, text: _fCCY.format(_walletStat[index].income!), color: accentColors[0]),
-                            Bar(amount: _walletStat[index].expense!, maxAmount: _maxAmount, text: _fCCY.format(_walletStat[index].expense!), color: accentColors[2]),
+                            Bar(
+                              amount: _walletStat[index].income!,
+                              maxAmount: _maxAmount,
+                              text: Globals.fCCY.format(
+                                _walletStat[index].income!
+                              ),
+                              color: accentColors[0]
+                            ),
+                            Bar(
+                              amount: _walletStat[index].expense!,
+                              maxAmount: _maxAmount,
+                              text: Globals.fCCY.format(
+                                _walletStat[index].expense!
+                              ),
+                              color: accentColors[2]
+                            ),
                           ],
                         ),
                       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:my_expense/_index.g.dart';
@@ -14,7 +13,6 @@ class StatsDetailPage extends StatefulWidget {
 
 class _StatsDetailPageState extends State<StatsDetailPage> {
   late StatsDetailArgs _stats;
-  final _fCCY = NumberFormat("#,##0.00", "en_US");
   double _maxExpense = 0.0;
   double _maxIncome = 0.0;
 
@@ -377,7 +375,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
     }
 
     // return the formated CCY
-    return "$symbol ${_fCCY.format(total)}";
+    return "$symbol ${Globals.fCCY.format(total)}";
   }
 
   void _getMaxAmount() {

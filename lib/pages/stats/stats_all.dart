@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -12,7 +11,6 @@ class StatsAllPage extends StatefulWidget {
 }
 
 class _StatsAllPageState extends State<StatsAllPage> {
-  final _fCCY = NumberFormat("#,##0.00", "en_US");
   final WalletHTTPService _walletHTTP = WalletHTTPService();
 
   late Future<bool> _getData;
@@ -200,7 +198,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                 SummaryBox(
                   color: accentColors[0],
                   text: "Income",
-                  value: _fCCY.format(_totalIncome),
+                  value: Globals.fCCY.format(_totalIncome),
                   count: _countIncome,
                 ),
                 const SizedBox(
@@ -209,7 +207,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                 SummaryBox(
                     color: accentColors[2],
                     text: "Expense",
-                    value: _fCCY.format(_totalExpense),
+                    value: Globals.fCCY.format(_totalExpense),
                     count: _countExpense),
               ],
             ),
@@ -281,7 +279,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                             Bar(
                               amount: _walletStatAll[0].data[index].income!,
                               maxAmount: _maxAmount,
-                              text: _fCCY.format(
+                              text: Globals.fCCY.format(
                                 _walletStatAll[0].data[index].income!
                               ),
                               color: accentColors[0]
@@ -289,7 +287,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                             Bar(
                               amount: _walletStatAll[0].data[index].expense!,
                               maxAmount: _maxAmount,
-                              text: _fCCY.format(
+                              text: Globals.fCCY.format(
                                 _walletStatAll[0].data[index].expense!
                               ),
                               color: accentColors[2]
@@ -297,7 +295,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                             Bar(
                               amount: _walletStatAll[0].data[index].balance!,
                               maxAmount: _maxAmount,
-                              text: _fCCY.format(
+                              text: Globals.fCCY.format(
                                 _walletStatAll[0].data[index].balance!
                               ),
                               color: accentColors[4]

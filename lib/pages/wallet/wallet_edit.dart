@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
@@ -16,7 +15,6 @@ class WalletEditPage extends StatefulWidget {
 
 class _WalletEditPageState extends State<WalletEditPage> {
   // format variable
-  final _fCCY = NumberFormat("0.00", "en_US");
   double _currentAmountFontSize = 25;
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
@@ -62,7 +60,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
     // set all the input data based on the initialize data above
     _nameController.text = walletData.name;
     if(_currentStartBalance > 0) {
-      _amountController.text = _fCCY.format(_currentStartBalance);
+      _amountController.text = Globals.fCCY2.format(_currentStartBalance);
       _currentAmountFontSize = 25 - ((10/6) * (_amountController.text.length - 6));
     }
 

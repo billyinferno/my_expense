@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class MyItemList extends StatelessWidget {
@@ -15,11 +14,9 @@ class MyItemList extends StatelessWidget {
   final TextStyle? descriptionStyle;
   final String symbol;
   final double amount;
-  final NumberFormat? amountFormat;
   final Color? amountColor;
   final String? symbolTo;
   final double? amountTo;
-  final NumberFormat? amountFormatTo;
   final Color? amountColorTo;
   final EdgeInsets? padding;
   final Color? borderColor;
@@ -37,11 +34,9 @@ class MyItemList extends StatelessWidget {
     this.descriptionStyle,
     required this.symbol,
     required this.amount,
-    this.amountFormat,
     this.amountColor,
     this.symbolTo,
     this.amountTo,
-    this.amountFormatTo,
     this.amountColorTo,
     this.padding,
     this.borderColor,
@@ -49,9 +44,6 @@ class MyItemList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final NumberFormat nf = (amountFormat ?? NumberFormat("#,##0.00", "en_US"));
-    final NumberFormat nfTo = (amountFormatTo ?? NumberFormat("#,##0.00", "en_US"));
-
     return Container(
       width: double.infinity,
       height: (height ?? 65),
@@ -104,7 +96,7 @@ class MyItemList extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                "$symbol ${nf.format(amount)}",
+                "$symbol ${Globals.fCCY.format(amount)}",
                 style: TextStyle(
                   color: (amountColor ?? textColor)
                 ),
@@ -112,7 +104,7 @@ class MyItemList extends StatelessWidget {
               Visibility(
                 visible: (symbolTo != null && amountTo != null),
                 child: Text(
-                  "${symbolTo ?? ''} ${nfTo.format(amountTo ?? 0)}",
+                  "${symbolTo ?? ''} ${Globals.fCCY.format(amountTo ?? 0)}",
                   style: TextStyle(
                     color: lighten((amountColorTo ?? (amountColor ?? textColor)), 0.25),
                   ),
