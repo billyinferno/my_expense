@@ -485,8 +485,8 @@ class _WalletEditPageState extends State<WalletEditPage> {
     Future <List<CurrencyModel>> walletCurrencyList;
 
     await Future.wait([
-      walletEdit = _walletHttp.updateWallet(wallet),
-      walletCurrencyList = _walletHttp.fetchWalletCurrencies(true),
+      walletEdit = _walletHttp.updateWallet(txn: wallet),
+      walletCurrencyList = _walletHttp.fetchWalletCurrencies(force: true),
     ]).then((_) {
       walletEdit.then((walletEdit) {
         // here we got the walletEdit, so we need to get the walletList from the
@@ -502,7 +502,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
           }
         }
 
-        walletList = _walletHttp.sortWallets(walletList);
+        walletList = _walletHttp.sortWallets(wallets: walletList);
 
         // set the shared preferences with this list
         WalletSharedPreferences.setWallets(walletList);

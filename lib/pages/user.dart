@@ -621,7 +621,10 @@ class _UserPageState extends State<UserPage> {
     // show loading screen
     LoadingScreen.instance().show(context: context);
 
-    await _categoryHTTP.updateDefaultCategory(type, categoryID).then((_) {
+    await _categoryHTTP.updateDefaultCategory(
+      type: type,
+      categoryID: categoryID
+    ).then((_) {
       String newCategoryName = '';
 
       // refresh the user me, as we already stored the updated user me
@@ -675,8 +678,11 @@ class _UserPageState extends State<UserPage> {
     String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
 
     await Future.wait([
-      _budgetHTTP.updateBudgetCurrency(currencyID),
-      _futureBudgetList = _budgetHTTP.fetchBudgetDate(currencyID, currentBudgetDate),
+      _budgetHTTP.updateBudgetCurrency(currencyID: currencyID),
+      _futureBudgetList = _budgetHTTP.fetchBudgetDate(
+        currencyID: currencyID,
+        date: currentBudgetDate
+      ),
     ]).then((_) {
       _refreshUserMe();
       _currentCurrency = _selectedCurrency!;
@@ -724,7 +730,7 @@ class _UserPageState extends State<UserPage> {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
-    await _walletHTTP.updateDefaultWallet(walletId).then((_) {
+    await _walletHTTP.updateDefaultWallet(walletId: walletId).then((_) {
       _refreshUserMe();
       _currentWallet = _selectedWallet!;
 
@@ -813,7 +819,12 @@ class _UserPageState extends State<UserPage> {
     result.then((value) async {
       if (value == true && mounted) {
         // navigate to the remove pin screen.
-        final result = await Navigator.push(context, createAnimationRoute(const PinRemovePage()));
+        final result = await Navigator.push(
+          context,
+          createAnimationRoute(
+            page: const PinRemovePage()
+          )
+        );
         if(result) {
           // set the pin as disabled
           _setIsPinEnabled(false);
@@ -836,7 +847,13 @@ class _UserPageState extends State<UserPage> {
 
   void _showSetupPin() async {
     // navigate to the remove pin screen.
-    final result = await Navigator.push(context, createAnimationRoute(const PinSetupPage()));
+    final result = await Navigator.push(
+      context,
+      createAnimationRoute(
+        page: const PinSetupPage()
+      )
+    );
+    
     if(result) {
       // set the pin as disabled
       _setIsPinEnabled(true);

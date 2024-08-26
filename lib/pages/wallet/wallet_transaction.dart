@@ -233,7 +233,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         // loop thru the transactions that have the same date and add this to the list
         isLoop = true;
         while(idx < txnList.length && isLoop) {
-          if (isSameDate(txnList[idx].date.toLocal(), key.toLocal())) {
+          if (isSameDate(dt1: txnList[idx].date.toLocal(), dt2: key.toLocal())) {
             // add to the transaction list
             WalletTransactionList data = WalletTransactionList();
             data.type = WalletListType.item;
@@ -888,7 +888,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
       // check if the same date or not with the transaction date that we just
       // delete
-      if (isSameDate(currentListTxnDate, txnDeleted.date)) {
+      if (isSameDate(dt1: currentListTxnDate, dt2: txnDeleted.date)) {
         if (mounted) {
           // pop the transaction from the provider
           Provider.of<HomeProvider>(context, listen: false).popTransactionList(txnDeleted);
@@ -945,8 +945,14 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     await WalletSharedPreferences.deleteWalletWorth(txnInfo);
 
     await Future.wait([
-      _futureWallets = _walletHTTP.fetchWallets(true, true),
-      _futureBudgets = _budgetHTTP.fetchBudgetDate(txnCurrencyId, refreshDay),
+      _futureWallets = _walletHTTP.fetchWallets(
+        showDisabled: true,
+        force: true
+      ),
+      _futureBudgets = _budgetHTTP.fetchBudgetDate(
+        currencyID: txnCurrencyId,
+        date: refreshDay
+      ),
     ]).then((_) {
       // update the wallets
       _futureWallets.then((wallets) {
@@ -996,7 +1002,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     });
 
     if (
-        (isWithin(txnInfo.date, from, to)) &&
+        (isWithin(date: txnInfo.date, from: from, to: to)) &&
         (txnInfo.type == 'expense' || txnInfo.type == 'income')
       ) {
       await _transactionHttp.fetchIncomeExpense(

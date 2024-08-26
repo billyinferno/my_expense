@@ -490,15 +490,15 @@ class _WalletAddPageState extends State<WalletAddPage> {
     Future<List<CurrencyModel>> walletCurrencyList;
 
     await Future.wait([
-      walletAdd = _walletHttp.addWallet(wallet),
-      walletCurrencyList = _walletHttp.fetchWalletCurrencies(true),
+      walletAdd = _walletHttp.addWallet(txn: wallet),
+      walletCurrencyList = _walletHttp.fetchWalletCurrencies(force: true),
     ]).then((_) {
       walletAdd.then((walletAdd) {
         // here we got the walletAdd, so we need to get the walletList from the
         // shared preferences, and add this at the end.
         List<WalletModel> walletList = WalletSharedPreferences.getWallets(true);
         walletList.add(walletAdd);
-        walletList = _walletHttp.sortWallets(walletList);
+        walletList = _walletHttp.sortWallets(wallets: walletList);
 
         // set the shared preferences with this list
         WalletSharedPreferences.setWallets(walletList);

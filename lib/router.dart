@@ -53,79 +53,131 @@ class _RouterPageState extends State<RouterPage> {
             case '/login':
             case '/':
               {
-                return MaterialPageRoute(builder: (context) => const LoginPage());
+                return MaterialPageRoute(
+                  builder: (context) => const LoginPage()
+                );
               }
             case '/home':
               {
-                return MaterialPageRoute(builder: (context) => const HomePage());
+                return MaterialPageRoute(
+                  builder: (context) => const HomePage()
+                );
               }
             case '/user':
               {
-                return createAnimationRoute(const UserPage());
+                return createAnimationRoute(page: const UserPage());
               }
             case '/user/password':
               {
-                return createAnimationRoute(const UserChangePassword());
+                return createAnimationRoute(page: const UserChangePassword());
               }
             case '/transaction/add':
               {
-                return createAnimationRoute(TransactionAddPage(params: settings.arguments,));
+                return createAnimationRoute(
+                  page: TransactionAddPage(
+                    params: settings.arguments,
+                  )
+                );
               }
             case '/transaction/edit':
               {
-                return createAnimationRoute(TransactionEditPage(params: settings.arguments,));
+                return createAnimationRoute(
+                  page: TransactionEditPage(
+                    params: settings.arguments,
+                  )
+                );
               }
             case '/transaction/search':
               {
-                return createAnimationRoute(const TransactionSearchPage());
+                return createAnimationRoute(
+                  page: const TransactionSearchPage()
+                );
               }
             case '/budget/list':
               {
-                return createAnimationRoute(BudgetListPage(currencyId: settings.arguments,));
+                return createAnimationRoute(
+                  page: BudgetListPage(
+                    currencyId: settings.arguments,
+                  )
+                );
               }
             case '/budget/transaction':
               {
-                return createAnimationRoute(BudgetTransactionPage(arguments: settings.arguments,));
+                return createAnimationRoute(
+                  page: BudgetTransactionPage(
+                    arguments: settings.arguments,
+                  )
+                );
               }
             case '/budget/stat':
               {
-                return createAnimationRoute(BudgetStatPage(arguments: settings.arguments,));
+                return createAnimationRoute(
+                  page: BudgetStatPage(
+                    arguments: settings.arguments,
+                  )
+                );
               }
             case '/wallet/add':
               {
-                return createAnimationRoute(const WalletAddPage());
+                return createAnimationRoute(page: const WalletAddPage());
               }
             case '/wallet/edit':
               {
-                return createAnimationRoute(WalletEditPage(walletData: settings.arguments,));
+                return createAnimationRoute(
+                  page: WalletEditPage(
+                    walletData: settings.arguments,
+                  )
+                );
               }
             case '/wallet/transaction':
               {
-                return createAnimationRoute(WalletTransactionPage(wallet: settings.arguments,));
+                return createAnimationRoute(
+                  page: WalletTransactionPage(
+                    wallet: settings.arguments,
+                  )
+                );
               }
             case '/wallet/stat':
               {
-                return createAnimationRoute(WalletStatPage(wallet: settings.arguments,));
+                return createAnimationRoute(
+                  page: WalletStatPage(
+                    wallet: settings.arguments,
+                  )
+                );
               }
             case '/stats/filter':
               {
-                return createAnimationRoute(const StatsFilterPage());
+                return createAnimationRoute(page: const StatsFilterPage());
               }
             case '/stats/all':
               {
-                return createAnimationRoute(StatsAllPage(ccy: settings.arguments));
+                return createAnimationRoute(
+                  page: StatsAllPage(
+                    ccy: settings.arguments
+                  )
+                );
               }
             case '/stats/detail':
               {
-                return createAnimationRoute(StatsDetailPage(args: settings.arguments,));
+                return createAnimationRoute(
+                  page: StatsDetailPage(
+                    args: settings.arguments,
+                  )
+                );
               }
             case '/stats/detail/transaction':
               {
-                return createAnimationRoute(StatsTransactionPage(args: settings.arguments,));
+                return createAnimationRoute(
+                  page: StatsTransactionPage(
+                    args: settings.arguments,
+                  )
+                );
               }
             default:
               {
-                return MaterialPageRoute(builder: (context) => const LoginPage());
+                return MaterialPageRoute(
+                  builder: (context) => const LoginPage()
+                );
               }
           }
         },

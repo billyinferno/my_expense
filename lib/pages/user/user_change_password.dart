@@ -237,9 +237,9 @@ class _UserChangePasswordState extends State<UserChangePassword> {
         LoadingScreen.instance().show(context: context);
 
         await _userHttp.updatePassword(
-          _userMe.username,
-          strCurrentPassword,
-          strNewPassword
+          userName: _userMe.username,
+          oldPassword: strCurrentPassword,
+          newPassword: strNewPassword,
         ).onError((error, stackTrace) {
           Log.error(
             message: "Error when update password",

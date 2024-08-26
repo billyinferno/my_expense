@@ -1,13 +1,16 @@
 import 'package:intl/intl.dart';
 
-String formatCurrency(double amount, [bool? checkThousand, bool? showDecimal, bool? shorten, int? decimalNum]) {
+String formatCurrency({
+  required double amount,
+  bool checkThousand = false,
+  bool showDecimal = true,
+  bool shorten = true,
+  int? decimalNum
+}) {
   NumberFormat ccy = NumberFormat("#,##0.00", "en_US");
-  bool isCheckThousand = checkThousand ?? false;
-  bool isShowDecimal = showDecimal ?? true;
-  bool isShorten = shorten ?? true;
-  int currentDecimalNum = (isShowDecimal ? (decimalNum ?? 2) : 0);
+  int currentDecimalNum = (showDecimal ? (decimalNum ?? 2) : 0);
 
-  if (!isShowDecimal) {
+  if (!showDecimal) {
     ccy = NumberFormat("#,##0", "en_US");
   }
   else {
@@ -33,19 +36,19 @@ String formatCurrency(double amount, [bool? checkThousand, bool? showDecimal, bo
   }
 
   // check if this is more than trillion?
-  if(currentAmount >= 1000000000000 && isShorten) {
+  if(currentAmount >= 1000000000000 && shorten) {
     posfix = "T";
     currentAmount = currentAmount / 1000000000000;
   }
-  else if(currentAmount >= 1000000000 && isShorten) {
+  else if(currentAmount >= 1000000000 && shorten) {
     posfix = "B";
     currentAmount = currentAmount / 1000000000;
   }
-  else if(currentAmount >= 1000000 && isShorten) {
+  else if(currentAmount >= 1000000 && shorten) {
     posfix = "M";
     currentAmount = currentAmount / 1000000;
   }
-  else if(currentAmount >= 1000 && isCheckThousand && isShorten) {
+  else if(currentAmount >= 1000 && checkThousand && shorten) {
     posfix = "K";
     currentAmount = currentAmount / 1000;
   }

@@ -70,7 +70,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // for transaction that actually add on the different date, we cannot notify the home list
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
-        if (isSameDate(txn.date.toLocal(), _selectedDate.toLocal()) && mounted) {
+        if (
+          isSameDate(dt1: txn.date.toLocal(), dt2: _selectedDate.toLocal()) &&
+          mounted
+        ) {
           Provider.of<HomeProvider>(
             context,
             listen: false
@@ -292,10 +295,13 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
     // fetch wallets
     await Future.wait([
-      futureWallets = _walletHttp.fetchWallets(true, true),
+      futureWallets = _walletHttp.fetchWallets(
+        showDisabled: true,
+        force: true,
+      ),
       futureBudgets = _budgetHttp.fetchBudgetDate(
-        txnAdd.wallet.currencyId,
-        refreshDay
+        currencyID: txnAdd.wallet.currencyId,
+        date: refreshDay
       ),
     ]).then((_) {
       // update the wallets
@@ -359,7 +365,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
         // check if txnAdd is within statFrom and statTo
         if (mounted) {
-          if (isWithin(txnAdd.date, statFrom, statTo) &&
+          if (isWithin(date: txnAdd.date, from: statFrom, to: statTo) &&
             (
               txnAdd.date.toLocal().month == DateTime.now().toLocal().month &&
               txnAdd.date.toLocal().year == DateTime.now().toLocal().year

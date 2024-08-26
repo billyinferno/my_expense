@@ -595,7 +595,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
-    await _budgetHttp.deleteBudgetList(currencyId, budgetId).then((budget) {
+    await _budgetHttp.deleteBudgetList(
+      currencyId: currencyId,
+      budgetId: budgetId
+    ).then((budget) {
       // we got the new budget, add this to the shared preferences and the
       // provider
       if (_budgetList!.budgets.isNotEmpty) {
@@ -663,7 +666,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
-    await _budgetHttp.addBudgetList(currencyId, categoryId).then((budget) {
+    await _budgetHttp.addBudgetList(
+      currencyId: currencyId,
+      categoryId: categoryId
+    ).then((budget) {
       // we got the new budget, add this to the shared preferences and the
       // provider
       List<BudgetModel> newBudgets = [];
@@ -719,7 +725,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
       // show the loading screen
       LoadingScreen.instance().show(context: context);
 
-      await _budgetHttp.updateBudgetList(_currencyID, _budgetList!.budgets).then((updatedBudgetList) {
+      await _budgetHttp.updateBudgetList(
+        currencyId: _currencyID,
+        budgetList: _budgetList!.budgets
+      ).then((updatedBudgetList) {
         // store back the home budget list
         String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
         String budgetDate = "";

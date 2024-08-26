@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'package:my_expense/_index.g.dart';
 
 class BudgetHTTPService {
-  Future<void> updateBudgetCurrency(int currencyID) async {
+  Future<void> updateBudgetCurrency({
+    required int currencyID
+  }) async {
     // check from shared preferences if we already have loaded category data
     UsersMeModel userMe = UserSharedPreferences.getUserMe();
 
@@ -24,7 +26,10 @@ class BudgetHTTPService {
     await UserSharedPreferences.setUserMe(userMe);
   }
 
-  Future<BudgetModel> addBudgetList(int currencyId, int categoryId) async {
+  Future<BudgetModel> addBudgetList({
+    required int currencyId,
+    required int categoryId
+  }) async {
     // check from shared preferences if we already have loaded category data
     UsersMeModel userMe = UserSharedPreferences.getUserMe();
 
@@ -50,7 +55,10 @@ class BudgetHTTPService {
     return budget;
   }
 
-  Future<List<BudgetModel>> updateBudgetList(int currencyId, List<BudgetModel> budgetList) async {
+  Future<List<BudgetModel>> updateBudgetList({
+    required int currencyId,
+    required List<BudgetModel> budgetList
+  }) async {
     // check from shared preferences if we already have loaded category data
     UsersMeModel userMe = UserSharedPreferences.getUserMe();
 
@@ -80,7 +88,10 @@ class BudgetHTTPService {
     return listBudget;
   }
 
-  Future<BudgetModel> deleteBudgetList(int currencyId, int budgetId) async {
+  Future<BudgetModel> deleteBudgetList({
+    required int currencyId,
+    required int budgetId
+  }) async {
     // send delete request to API
     final String result = await NetUtils.delete(
       url: '${Globals.apiURL}budgets/currency/${currencyId.toString()}/id/${budgetId.toString()}',
@@ -121,12 +132,13 @@ class BudgetHTTPService {
     return budgetListData;
   }
 
-  Future<List<BudgetModel>> fetchBudgetDate(int currencyID, String date,
-      [bool? force]) async {
-    bool isForce = (force ?? false);
-
+  Future<List<BudgetModel>> fetchBudgetDate({
+    required int currencyID,
+    required String date,
+    bool force = false,
+  }) async {
     // check if this is being force or not?
-    if (!isForce) {
+    if (!force) {
       List<BudgetModel>? budgetPref = BudgetSharedPreferences.getBudget(currencyID, date);
       if (budgetPref != null) {
         return budgetPref;

@@ -360,7 +360,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
   Future<bool> _getWalletStatData() async {
     try {
       // perform the get company detail information here
-      await _walletHTTP.getStat(_wallet.id).then((resp) {
+      await _walletHTTP.getStat(id: _wallet.id).then((resp) {
         // copy the response to company detail data
         _walletStat = resp;
         _origWalletStat.addAll(resp);

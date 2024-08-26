@@ -64,7 +64,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         // if not the same then we will need to refresh bot transaction list
         // both on the transaction update date and the home list date.
         if (!isSameDate(
-            txnUpdate.date.toLocal(), currentListTxnDate.toLocal())) {
+            dt1: txnUpdate.date.toLocal(),
+            dt2: currentListTxnDate.toLocal()
+          )) {
           // since the update transaction and current home list is different date
           // get both data and stored it on the transaction shared preferences
           await _refreshHomeList(
@@ -313,13 +315,19 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     }
 
     await Future.wait([
-      futureWallets = _walletHttp.fetchWallets(true, true),
-      futureBudgets = _budgetHttp.fetchBudgetDate(
-        txnUpdate.wallet.currencyId,
-        refreshDay,
-        true
+      futureWallets = _walletHttp.fetchWallets(
+        showDisabled: true,
+        force: true,
       ),
-      futureNetWorth = _walletHttp.fetchWalletsWorth(txnUpdate.date, true),
+      futureBudgets = _budgetHttp.fetchBudgetDate(
+        currencyID: txnUpdate.wallet.currencyId,
+        date: refreshDay,
+        force: true,
+      ),
+      futureNetWorth = _walletHttp.fetchWalletsWorth(
+        to: txnUpdate.date,
+        force: true,
+      ),
     ]).then((_) {
       // got the updated wallets
       futureWallets.then((wallets) {
@@ -393,7 +401,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       (statFrom, statTo) = TransactionSharedPreferences.getStatDate();
 
       // check if txn update is within stat from and to date
-      if (isWithin(txnUpdate.date, statFrom, statTo)) {
+      if (isWithin(date: txnUpdate.date, from: statFrom, to: statTo)) {
         await _transactionHttp.fetchTransactionTop(
           type: txnUpdate.type, 
           ccy: txnUpdate.wallet.currencyId,

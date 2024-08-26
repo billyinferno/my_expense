@@ -717,7 +717,10 @@ class _HomeStatsState extends State<HomeStats> {
     bool isForce = (force ?? false);
 
     // get the data
-    await _walletHttp.fetchWalletsWorth(to, isForce).then((worth) {
+    await _walletHttp.fetchWalletsWorth(
+      to: to,
+      force: isForce
+    ).then((worth) {
       Log.success(message: "💯 fetching wallet worth");
       // set this worth
       _setWorth(worth);

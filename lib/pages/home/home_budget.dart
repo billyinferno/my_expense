@@ -452,7 +452,11 @@ class _HomeBudgetState extends State<HomeBudget> {
     Log.info(message: "📃 Refresh Budget at $budgetDate");
 
     // get the budget data
-    await _budgetHTTP.fetchBudgetDate(_currentCurrencies!.id, budgetDate, isForce).then((value) {
+    await _budgetHTTP.fetchBudgetDate(
+      currencyID: _currentCurrencies!.id,
+      date: budgetDate,
+      force: isForce
+    ).then((value) {
       _streamBudgetList(data: value);
     }).whenComplete(() {
       if(isShowLoader) {

@@ -131,10 +131,16 @@ class _HomeListState extends State<HomeList> {
                   );
                 },
                 selectedDayPredicate: (day) {
-                  return isSameDate(day, _currentFocusedDay);
+                  return isSameDate(
+                    dt1: day,
+                    dt2: _currentFocusedDay
+                  );
                 },
                 onDaySelected: (selectedDay, focusedDay) {
-                  if (!(isSameDate(selectedDay, _currentFocusedDay))) {
+                  if (!(isSameDate(
+                    dt1: selectedDay,
+                    dt2: _currentFocusedDay
+                  ))) {
                     _setFocusedDay(selectedDay);
                     _getData = _refreshTransaction(
                       refreshDay: selectedDay,
@@ -205,7 +211,7 @@ class _HomeListState extends State<HomeList> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    (isSameDate(_currentFocusedDay, DateTime.now())
+                    (isSameDate(dt1: _currentFocusedDay, dt2: DateTime.now())
                       ? "Today"
                       : Globals.dfddMMMMyyyy.format(_currentFocusedDay.toLocal())
                     ),
@@ -511,7 +517,7 @@ class _HomeListState extends State<HomeList> {
       force: force,
     ).then((value) {
       // ensure that the selectedDate and the refreshDay is the same
-      if (isSameDate(_currentFocusedDay, refreshDay) && mounted) {
+      if (isSameDate(dt1: _currentFocusedDay, dt2: refreshDay) && mounted) {
         Provider.of<HomeProvider>(
           context,
           listen: false
@@ -612,9 +618,14 @@ class _HomeListState extends State<HomeList> {
     await WalletSharedPreferences.deleteWalletWorth(txnInfo);
 
     await Future.wait([
-      _futureWallets = _walletHTTP.fetchWallets(true, true),
-      _futureBudgets =
-          _budgetHTTP.fetchBudgetDate(txnInfo.wallet.currencyId, _refreshDay),
+      _futureWallets = _walletHTTP.fetchWallets(
+        showDisabled: true,
+        force: true,
+      ),
+      _futureBudgets = _budgetHTTP.fetchBudgetDate(
+        currencyID: txnInfo.wallet.currencyId,
+        date: _refreshDay
+      ),
     ]).then((_) {
       // update the wallets
       _futureWallets.then((wallets) {
@@ -671,8 +682,10 @@ class _HomeListState extends State<HomeList> {
     });
 
     // check if the txn date is within the from and to of the stat date
-    if (isWithin(txnInfo.date, from, to) &&
-        (txnInfo.type == "expense" || txnInfo.type == "income")) {
+    if (
+      isWithin(date: txnInfo.date, from: from, to: to) &&
+      (txnInfo.type == "expense" || txnInfo.type == "income")
+    ) {
       // fetch the income expense
       await _transactionHttp.fetchIncomeExpense(
         ccyId: txnInfo.wallet.currencyId,

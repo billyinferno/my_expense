@@ -375,7 +375,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
   Future<bool> _getWalletStatAllData() async {
     try {
       // perform the get company detail information here
-      await _walletHTTP.getAllStat(_ccy).then((resp) {
+      await _walletHTTP.getAllStat(ccy: _ccy).then((resp) {
         // copy the response to company detail data
         _walletStatAll = resp;
         _origWalletStatAll.addAll(resp);

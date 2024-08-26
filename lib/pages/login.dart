@@ -323,7 +323,7 @@ class _LoginPageState extends State<LoginPage> {
       _walletHTTP.fetchCurrency().then((_) {
         Log.success(message: "⏳ Fetch Currency");
       }),
-      _walletHTTP.fetchWalletCurrencies(true).then((_) async {
+      _walletHTTP.fetchWalletCurrencies(force: true).then((_) async {
         Log.success(message: "⏳ Fetch Wallet User Currency");
         await _fetchAllBudget();
       }),
@@ -363,9 +363,9 @@ class _LoginPageState extends State<LoginPage> {
     for (CurrencyModel ccy in ccyLists) {
       // fetch the budget for this ccy
       await _budgetHTTP.fetchBudgetDate(
-        ccy.id,
-        _currentDateString,
-        true
+        currencyID: ccy.id,
+        date: _currentDateString,
+        force: true
       ).then((_) {
         Log.success(message: "⏳ Fetch budget at $_currentDateString for ${ccy.name}");
       },);
@@ -455,7 +455,10 @@ class _LoginPageState extends State<LoginPage> {
     // try to fetch users/me endpoint to check if we have credentials to access
     // this page or not?
     try {
-      await _userHTTP.login(username, password).then((loginModel) {
+      await _userHTTP.login(
+        identifier: username,
+        password: password
+      ).then((loginModel) {
         // login success, now we can just store this on the shared preferences
         _storeCredentials(loginModel);
       }).whenComplete(

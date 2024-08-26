@@ -1,4 +1,7 @@
-bool isSameDate(DateTime dt1, DateTime dt2) {
+bool isSameDate({
+  required DateTime dt1,
+  required DateTime dt2
+}) {
   // check if year same or not?
   if (dt1.year == dt2.year) {
     // same, now check if month is the same or not?
@@ -13,7 +16,11 @@ bool isSameDate(DateTime dt1, DateTime dt2) {
   return false;
 }
 
-bool isWithin(DateTime date, DateTime from, DateTime to) {
+bool isWithin({
+  required DateTime date,
+  required DateTime from,
+  required DateTime to
+}) {
   if ((date.isAtSameMomentAs(from) || date.isAfter(from)) && (date.isAtSameMomentAs(to) || date.isBefore(to))) {
     return true;
   }

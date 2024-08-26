@@ -15,7 +15,10 @@ class UserHTTPService {
     return userModel;
   }
 
-  Future<LoginModel> login(String identifier, String password) async {
+  Future<LoginModel> login({
+    required String identifier,
+    required String password
+  }) async {
     // create the body request for login
     var body = {'identifier': identifier, 'password': password};
 
@@ -31,8 +34,11 @@ class UserHTTPService {
     return loginModel;
   }
 
-  Future<void> updatePassword(
-      String userName, String oldPassword, String newPassword) async {
+  Future<void> updatePassword({
+    required String userName,
+    required String oldPassword,
+    required String newPassword
+  }) async {
     // prepare the data request for update password
     var body = {
       "username": userName,

@@ -126,8 +126,8 @@ class _HomeWalletState extends State<HomeWallet> {
     LoadingScreen.instance().show(context: context);
 
     await Future.wait([
-      walletList = _walletHttpService.deleteWallets(id),
-      walletCurrencyList = _walletHttpService.fetchWalletCurrencies(true),
+      walletList = _walletHttpService.deleteWallets(id: id),
+      walletCurrencyList = _walletHttpService.fetchWalletCurrencies(force: true),
     ]).then((_) {
       // set the provider so it can tell the consumer to update/build the widget.
       walletList.then((wallets) {
@@ -178,7 +178,10 @@ class _HomeWalletState extends State<HomeWallet> {
 
     // fetch the new wallet data from API
     await Future.wait([
-      futureWallets = _walletHttpService.fetchWallets(true, true),
+      futureWallets = _walletHttpService.fetchWallets(
+        showDisabled: true,
+        force: true,
+      ),
     ]).then((_) {
       futureWallets.then((wallets) {
         if (wallets.isNotEmpty && mounted) {
@@ -308,8 +311,11 @@ class _HomeWalletState extends State<HomeWallet> {
     LoadingScreen.instance().show(context: context);
 
     await Future.wait([
-      walletList = _walletHttpService.enableWallet(wallet, !wallet.enabled),
-      walletCurrencyList = _walletHttpService.fetchWalletCurrencies(true),
+      walletList = _walletHttpService.enableWallet(
+        txn: wallet,
+        isEnabled: !wallet.enabled
+      ),
+      walletCurrencyList = _walletHttpService.fetchWalletCurrencies(force: true),
     ]).then((_) {
       // set the provider with the new wallets we got
       walletList.then((wallets) {

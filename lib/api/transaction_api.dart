@@ -6,7 +6,10 @@ class TransactionHTTPService {
     required TransactionModel txn,
     required TransactionListModel prevTxn
   }) async {
-    bool sameDate = isSameDate(txn.date.toLocal(), prevTxn.date.toLocal());
+    bool sameDate = isSameDate(
+      dt1: txn.date.toLocal(),
+      dt2: prevTxn.date.toLocal()
+    );
     String date = Globals.dfyyyyMMdd.format(prevTxn.date.toLocal());
     
     // send the request to update the transaction

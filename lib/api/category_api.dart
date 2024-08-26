@@ -3,7 +3,10 @@ import 'package:my_expense/_index.g.dart';
 
 class CategoryHTTPService {
 
-  Future<void> updateDefaultCategory(String type, int categoryID) async {
+  Future<void> updateDefaultCategory({
+    required String type,
+    required int categoryID
+  }) async {
     // get user information from the shared preferences
     UsersMeModel userMe = UserSharedPreferences.getUserMe();
 
@@ -25,10 +28,10 @@ class CategoryHTTPService {
     await UserSharedPreferences.setUserMe(userMe);
   }
 
-  Future<void> fetchCategory([bool? force]) async {
-    bool isForce = (force ?? false);
-
-    if (!isForce) {
+  Future<void> fetchCategory({
+    bool force = false
+  }) async {
+    if (!force) {
       // check whether we have data on shared preferences or not?
       Map<int, CategoryModel> expensePref =
           CategorySharedPreferences.getCategory("expense");

@@ -3,13 +3,14 @@ import 'dart:convert';
 import 'package:my_expense/_index.g.dart';
 
 class WalletHTTPService {
-  Future<List<WalletModel>> fetchWallets(bool showDisabled, [bool? force]) async {
-    bool isForce = (force ?? false);
-    
+  Future<List<WalletModel>> fetchWallets({
+    required bool showDisabled,
+    bool force = false,
+  }) async {
     // check if we need to force to get the wallet or not?
     // if not need, it means we will just load it from shared preferences
     // instead.
-    if (!isForce) {
+    if (!force) {
       // check if we got wallets already on the shared preferences or not?
       List<WalletModel> walletsPref =
           WalletSharedPreferences.getWallets(showDisabled);
@@ -40,13 +41,13 @@ class WalletHTTPService {
     return wallets;
   }
 
-  Future<List<CurrencyModel>> fetchWalletCurrencies([bool? force]) async {
-    bool isForce = (force ?? false);
-
+  Future<List<CurrencyModel>> fetchWalletCurrencies({
+    bool force = false,
+  }) async {
     // check if we need to force to get the wallet or not?
     // if not need, it means we will just load it from shared preferences
     // instead.
-    if (!isForce) {
+    if (!force) {
       // check if we got wallets already on the shared preferences or not?
       List<CurrencyModel> walletsCurrencyPref = WalletSharedPreferences.getWalletUserCurrency();
       if (walletsCurrencyPref.isNotEmpty) {
@@ -75,7 +76,7 @@ class WalletHTTPService {
     return currencies;
   }
 
-  Future<WalletModel> fetchWalletsID(int id) async {
+  Future<WalletModel> fetchWalletsID({required int id}) async {
     // send the request to get wallet ID
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}wallets/$id',
@@ -92,14 +93,16 @@ class WalletHTTPService {
     return wallet;
   }
 
-  Future<List<WorthModel>> fetchWalletsWorth(DateTime to, [bool? force]) async {
-    bool isForce = (force ?? false);
+  Future<List<WorthModel>> fetchWalletsWorth({
+    required DateTime to,
+    bool force = false,
+  }) async {
     String dateTo = Globals.dfyyyyMMdd.format(to.toLocal());
     
     // check if we need to force to get the wallet or not?
     // if not need, it means we will just load it from shared preferences
     // instead.
-    if (!isForce) {
+    if (!force) {
       // check if we got wallets already on the shared preferences or not?
       List<WorthModel> walletsPref = WalletSharedPreferences.getWalletWorth(dateTo);
       if (walletsPref.isNotEmpty) {
@@ -129,7 +132,7 @@ class WalletHTTPService {
     return worth;
   }
 
-  Future<WalletModel> addWallet(WalletModel txn) async {
+  Future<WalletModel> addWallet({required WalletModel txn}) async {
     // prepare the JSON data
     var walletAdd = {
       "name": txn.name,
@@ -157,7 +160,7 @@ class WalletHTTPService {
     return ret;
   }
 
-  Future<WalletModel> updateWallet(WalletModel txn) async {
+  Future<WalletModel> updateWallet({required WalletModel txn}) async {
     // prepare the JSON data
     var walletEdit = {
       "name": txn.name,
@@ -186,7 +189,7 @@ class WalletHTTPService {
     return ret;
   }
 
-  Future<List<WalletModel>> deleteWallets(int id) async {
+  Future<List<WalletModel>> deleteWallets({required int id}) async {
     // send the request to delete wallet
     await NetUtils.delete(
       url: '${Globals.apiURL}wallets/$id',
@@ -215,7 +218,10 @@ class WalletHTTPService {
     return wallets;
   }
 
-  Future<List<WalletModel>> enableWallet(WalletModel txn, bool isEnabled) async {
+  Future<List<WalletModel>> enableWallet({
+    required WalletModel txn,
+    required bool isEnabled
+  }) async {
     // prepare the JSON data
     var enableWallet = {"enabled": isEnabled};
 
@@ -244,7 +250,7 @@ class WalletHTTPService {
     }
 
     // sort the wallet before we stored it again on the shared preferences.
-    wallets = sortWallets(wallets);
+    wallets = sortWallets(wallets: wallets);
 
     // now store back the _wallets to the sharedPreferences
     WalletSharedPreferences.setWallets(wallets);
@@ -256,7 +262,7 @@ class WalletHTTPService {
     return wallets;
   }
 
-  List<WalletModel> sortWallets(List<WalletModel> wallets) {
+  List<WalletModel> sortWallets({required List<WalletModel> wallets}) {
     List<WalletModel> walletList = wallets;
     WalletModel tmpWallet;
 
@@ -319,10 +325,8 @@ class WalletHTTPService {
   }
 
   /// WalletTypes API call
-  Future<List<WalletTypeModel>> fetchWalletTypes([bool? force]) async {
-    bool isForce = (force ?? false);
-
-    if (!isForce) {
+  Future<List<WalletTypeModel>> fetchWalletTypes({bool force = false}) async {
+    if (!force) {
       // check if we got wallets already on the shared preferences or not?
       List<WalletTypeModel> walletTypes =
           WalletSharedPreferences.getWalletTypes();
@@ -355,10 +359,8 @@ class WalletHTTPService {
   }
 
   /// Currency API call
-  Future<List<CurrencyModel>> fetchCurrency([bool? force]) async {
-    bool isForce = (force ?? false);
-    
-    if (!isForce) {
+  Future<List<CurrencyModel>> fetchCurrency({bool force = false}) async {
+    if (!force) {
       // check if we got wallets already on the shared preferences or not?
       List<CurrencyModel> currencies =
           WalletSharedPreferences.getWalletCurrency();
@@ -390,7 +392,7 @@ class WalletHTTPService {
     return currencies;
   }
 
-  Future<void> updateDefaultWallet(int walletId) async {
+  Future<void> updateDefaultWallet({required int walletId}) async {
     // check from shared preferences if we already have loaded category data
     UsersMeModel userMe = UserSharedPreferences.getUserMe();
 
@@ -413,7 +415,7 @@ class WalletHTTPService {
     await UserSharedPreferences.setUserMe(userMe);
   }
 
-  Future<List<WalletStatModel>> getStat(int id) async {
+  Future<List<WalletStatModel>> getStat({required int id}) async {
     // send the request to get wallet statistic
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}wallets/stat/$id',
@@ -427,7 +429,7 @@ class WalletHTTPService {
     return walletStatModel;
   }
 
-  Future<List<WalletStatAllModel>> getAllStat(int? ccy) async {
+  Future<List<WalletStatAllModel>> getAllStat({int? ccy}) async {
     String url = '${Globals.apiURL}wallets/statall';
     if (ccy != null) {
       url += '/$ccy';

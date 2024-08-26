@@ -234,7 +234,14 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 2,
                     ),
                     Text(
-                        "${_budgetTransaction.currencySymbol} ${formatCurrency(_totalMonthlyAmount, false, true, true, 2)}"),
+                      "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                        amount: _totalMonthlyAmount,
+                        checkThousand: false,
+                        showDecimal: true,
+                        shorten: true,
+                        decimalNum: 2
+                      )}"
+                    ),
                   ],
                 ),
               ),
@@ -257,7 +264,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 2,
                     ),
                     Text(
-                        "${_budgetTransaction.currencySymbol} ${formatCurrency(_averageMonthlyAmount, false, true, true, 2)}"),
+                        "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                          amount: _averageMonthlyAmount,
+                          checkThousand: false,
+                          showDecimal: true,
+                          shorten: true,
+                          decimalNum: 2,
+                        )}"),
                   ],
                 ),
               ),
@@ -280,7 +293,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 2,
                     ),
                     Text(
-                        "${_budgetTransaction.currencySymbol} ${formatCurrency(_averageMonthlyDailyAmount, false, true, true, 2)}"),
+                        "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                          amount: _averageMonthlyDailyAmount,
+                          checkThousand: false,
+                          showDecimal: true,
+                          shorten: true,
+                          decimalNum: 2
+                        )}"),
                   ],
                 ),
               ),
