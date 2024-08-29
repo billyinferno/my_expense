@@ -272,9 +272,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
         // loop thru the transactions that have the same date and add this to the list
         isLoop = true;
         while(idx < txnList.length && isLoop) {
-          if (isSameDate(
-            dt1: txnList[idx].date.toLocal(),
-            dt2: key.toLocal())
+          if (txnList[idx].date.toLocal().isSameDate(date: key.toLocal())
           ) {
             // add to the transaction list
             WalletTransactionList data = WalletTransactionList();

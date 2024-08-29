@@ -90,43 +90,43 @@ class IconColorList {
   static Color getExpenseColor(String name) {
     String iconName = name.toLowerCase().trim().replaceAll(RegExp('${String.fromCharCode(160)}+'), ' ');
     switch (iconName) {
-      case "auto": { return darken(accentColors[2],0.2); }
-      case "bank charge": { return darken(accentColors[2],0.19); }
-      case "cash": { return darken(accentColors[2],0.18); }
-      case "charity": { return darken(accentColors[2],0.17); }
-      case "childcare": { return darken(accentColors[2],0.16); }
-      case "clothing": { return darken(accentColors[2],0.14); }
-      case "credit card": { return darken(accentColors[2],0.13); }
-      case "dining": { return darken(accentColors[2],0.12); }
-      case "eating out": { return darken(accentColors[2],0.11); }
-      case "education": { return darken(accentColors[2],0.1); }
-      case "entertainment": { return darken(accentColors[2],0.09); }
-      case "gifts": { return darken(accentColors[2],0.08); }
-      case "groceries": { return darken(accentColors[2],0.07); }
-      case "grooming": { return darken(accentColors[2],0.06); }
-      case "health": { return darken(accentColors[2],0.04); }
-      case "holiday": { return darken(accentColors[2],0.03); }
-      case "home repair": { return darken(accentColors[2],0.02); }
-      case "household": { return darken(accentColors[2],0.01); }
+      case "auto": { return darken(accentColors[2], amount: 0.2); }
+      case "bank charge": { return darken(accentColors[2], amount: 0.19); }
+      case "cash": { return darken(accentColors[2], amount: 0.18); }
+      case "charity": { return darken(accentColors[2], amount: 0.17); }
+      case "childcare": { return darken(accentColors[2], amount: 0.16); }
+      case "clothing": { return darken(accentColors[2], amount: 0.14); }
+      case "credit card": { return darken(accentColors[2], amount: 0.13); }
+      case "dining": { return darken(accentColors[2], amount: 0.12); }
+      case "eating out": { return darken(accentColors[2], amount: 0.11); }
+      case "education": { return darken(accentColors[2], amount: 0.1); }
+      case "entertainment": { return darken(accentColors[2], amount: 0.09); }
+      case "gifts": { return darken(accentColors[2], amount: 0.08); }
+      case "groceries": { return darken(accentColors[2], amount: 0.07); }
+      case "grooming": { return darken(accentColors[2], amount: 0.06); }
+      case "health": { return darken(accentColors[2], amount: 0.04); }
+      case "holiday": { return darken(accentColors[2], amount: 0.03); }
+      case "home repair": { return darken(accentColors[2], amount: 0.02); }
+      case "household": { return darken(accentColors[2], amount: 0.01); }
       case "insurance": { return accentColors[2]; }
-      case "investment": { return lighten(accentColors[2],0.01); }
-      case "loan": { return lighten(accentColors[2],0.02); }
-      case "medical": { return lighten(accentColors[2],0.03); }
-      case "misc": { return lighten(accentColors[2],0.04); }
-      case "mortgage": { return lighten(accentColors[2],0.06); }
-      case "others": { return lighten(accentColors[2],0.07); }
-      case "pets": { return lighten(accentColors[2],0.08); }
-      case "rent": { return lighten(accentColors[2],0.09); }
-      case "tax": { return lighten(accentColors[2],0.1); }
-      case "transport": { return lighten(accentColors[2],0.11); }
-      case "travel": { return lighten(accentColors[2],0.12); }
-      case "utilities": { return lighten(accentColors[2],0.13); }
-      case "utilities: cable tv": { return lighten(accentColors[2],0.14); }
-      case "utilities: garbage": { return lighten(accentColors[2],0.16); }
-      case "utilities: gas & electric": { return lighten(accentColors[2],0.17); }
-      case "utilities: internet": { return lighten(accentColors[2],0.18); }
-      case "utilities: telephone": { return lighten(accentColors[2],0.19); }
-      case "utilities: water": { return lighten(accentColors[2],0.2); }
+      case "investment": { return lighten(accentColors[2], amount: 0.01); }
+      case "loan": { return lighten(accentColors[2], amount: 0.02); }
+      case "medical": { return lighten(accentColors[2], amount: 0.03); }
+      case "misc": { return lighten(accentColors[2], amount: 0.04); }
+      case "mortgage": { return lighten(accentColors[2], amount: 0.06); }
+      case "others": { return lighten(accentColors[2], amount: 0.07); }
+      case "pets": { return lighten(accentColors[2], amount: 0.08); }
+      case "rent": { return lighten(accentColors[2], amount: 0.09); }
+      case "tax": { return lighten(accentColors[2], amount: 0.1); }
+      case "transport": { return lighten(accentColors[2], amount: 0.11); }
+      case "travel": { return lighten(accentColors[2], amount: 0.12); }
+      case "utilities": { return lighten(accentColors[2], amount: 0.13); }
+      case "utilities: cable tv": { return lighten(accentColors[2], amount: 0.14); }
+      case "utilities: garbage": { return lighten(accentColors[2], amount: 0.16); }
+      case "utilities: gas & electric": { return lighten(accentColors[2], amount: 0.17); }
+      case "utilities: internet": { return lighten(accentColors[2], amount: 0.18); }
+      case "utilities: telephone": { return lighten(accentColors[2], amount: 0.19); }
+      case "utilities: water": { return lighten(accentColors[2], amount: 0.2); }
       default: { return accentColors[2]; }
     }
   }
@@ -150,14 +150,14 @@ class IconColorList {
   static Color getIncomeColor(String name) {
     String iconName = name.toLowerCase().trim().replaceAll(RegExp('${String.fromCharCode(160)}+'), ' ');
     switch (iconName) {
-      case "bonus": { return darken(accentColors[0],0.15); }
-      case "investment": { return darken(accentColors[0],0.1); }
-      case "loan payment": { return darken(accentColors[0],0.05); }
+      case "bonus": { return darken(accentColors[0], amount: 0.15); }
+      case "investment": { return darken(accentColors[0], amount: 0.1); }
+      case "loan payment": { return darken(accentColors[0], amount: 0.05); }
       case "misc": { return accentColors[0]; }
-      case "others": { return darken(accentColors[0],0.05); }
-      case "salary": { return darken(accentColors[0],0.1); }
-      case "deposit": { return darken(accentColors[0],0.15); }
-      case "tax refund": { return darken(accentColors[0],0.2); }
+      case "others": { return darken(accentColors[0], amount: 0.05); }
+      case "salary": { return darken(accentColors[0], amount: 0.1); }
+      case "deposit": { return darken(accentColors[0], amount: 0.15); }
+      case "tax refund": { return darken(accentColors[0], amount: 0.2); }
       default: { return accentColors[0]; }
     }
   }

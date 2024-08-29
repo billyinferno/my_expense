@@ -20,13 +20,13 @@ class TransactionSharedPreferences {
     String key = "${_transactionKey}_$date";
     List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
 
-    await MyBox.putStringList(key, data);
+    await MyBox.putStringList(key: key, value: data);
   }
 
   static List<TransactionListModel>? getTransaction(String date) {
     String key = "${_transactionKey}_$date";
 
-    List<String>? data = MyBox.getStringList(key);
+    List<String>? data = MyBox.getStringList(key: key);
 
     if(data != null) {
       List<TransactionListModel> transaction = data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
@@ -47,7 +47,7 @@ class TransactionSharedPreferences {
     }
     List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
 
-    await MyBox.putStringList(key, data);
+    await MyBox.putStringList(key: key, value: data);
   }
 
   static List<LastTransactionModel>? getLastTransaction(String type) {
@@ -59,7 +59,7 @@ class TransactionSharedPreferences {
       key = _transactionLastIncomeKey;
     }
 
-    List<String>? data = MyBox.getStringList(key);
+    List<String>? data = MyBox.getStringList(key: key);
 
     if(data != null) {
       List<LastTransactionModel> transaction = data.map((e) => LastTransactionModel.fromJson(jsonDecode(e))).toList();
@@ -74,13 +74,13 @@ class TransactionSharedPreferences {
     String key = "${_transactionBudget}_${categoryId}_$date";
     List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
 
-    await MyBox.putStringList(key, data);
+    await MyBox.putStringList(key: key, value: data);
   }
 
   static List<TransactionListModel>? getTransactionBudget(int categoryId, String date) {
     String key = "${_transactionBudget}_${categoryId}_$date";
 
-    List<String>? data = MyBox.getStringList(key);
+    List<String>? data = MyBox.getStringList(key: key);
 
     if(data != null) {
       List<TransactionListModel> transaction = data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
@@ -92,11 +92,14 @@ class TransactionSharedPreferences {
   }
 
   static Future<void> setTransactionMinDate(DateTime date) async {
-    await MyBox.putString(_transactionMinDate, date.toString());
+    await MyBox.putString(
+      key: _transactionMinDate,
+      value: date.toString()
+    );
   }
 
   static DateTime getTransactionMinDate() {
-    String? data = MyBox.getString(_transactionMinDate);
+    String? data = MyBox.getString(key: _transactionMinDate);
 
     if(data != null) {
       DateTime date = DateTime.parse(data);
@@ -108,18 +111,25 @@ class TransactionSharedPreferences {
   }
 
   static Future<void> setTransactionMaxDate(DateTime date) async {
-    await MyBox.putString(_transactionMaxDate, date.toString());
+    await MyBox.putString(
+      key: _transactionMaxDate,
+      value: date.toString()
+    );
   }
 
   static DateTime getTransactionMaxDate() {
-    String? data = MyBox.getString(_transactionMaxDate);
+    String? data = MyBox.getString(key: _transactionMaxDate);
 
     if(data != null) {
       DateTime date = DateTime.parse(data);
       return date;
     }
     else {
-      return DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
+      return DateTime(
+        DateTime.now().year,
+        DateTime.now().month + 1,
+        1
+      ).subtract(const Duration(days: 1));
     }
   }
 
@@ -127,13 +137,13 @@ class TransactionSharedPreferences {
     String key = "${_transactionWallet}_${walletId}_$date";
     List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
 
-    await MyBox.putStringList(key, data);
+    await MyBox.putStringList(key: key, value: data);
   }
 
   static List<TransactionListModel>? getTransactionWallet(int walletId, String date) {
     String key = "${_transactionWallet}_${walletId}_$date";
 
-    List<String>? data = MyBox.getStringList(key);
+    List<String>? data = MyBox.getStringList(key: key);
 
     if(data != null) {
       List<TransactionListModel> transaction = data.map((e) => TransactionListModel.fromJson(jsonDecode(e))).toList();
@@ -147,7 +157,7 @@ class TransactionSharedPreferences {
   static Future<void> deleteTransactionWallet(int walletId, String date, TransactionListModel txn) async {
     String key = "${_transactionWallet}_${walletId}_$date";
     
-    List<String>? data = MyBox.getStringList(key);
+    List<String>? data = MyBox.getStringList(key: key);
 
     List<TransactionListModel> transaction;
     if(data != null) {
@@ -180,7 +190,7 @@ class TransactionSharedPreferences {
   static Future<void> updateTransactionWallet(int walletId, String date, TransactionListModel txn) async {
     String key = "${_transactionWallet}_${walletId}_$date";
     
-    List<String>? data = MyBox.getStringList(key);
+    List<String>? data = MyBox.getStringList(key: key);
 
     List<TransactionListModel> transaction;
     if(data != null) {
@@ -207,7 +217,7 @@ class TransactionSharedPreferences {
   static Future<void> addTransactionWallet(int walletId, String date, TransactionListModel txn) async {
     String key = "${_transactionWallet}_${walletId}_$date";
     
-    List<String>? data = MyBox.getStringList(key);
+    List<String>? data = MyBox.getStringList(key: key);
 
     List<TransactionListModel> transaction;
     if(data != null) {
@@ -233,9 +243,8 @@ class TransactionSharedPreferences {
           transaction[j] = swp;
         }
         else {
-          if(isSameDate(
-            dt1: transaction[i].date.toLocal(),
-            dt2: transaction[j].date.toLocal()
+          if(transaction[i].date.toLocal().isSameDate(
+            date: transaction[j].date.toLocal()
           )) {
             // check which ID is bigger
             if(transaction[i].id > transaction[j].id) {
@@ -268,13 +277,13 @@ class TransactionSharedPreferences {
     String key = "${_transactionIncomeExpense}_${ccyId}_${dateFrom}_$dateTo";
     String? incomeExpense0 = jsonEncode(incomeExpense.toJson());
 
-    await MyBox.putString(key, incomeExpense0);
+    await MyBox.putString(key: key, value: incomeExpense0);
   }
 
   static IncomeExpenseModel? getIncomeExpense(int ccyId, String dateFrom, String dateTo) {
     String key = "${_transactionIncomeExpense}_${ccyId}_${dateFrom}_$dateTo";
 
-    String? data = MyBox.getString(key);
+    String? data = MyBox.getString(key: key);
 
     if(data != null) {
       IncomeExpenseModel incomeExpense = IncomeExpenseModel.fromJson(jsonDecode(data));
@@ -346,11 +355,11 @@ class TransactionSharedPreferences {
   }
 
   static Future<void> setTransactionListCurrentDate(DateTime date) async {
-    await MyBox.putString(_transactionListCurrentDate, date.toString());
+    await MyBox.putString(key: _transactionListCurrentDate, value: date.toString());
   }
 
   static DateTime? getTransactionListCurrentDate() {
-    String? data = MyBox.getString(_transactionListCurrentDate);
+    String? data = MyBox.getString(key: _transactionListCurrentDate);
     
     if(data != null) {
       DateTime date = DateTime.parse(data);
@@ -365,13 +374,13 @@ class TransactionSharedPreferences {
     String key = "${_transactionTop}_${date}_$type";
     List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
 
-    await MyBox.putStringList(key, data);
+    await MyBox.putStringList(key: key, value: data);
   }
 
   static List<TransactionTopModel>? getTransactionTop(String date, String type) {
     String key = "${_transactionTop}_${date}_$type";
 
-    List<String>? data = MyBox.getStringList(key);
+    List<String>? data = MyBox.getStringList(key: key);
 
     if(data != null) {
       List<TransactionTopModel> transaction = data.map((e) => TransactionTopModel.fromJson(jsonDecode(e))).toList();
@@ -386,13 +395,19 @@ class TransactionSharedPreferences {
     String strDateFrom = from.toLocal().toIso8601String();
     String strDateTo = to.toLocal().toIso8601String();
 
-    await MyBox.putString(_transactionStatDateFrom, strDateFrom);
-    await MyBox.putString(_transactionStatDateTo, strDateTo);
+    await MyBox.putString(
+      key: _transactionStatDateFrom,
+      value: strDateFrom,
+    );
+    await MyBox.putString(
+      key: _transactionStatDateTo,
+      value: strDateTo,
+    );
   }
 
   static (DateTime, DateTime) getStatDate() {
-    String? dateFrom = MyBox.getString(_transactionStatDateFrom);
-    String? dateTo = MyBox.getString(_transactionStatDateFrom);
+    String? dateFrom = MyBox.getString(key: _transactionStatDateFrom);
+    String? dateTo = MyBox.getString(key: _transactionStatDateFrom);
 
     DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
     DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));

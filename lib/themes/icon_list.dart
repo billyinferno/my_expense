@@ -3,26 +3,25 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_expense/_index.g.dart';
 
 class IconList {
-  static Icon getIcon(String name, [double? size]) {
-    double currentSize = (size ?? 20);
+  static Icon getIcon(String name, {double size = 20, Color color = Colors.white}) {
     switch(name.toLowerCase()) {
-      case "wallet": { return Icon(FontAwesomeIcons.wallet, color: const Color(0xFFFFFFFF), size: currentSize,); }
-      case "asset": { return Icon(FontAwesomeIcons.fileInvoiceDollar, color: const Color(0xFFFFFFFF), size: currentSize); }
-      case "cash": { return Icon(FontAwesomeIcons.moneyBill1, color: const Color(0xFFFFFFFF), size: currentSize); }
-      case "checking": { return Icon(FontAwesomeIcons.solidCreditCard, color: const Color(0xFFFFFFFF), size: currentSize); }
-      case "credit card": { return Icon(FontAwesomeIcons.ccVisa, color: const Color(0xFFFFFFFF), size: currentSize); }
-      case "debit card": { return Icon(FontAwesomeIcons.solidCreditCard, color: const Color(0xFFFFFFFF), size: currentSize); }
-      case "investment": { return Icon(FontAwesomeIcons.chartArea, color: const Color(0xFFFFFFFF), size: currentSize); }
-      case "loan": { return Icon(FontAwesomeIcons.handHoldingDollar, color: const Color(0xFFFFFFFF), size: currentSize); }
-      case "savings": { return Icon(FontAwesomeIcons.piggyBank, color: const Color(0xFFFFFFFF), size: currentSize); }
-      case "other": { return Icon(FontAwesomeIcons.wallet, color: const Color(0xFFFFFFFF), size: currentSize); }
-      default: { return Icon(FontAwesomeIcons.question, color: const Color(0xFFFFFFFF), size: currentSize); }
+      case "wallet": { return Icon(FontAwesomeIcons.wallet, color: color, size: size,); }
+      case "asset": { return Icon(FontAwesomeIcons.fileInvoiceDollar, color: color, size: size); }
+      case "cash": { return Icon(FontAwesomeIcons.moneyBill1, color: color, size: size); }
+      case "checking": { return Icon(FontAwesomeIcons.solidCreditCard, color: color, size: size); }
+      case "credit card": { return Icon(FontAwesomeIcons.ccVisa, color: color, size: size); }
+      case "debit card": { return Icon(FontAwesomeIcons.solidCreditCard, color: color, size: size); }
+      case "investment": { return Icon(FontAwesomeIcons.chartArea, color: color, size: size); }
+      case "loan": { return Icon(FontAwesomeIcons.handHoldingDollar, color: color, size: size); }
+      case "savings": { return Icon(FontAwesomeIcons.piggyBank, color: color, size: size); }
+      case "other": { return Icon(FontAwesomeIcons.wallet, color: color, size: size); }
+      default: { return Icon(FontAwesomeIcons.question, color: color, size: size); }
     }
   }
 
   static Color getColor(String name) {
     switch(name.toLowerCase()) {
-      case "wallet": { return accentColors[0]; }
+      case "walle ?? TileMode.mirror)t": { return accentColors[0]; }
       case "asset": { return accentColors[3]; }
       case "cash": { return accentColors[5]; }
       case "checking": { return accentColors[9]; }

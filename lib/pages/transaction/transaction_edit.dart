@@ -63,10 +63,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         // check if this is the same date or not?
         // if not the same then we will need to refresh bot transaction list
         // both on the transaction update date and the home list date.
-        if (!isSameDate(
-            dt1: txnUpdate.date.toLocal(),
-            dt2: currentListTxnDate.toLocal()
-          )) {
+        if (!txnUpdate.date.toLocal().isSameDate(
+          date: currentListTxnDate.toLocal()
+        )) {
           // since the update transaction and current home list is different date
           // get both data and stored it on the transaction shared preferences
           await _refreshHomeList(
@@ -101,7 +100,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setTransactionList(txnListShared ?? []);
+          ).setTransactionList(transactions: txnListShared ?? []);
 
           // since we already finished, we can pop to return back to the
           // previous page
@@ -302,7 +301,10 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
             Provider.of<HomeProvider>(
               context,
               listen: false
-            ).setIncomeExpense(txnUpdate.wallet.currencyId, incomeExpense);
+            ).setIncomeExpense(
+              ccyId: txnUpdate.wallet.currencyId,
+              data: incomeExpense
+            );
           }
         }).onError((error, stackTrace) {
           Log.error(
@@ -335,7 +337,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setWalletList(wallets);
+          ).setWalletList(wallets: wallets);
         }
       });
 
@@ -352,7 +354,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setBudgetList(budgets);
+          ).setBudgetList(budgets: budgets);
         }
       }).then((_) {
         // lastly check whether the date being used on the transaction
@@ -379,7 +381,10 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         ).subtract(const Duration(days: 1)));
         WalletSharedPreferences.setWalletWorth(dateTo, worth);
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setNetWorth(worth: worth);
         }
       });
     }).onError((error, stackTrace) {
@@ -401,7 +406,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       (statFrom, statTo) = TransactionSharedPreferences.getStatDate();
 
       // check if txn update is within stat from and to date
-      if (isWithin(date: txnUpdate.date, from: statFrom, to: statTo)) {
+      if (txnUpdate.date.isWithin(from: statFrom, to: statTo)) {
         await _transactionHttp.fetchTransactionTop(
           type: txnUpdate.type, 
           ccy: txnUpdate.wallet.currencyId,
@@ -415,9 +420,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
               context,
               listen: false
             ).setTopTransaction(
-              txnUpdate.wallet.currencyId,
-              txnUpdate.type,
-              transactionTop
+              ccy: txnUpdate.wallet.currencyId,
+              type: txnUpdate.type,
+              data: transactionTop
             );
           }
         }).onError(

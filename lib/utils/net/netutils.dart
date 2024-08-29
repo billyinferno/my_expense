@@ -18,7 +18,12 @@ class NetException {
   final String message;
   final String? body;
 
-  const NetException({required this.code, required this.type, required this.message, this.body});
+  const NetException({
+    required this.code,
+    required this.type,
+    required this.message,
+    this.body
+  });
 
   @override
   String toString() {

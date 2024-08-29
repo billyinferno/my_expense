@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
-SnackBar createSnackBar({required String message, Icon? icon, int? duration}) {
+SnackBar createSnackBar({
+  required String message,
+  Icon? icon,
+  int duration = 3,
+}) {
   Icon snackBarIcon = (icon ?? Icon(Ionicons.alert_circle_outline, size: 20, color: accentColors[2],));
-  int currentDuration = (duration ?? 3);
 
   SnackBar snackBar = SnackBar(
-    duration: Duration(seconds: currentDuration),
+    duration: Duration(seconds: duration),
     backgroundColor: primaryDark,
     content: Container(
       height: 25,

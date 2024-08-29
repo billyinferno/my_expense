@@ -9,7 +9,14 @@ class MultiLineChartPainter extends CustomPainter {
   final List<Map<String, double>> data;
   final int? dateOffset;
   
-  const MultiLineChartPainter({required this.min, required this.max, required this.point, required this.color, required this.data, this.dateOffset});
+  const MultiLineChartPainter({
+    required this.min,
+    required this.max,
+    required this.point,
+    required this.color,
+    required this.data,
+    this.dateOffset
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -120,16 +127,17 @@ class MultiLineChartPainter extends CustomPainter {
       if (i % datePrintOffset == 0 && i > 0 && i < (point.length - 1)) {
         canvas.drawLine(p1, p2, graphRectBorderWhite);
         _drawText(
-            canvas: canvas,
-            position: Offset(xLeft, graphRect.bottom),
-            width: 60,
-            text: point[i],
-            left: -15,
-            top: 5,
-            minHeight: 0,
-            maxHeight: graphRect.height + 20,
-            minWidth: 0,
-            maxWidth: graphRect.width + 20);
+          canvas: canvas,
+          position: Offset(xLeft, graphRect.bottom),
+          width: 60,
+          text: point[i],
+          left: -15,
+          top: 5,
+          minHeight: 0,
+          maxHeight: graphRect.height + 20,
+          minWidth: 0,
+          maxWidth: graphRect.width + 20
+        );
       } else {
         canvas.drawLine(p1, p2, graphRectBorder);
       }
@@ -147,30 +155,32 @@ class MultiLineChartPainter extends CustomPainter {
 
       double currVal = min + (((max - min) / 4.0) * i.toDouble());
       _drawText(
-          canvas: canvas,
-          position: Offset(graphRect.left, graphRect.bottom - (yD * i) - 5),
-          width: 60,
-          text: formatCurrency(currVal),
-          left: 0,
-          top: -5,
-          minHeight: 10,
-          maxHeight: graphRect.height,
-          minWidth: 10,
-          maxWidth: graphRect.width);
-    }
-
-    // put the max price
-    _drawText(
         canvas: canvas,
-        position: Offset(graphRect.left, graphRect.top),
+        position: Offset(graphRect.left, graphRect.bottom - (yD * i) - 5),
         width: 60,
-        text: formatCurrency(max),
+        text: formatCurrency(currVal),
         left: 0,
         top: -5,
         minHeight: 10,
         maxHeight: graphRect.height,
         minWidth: 10,
-        maxWidth: graphRect.width);
+        maxWidth: graphRect.width
+      );
+    }
+
+    // put the max price
+    _drawText(
+      canvas: canvas,
+      position: Offset(graphRect.left, graphRect.top),
+      width: 60,
+      text: formatCurrency(max),
+      left: 0,
+      top: -5,
+      minHeight: 10,
+      maxHeight: graphRect.height,
+      minWidth: 10,
+      maxWidth: graphRect.width
+    );
 
     canvas.drawRect(graphRect, graphRectBorder);
   }

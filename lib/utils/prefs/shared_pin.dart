@@ -4,7 +4,7 @@ import 'package:my_expense/_index.g.dart';
 class PinSharedPreferences {
   static const _pinModel = 'pin';
 
-  static Future<void> setPin(PinModel pin) async {
+  static Future<void> setPin({required PinModel pin}) async {
     if (MyBox.encryptedBox == null) {
       await MyBox.init();
     }

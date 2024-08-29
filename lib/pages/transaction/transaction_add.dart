@@ -71,13 +71,13 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
         if (
-          isSameDate(dt1: txn.date.toLocal(), dt2: _selectedDate.toLocal()) &&
+          txn.date.toLocal().isSameDate(date: _selectedDate.toLocal()) &&
           mounted
         ) {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setTransactionList(txnListShared);
+          ).setTransactionList(transactions: txnListShared);
         }
 
         // finished update information, return back to the previous page
@@ -237,7 +237,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
       _worth = WalletSharedPreferences.getWalletWorth(dateTo);
       if (mounted) {
-        Provider.of<HomeProvider>(context, listen: false).setNetWorth(_worth);
+        Provider.of<HomeProvider>(
+          context,
+          listen: false
+        ).setNetWorth(worth: _worth);
       }
     }).onError((error, stackTrace) {
       // why got error here?
@@ -281,7 +284,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
             Provider.of<HomeProvider>(
               context,
               listen: false
-            ).setIncomeExpense(txnAdd.wallet.currencyId, incomeExpense);
+            ).setIncomeExpense(
+              ccyId: txnAdd.wallet.currencyId,
+              data: incomeExpense
+            );
           }
         }).onError((error, stackTrace) {
           Log.error(
@@ -310,7 +316,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setWalletList(wallets);
+          ).setWalletList(wallets: wallets);
         }
       });
 
@@ -349,7 +355,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
             Provider.of<HomeProvider>(
               context,
               listen: false
-            ).setBudgetList(budgets);
+            ).setBudgetList(budgets: budgets);
           }
         });
       }
@@ -365,7 +371,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
         // check if txnAdd is within statFrom and statTo
         if (mounted) {
-          if (isWithin(date: txnAdd.date, from: statFrom, to: statTo) &&
+          if (txnAdd.date.isWithin(from: statFrom, to: statTo) &&
             (
               txnAdd.date.toLocal().month == DateTime.now().toLocal().month &&
               txnAdd.date.toLocal().year == DateTime.now().toLocal().year
@@ -374,7 +380,11 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
             Provider.of<HomeProvider>(
               context,
               listen: false
-            ).addTopTransaction(txnAdd.wallet.currencyId, txnAdd.type, txnAdd);
+            ).addTopTransaction(
+              ccy: txnAdd.wallet.currencyId,
+              type: txnAdd.type,
+              transaction: txnAdd
+            );
           }
         }
       }

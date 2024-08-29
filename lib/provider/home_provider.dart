@@ -11,15 +11,15 @@ class HomeProvider extends ChangeNotifier {
   Map<int, IncomeExpenseModel> incomeExpense = {};
   Map<int, Map<String, List<TransactionTopModel>>> topTransaction = {};
 
-  setTransactionList(List<TransactionListModel> newTransactionList) {
-    transactionList = newTransactionList;
+  setTransactionList({required List<TransactionListModel> transactions}) {
+    transactionList = transactions;
     notifyListeners();
   }
 
-  popTransactionList(TransactionListModel txnData) {
+  popTransactionList({required TransactionListModel transaction}) {
     // loop transaction list until find the same id
     for(int i=0; i<transactionList.length; i++) {
-      if (transactionList[i].id == txnData.id) {
+      if (transactionList[i].id == transaction.id) {
         transactionList.removeAt(i);
         break;
       }
@@ -33,13 +33,13 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setWalletList(List<WalletModel> newWalletList) {
-    walletList = newWalletList;
+  setWalletList({required List<WalletModel> wallets}) {
+    walletList = wallets;
     notifyListeners();
   }
 
-  setBudgetList(List<BudgetModel> newBudgetList) {
-    budgetList = newBudgetList;
+  setBudgetList({required List<BudgetModel> budgets}) {
+    budgetList = budgets;
     notifyListeners();
   }
 
@@ -49,7 +49,7 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setBudgetAddList(List<BudgetModel> budgetList) {
+  setBudgetAddList({required List<BudgetModel> budgets}) {
     budgetAddList = budgetList;
     notifyListeners();
   }
@@ -60,13 +60,13 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setWalletCurrency(List<CurrencyModel> newWalletCurrency) {
-    walletCurrency = newWalletCurrency;
+  setWalletCurrency({required List<CurrencyModel> currencies}) {
+    walletCurrency = currencies;
     notifyListeners();
   }
 
-  setNetWorth(List<WorthModel> newNetWorth) {
-    netWorth = newNetWorth;
+  setNetWorth({required List<WorthModel> worth}) {
+    netWorth = worth;
     notifyListeners();
   }
 
@@ -76,12 +76,18 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  setIncomeExpense(int ccyId, IncomeExpenseModel updateIncomeExpense) {
-    incomeExpense[ccyId] = updateIncomeExpense;
+  setIncomeExpense({
+    required int ccyId,
+    required IncomeExpenseModel data}) {
+    incomeExpense[ccyId] = data;
     notifyListeners();
   }
 
-  setTopTransaction(int ccy, String type, List<TransactionTopModel> data) {
+  setTopTransaction({
+    required int ccy,
+    required String type,
+    required List<TransactionTopModel> data
+  }) {
     // check if ccy already exists or not?
     if (!topTransaction.containsKey(ccy)) {
       topTransaction[ccy] = {};
@@ -92,18 +98,22 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
   
-  addTopTransaction(int ccy, String type, TransactionListModel txn) {
+  addTopTransaction({
+    required int ccy,
+    required String type,
+    required TransactionListModel transaction
+  }) {
     // check whether this ccy already exists in topTransaction?
     if(topTransaction.containsKey(ccy)) {
       // it means we already have data for this
       // create the transaction top model for this transaction
       TransactionTopModel txnTop = TransactionTopModel(
-        transactionName: txn.name,
-        transactionAmount: txn.amount,
-        transactionCategoryId: txn.category!.id,
-        transactionCategoryName: txn.category!.name,
-        transactionWalletId: txn.wallet.id,
-        transactionWalletName: txn.wallet.name
+        transactionName: transaction.name,
+        transactionAmount: transaction.amount,
+        transactionCategoryId: transaction.category!.id,
+        transactionCategoryName: transaction.category!.name,
+        transactionWalletId: transaction.wallet.id,
+        transactionWalletName: transaction.wallet.name
       );
 
       // check if empty or not?
@@ -120,7 +130,7 @@ class HomeProvider extends ChangeNotifier {
           // only do if the new list still less than 10
           if (newTopList.length < 10) {
             // compare the amount to the current data
-            if (topTransaction[ccy]![type]![i].transactionAmount < txn.amount && !isAdded) {
+            if (topTransaction[ccy]![type]![i].transactionAmount < transaction.amount && !isAdded) {
               // current amount is bigger then this
               // so put the txn top here
               newTopList.add(txnTop);

@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 
-String formatCurrency({
-  required double amount,
+String formatCurrency(
+  double amount, {
   bool checkThousand = false,
   bool showDecimal = true,
   bool shorten = true,

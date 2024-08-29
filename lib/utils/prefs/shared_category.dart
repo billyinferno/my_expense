@@ -19,8 +19,14 @@ class CategorySharedPreferences {
     }
 
     await Future.wait([
-      MyBox.putStringList(_keyCategoryExpenseModel, jsonExpense),
-      MyBox.putStringList(_keyCategoryIncomeModel, jsonIncome),
+      MyBox.putStringList(
+        key: _keyCategoryExpenseModel,
+        value: jsonExpense
+      ),
+      MyBox.putStringList(
+        key: _keyCategoryIncomeModel,
+        value: jsonIncome
+      ),
     ]);
   }
 
@@ -34,7 +40,7 @@ class CategorySharedPreferences {
       key = _keyCategoryIncomeModel;
     }
 
-    List<String>? data = MyBox.getStringList(key);
+    List<String>? data = MyBox.getStringList(key: key);
     // List<String>? _data = _pref!.getStringList(_key);
 
     if(data != null) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Color darken(Color color, [double amount = .1]) {
+Color darken(Color color, {double amount = .1}) {
   assert(amount >= 0 && amount <= 1);
 
   final hsl = HSLColor.fromColor(color);
@@ -9,7 +9,7 @@ Color darken(Color color, [double amount = .1]) {
   return hslDark.toColor();
 }
 
-Color lighten(Color color, [double amount = .1]) {
+Color lighten(Color color, {double amount = .1}) {
   assert(amount >= 0 && amount <= 1);
 
   final hsl = HSLColor.fromColor(color);

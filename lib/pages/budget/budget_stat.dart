@@ -235,7 +235,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                     ),
                     Text(
                       "${_budgetTransaction.currencySymbol} ${formatCurrency(
-                        amount: _totalMonthlyAmount,
+                        _totalMonthlyAmount,
                         checkThousand: false,
                         showDecimal: true,
                         shorten: true,
@@ -265,7 +265,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                     ),
                     Text(
                         "${_budgetTransaction.currencySymbol} ${formatCurrency(
-                          amount: _averageMonthlyAmount,
+                          _averageMonthlyAmount,
                           checkThousand: false,
                           showDecimal: true,
                           shorten: true,
@@ -294,7 +294,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                     ),
                     Text(
                         "${_budgetTransaction.currencySymbol} ${formatCurrency(
-                          amount: _averageMonthlyDailyAmount,
+                          _averageMonthlyDailyAmount,
                           checkThousand: false,
                           showDecimal: true,
                           shorten: true,
@@ -430,7 +430,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                                   child: Align(
                                       alignment: Alignment.centerRight,
                                       child: Text(
-                                          "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetMonthly[index].totalAmount, false, true, true, 2)}")),
+                                          "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                                            _budgetMonthly[index].totalAmount,
+                                            checkThousand: false,
+                                            showDecimal: true,
+                                            shorten: true,
+                                            decimalNum: 2,
+                                          )}")),
                                 ),
                               ),
                               Expanded(
@@ -440,7 +446,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                                   child: Align(
                                       alignment: Alignment.centerRight,
                                       child: Text(
-                                          "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetMonthly[index].averageAmount, false, true, true, 2)}")),
+                                          "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                                            _budgetMonthly[index].averageAmount,
+                                            checkThousand: false,
+                                            showDecimal: true,
+                                            shorten: true,
+                                            decimalNum: 2,
+                                          )}")),
                                 ),
                               ),
                             ],
@@ -525,7 +537,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 2,
                     ),
                     Text(
-                        "${_budgetTransaction.currencySymbol} ${formatCurrency(_totalYearlyAmount, false, true, true, 2)}"),
+                        "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                          _totalYearlyAmount,
+                          checkThousand: false,
+                          showDecimal: true,
+                          shorten: true,
+                          decimalNum: 2,
+                        )}"),
                   ],
                 ),
               ),
@@ -548,7 +566,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 2,
                     ),
                     Text(
-                        "${_budgetTransaction.currencySymbol} ${formatCurrency(_averageYearlyAmount, false, true, true, 2)}"),
+                        "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                          _averageYearlyAmount,
+                          checkThousand: false,
+                          showDecimal: true,
+                          shorten: true,
+                          decimalNum: 2,
+                        )}"),
                   ],
                 ),
               ),
@@ -571,7 +595,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 2,
                     ),
                     Text(
-                        "${_budgetTransaction.currencySymbol} ${formatCurrency(_averageYearlyDailyAmount, false, true, true, 2)}"),
+                        "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                          _averageYearlyDailyAmount,
+                          checkThousand: false,
+                          showDecimal: true,
+                          shorten: true,
+                          decimalNum: 2,
+                        )}"),
                   ],
                 ),
               ),
@@ -702,7 +732,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                                   child: Align(
                                       alignment: Alignment.centerRight,
                                       child: Text(
-                                          "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetYearly[index].totalAmount, false, true, true, 2)}")),
+                                          "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                                            _budgetYearly[index].totalAmount,
+                                            checkThousand: false,
+                                            showDecimal: true,
+                                            shorten: true,
+                                            decimalNum: 2,
+                                          )}")),
                                 ),
                               ),
                               Expanded(
@@ -712,7 +748,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                                   child: Align(
                                       alignment: Alignment.centerRight,
                                       child: Text(
-                                          "${_budgetTransaction.currencySymbol} ${formatCurrency(_budgetYearly[index].averageAmount, false, true, true, 2)}")),
+                                          "${_budgetTransaction.currencySymbol} ${formatCurrency(
+                                            _budgetYearly[index].averageAmount,
+                                            checkThousand: false,
+                                            showDecimal: true,
+                                            shorten: true,
+                                            decimalNum: 2,
+                                          )}")),
                                 ),
                               ),
                             ],

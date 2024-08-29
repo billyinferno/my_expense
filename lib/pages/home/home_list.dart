@@ -131,16 +131,10 @@ class _HomeListState extends State<HomeList> {
                   );
                 },
                 selectedDayPredicate: (day) {
-                  return isSameDate(
-                    dt1: day,
-                    dt2: _currentFocusedDay
-                  );
+                  return day.isSameDate(date: _currentFocusedDay);
                 },
                 onDaySelected: (selectedDay, focusedDay) {
-                  if (!(isSameDate(
-                    dt1: selectedDay,
-                    dt2: _currentFocusedDay
-                  ))) {
+                  if (!(selectedDay.isSameDate(date: _currentFocusedDay))) {
                     _setFocusedDay(selectedDay);
                     _getData = _refreshTransaction(
                       refreshDay: selectedDay,
@@ -211,7 +205,7 @@ class _HomeListState extends State<HomeList> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    (isSameDate(dt1: _currentFocusedDay, dt2: DateTime.now())
+                    (_currentFocusedDay.isSameDate(date: DateTime.now())
                       ? "Today"
                       : Globals.dfddMMMMyyyy.format(_currentFocusedDay.toLocal())
                     ),
@@ -517,11 +511,11 @@ class _HomeListState extends State<HomeList> {
       force: force,
     ).then((value) {
       // ensure that the selectedDate and the refreshDay is the same
-      if (isSameDate(dt1: _currentFocusedDay, dt2: refreshDay) && mounted) {
+      if (_currentFocusedDay.isSameDate(date: refreshDay) && mounted) {
         Provider.of<HomeProvider>(
           context,
           listen: false
-        ).setTransactionList(value);
+        ).setTransactionList(transactions: value);
       }
     }).onError((error, stackTrace) {
       Log.error(
@@ -549,7 +543,7 @@ class _HomeListState extends State<HomeList> {
         Provider.of<HomeProvider>(
           context,
           listen: false
-        ).popTransactionList(txnDeleted);
+        ).popTransactionList(transaction: txnDeleted);
 
         // get the current transaction on the provider
         List<TransactionListModel> txnListModel = Provider.of<HomeProvider>(
@@ -630,8 +624,10 @@ class _HomeListState extends State<HomeList> {
       // update the wallets
       _futureWallets.then((wallets) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletList(wallets);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(wallets: wallets);
         }
       });
 
@@ -668,7 +664,7 @@ class _HomeListState extends State<HomeList> {
             Provider.of<HomeProvider>(
               context,
               listen: false
-            ).setBudgetList(_budgets);
+            ).setBudgetList(budgets: _budgets);
           }
         });
       }
@@ -683,7 +679,7 @@ class _HomeListState extends State<HomeList> {
 
     // check if the txn date is within the from and to of the stat date
     if (
-      isWithin(date: txnInfo.date, from: from, to: to) &&
+      txnInfo.date.isWithin(from: from, to: to) &&
       (txnInfo.type == "expense" || txnInfo.type == "income")
     ) {
       // fetch the income expense
@@ -698,7 +694,10 @@ class _HomeListState extends State<HomeList> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setIncomeExpense(txnInfo.wallet.currencyId, result);
+          ).setIncomeExpense(
+            ccyId: txnInfo.wallet.currencyId,
+            data: result
+          );
         }
       }).onError((error, stackTrace) {
         Log.error(
@@ -723,9 +722,9 @@ class _HomeListState extends State<HomeList> {
             context,
             listen: false
           ).setTopTransaction(
-            txnInfo.wallet.currencyId,
-            txnInfo.type,
-            transactionTop
+            ccy: txnInfo.wallet.currencyId,
+            type: txnInfo.type,
+            data: transactionTop
           );
         }
       }).onError(

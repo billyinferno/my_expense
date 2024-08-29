@@ -14,11 +14,16 @@ class BudgetSharedPreferences {
       jsonBudget = budgets.map((e) => jsonEncode(e.toJson())).toList();
     }
 
-    await MyBox.putStringList("$_keyBudgetModel${currencyID}_$date", jsonBudget);
+    await MyBox.putStringList(
+      key: "$_keyBudgetModel${currencyID}_$date",
+      value: jsonBudget,
+    );
   }
 
   static List<BudgetModel>? getBudget(int currencyID, String date) {
-    List<String>? data = MyBox.getStringList("$_keyBudgetModel${currencyID}_$date");
+    List<String>? data = MyBox.getStringList(
+      key: "$_keyBudgetModel${currencyID}_$date"
+    );
 
     if(data != null) {
       List<BudgetModel> listBudgetModel = data.map((e) => BudgetModel.fromJson(jsonDecode(e))).toList();
@@ -31,11 +36,11 @@ class BudgetSharedPreferences {
 
   static Future setBudgetCurrent(DateTime date) async {
     String strDate = Globals.dfyyyyMMdd.format(DateTime(date.toLocal().year, date.toLocal().month, 1));
-    await MyBox.putString(_keyCurrentBudgetDate, strDate);
+    await MyBox.putString(key: _keyCurrentBudgetDate, value: strDate);
   }
 
   static String getBudgetCurrent() {
-    String? date = MyBox.getString(_keyCurrentBudgetDate);
+    String? date = MyBox.getString(key: _keyCurrentBudgetDate);
 
     if(date != null) {
       return date;
@@ -46,11 +51,14 @@ class BudgetSharedPreferences {
   }
 
   static Future<void> setBudgetList(int currencyID, BudgetListModel budgetList) async {
-    await MyBox.putString(_keyBudgetList + currencyID.toString(), jsonEncode(budgetList.toJson()));
+    await MyBox.putString(
+      key: _keyBudgetList + currencyID.toString(),
+      value: jsonEncode(budgetList.toJson())
+    );
   }
 
   static BudgetListModel? getBudgetList(int currencyID) {
-    String? data = MyBox.getString(_keyBudgetList + currencyID.toString());
+    String? data = MyBox.getString(key: _keyBudgetList + currencyID.toString());
 
     if(data != null) {
       BudgetListModel listBudgetListModel = BudgetListModel.fromJson(jsonDecode(data));

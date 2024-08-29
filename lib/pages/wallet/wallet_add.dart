@@ -508,7 +508,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setWalletList(walletList);
+          ).setWalletList(wallets: walletList);
         }
       });
 
@@ -517,7 +517,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setWalletCurrency(walletsCurrency);
+          ).setWalletCurrency(currencies: walletsCurrency);
         }
       });
     }).onError((error, stackTrace) {

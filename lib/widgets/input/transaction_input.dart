@@ -1213,7 +1213,7 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   String _calendarText() {
-    if(isSameDate(dt1: _currentDate.toLocal(), dt2: DateTime.now().toLocal())) {
+    if(_currentDate.toLocal().isSameDate(date: DateTime.now().toLocal())) {
       return "Today";
     }
     else {

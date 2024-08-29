@@ -233,7 +233,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         // loop thru the transactions that have the same date and add this to the list
         isLoop = true;
         while(idx < txnList.length && isLoop) {
-          if (isSameDate(dt1: txnList[idx].date.toLocal(), dt2: key.toLocal())) {
+          if (txnList[idx].date.toLocal().isSameDate(date: key.toLocal())) {
             // add to the transaction list
             WalletTransactionList data = WalletTransactionList();
             data.type = WalletListType.item;
@@ -888,10 +888,13 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
       // check if the same date or not with the transaction date that we just
       // delete
-      if (isSameDate(dt1: currentListTxnDate, dt2: txnDeleted.date)) {
+      if (currentListTxnDate.isSameDate(date: txnDeleted.date)) {
         if (mounted) {
           // pop the transaction from the provider
-          Provider.of<HomeProvider>(context, listen: false).popTransactionList(txnDeleted);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).popTransactionList(transaction: txnDeleted);
 
           // get the current transaction on the provider
           List<TransactionListModel> txnListModel = Provider.of<HomeProvider>(context, listen: false).transactionList;
@@ -957,7 +960,10 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       // update the wallets
       _futureWallets.then((wallets) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setWalletList(wallets);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(wallets: wallets);
         }
       });
 
@@ -988,7 +994,10 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           // only set the provider if only the current budget date is the same as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
           if(currentBudgetDate == refreshDay && mounted) {
-            Provider.of<HomeProvider>(context, listen: false).setBudgetList(_budgets);
+            Provider.of<HomeProvider>(
+              context,
+              listen: false
+            ).setBudgetList(budgets: _budgets);
           }
         });
       }
@@ -1002,7 +1011,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     });
 
     if (
-        (isWithin(date: txnInfo.date, from: from, to: to)) &&
+        (txnInfo.date.isWithin(from: from, to: to)) &&
         (txnInfo.type == 'expense' || txnInfo.type == 'income')
       ) {
       await _transactionHttp.fetchIncomeExpense(
@@ -1012,7 +1021,10 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         force: true
       ).then((result) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(txnCurrencyId, result);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setIncomeExpense(ccyId: txnCurrencyId, data: result);
         }
       }).onError((error, stackTrace) {
         Log.error(
@@ -1035,9 +1047,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         if (mounted) {
           // set the provide for this
           Provider.of<HomeProvider>(context, listen: false).setTopTransaction(
-            txnCurrencyId,
-            txnInfo.type,
-            transactionTop
+            ccy: txnCurrencyId,
+            type: txnInfo.type,
+            data: transactionTop
           );
         }
       }).onError((error, stackTrace) {

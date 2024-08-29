@@ -38,11 +38,14 @@ class UserSharedPreferences {
   }
 
   static Future setUserMe(UsersMeModel me) async {
-    await MyBox.putString(_userMeModel, jsonEncode(me.toJson()));
+    await MyBox.putString(
+      key: _userMeModel,
+      value: jsonEncode(me.toJson())
+    );
   }
 
   static UsersMeModel getUserMe() {
-    String? userMeData = MyBox.getString(_userMeModel);
+    String? userMeData = MyBox.getString(key: _userMeModel);
     //String? userMeData = _pref!.getString(_userMeModel);
 
     UsersMeModel userModel;

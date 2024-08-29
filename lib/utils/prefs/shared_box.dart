@@ -41,7 +41,10 @@ class MyBox {
     await encryptedBox!.compact();
   }
 
-  static Future<void> putString(String key, String value) async {
+  static Future<void> putString({
+    required String key,
+    required String value,
+  }) async {
     // check if null
     if(keyBox == null) {
       await init();
@@ -51,7 +54,10 @@ class MyBox {
     await keyBox!.put(key, value);
   }
 
-  static Future<void> putStringList(String key, List<String> value) async {
+  static Future<void> putStringList({
+    required String key,
+    required List<String> value
+  }) async {
     // check if null
     if(keyBox == null) {
       await init();
@@ -61,7 +67,9 @@ class MyBox {
     await keyBox!.put(key, value);
   }
 
-  static String? getString(String key) {
+  static String? getString({
+    required String key
+  }) {
     // check if null
     if(keyBox == null) {
       init();
@@ -76,7 +84,7 @@ class MyBox {
     }
   }
 
-  static List<String>? getStringList(String key) {
+  static List<String>? getStringList({required String key}) {
     // check if null
     if(keyBox == null) {
       init();
@@ -91,7 +99,10 @@ class MyBox {
     }
   }
 
-  static Future<void> putBool(String key, bool value) async {
+  static Future<void> putBool({
+    required String key,
+    required bool value
+  }) async {
     // check if null
     if(keyBox == null) {
       init();
@@ -100,7 +111,7 @@ class MyBox {
     await keyBox!.put(key, value);
   }
 
-  static bool getBool(String key) {
+  static bool getBool({required String key}) {
     // check if null
     if(keyBox == null) {
       init();
@@ -114,7 +125,7 @@ class MyBox {
     }
   }
 
-  static List<String> getKeys(String key) {
+  static List<String> getKeys({required String key}) {
     List<String> result = [];
     String key0 = "";
     var keys = keyBox!.keys;
@@ -153,10 +164,11 @@ class MyBox {
     }
   }
 
-  static Future<void> delete(String key, [bool? exact]) async {
-    bool isExact = (exact ?? false);
-
-    if(isExact) {
+  static Future<void> delete({
+    required String key,
+    bool exact = false,
+  }) async {
+    if(exact) {
       // check if got key on the key box or not?
       if(keyBox!.containsKey(key)) {
         // can be deleted

@@ -452,7 +452,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                         Provider.of<HomeProvider>(
                                           context,
                                           listen: false
-                                        ).setBudgetAddList(newBudgetListModel.budgets);
+                                        ).setBudgetAddList(
+                                          budgets: newBudgetListModel.budgets
+                                        );
                                   
                                         // remove the dialog
                                         Navigator.pop(context);
@@ -559,7 +561,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
         Provider.of<HomeProvider>(
           context,
           listen: false
-        ).setBudgetAddList(result.budgets);
+        ).setBudgetAddList(budgets: result.budgets);
       }
     }).onError((error, stackTrace) {
       // got error
@@ -618,7 +620,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setBudgetAddList(newBudgetList.budgets);
+          ).setBudgetAddList(budgets: newBudgetList.budgets);
         }
 
         // set the budget on the home screen, since the budget on the home screen
@@ -645,7 +647,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
               Provider.of<HomeProvider>(
                 context,
                 listen: false
-              ).setBudgetList(homeBudgetList);
+              ).setBudgetList(budgets: homeBudgetList);
             }
           }
         }
@@ -687,7 +689,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
       _setBudgetList(newBudgetList);
       if (mounted) {
-        Provider.of<HomeProvider>(context, listen: false).setBudgetAddList(newBudgetList.budgets);
+        Provider.of<HomeProvider>(
+          context,
+          listen: false
+        ).setBudgetAddList(budgets: newBudgetList.budgets);
       }
 
       // set the budget on the home screen, since the budget on the home screen
@@ -703,7 +708,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
           _currencyID, currentBudgetDate, homeBudgetList);
       if (mounted) {
         // after that notify the budget list on the home
-        Provider.of<HomeProvider>(context, listen: false).setBudgetList(homeBudgetList);
+        Provider.of<HomeProvider>(
+          context,
+          listen: false
+        ).setBudgetList(budgets: homeBudgetList);
       }
     }).onError((error, stackTrace) {
       Log.error(
@@ -736,7 +744,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
         List<BudgetModel>? currentHomeBudgetList;
 
         // get the list of budget for this currency that we already load on the storage
-        List<String> budgetKeys = MyBox.getKeys("budget_$_currencyID");
+        List<String> budgetKeys = MyBox.getKeys(key: "budget_$_currencyID");
         for (String budgetKey in budgetKeys) {
           // get the current budget date
           budgetDate = budgetKey.replaceAll("budget_${_currencyID}_", "");
@@ -780,7 +788,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
           if (budgetDate == currentBudgetDate) {
             if (mounted) {
               // after that notify the budget list on the home if this is the same as the current budget
-              Provider.of<HomeProvider>(context, listen: false).setBudgetList(newHomeBudgetList);
+              Provider.of<HomeProvider>(
+                context,
+                listen: false
+              ).setBudgetList(budgets: newHomeBudgetList);
             }
           }
         }

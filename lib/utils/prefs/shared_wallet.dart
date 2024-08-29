@@ -11,12 +11,12 @@ class WalletSharedPreferences {
   static Future setWallets(List<WalletModel> wallet) async {
     List<String> data = wallet.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
-      await MyBox.putStringList(_walletKey, data);
+      await MyBox.putStringList(key: _walletKey, value: data);
     }
   }
 
   static List<WalletModel> getWallets(bool showDisabled) {
-    List<String>? data = MyBox.getStringList(_walletKey);
+    List<String>? data = MyBox.getStringList(key: _walletKey);
 
     if(data != null) {
       List<WalletModel> wallet = data.map((e) => WalletModel.fromJson(jsonDecode(e))).toList();
@@ -42,12 +42,12 @@ class WalletSharedPreferences {
   static Future setWalletTypes(List<WalletTypeModel> walletType) async {
     List<String> data = walletType.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
-      await MyBox.putStringList(_walletTypeKey, data);
+      await MyBox.putStringList(key: _walletTypeKey, value: data);
     }
   }
 
   static List<WalletTypeModel> getWalletTypes() {
-    List<String>? data = MyBox.getStringList(_walletTypeKey);
+    List<String>? data = MyBox.getStringList(key: _walletTypeKey);
 
     if(data != null) {
       List<WalletTypeModel> walletType = data.map((e) => WalletTypeModel.fromJson(jsonDecode(e))).toList();
@@ -61,12 +61,12 @@ class WalletSharedPreferences {
   static Future setWalletCurrency(List<CurrencyModel> walletCurrency) async {
     List<String> data = walletCurrency.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
-      await MyBox.putStringList(_walletCurrencyKey, data);
+      await MyBox.putStringList(key: _walletCurrencyKey, value: data);
     }
   }
 
   static List<CurrencyModel> getWalletCurrency() {
-    List<String>? data = MyBox.getStringList(_walletCurrencyKey);
+    List<String>? data = MyBox.getStringList(key: _walletCurrencyKey);
 
     if(data != null) {
       List<CurrencyModel> currency = data.map((e) => CurrencyModel.fromJson(jsonDecode(e))).toList();
@@ -80,12 +80,12 @@ class WalletSharedPreferences {
   static Future<void> setWalletUserCurrency(List<CurrencyModel> currencies) async {
     List<String> data = currencies.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
-      await MyBox.putStringList(_walletUserCurrency, data);
+      await MyBox.putStringList(key: _walletUserCurrency, value: data);
     }
   }
 
   static List<CurrencyModel> getWalletUserCurrency() {
-    List<String>? data = MyBox.getStringList(_walletUserCurrency);
+    List<String>? data = MyBox.getStringList(key: _walletUserCurrency);
 
     if(data != null) {
       List<CurrencyModel> currency = data.map((e) => CurrencyModel.fromJson(jsonDecode(e))).toList();
@@ -99,12 +99,12 @@ class WalletSharedPreferences {
   static Future setWalletWorth(String dateTo, List<WorthModel> walletWorth) async {
     List<String> data = walletWorth.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
-      await MyBox.putStringList("${_walletWorthKey}_$dateTo", data);
+      await MyBox.putStringList(key: "${_walletWorthKey}_$dateTo", value: data);
     }
   }
 
   static List<WorthModel> getWalletWorth(String dateTo) {
-    List<String>? data = MyBox.getStringList("${_walletWorthKey}_$dateTo");
+    List<String>? data = MyBox.getStringList(key: "${_walletWorthKey}_$dateTo");
 
     if(data != null) {
       List<WorthModel> walletWorth = data.map((e) => WorthModel.fromJson(jsonDecode(e))).toList();

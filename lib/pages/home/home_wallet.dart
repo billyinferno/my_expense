@@ -132,14 +132,18 @@ class _HomeWalletState extends State<HomeWallet> {
       // set the provider so it can tell the consumer to update/build the widget.
       walletList.then((wallets) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletList(wallets);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(wallets: wallets);
         }
       });
       walletCurrencyList.then((walletsCurrency) {
         if (mounted) {
-          Provider.of<HomeProvider>(context, listen: false)
-              .setWalletCurrency(walletsCurrency);
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletCurrency(currencies: walletsCurrency);
         }
       });
     }).onError((error, stackTrace) {
@@ -188,7 +192,7 @@ class _HomeWalletState extends State<HomeWallet> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setWalletList(wallets);
+          ).setWalletList(wallets: wallets);
         }
       });
     }).onError((error, stackTrace) {
@@ -323,7 +327,7 @@ class _HomeWalletState extends State<HomeWallet> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setWalletList(wallets);
+          ).setWalletList(wallets: wallets);
         }
       });
 
@@ -332,7 +336,7 @@ class _HomeWalletState extends State<HomeWallet> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setWalletCurrency(walletsCurrency);
+          ).setWalletCurrency(currencies: walletsCurrency);
         }
       });
     }).onError((error, stackTrace) {

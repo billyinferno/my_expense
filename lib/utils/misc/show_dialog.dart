@@ -5,22 +5,22 @@ import 'package:my_expense/_index.g.dart';
 class ShowMyDialog {
   // const ShowMyDialog({Key? key}) : super(key: key);
   ShowMyDialog({
-    this.dialogTitle,
-    this.dialogText,
-    this.confirmText,
+    this.dialogTitle = "Confirmation",
+    this.dialogText = "Are your sure?",
+    this.confirmText = "Confirm",
     this.confirmColor,
-    this.cancelText,
+    this.cancelText = "Cancel",
     this.cancelColor,
-    this.cancelEnabled,
+    this.cancelEnabled = true,
   });
 
-  final String? dialogTitle;
-  final String? dialogText;
-  final String? confirmText;
+  final String dialogTitle;
+  final String dialogText;
+  final String confirmText;
   final Color? confirmColor;
-  final String? cancelText;
+  final String cancelText;
   final Color? cancelColor;
-  final bool? cancelEnabled;
+  final bool cancelEnabled;
 
   Future<bool?> show(BuildContext context) async {
     return showDialog<bool>(
@@ -29,7 +29,7 @@ class ShowMyDialog {
         builder: (BuildContext context) {
           return CupertinoAlertDialog(
             title: Text(
-              dialogTitle ?? "Confirmation",
+              dialogTitle,
               style: const TextStyle(
                 fontFamily: '--apple-system',
               ),
@@ -41,7 +41,7 @@ class ShowMyDialog {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    dialogText ?? "Are your sure?",
+                    dialogText,
                     style: const TextStyle(
                       fontFamily: '--apple-system',
                     ),
@@ -63,7 +63,7 @@ class ShowMyDialog {
           Navigator.pop(context, true);
         },
         child: Text(
-          confirmText ?? "Confirm",
+          confirmText,
           style: TextStyle(
             fontFamily: '--apple-system',
             color: (confirmColor ?? accentColors[0]),
@@ -73,11 +73,11 @@ class ShowMyDialog {
     ];
 
     // check if we need to enabled the cancel button or not?
-    if (cancelEnabled ?? true) {
+    if (cancelEnabled) {
       ret.add(
         CupertinoDialogAction(
           child: Text(
-            cancelText ?? "Cancel",
+            cancelText,
             style: TextStyle(
               fontFamily: '--apple-system',
               color: (cancelColor ?? textColor),

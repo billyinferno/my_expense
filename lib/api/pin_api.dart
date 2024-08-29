@@ -25,7 +25,7 @@ class PinHTTPService {
     PinModel pin = PinModel.fromJson(jsonDecode(result));
     
     // stored pin on the shared preferences
-    PinSharedPreferences.setPin(pin);
+    PinSharedPreferences.setPin(pin: pin);
     return pin;
   }
 
@@ -43,7 +43,7 @@ class PinHTTPService {
     // parse the login data and get the login model
     PinModel pin = PinModel.fromJson(jsonDecode(result));
     // stored pin on the shared preferences
-    PinSharedPreferences.setPin(pin);
+    PinSharedPreferences.setPin(pin: pin);
     return pin;
   }
 
@@ -62,7 +62,7 @@ class PinHTTPService {
     PinModel pin = PinModel.fromJson(jsonDecode(result));
 
     // stored pin on the shared preferences
-    PinSharedPreferences.setPin(pin);
+    PinSharedPreferences.setPin(pin: pin);
     return pin;
   }
 
@@ -76,6 +76,6 @@ class PinHTTPService {
 
     // set the pin as NULL
     PinModel pin = PinModel(hashKey: null, hashPin: null);
-    PinSharedPreferences.setPin(pin);
+    PinSharedPreferences.setPin(pin: pin);
   }
 }

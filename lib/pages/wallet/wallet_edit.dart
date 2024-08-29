@@ -512,7 +512,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setWalletList(walletList);
+          ).setWalletList(wallets: walletList);
         }
       });
 
@@ -521,7 +521,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
           Provider.of<HomeProvider>(
             context,
             listen: false
-          ).setWalletCurrency(walletsCurrency);
+          ).setWalletCurrency(currencies: walletsCurrency);
         }
       });
     }).onError((error, stackTrace) {

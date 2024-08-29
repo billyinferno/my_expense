@@ -433,7 +433,7 @@ class _HomeBudgetState extends State<HomeBudget> {
   }
 
   void _streamBudgetList({required List<BudgetModel> data}) {
-    Provider.of<HomeProvider>(context, listen: false).setBudgetList(data);
+    Provider.of<HomeProvider>(context, listen: false).setBudgetList(budgets: data);
   }
 
   Future<bool> _fetchBudget([bool? showLoader, bool? force]) async {

@@ -727,7 +727,7 @@ class _HomeStatsState extends State<HomeStats> {
 
       if (mounted) {
         // set the provider for net worth
-        Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth);
+        Provider.of<HomeProvider>(context, listen: false).setNetWorth(worth: worth);
       }
     }).onError((error, stackTrace) {
       Log.error(
@@ -751,7 +751,10 @@ class _HomeStatsState extends State<HomeStats> {
     ).then((incomeExpense) {
       if (mounted) {
         // set the provider for income expense
-        Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(ccy.id, incomeExpense);
+        Provider.of<HomeProvider>(context, listen: false).setIncomeExpense(
+          ccyId: ccy.id,
+          data: incomeExpense
+        );
       }
     }).onError((error, stackTrace) {
       Log.error(
@@ -774,7 +777,14 @@ class _HomeStatsState extends State<HomeStats> {
     ).then((transactionTop) {
       if (mounted) {
         // set the provide for this
-        Provider.of<HomeProvider>(context, listen: false).setTopTransaction(ccy, type, transactionTop);
+        Provider.of<HomeProvider>(
+          context,
+          listen: false
+        ).setTopTransaction(
+          ccy: ccy,
+          type: type,
+          data: transactionTop
+        );
       }
     }).onError((error, stackTrace) {
       Log.error(
