@@ -162,7 +162,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        budgetCurrencySelector(
+        _budgetCurrencySelector(
           ccy: (_budgetList?.currency),
           totalAmount: _totalAmount,
         ),
@@ -174,7 +174,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
             child: Consumer<HomeProvider>(
               builder: ((context, homeProvider, child) {
-                return generateListItem(homeProvider.budgetAddList);
+                return _generateListItem(homeProvider.budgetAddList);
               }),
             ),
           ),
@@ -262,7 +262,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
   }
 
-  Widget generateListItem(List<BudgetModel> budgetList) {
+  Widget _generateListItem(List<BudgetModel> budgetList) {
     if (_budgetList == null) {
       return const Text("Loading Budget List");
     } else {
@@ -500,7 +500,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
     }
   }
 
-  Widget budgetCurrencySelector(
+  Widget _budgetCurrencySelector(
       {required CurrencyModel? ccy, required double totalAmount}) {
     if (ccy != null) {
       return Container(
