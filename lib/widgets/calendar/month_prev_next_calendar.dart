@@ -4,15 +4,15 @@ import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:my_expense/_index.g.dart';
 
 class MonthPrevNextCalendar extends StatelessWidget {
-  final Color? background;
-  final Color? border;
+  final Color background;
+  final Color border;
   final DateTime initialDate;
   final DateTime minDate;
   final DateTime maxDate;
   final Function(DateTime, DateTime) onPress;
   const MonthPrevNextCalendar({
-    this.background,
-    this.border,
+    this.background = secondaryDark,
+    this.border = primaryBackground,
     required this.maxDate,
     required this.minDate,
     required this.initialDate,
@@ -32,16 +32,34 @@ class MonthPrevNextCalendar extends StatelessWidget {
           lastDate: maxDate,
         ).then((newDate) async {
           if (newDate != null) {
-            DateTime from = DateTime(newDate.year, newDate.month, 1).toLocal();
-            DateTime to = DateTime(newDate.year, newDate.month+1, 1).subtract(const Duration(days: 1)).toLocal();
+            DateTime from = DateTime(
+              newDate.year,
+              newDate.month,
+              1
+            ).toLocal();
+            
+            DateTime to = DateTime(
+              newDate.year,
+              newDate.month+1,
+              1
+            ).subtract(const Duration(days: 1)).toLocal();
 
             onPress(from, to);
           }
         });
       }),
       onDoubleTap: (() {
-        DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
-        DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1)).toLocal();
+        DateTime from = DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          1
+        ).toLocal();
+
+        DateTime to = DateTime(
+          DateTime.now().year,
+          DateTime.now().month + 1,
+          1
+        ).subtract(const Duration(days: 1)).toLocal();
     
         onPress(from, to);
       }),
@@ -49,10 +67,10 @@ class MonthPrevNextCalendar extends StatelessWidget {
         height: 35,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: (background ?? secondaryDark),
+          color: background,
           border: Border(
             bottom: BorderSide(
-              color: (border ?? primaryBackground),
+              color: border,
               width: 1.0,
               style: BorderStyle.solid
             )
@@ -81,7 +99,11 @@ class MonthPrevNextCalendar extends StatelessWidget {
             Expanded(
               child: Container(
                 color: Colors.transparent,
-                child: Center(child: Text(Globals.dfMMMMyyyy.format(initialDate)),),
+                child: Center(
+                  child: Text(
+                    Globals.dfMMMMyyyy.format(initialDate)
+                  ),
+                ),
               ),
             ),
             InkWell(
@@ -106,15 +128,33 @@ class MonthPrevNextCalendar extends StatelessWidget {
   }
 
   void _goPrevMonth() {
-    DateTime from = DateTime(initialDate.year, initialDate.month-1, 1).toLocal();
-    DateTime to = DateTime(initialDate.year, initialDate.month, 1).subtract(const Duration(days: 1)).toLocal();
+    DateTime from = DateTime(
+      initialDate.year,
+      initialDate.month-1,
+      1
+    ).toLocal();
+    
+    DateTime to = DateTime(
+      initialDate.year,
+      initialDate.month,
+      1
+    ).subtract(const Duration(days: 1)).toLocal();
     
     onPress(from, to);
   }
 
   void _goNextMonth() {
-    DateTime from = DateTime(initialDate.year, initialDate.month+1, 1).toLocal();
-    DateTime to = DateTime(initialDate.year, initialDate.month+2, 1).subtract(const Duration(days: 1)).toLocal();
+    DateTime from = DateTime(
+      initialDate.year,
+      initialDate.month+1,
+      1
+    ).toLocal();
+    
+    DateTime to = DateTime(
+      initialDate.year,
+      initialDate.month+2,
+      1
+    ).subtract(const Duration(days: 1)).toLocal();
 
     onPress(from, to);
   }
