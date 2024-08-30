@@ -112,7 +112,10 @@ class BudgetHTTPService {
 
     // if not force, then get it from the shared preferences
     if (!isForce) {
-      BudgetListModel? budgetListPref = BudgetSharedPreferences.getBudgetList(currencyID);
+      BudgetListModel? budgetListPref = BudgetSharedPreferences.getBudgetList(
+        ccyId: currencyID
+      );
+
       if (budgetListPref != null) {
         return budgetListPref;
       }
@@ -127,7 +130,10 @@ class BudgetHTTPService {
 
     // if got success response, then parse json data and then put on the budget list model
     BudgetListModel budgetListData = BudgetListModel.fromJson(json.decode(result));
-    await BudgetSharedPreferences.setBudgetList(currencyID, budgetListData);
+    await BudgetSharedPreferences.setBudgetList(
+      ccyId: currencyID,
+      budgetList: budgetListData
+    );
 
     return budgetListData;
   }
@@ -139,7 +145,11 @@ class BudgetHTTPService {
   }) async {
     // check if this is being force or not?
     if (!force) {
-      List<BudgetModel>? budgetPref = BudgetSharedPreferences.getBudget(currencyID, date);
+      List<BudgetModel>? budgetPref = BudgetSharedPreferences.getBudget(
+        ccyId: currencyID,
+        date: date
+      );
+
       if (budgetPref != null) {
         return budgetPref;
       }
@@ -156,7 +166,11 @@ class BudgetHTTPService {
     List<dynamic> jsonData = jsonDecode(result);
     List<BudgetModel> listBudget =
         jsonData.map((e) => BudgetModel.fromJson(e)).toList();
-    BudgetSharedPreferences.setBudget(currencyID, date, listBudget);
+    BudgetSharedPreferences.setBudget(
+      ccyId: currencyID,
+      date: date,
+      budgets: listBudget
+    );
     return listBudget;
   }
 }

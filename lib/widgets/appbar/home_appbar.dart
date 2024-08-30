@@ -7,7 +7,13 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onUserPress;
   final VoidCallback onActionPress;
 
-  const HomeAppBar({super.key, required this.title, required this.iconItem, required this.onUserPress, required this.onActionPress});
+  const HomeAppBar({
+    super.key,
+    required this.title,
+    required this.iconItem,
+    required this.onUserPress,
+    required this.onActionPress
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +28,9 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: title,
       actions: <Widget>[
         IconButton(
-            onPressed: onActionPress,
-            icon: iconItem,),
+          onPressed: onActionPress,
+          icon: iconItem,
+        ),
       ],
     );
   }

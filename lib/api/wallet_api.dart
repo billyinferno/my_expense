@@ -13,7 +13,7 @@ class WalletHTTPService {
     if (!force) {
       // check if we got wallets already on the shared preferences or not?
       List<WalletModel> walletsPref =
-          WalletSharedPreferences.getWallets(showDisabled);
+          WalletSharedPreferences.getWallets(showDisabled: showDisabled);
       if (walletsPref.isNotEmpty) {
         // return back from proc, no need to fetch to server
         return walletsPref;
@@ -35,7 +35,7 @@ class WalletHTTPService {
         body.map((dynamic item) => WalletModel.fromJson(item)).toList();
 
     // store the wallet on the shared preferences
-    await WalletSharedPreferences.setWallets(wallets);
+    await WalletSharedPreferences.setWallets(wallet: wallets);
 
     // once finished then return all the wallets
     return wallets;
@@ -70,7 +70,7 @@ class WalletHTTPService {
         body.map((dynamic item) => CurrencyModel.fromJson(item)).toList();
 
     // store the wallet on the shared preferences
-    await WalletSharedPreferences.setWalletUserCurrency(currencies);
+    await WalletSharedPreferences.setWalletUserCurrency(currencies: currencies);
 
     // once finished then return all the wallets
     return currencies;
@@ -104,7 +104,10 @@ class WalletHTTPService {
     // instead.
     if (!force) {
       // check if we got wallets already on the shared preferences or not?
-      List<WorthModel> walletsPref = WalletSharedPreferences.getWalletWorth(dateTo);
+      List<WorthModel> walletsPref = WalletSharedPreferences.getWalletWorth(
+        dateTo: dateTo
+      );
+
       if (walletsPref.isNotEmpty) {
         // return back from proc, no need to fetch to server
         return walletsPref;
@@ -126,7 +129,10 @@ class WalletHTTPService {
         body.map((dynamic item) => WorthModel.fromJson(item)).toList();
 
     // store the wallet on the shared preferences
-    await WalletSharedPreferences.setWalletWorth(dateTo, worth);
+    await WalletSharedPreferences.setWalletWorth(
+      dateTo: dateTo,
+      walletWorth: worth
+    );
 
     // once finished then return all the wallets
     return worth;
@@ -212,7 +218,7 @@ class WalletHTTPService {
         body.map((dynamic item) => WalletModel.fromJson(item)).toList();
 
     // store the wallet on the shared preferences
-    await WalletSharedPreferences.setWallets(wallets);
+    await WalletSharedPreferences.setWallets(wallet: wallets);
 
     // return the wallets
     return wallets;
@@ -239,7 +245,7 @@ class WalletHTTPService {
     WalletModel walletEnabled =
         WalletModel.fromJson(jsonDecode(result));
 
-    List<WalletModel> wallets = WalletSharedPreferences.getWallets(true);
+    List<WalletModel> wallets = WalletSharedPreferences.getWallets(showDisabled: true);
 
     // set the wallet that we want to disabled
     for (int i = 0; i < wallets.length; i++) {
@@ -253,7 +259,7 @@ class WalletHTTPService {
     wallets = sortWallets(wallets: wallets);
 
     // now store back the _wallets to the sharedPreferences
-    WalletSharedPreferences.setWallets(wallets);
+    WalletSharedPreferences.setWallets(wallet: wallets);
 
     // return back the new wallet list, which we can used as setup for provider
     // the back side of update the shared preferences, it means that the
@@ -352,7 +358,7 @@ class WalletHTTPService {
         body.map((dynamic item) => WalletTypeModel.fromJson(item)).toList();
 
     // store the wallet on the shared preferences
-    await WalletSharedPreferences.setWalletTypes(walletTypes);
+    await WalletSharedPreferences.setWalletTypes(walletType: walletTypes);
 
     // once finished then return all the wallets
     return walletTypes;
@@ -386,7 +392,7 @@ class WalletHTTPService {
         body.map((dynamic item) => CurrencyModel.fromJson(item)).toList();
 
     // store the wallet on the shared preferences
-    await WalletSharedPreferences.setWalletCurrency(currencies);
+    await WalletSharedPreferences.setWalletCurrency(walletCurrency: currencies);
 
     // once finished then return all the wallets
     return currencies;

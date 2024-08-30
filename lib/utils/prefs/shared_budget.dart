@@ -6,7 +6,11 @@ class BudgetSharedPreferences {
   static const _keyBudgetList = 'budget_list_'; // key will be budget_list_{ccy}
   static const _keyCurrentBudgetDate = 'budget_current';
 
-  static Future setBudget(int currencyID, String date, List<BudgetModel> budgets) async {
+  static Future setBudget({
+    required int ccyId,
+    required String date,
+    required List<BudgetModel> budgets
+  }) async {
     // convert both expense and income into List<String>
     List<String> jsonBudget = [];
 
@@ -15,14 +19,17 @@ class BudgetSharedPreferences {
     }
 
     await MyBox.putStringList(
-      key: "$_keyBudgetModel${currencyID}_$date",
+      key: "$_keyBudgetModel${ccyId}_$date",
       value: jsonBudget,
     );
   }
 
-  static List<BudgetModel>? getBudget(int currencyID, String date) {
+  static List<BudgetModel>? getBudget({
+    required int ccyId,
+    required String date
+  }) {
     List<String>? data = MyBox.getStringList(
-      key: "$_keyBudgetModel${currencyID}_$date"
+      key: "$_keyBudgetModel${ccyId}_$date"
     );
 
     if(data != null) {
@@ -34,7 +41,7 @@ class BudgetSharedPreferences {
     }
   }
 
-  static Future setBudgetCurrent(DateTime date) async {
+  static Future setBudgetCurrent({required DateTime date}) async {
     String strDate = Globals.dfyyyyMMdd.format(DateTime(date.toLocal().year, date.toLocal().month, 1));
     await MyBox.putString(key: _keyCurrentBudgetDate, value: strDate);
   }
@@ -50,15 +57,18 @@ class BudgetSharedPreferences {
     }
   }
 
-  static Future<void> setBudgetList(int currencyID, BudgetListModel budgetList) async {
+  static Future<void> setBudgetList({
+    required int ccyId,
+    required BudgetListModel budgetList
+  }) async {
     await MyBox.putString(
-      key: _keyBudgetList + currencyID.toString(),
+      key: _keyBudgetList + ccyId.toString(),
       value: jsonEncode(budgetList.toJson())
     );
   }
 
-  static BudgetListModel? getBudgetList(int currencyID) {
-    String? data = MyBox.getString(key: _keyBudgetList + currencyID.toString());
+  static BudgetListModel? getBudgetList({required int ccyId}) {
+    String? data = MyBox.getString(key: _keyBudgetList + ccyId.toString());
 
     if(data != null) {
       BudgetListModel listBudgetListModel = BudgetListModel.fromJson(jsonDecode(data));

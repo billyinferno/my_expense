@@ -900,7 +900,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           List<TransactionListModel> txnListModel = Provider.of<HomeProvider>(context, listen: false).transactionList;
           // save the current transaction on the provider to the shared preferences
           String date = Globals.dfyyyyMMdd.format(txnDeleted.date.toLocal());
-          TransactionSharedPreferences.setTransaction(date, txnListModel);
+          TransactionSharedPreferences.setTransaction(date: date, txn: txnListModel);
         }
       }
 
@@ -939,13 +939,22 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     toString = Globals.dfyyyyMMdd.format(to);
 
     // delete the transaction from wallet transaction
-    await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.wallet.id, refreshDay, txnInfo);
+    await TransactionSharedPreferences.deleteTransactionWallet(
+      walletId: txnInfo.wallet.id,
+      date: refreshDay,
+      txn: txnInfo
+    );
+
     if (txnInfo.walletTo != null) {
-      await TransactionSharedPreferences.deleteTransactionWallet(txnInfo.walletTo!.id, refreshDay, txnInfo);
+      await TransactionSharedPreferences.deleteTransactionWallet(
+        walletId: txnInfo.walletTo!.id,
+        date: refreshDay,
+        txn: txnInfo
+      );
     }
 
     // delete the transaction from budget
-    await WalletSharedPreferences.deleteWalletWorth(txnInfo);
+    await WalletSharedPreferences.deleteWalletWorth(txn: txnInfo);
 
     await Future.wait([
       _futureWallets = _walletHTTP.fetchWallets(
@@ -989,7 +998,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             }
           }
           // now we can set the shared preferences of budget
-          BudgetSharedPreferences.setBudget(txnCurrencyId, refreshDay, _budgets);
+          BudgetSharedPreferences.setBudget(
+            ccyId: txnCurrencyId,
+            date: refreshDay,
+            budgets: _budgets
+          );
 
           // only set the provider if only the current budget date is the same as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();

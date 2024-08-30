@@ -140,7 +140,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
     // try to get the transaction date data from the storage, and see whether we got null or not?
     List<BudgetModel>? budgetPref =
-        BudgetSharedPreferences.getBudget(txnAdd.wallet.currencyId, refreshDay);
+      BudgetSharedPreferences.getBudget(
+        ccyId: txnAdd.wallet.currencyId,
+        date: refreshDay
+      );
 
     if (budgetPref != null) {
       // if this is set into true, it means that we need to calculate the budget manually
@@ -151,7 +154,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     // check for the last transaction list, and add the last transaction if the transaction is not
     // on the last transaction list?
     if (txnAdd.type == "expense" || txnAdd.type == "income") {
-      List<LastTransactionModel>? lastTransaction = TransactionSharedPreferences.getLastTransaction(txnAdd.type);
+      List<LastTransactionModel>? lastTransaction =
+        TransactionSharedPreferences.getLastTransaction(type: txnAdd.type);
+
       LastTransactionModel lastTxn = LastTransactionModel(
         name: txnAdd.name,
         category: CategoryLastTransaction(
@@ -182,7 +187,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
           // then save the _lastTransaction to shared preferences
           TransactionSharedPreferences.setLastTransaction(
-              txnAdd.type, lastTransaction);
+            type: txnAdd.type,
+            txn: lastTransaction
+          );
         } else {
           // last transaction already exists, bump this to first list of the _lastTransaction
           lastTransaction.removeAt(lastLoc);
@@ -193,8 +200,8 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
           // then save the _newLastTransaction to shared preferences
           TransactionSharedPreferences.setLastTransaction(
-            txnAdd.type,
-            newLastTransaction
+            type: txnAdd.type,
+            txn: newLastTransaction
           );
         }
       } else {
@@ -204,29 +211,29 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
         // then save the _lastTransaction to shared preferences
         TransactionSharedPreferences.setLastTransaction(
-          txnAdd.type,
-          lastTransaction
+          type: txnAdd.type,
+          txn: lastTransaction
         );
       }
     }
 
     // add the new transaction to the wallet transaction
     await TransactionSharedPreferences.addTransactionWallet(
-      txnAdd.wallet.id,
-      refreshDay,
-      txnAdd
+      walletId: txnAdd.wallet.id,
+      date: refreshDay,
+      txn: txnAdd
     );
 
     if (txnAdd.walletTo != null) {
       await TransactionSharedPreferences.addTransactionWallet(
-        txnAdd.walletTo!.id,
-        refreshDay,
-        txnAdd
+        walletId: txnAdd.walletTo!.id,
+        date: refreshDay,
+        txn: txnAdd
       );
     }
 
     // add the transaction to the statisctics
-    await WalletSharedPreferences.addWalletWorth(txnAdd).then((_) {
+    await WalletSharedPreferences.addWalletWorth(txn: txnAdd).then((_) {
       String dateTo = Globals.dfyyyyMMdd.format(
         DateTime(
           txnAdd.date.toLocal().year,
@@ -235,7 +242,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         ).subtract(const Duration(days: 1))
       );
 
-      _worth = WalletSharedPreferences.getWalletWorth(dateTo);
+      _worth = WalletSharedPreferences.getWalletWorth(dateTo: dateTo);
       if (mounted) {
         Provider.of<HomeProvider>(
           context,
@@ -274,10 +281,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         );
 
         await TransactionSharedPreferences.addIncomeExpense(
-          txnAdd.wallet.currencyId,
-          dateFrom,
-          dateTo,
-          txnAdd
+          ccyId: txnAdd.wallet.currencyId,
+          dateFrom: dateFrom,
+          dateTo: dateTo,
+          txn: txnAdd
         ).then((incomeExpense) {
           if (mounted) {
             // set the provider for this statistics
@@ -343,9 +350,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           }
           // now we can set the shared preferences of budget
           BudgetSharedPreferences.setBudget(
-            txnAdd.wallet.currencyId,
-            refreshDay,
-            budgets
+            ccyId: txnAdd.wallet.currencyId,
+            date: refreshDay,
+            budgets: budgets
           );
 
           // only update the provider if, the current home budget is ed
@@ -397,11 +404,11 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       if (minDate.isAfter(txnAdd.date)) {
         // set txnAdd as current minDate, as minDate is bigger than current
         // transaction data date.
-        TransactionSharedPreferences.setTransactionMinDate(txnAdd.date);
+        TransactionSharedPreferences.setTransactionMinDate(date: txnAdd.date);
       } else if (maxDate.isBefore(txnAdd.date)) {
         // set txnAdd as current maxDate, as maxDate is lesser than current
         // transacion data date.
-        TransactionSharedPreferences.setTransactionMaxDate(txnAdd.date);
+        TransactionSharedPreferences.setTransactionMaxDate(date: txnAdd.date);
       }
     }).onError((error, stackTrace) {
       Log.error(

@@ -34,9 +34,9 @@ class CategoryHTTPService {
     if (!force) {
       // check whether we have data on shared preferences or not?
       Map<int, CategoryModel> expensePref =
-          CategorySharedPreferences.getCategory("expense");
+          CategorySharedPreferences.getCategory(type: "expense");
       Map<int, CategoryModel> incomePref =
-          CategorySharedPreferences.getCategory("income");
+          CategorySharedPreferences.getCategory(type: "income");
 
       // check if we got data there or not?
       if (expensePref.isNotEmpty && incomePref.isNotEmpty) {
@@ -69,7 +69,10 @@ class CategoryHTTPService {
     }
 
     // saved the expense and income category model
-    CategorySharedPreferences.setCategory(expenseModel, incomeModel);
+    CategorySharedPreferences.setCategory(
+      expense: expenseModel,
+      income: incomeModel
+    );
   }
 
 }

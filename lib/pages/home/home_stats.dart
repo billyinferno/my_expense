@@ -223,7 +223,7 @@ class _HomeStatsState extends State<HomeStats> {
                   _toString = Globals.dfyyyyMMdd.format(_to.toLocal());
 
                   // stored the from and to on the shared preferences
-                  TransactionSharedPreferences.setStatDate(from, to);
+                  TransactionSharedPreferences.setStatDate(from: from, to: to);
           
                   // fetch the statistic data again once we change the _from and _to date
                   _getStat = _fetchData(showDialog: true);
@@ -644,7 +644,7 @@ class _HomeStatsState extends State<HomeStats> {
     bool isShowDialog = (showDialog ?? false);
     List<BudgetModel> currentBudget = [];
     double maxBudget = 0;
-    String currentDataString = Globals.dfyyyyMMdd.format(DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal());
+    String currentDateString = Globals.dfyyyyMMdd.format(DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal());
 
     // check if the currencies is not empty
     if (_currencies.isNotEmpty) {
@@ -672,7 +672,10 @@ class _HomeStatsState extends State<HomeStats> {
           ]).then((_) {
             // try to get the budget data for this currencies
             // we can use the from to get the budget date
-            currentBudget = (BudgetSharedPreferences.getBudget(ccy.id, currentDataString) ?? []);
+            currentBudget = (BudgetSharedPreferences.getBudget(
+              ccyId: ccy.id,
+              date: currentDateString
+            ) ?? []);
 
             // default the max budget to 0 first
             maxBudget = 0;

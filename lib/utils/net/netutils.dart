@@ -63,7 +63,10 @@ class NetUtils {
   /// Parameter needed for this are:
   /// - required : url         : String
   /// - optional : params      : Map<String, dynamic>
-  static Future get({required String url, Map<String, dynamic>? params}) async {
+  static Future get({
+    required String url,
+    Map<String, dynamic>? params
+  }) async {
     // check if bearer token is null? if null then get from UserSharedPreferences
     bearerToken ??= UserSharedPreferences.getJWT();
 
@@ -98,7 +101,20 @@ class NetUtils {
           message: 'Gateway Timeout for $url'
         );
       },
-    );
+    ).onError<http.ClientException>((error, stackTrace) {
+      throw NetException(
+        code: -1,
+        type: NetType.get,
+        message: '[ClientException] ${error.message}',
+      );
+    },).onError((error, stackTrace) {
+      // common error
+      throw NetException(
+        code: -2,
+        type: NetType.get,
+        message: '[Error] ${error.toString()}',
+      );
+    },);
 
     // check the response we got from http
     if (response.statusCode == 200) {
@@ -121,7 +137,12 @@ class NetUtils {
   /// - optional : params      : Map<String, dynamic>
   /// - required : body        : Map<String, dynamic>
   /// - optional : requiredJWT : bool
-  static Future post({required String url, Map<String, dynamic>? params, required Map<String, dynamic> body, bool? requiredJWT}) async {
+  static Future post({
+    required String url,
+    Map<String, dynamic>? params,
+    required Map<String, dynamic> body,
+    bool? requiredJWT
+  }) async {
     // check the JWT requirement
     bool isRequiredJWT = (requiredJWT ?? true);
     
@@ -175,7 +196,20 @@ class NetUtils {
           message: 'Gateway Timeout for $url'
         );
       },
-    );
+    ).onError<http.ClientException>((error, stackTrace) {
+      throw NetException(
+        code: -1,
+        type: NetType.post,
+        message: '[ClientException] ${error.message}',
+      );
+    },).onError((error, stackTrace) {
+      // common error
+      throw NetException(
+        code: -2,
+        type: NetType.post,
+        message: '[Error] ${error.toString()}',
+      );
+    },);
 
     // check the response we got from http
     if (response.statusCode == 200) {
@@ -196,7 +230,10 @@ class NetUtils {
   /// Parameter needed for this are:
   /// - required : url         : String
   /// - optional : params      : Map<String, dynamic>
-  static Future delete({required String url, Map<String, dynamic>? params}) async {
+  static Future delete({
+    required String url,
+    Map<String, dynamic>? params
+  }) async {
     // check if bearer token is null? if null then get from UserSharedPreferences
     bearerToken ??= UserSharedPreferences.getJWT();
 
@@ -231,7 +268,20 @@ class NetUtils {
           message: 'Gateway Timeout for $url'
         );
       },
-    );
+    ).onError<http.ClientException>((error, stackTrace) {
+      throw NetException(
+        code: -1,
+        type: NetType.delete,
+        message: '[ClientException] ${error.message}',
+      );
+    },).onError((error, stackTrace) {
+      // common error
+      throw NetException(
+        code: -2,
+        type: NetType.delete,
+        message: '[Error] ${error.toString()}',
+      );
+    },);
 
     // check the response we got from http
     if (response.statusCode == 200) {
@@ -253,7 +303,11 @@ class NetUtils {
   /// - required : url         : String
   /// - optional : params      : Map<String, dynamic>
   /// - required : body        : Map<String, dynamic>
-  static Future patch({required String url, Map<String, dynamic>? params, required Map<String, dynamic> body}) async {
+  static Future patch({
+    required String url,
+    Map<String, dynamic>? params,
+    required Map<String, dynamic> body
+  }) async {
     // check if bearer token is null? if null then get from UserSharedPreferences
     bearerToken ??= UserSharedPreferences.getJWT();
 
@@ -289,7 +343,20 @@ class NetUtils {
           message: 'Gateway Timeout for $url'
         );
       },
-    );
+    ).onError<http.ClientException>((error, stackTrace) {
+      throw NetException(
+        code: -1,
+        type: NetType.patch,
+        message: '[ClientException] ${error.message}',
+      );
+    },).onError((error, stackTrace) {
+      // common error
+      throw NetException(
+        code: -2,
+        type: NetType.patch,
+        message: '[Error] ${error.toString()}',
+      );
+    },);
 
     // check the response we got from http
     if (response.statusCode == 200) {
@@ -311,7 +378,11 @@ class NetUtils {
   /// - required : url         : String
   /// - optional : params      : Map<String, dynamic>
   /// - required : body        : Map<String, dynamic>
-  static Future put({required String url, Map<String, dynamic>? params, required Map<String, dynamic> body}) async {
+  static Future put({
+    required String url,
+    Map<String, dynamic>? params,
+    required Map<String, dynamic> body
+  }) async {
     // check if bearer token is null? if null then get from UserSharedPreferences
     bearerToken ??= UserSharedPreferences.getJWT();
 
@@ -347,7 +418,20 @@ class NetUtils {
           message: 'Gateway Timeout for $url'
         );
       },
-    );
+    ).onError<http.ClientException>((error, stackTrace) {
+      throw NetException(
+        code: -1,
+        type: NetType.put,
+        message: '[ClientException] ${error.message}',
+      );
+    },).onError((error, stackTrace) {
+      // common error
+      throw NetException(
+        code: -2,
+        type: NetType.put,
+        message: '[Error] ${error.toString()}',
+      );
+    },);
 
     // check the response we got from http
     if (response.statusCode == 200) {
@@ -363,7 +447,17 @@ class NetUtils {
     );
   }
 
-  static Future putArray({required String url, Map<String, dynamic>? params, required List<dynamic> body}) async {
+  /// putArray
+  /// This is to sending PUT request to the API Server with body of array
+  /// Parameter needed for this are:
+  /// - required : url         : String
+  /// - optional : params      : Map<String, dynamic>
+  /// - required : body        : List<dynamic>
+  static Future putArray({
+    required String url,
+    Map<String, dynamic>? params,
+    required List<dynamic> body
+  }) async {
     // check if bearer token is null? if null then get from UserSharedPreferences
     bearerToken ??= UserSharedPreferences.getJWT();
 
@@ -399,7 +493,20 @@ class NetUtils {
           message: 'Gateway Timeout for $url'
         );
       },
-    );
+    ).onError<http.ClientException>((error, stackTrace) {
+      throw NetException(
+        code: -1,
+        type: NetType.put,
+        message: '[ClientException] ${error.message}',
+      );
+    },).onError((error, stackTrace) {
+      // common error
+      throw NetException(
+        code: -2,
+        type: NetType.put,
+        message: '[Error] ${error.toString()}',
+      );
+    },);
 
     // check the response we got from http
     if (response.statusCode == 200) {

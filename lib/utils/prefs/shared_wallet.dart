@@ -8,14 +8,14 @@ class WalletSharedPreferences {
   static const _walletUserCurrency = "walletUserCurrency";
   static const _walletWorthKey = "walletWorth";
 
-  static Future setWallets(List<WalletModel> wallet) async {
+  static Future setWallets({required List<WalletModel> wallet}) async {
     List<String> data = wallet.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
       await MyBox.putStringList(key: _walletKey, value: data);
     }
   }
 
-  static List<WalletModel> getWallets(bool showDisabled) {
+  static List<WalletModel> getWallets({required bool showDisabled}) {
     List<String>? data = MyBox.getStringList(key: _walletKey);
 
     if(data != null) {
@@ -39,7 +39,7 @@ class WalletSharedPreferences {
     }
   }
 
-  static Future setWalletTypes(List<WalletTypeModel> walletType) async {
+  static Future setWalletTypes({required List<WalletTypeModel> walletType}) async {
     List<String> data = walletType.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
       await MyBox.putStringList(key: _walletTypeKey, value: data);
@@ -58,7 +58,7 @@ class WalletSharedPreferences {
     }
   }
 
-  static Future setWalletCurrency(List<CurrencyModel> walletCurrency) async {
+  static Future setWalletCurrency({required List<CurrencyModel> walletCurrency}) async {
     List<String> data = walletCurrency.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
       await MyBox.putStringList(key: _walletCurrencyKey, value: data);
@@ -77,7 +77,7 @@ class WalletSharedPreferences {
     }
   }
 
-  static Future<void> setWalletUserCurrency(List<CurrencyModel> currencies) async {
+  static Future<void> setWalletUserCurrency({required List<CurrencyModel> currencies}) async {
     List<String> data = currencies.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
       await MyBox.putStringList(key: _walletUserCurrency, value: data);
@@ -96,14 +96,17 @@ class WalletSharedPreferences {
     }
   }
 
-  static Future setWalletWorth(String dateTo, List<WorthModel> walletWorth) async {
+  static Future setWalletWorth({
+    required String dateTo,
+    required List<WorthModel> walletWorth
+  }) async {
     List<String> data = walletWorth.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
       await MyBox.putStringList(key: "${_walletWorthKey}_$dateTo", value: data);
     }
   }
 
-  static List<WorthModel> getWalletWorth(String dateTo) {
+  static List<WorthModel> getWalletWorth({required String dateTo}) {
     List<String>? data = MyBox.getStringList(key: "${_walletWorthKey}_$dateTo");
 
     if(data != null) {
@@ -115,10 +118,10 @@ class WalletSharedPreferences {
     }
   }
 
-  static Future<void> addWalletWorth(TransactionListModel txn) async {
+  static Future<void> addWalletWorth({required TransactionListModel txn}) async {
     // get the date of the transaction
     String dateTo = Globals.dfyyyyMMdd.format(txn.date.toLocal());
-    List<WorthModel> worth = getWalletWorth(dateTo);
+    List<WorthModel> worth = getWalletWorth(dateTo: dateTo);
     double amount = 0.0;
     double amountTo = 0.0;
 
@@ -169,14 +172,14 @@ class WalletSharedPreferences {
       }
 
       // set the wallet net worth
-      await setWalletWorth(dateTo, worth);
+      await setWalletWorth(dateTo: dateTo, walletWorth: worth);
     }
   }
 
-  static Future<void> deleteWalletWorth(TransactionListModel txn) async {
+  static Future<void> deleteWalletWorth({required TransactionListModel txn}) async {
     // get the date of the transaction
     String dateTo = Globals.dfyyyyMMdd.format(txn.date.toLocal());
-    List<WorthModel> worth = getWalletWorth(dateTo);
+    List<WorthModel> worth = getWalletWorth(dateTo: dateTo);
     double amount = 0.0;
     double amountTo = 0.0;
 
@@ -227,7 +230,7 @@ class WalletSharedPreferences {
       }
 
       // set the wallet net worth
-      await setWalletWorth(dateTo, worth);
+      await setWalletWorth(dateTo: dateTo, walletWorth: worth);
     }
   }
 }

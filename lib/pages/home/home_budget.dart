@@ -63,7 +63,7 @@ class _HomeBudgetState extends State<HomeBudget> {
       }
 
       // now fetch budget based on the _currentCurrencies
-      BudgetSharedPreferences.setBudgetCurrent(_selectedDate);
+      BudgetSharedPreferences.setBudgetCurrent(date: _selectedDate);
     }
 
     _getData = _fetchBudget();
@@ -183,7 +183,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                         onDateSelected: ((value) {
                           setState(() {
                             _selectedDate = value;
-                            BudgetSharedPreferences.setBudgetCurrent(value);
+                            BudgetSharedPreferences.setBudgetCurrent(date: value);
                             // in case we add transaction to other month, just refresh the budget forcefully.
                             _getData = _fetchBudget(true, true);
                           });

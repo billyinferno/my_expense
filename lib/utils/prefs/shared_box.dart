@@ -127,13 +127,13 @@ class MyBox {
 
   static List<String> getKeys({required String key}) {
     List<String> result = [];
-    String key0 = "";
+    String currentKey = "";
     var keys = keyBox!.keys;
     if(keys.isNotEmpty) {
       for (var keyDynamic in keys) {
-        key0 = keyDynamic.toString();
-        if(key0.contains(key)) {
-          result.add(key0);
+        currentKey = keyDynamic.toString();
+        if(currentKey.contains(key)) {
+          result.add(currentKey);
         }
       }
     }

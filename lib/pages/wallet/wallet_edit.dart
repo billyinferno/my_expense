@@ -491,7 +491,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
       walletEdit.then((walletEdit) {
         // here we got the walletEdit, so we need to get the walletList from the
         // shared preferences, and add this at the end.
-        List<WalletModel> walletList = WalletSharedPreferences.getWallets(true);
+        List<WalletModel> walletList = WalletSharedPreferences.getWallets(showDisabled: true);
         for(int i=0; i<walletList.length; i++) {
           if(walletList[i].id == walletEdit.id) {
             // changet his wallet to the newly updated wallet
@@ -505,7 +505,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
         walletList = _walletHttp.sortWallets(wallets: walletList);
 
         // set the shared preferences with this list
-        WalletSharedPreferences.setWallets(walletList);
+        WalletSharedPreferences.setWallets(wallet: walletList);
 
         if (mounted) {
           // set the provider with this

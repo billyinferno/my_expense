@@ -9,7 +9,7 @@ import 'package:my_expense/_index.g.dart';
 class UserSharedPreferences {
   static const _userMeModel = 'user_me';
 
-  static Future<void> setUserLogin(LoginModel login) async {
+  static Future<void> setUserLogin({required LoginModel login}) async {
     if (MyBox.encryptedBox == null) {
       await MyBox.init();
     } else {

@@ -114,7 +114,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         CurrencyModel(-1, "", "", ""),
         UserPermissionModel(-1, "", ""))
       ),
-      ...WalletSharedPreferences.getWallets(false)
+      ...WalletSharedPreferences.getWallets(showDisabled: false)
     ];
 
     // default current wallets to empty array and filter wallet list

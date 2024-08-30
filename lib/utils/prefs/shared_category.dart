@@ -5,7 +5,10 @@ class CategorySharedPreferences {
   static const _keyCategoryExpenseModel = 'category_expense';
   static const _keyCategoryIncomeModel = 'category_income';
 
-  static Future setCategory(List<CategoryModel> expense, List<CategoryModel> income) async {
+  static Future setCategory({
+    required List<CategoryModel> expense,
+    required List<CategoryModel> income
+  }) async {
     // convert both expense and income into List<String>
     List<String> jsonExpense = [];
     List<String> jsonIncome = [];
@@ -30,7 +33,7 @@ class CategorySharedPreferences {
     ]);
   }
 
-  static Map<int, CategoryModel> getCategory(String type) {
+  static Map<int, CategoryModel> getCategory({required String type}) {
     String key = "";
 
     if(type.toLowerCase() == "expense") {

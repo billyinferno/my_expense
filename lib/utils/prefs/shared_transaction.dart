@@ -16,9 +16,12 @@ class TransactionSharedPreferences {
   static const _transactionStatDateFrom = "trx_stat_date_from";
   static const _transactionStatDateTo = "trx_stat_date_to";
 
-  static Future setTransaction(String date, List<TransactionListModel> model) async {
+  static Future setTransaction({
+    required String date,
+    required List<TransactionListModel> txn
+  }) async {
     String key = "${_transactionKey}_$date";
-    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
+    List<String> data = txn.map((e) => jsonEncode(e.toJson())).toList();
 
     await MyBox.putStringList(key: key, value: data);
   }
@@ -37,7 +40,10 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future setLastTransaction(String type, List<LastTransactionModel> model) async {
+  static Future setLastTransaction({
+    required String type,
+    required List<LastTransactionModel> txn
+  }) async {
     String key = "";
     if(type == "expense") {
       key = _transactionLastExpenseKey;
@@ -45,12 +51,12 @@ class TransactionSharedPreferences {
     else {
       key = _transactionLastIncomeKey;
     }
-    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
+    List<String> data = txn.map((e) => jsonEncode(e.toJson())).toList();
 
     await MyBox.putStringList(key: key, value: data);
   }
 
-  static List<LastTransactionModel>? getLastTransaction(String type) {
+  static List<LastTransactionModel>? getLastTransaction({required String type}) {
     String key = "";
     if(type == "expense") {
       key = _transactionLastExpenseKey;
@@ -70,14 +76,21 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future setTransactionBudget(int categoryId, String date, List<TransactionListModel> model) async {
+  static Future setTransactionBudget({
+    required int categoryId,
+    required String date,
+    required List<TransactionListModel> txn
+  }) async {
     String key = "${_transactionBudget}_${categoryId}_$date";
-    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
+    List<String> data = txn.map((e) => jsonEncode(e.toJson())).toList();
 
     await MyBox.putStringList(key: key, value: data);
   }
 
-  static List<TransactionListModel>? getTransactionBudget(int categoryId, String date) {
+  static List<TransactionListModel>? getTransactionBudget({
+    required int categoryId,
+    required String date
+  }) {
     String key = "${_transactionBudget}_${categoryId}_$date";
 
     List<String>? data = MyBox.getStringList(key: key);
@@ -91,7 +104,7 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future<void> setTransactionMinDate(DateTime date) async {
+  static Future<void> setTransactionMinDate({required DateTime date}) async {
     await MyBox.putString(
       key: _transactionMinDate,
       value: date.toString()
@@ -110,7 +123,7 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future<void> setTransactionMaxDate(DateTime date) async {
+  static Future<void> setTransactionMaxDate({required DateTime date}) async {
     await MyBox.putString(
       key: _transactionMaxDate,
       value: date.toString()
@@ -133,14 +146,21 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future setTransactionWallet(int walletId, String date, List<TransactionListModel> model) async {
+  static Future setTransactionWallet({
+    required int walletId,
+    required String date,
+    required List<TransactionListModel> txn
+  }) async {
     String key = "${_transactionWallet}_${walletId}_$date";
-    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
+    List<String> data = txn.map((e) => jsonEncode(e.toJson())).toList();
 
     await MyBox.putStringList(key: key, value: data);
   }
 
-  static List<TransactionListModel>? getTransactionWallet(int walletId, String date) {
+  static List<TransactionListModel>? getTransactionWallet({
+    required int walletId,
+    required String date
+  }) {
     String key = "${_transactionWallet}_${walletId}_$date";
 
     List<String>? data = MyBox.getStringList(key: key);
@@ -154,7 +174,11 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future<void> deleteTransactionWallet(int walletId, String date, TransactionListModel txn) async {
+  static Future<void> deleteTransactionWallet({
+    required int walletId,
+    required String date,
+    required TransactionListModel txn
+  }) async {
     String key = "${_transactionWallet}_${walletId}_$date";
     
     List<String>? data = MyBox.getStringList(key: key);
@@ -184,10 +208,18 @@ class TransactionSharedPreferences {
     }
 
     // set the wallet transaction after we delete the transaction
-    await setTransactionWallet(walletId, date, transaction);
+    await setTransactionWallet(
+      walletId: walletId,
+      date: date,
+      txn: transaction
+    );
   }
 
-  static Future<void> updateTransactionWallet(int walletId, String date, TransactionListModel txn) async {
+  static Future<void> updateTransactionWallet({
+    required int walletId,
+    required String date,
+    required TransactionListModel txn
+  }) async {
     String key = "${_transactionWallet}_${walletId}_$date";
     
     List<String>? data = MyBox.getStringList(key: key);
@@ -211,10 +243,14 @@ class TransactionSharedPreferences {
     }
 
     // set the wallet transaction after we delete the transaction
-    await setTransactionWallet(walletId, date, transaction);
+    await setTransactionWallet(walletId: walletId, date: date, txn: transaction);
   }
 
-  static Future<void> addTransactionWallet(int walletId, String date, TransactionListModel txn) async {
+  static Future<void> addTransactionWallet({
+    required int walletId,
+    required String date,
+    required TransactionListModel txn
+  }) async {
     String key = "${_transactionWallet}_${walletId}_$date";
     
     List<String>? data = MyBox.getStringList(key: key);
@@ -259,7 +295,7 @@ class TransactionSharedPreferences {
     }
 
     // set the transaction wallet after we sort it out
-    await setTransactionWallet(walletId, date, transaction);
+    await setTransactionWallet(walletId: walletId, date: date, txn: transaction);
   }
 
   static Future<void> clearTransaction() async {
@@ -273,14 +309,23 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future<void> setIncomeExpense(int ccyId, String dateFrom, String dateTo, IncomeExpenseModel incomeExpense) async {
+  static Future<void> setIncomeExpense({
+    required int ccyId,
+    required String dateFrom,
+    required String dateTo,
+    required IncomeExpenseModel incomeExpense
+  }) async {
     String key = "${_transactionIncomeExpense}_${ccyId}_${dateFrom}_$dateTo";
     String? incomeExpense0 = jsonEncode(incomeExpense.toJson());
 
     await MyBox.putString(key: key, value: incomeExpense0);
   }
 
-  static IncomeExpenseModel? getIncomeExpense(int ccyId, String dateFrom, String dateTo) {
+  static IncomeExpenseModel? getIncomeExpense({
+    required int ccyId,
+    required String dateFrom,
+    required String dateTo
+  }) {
     String key = "${_transactionIncomeExpense}_${ccyId}_${dateFrom}_$dateTo";
 
     String? data = MyBox.getString(key: key);
@@ -294,8 +339,16 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future<IncomeExpenseModel> addIncomeExpense(int ccyId, String dateFrom, String dateTo, TransactionListModel txn) async {
-    IncomeExpenseModel? incomeExpense = (getIncomeExpense(ccyId, dateFrom, dateTo) ?? IncomeExpenseModel(income: {}, expense: {}));
+  static Future<IncomeExpenseModel> addIncomeExpense({
+    required int ccyId,
+    required String dateFrom,
+    required String dateTo,
+    required TransactionListModel txn
+  }) async {
+    IncomeExpenseModel? incomeExpense = (
+      getIncomeExpense(ccyId: ccyId, dateFrom: dateFrom, dateTo: dateTo) ??
+      IncomeExpenseModel(income: {}, expense: {})
+    );
 
     // now check what transaction is this?
     SplayTreeMap<DateTime, double> sortedMap = SplayTreeMap<DateTime, double>();
@@ -320,8 +373,18 @@ class TransactionSharedPreferences {
       });
 
       // put the new expense to new income expense model
-      IncomeExpenseModel newIncomeExpense = IncomeExpenseModel(income: incomeExpense.income, expense: expense);
-      await setIncomeExpense(ccyId, dateFrom, dateTo, newIncomeExpense);
+      IncomeExpenseModel newIncomeExpense = IncomeExpenseModel(
+        income: incomeExpense.income,
+        expense: expense
+      );
+      
+      await setIncomeExpense(
+        ccyId: ccyId,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        incomeExpense: newIncomeExpense
+      );
+
       return newIncomeExpense;
     }
     else if(txn.type == "income") {
@@ -345,8 +408,18 @@ class TransactionSharedPreferences {
       });
 
       // put the new expense to new income expense model
-      IncomeExpenseModel newIncomeExpense0 = IncomeExpenseModel(income: income, expense: incomeExpense.expense);
-      await setIncomeExpense(ccyId, dateFrom, dateTo, newIncomeExpense0);
+      IncomeExpenseModel newIncomeExpense0 = IncomeExpenseModel(
+        income: income,
+        expense: incomeExpense.expense
+      );
+
+      await setIncomeExpense(
+        ccyId: ccyId,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+        incomeExpense: newIncomeExpense0
+      );
+      
       return newIncomeExpense0; 
     }
 
@@ -354,7 +427,7 @@ class TransactionSharedPreferences {
     return incomeExpense;
   }
 
-  static Future<void> setTransactionListCurrentDate(DateTime date) async {
+  static Future<void> setTransactionListCurrentDate({required DateTime date}) async {
     await MyBox.putString(key: _transactionListCurrentDate, value: date.toString());
   }
 
@@ -370,14 +443,21 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future setTransactionTop(String date, String type, List<TransactionTopModel> model) async {
+  static Future setTransactionTop({
+    required String date,
+    required String type,
+    required List<TransactionTopModel> txn
+  }) async {
     String key = "${_transactionTop}_${date}_$type";
-    List<String> data = model.map((e) => jsonEncode(e.toJson())).toList();
+    List<String> data = txn.map((e) => jsonEncode(e.toJson())).toList();
 
     await MyBox.putStringList(key: key, value: data);
   }
 
-  static List<TransactionTopModel>? getTransactionTop(String date, String type) {
+  static List<TransactionTopModel>? getTransactionTop({
+    required String date,
+    required String type
+  }) {
     String key = "${_transactionTop}_${date}_$type";
 
     List<String>? data = MyBox.getStringList(key: key);
@@ -391,7 +471,10 @@ class TransactionSharedPreferences {
     }
   }
 
-  static Future setStatDate(DateTime from, DateTime to) async {
+  static Future setStatDate({
+    required DateTime from,
+    required DateTime to
+  }) async {
     String strDateFrom = from.toLocal().toIso8601String();
     String strDateTo = to.toLocal().toIso8601String();
 

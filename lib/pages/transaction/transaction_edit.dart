@@ -159,8 +159,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       ).then((resp) {
         // once got the response store this on the TransactionSharedPreferences
         TransactionSharedPreferences.setTransaction(
-          Globals.dfyyyyMMdd.format(txnDate),
-          resp
+          date: Globals.dfyyyyMMdd.format(txnDate),
+          txn: resp
         );
       }).onError(
         (error, stackTrace) {
@@ -174,8 +174,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       ).then((resp) {
         // once got the response store this on the TransactionSharedPreferences
         TransactionSharedPreferences.setTransaction(
-          Globals.dfyyyyMMdd.format(homeListDate),
-          resp
+          date: Globals.dfyyyyMMdd.format(homeListDate),
+          txn: resp
         );
       }).onError(
         (error, stackTrace) {
@@ -240,15 +240,15 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     if (!isWalletMoved) {
       // update the new transaction to the wallet transaction
       await TransactionSharedPreferences.updateTransactionWallet(
-        txnUpdate.wallet.id,
-        refreshDay,
-        txnUpdate
+        walletId: txnUpdate.wallet.id,
+        date: refreshDay,
+        txn: txnUpdate
       );
       if (txnUpdate.walletTo != null) {
         await TransactionSharedPreferences.updateTransactionWallet(
-          txnUpdate.walletTo!.id,
-          refreshDay,
-          txnUpdate
+          walletId: txnUpdate.walletTo!.id,
+          date: refreshDay,
+          txn: txnUpdate
         );
       }
     } else {
@@ -256,14 +256,14 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       if (_paramsData.wallet.id != txnUpdate.wallet.id) {
         // moved the transaction from previous wallet to the new wallet
         await TransactionSharedPreferences.deleteTransactionWallet(
-          _paramsData.wallet.id,
-          prevDay,
-          _paramsData
+          walletId: _paramsData.wallet.id,
+          date: prevDay,
+          txn: _paramsData
         );
         await TransactionSharedPreferences.addTransactionWallet(
-          txnUpdate.wallet.id,
-          refreshDay,
-          txnUpdate
+          walletId: txnUpdate.wallet.id,
+          date: refreshDay,
+          txn: txnUpdate
         );
       }
 
@@ -272,14 +272,14 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         if (_paramsData.walletTo!.id != txnUpdate.walletTo!.id) {
           // moved the transaction from previous wallet to the new wallet
           await TransactionSharedPreferences.deleteTransactionWallet(
-            _paramsData.walletTo!.id,
-            prevDay,
-            _paramsData
+            walletId: _paramsData.walletTo!.id,
+            date: prevDay,
+            txn: _paramsData
           );
           await TransactionSharedPreferences.addTransactionWallet(
-            txnUpdate.walletTo!.id,
-            refreshDay,
-            txnUpdate
+            walletId: txnUpdate.walletTo!.id,
+            date: refreshDay,
+            txn: txnUpdate
           );
         }
       }
@@ -345,9 +345,9 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       futureBudgets.then((budgets) {
         // now we can set the shared preferences of budget
         BudgetSharedPreferences.setBudget(
-          txnUpdate.wallet.currencyId,
-          refreshDay,
-          budgets
+          ccyId: txnUpdate.wallet.currencyId,
+          date: refreshDay,
+          budgets: budgets
         );
 
         if (mounted) {
@@ -365,11 +365,11 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         if (minDate.isAfter(txnUpdate.date)) {
           // set txnAdd as current minDate, as minDate is bigger than current
           // transaction data date.
-          TransactionSharedPreferences.setTransactionMinDate(txnUpdate.date);
+          TransactionSharedPreferences.setTransactionMinDate(date: txnUpdate.date);
         } else if (maxDate.isBefore(txnUpdate.date)) {
           // set txnAdd as current maxDate, as maxDate is lesser than current
           // transacion data date.
-          TransactionSharedPreferences.setTransactionMaxDate(txnUpdate.date);
+          TransactionSharedPreferences.setTransactionMaxDate(date: txnUpdate.date);
         }
       });
 
@@ -379,7 +379,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           txnUpdate.date.toLocal().month + 1,
           1
         ).subtract(const Duration(days: 1)));
-        WalletSharedPreferences.setWalletWorth(dateTo, worth);
+        WalletSharedPreferences.setWalletWorth(dateTo: dateTo, walletWorth: worth);
         if (mounted) {
           Provider.of<HomeProvider>(
             context,

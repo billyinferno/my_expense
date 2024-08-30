@@ -427,7 +427,9 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _storeCredentials(LoginModel loginModel) async {
     // ensure we finished storing the credentials before we actually get the
     // additional information and navigate to home
-    await UserSharedPreferences.setUserLogin(loginModel).then((value) async {
+    await UserSharedPreferences.setUserLogin(
+      login: loginModel
+    ).then((value) async {
       // refresh JWT token with the latest JWT token that we just get after
       // login.
       NetUtils.refreshJWT();

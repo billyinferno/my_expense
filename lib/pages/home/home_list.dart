@@ -498,7 +498,7 @@ class _HomeListState extends State<HomeList> {
     // we can use this date when we perform edit, and if the date is not the same
     // as the current transaction list date, we don't need to refresh the provider.
     await TransactionSharedPreferences.setTransactionListCurrentDate(
-      refreshDay.toLocal()
+      date: refreshDay.toLocal()
     );
 
     String strRefreshDay = Globals.dfyyyyMMdd.format(refreshDay.toLocal());
@@ -554,7 +554,10 @@ class _HomeListState extends State<HomeList> {
 
         // save the current transaction on the provider to the shared preferences
         String date = Globals.dfyyyyMMdd.format(txnDeleted.date.toLocal());
-        TransactionSharedPreferences.setTransaction(date, txnListModel);
+        TransactionSharedPreferences.setTransaction(
+          date: date,
+          txn: txnListModel
+        );
       }
 
       // update information for txn delete
@@ -596,21 +599,21 @@ class _HomeListState extends State<HomeList> {
 
     // delete the transaction from wallet transaction
     await TransactionSharedPreferences.deleteTransactionWallet(
-      txnInfo.wallet.id,
-      _refreshDay,
-      txnInfo
+      walletId: txnInfo.wallet.id,
+      date: _refreshDay,
+      txn: txnInfo
     );
 
     if (txnInfo.walletTo != null) {
       await TransactionSharedPreferences.deleteTransactionWallet(
-        txnInfo.walletTo!.id,
-        _refreshDay,
-        txnInfo
+        walletId: txnInfo.walletTo!.id,
+        date: _refreshDay,
+        txn: txnInfo
       );
     }
 
     // delete the transaction from budget
-    await WalletSharedPreferences.deleteWalletWorth(txnInfo);
+    await WalletSharedPreferences.deleteWalletWorth(txn: txnInfo);
 
     await Future.wait([
       _futureWallets = _walletHTTP.fetchWallets(
@@ -657,7 +660,10 @@ class _HomeListState extends State<HomeList> {
           }
           // now we can set the shared preferences of budget
           BudgetSharedPreferences.setBudget(
-              txnInfo.wallet.currencyId, _refreshDay, _budgets);
+            ccyId: txnInfo.wallet.currencyId,
+            date: _refreshDay,
+            budgets: _budgets
+          );
 
           // only set the provider if only the current budget date is the same as the refresh day
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();

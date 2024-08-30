@@ -57,6 +57,6 @@ class UserHTTPService {
     LoginModel loginModel = LoginModel.fromJson(jsonDecode(result));
 
     // replace the login model on shared preferences
-    await UserSharedPreferences.setUserLogin(loginModel);
+    await UserSharedPreferences.setUserLogin(login: loginModel);
   }
 }

@@ -122,14 +122,14 @@ class _TransactionInputState extends State<TransactionInput> {
     // initialize the filter list and get the last expense and income
     // transaction to build the auto complete
     _filterList = [];
-    _lastExpense = (TransactionSharedPreferences.getLastTransaction("expense") ?? []);
-    _lastIncome = (TransactionSharedPreferences.getLastTransaction("income") ?? []);
+    _lastExpense = (TransactionSharedPreferences.getLastTransaction(type: "expense") ?? []);
+    _lastIncome = (TransactionSharedPreferences.getLastTransaction(type: "income") ?? []);
 
     // get the list of enabled wallet
-    _walletList = WalletSharedPreferences.getWallets(false);
+    _walletList = WalletSharedPreferences.getWallets(showDisabled: false);
     
     // get the list of disabled wallet if needed
-    _walletListAll = WalletSharedPreferences.getWallets(true);
+    _walletListAll = WalletSharedPreferences.getWallets(showDisabled: true);
 
     // default the _isDisabled to false
     _isDisabled = false;
@@ -1173,7 +1173,7 @@ class _TransactionInputState extends State<TransactionInput> {
     }
     else {
       // get current category list based on current type
-      _currentCategoryList = CategorySharedPreferences.getCategory(_currentType);
+      _currentCategoryList = CategorySharedPreferences.getCategory(type: _currentType);
 
       // check if we got category id or not?
       if (categoryId != null) {

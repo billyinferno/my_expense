@@ -40,7 +40,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
     _currencyID = widget.currencyId as int;
 
     // get the expense category model
-    _expenseCategory = CategorySharedPreferences.getCategory("expense");
+    _expenseCategory = CategorySharedPreferences.getCategory(type: "expense");
 
     // fetch the current budget
     _getData = _fetchBudget(true);
@@ -627,7 +627,11 @@ class _BudgetListPageState extends State<BudgetListPage> {
         // is based on date, first we need to get what is the curren date being displayed
         // on the home budget?
         String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-        List<BudgetModel>? homeBudgetList = BudgetSharedPreferences.getBudget(_currencyID, currentBudgetDate);
+        List<BudgetModel>? homeBudgetList = BudgetSharedPreferences.getBudget(
+          ccyId: _currencyID,
+          date: currentBudgetDate
+        );
+
         if (homeBudgetList != null) {
           if (homeBudgetList.isNotEmpty) {
             homeBudgetList.removeWhere((element) =>
@@ -637,9 +641,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
             // store back the home budget list
             BudgetSharedPreferences.setBudget(
-              _currencyID,
-              currentBudgetDate,
-              homeBudgetList
+              ccyId: _currencyID,
+              date: currentBudgetDate,
+              budgets: homeBudgetList
             );
 
             if (mounted) {
@@ -700,12 +704,20 @@ class _BudgetListPageState extends State<BudgetListPage> {
       // on the home budget?
       String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
       List<BudgetModel>? homeBudgetList = (
-        BudgetSharedPreferences.getBudget(_currencyID, currentBudgetDate) ?? []
+        BudgetSharedPreferences.getBudget(
+          ccyId: _currencyID,
+          date: currentBudgetDate
+        ) ?? []
       );
       homeBudgetList.add(budget);
+      
       // store back the home budget list
       BudgetSharedPreferences.setBudget(
-          _currencyID, currentBudgetDate, homeBudgetList);
+        ccyId: _currencyID,
+        date: currentBudgetDate,
+        budgets: homeBudgetList
+      );
+
       if (mounted) {
         // after that notify the budget list on the home
         Provider.of<HomeProvider>(
@@ -751,7 +763,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
           // initialize all the variable needed
           newHomeBudgetList = [];
-          currentHomeBudgetList = BudgetSharedPreferences.getBudget(_currencyID, budgetDate);
+          currentHomeBudgetList = BudgetSharedPreferences.getBudget(
+            ccyId: _currencyID,
+            date: budgetDate,
+          );
 
           // check if the current home budget list got data or not?
           // if got data then we can loop and add the new amount on the existing list
@@ -784,7 +799,12 @@ class _BudgetListPageState extends State<BudgetListPage> {
           }
 
           // set the new home list to the home list budget, so we can directly reflect the data
-          BudgetSharedPreferences.setBudget(_currencyID, budgetDate, newHomeBudgetList);
+          BudgetSharedPreferences.setBudget(
+            ccyId: _currencyID,
+            date: budgetDate,
+            budgets: newHomeBudgetList
+          );
+          
           if (budgetDate == currentBudgetDate) {
             if (mounted) {
               // after that notify the budget list on the home if this is the same as the current budget

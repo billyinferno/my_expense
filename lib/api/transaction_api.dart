@@ -68,7 +68,10 @@ class TransactionHTTPService {
     }
 
     // once all the manipulation finished
-    await TransactionSharedPreferences.setTransaction(date, txnListShared);
+    await TransactionSharedPreferences.setTransaction(
+      date: date,
+      txn: txnListShared
+    );
 
     // return from the proc
     return txnUpdate;
@@ -102,7 +105,10 @@ class TransactionHTTPService {
     txnListShared.add(txnAdd);
 
     // and set back this shared preferences
-    await TransactionSharedPreferences.setTransaction(date, txnListShared);
+    await TransactionSharedPreferences.setTransaction(
+      date: date,
+      txn: txnListShared
+    );
 
     // return from the proc
     return txnAdd;
@@ -133,7 +139,10 @@ class TransactionHTTPService {
     List<dynamic> jsonData = jsonDecode(result);
     List<TransactionListModel> transactionModel =
       jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
-    TransactionSharedPreferences.setTransaction(date, transactionModel);
+    TransactionSharedPreferences.setTransaction(
+      date: date,
+      txn: transactionModel
+    );
     
     return transactionModel;
   }
@@ -144,7 +153,9 @@ class TransactionHTTPService {
   }) async {
     // check if we got data on the sharedPreferences or not?
     if (!force) {
-      List<LastTransactionModel>? transactionPref = TransactionSharedPreferences.getLastTransaction(type);
+      List<LastTransactionModel>? transactionPref =
+        TransactionSharedPreferences.getLastTransaction(type: type);
+      
       if (transactionPref != null) {
         // check if the transaction preference got data or not?
         // if not data, then we just continue the request to the server
@@ -165,7 +176,12 @@ class TransactionHTTPService {
     List<dynamic> jsonData = jsonDecode(result);
     List<LastTransactionModel> transactionModel =
         jsonData.map((e) => LastTransactionModel.fromJson(e)).toList();
-    TransactionSharedPreferences.setLastTransaction(type, transactionModel);
+    
+    TransactionSharedPreferences.setLastTransaction(
+      type: type,
+      txn: transactionModel
+    );
+
     return transactionModel;
   }
 
@@ -177,7 +193,12 @@ class TransactionHTTPService {
   }) async {
     // check if we got data on the sharedPreferences or not?
     if (!force) {
-      List<TransactionListModel>? transactionPref = TransactionSharedPreferences.getTransactionBudget(categoryId, date);
+      List<TransactionListModel>? transactionPref =
+        TransactionSharedPreferences.getTransactionBudget(
+          categoryId: categoryId,
+          date: date
+        );
+      
       if (transactionPref != null) {
         return transactionPref;
       }
@@ -194,7 +215,13 @@ class TransactionHTTPService {
     List<dynamic> jsonData = jsonDecode(result);
     List<TransactionListModel> transactionModel =
         jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
-    TransactionSharedPreferences.setTransactionBudget(categoryId, date, transactionModel);
+    
+    TransactionSharedPreferences.setTransactionBudget(
+      categoryId: categoryId,
+      date: date,
+      txn: transactionModel
+    );
+
     return transactionModel;
   }
 
@@ -236,7 +263,12 @@ class TransactionHTTPService {
   }) async {
     // check if we got data on the sharedPreferences or not?
     if (!force) {
-      List<TransactionListModel>? transactionPref = TransactionSharedPreferences.getTransactionWallet(walletId, date);
+      List<TransactionListModel>? transactionPref =
+        TransactionSharedPreferences.getTransactionWallet(
+          walletId: walletId,
+          date: date
+        );
+
       if (transactionPref != null) {
         return transactionPref;
       }
@@ -253,7 +285,13 @@ class TransactionHTTPService {
     List<dynamic> jsonData = jsonDecode(result);
     List<TransactionListModel> transactionModel =
         jsonData.map((e) => TransactionListModel.fromJson(e)).toList();
-    TransactionSharedPreferences.setTransactionWallet(walletId, date, transactionModel);
+
+    TransactionSharedPreferences.setTransactionWallet(
+      walletId: walletId,
+      date: date,
+      txn: transactionModel
+    );
+
     return transactionModel;
   }
 
@@ -298,7 +336,13 @@ class TransactionHTTPService {
 
     // check if we got data on the sharedPreferences or not?
     if (!force) {
-      IncomeExpenseModel? transactionPref = TransactionSharedPreferences.getIncomeExpense(ccyId, dateFrom, dateTo);
+      IncomeExpenseModel? transactionPref =
+        TransactionSharedPreferences.getIncomeExpense(
+          ccyId: ccyId,
+          dateFrom: dateFrom,
+          dateTo: dateTo
+        );
+      
       if (transactionPref != null) {
         return transactionPref;
       }
@@ -314,7 +358,12 @@ class TransactionHTTPService {
     // get the income and expense data
     Map<String, dynamic> jsonData = jsonDecode(result);
     IncomeExpenseModel incomeExpense = IncomeExpenseModel.fromJson(jsonData);
-    TransactionSharedPreferences.setIncomeExpense(ccyId, dateFrom, dateTo, incomeExpense);
+    TransactionSharedPreferences.setIncomeExpense(
+      ccyId: ccyId,
+      dateFrom: dateFrom,
+      dateTo: dateTo,
+      incomeExpense: incomeExpense,
+    );
     
     return incomeExpense;
   }
@@ -383,17 +432,33 @@ class TransactionHTTPService {
     
     // get the data
     if(jsonData["min"] == null) {
-      TransactionSharedPreferences.setTransactionMinDate(DateTime(DateTime.now().year, DateTime.now().month, 1));
+      TransactionSharedPreferences.setTransactionMinDate(
+        date: DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          1
+        ),
+      );
     }
     else {
-      TransactionSharedPreferences.setTransactionMinDate(DateTime.parse(jsonData["min"]));
+      TransactionSharedPreferences.setTransactionMinDate(
+        date: DateTime.parse(jsonData["min"])
+      );
     }
     
     if(jsonData["max"] == null) {
-      TransactionSharedPreferences.setTransactionMaxDate(DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1)));
+      TransactionSharedPreferences.setTransactionMaxDate(
+        date: DateTime(
+          DateTime.now().year,
+          DateTime.now().month + 1,
+          1
+        ).subtract(const Duration(days: 1))
+      );
     }
     else {
-      TransactionSharedPreferences.setTransactionMaxDate(DateTime.parse(jsonData["max"]));
+      TransactionSharedPreferences.setTransactionMaxDate(
+        date: DateTime.parse(jsonData["max"])
+      );
     }
   }
 
@@ -436,7 +501,7 @@ class TransactionHTTPService {
     // check if we got data on the sharedPreferences or not?
     if (!force) {
       List<TransactionTopModel>? transactionPref =
-          TransactionSharedPreferences.getTransactionTop(from, type);
+          TransactionSharedPreferences.getTransactionTop(date: from, type: type);
       if (transactionPref != null) {
         return transactionPref;
       }
@@ -452,7 +517,7 @@ class TransactionHTTPService {
     // parse the result and return the transaction list
     List<dynamic> jsonData = jsonDecode(result);
     List<TransactionTopModel> transactionModel = jsonData.map((e) => TransactionTopModel.fromJson(e)).toList();
-    TransactionSharedPreferences.setTransactionTop(from, type, transactionModel);
+    TransactionSharedPreferences.setTransactionTop(date: from, type: type, txn: transactionModel);
     return transactionModel;
   }
 }

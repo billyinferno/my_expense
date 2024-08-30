@@ -65,14 +65,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   @override
   void initState() {
     // get the category expense and income list from shared preferences
-    _categoryExpenseList = CategorySharedPreferences.getCategory('expense');
-    _categoryIncomeList = CategorySharedPreferences.getCategory('income');
+    _categoryExpenseList = CategorySharedPreferences.getCategory(type: 'expense');
+    _categoryIncomeList = CategorySharedPreferences.getCategory(type: 'income');
 
     // generate the icon list widget for both expense and income
     _generateIconCategory();
 
     // get the wallet list
-    _walletList = WalletSharedPreferences.getWallets(false);
+    _walletList = WalletSharedPreferences.getWallets(showDisabled: false);
 
     super.initState();
   }

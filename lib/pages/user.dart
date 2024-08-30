@@ -44,8 +44,8 @@ class _UserPageState extends State<UserPage> {
     _userMe = UserSharedPreferences.getUserMe();
 
     // get the expense and incomr category
-    _expenseCategory = CategorySharedPreferences.getCategory("expense");
-    _incomeCategory = CategorySharedPreferences.getCategory("income");
+    _expenseCategory = CategorySharedPreferences.getCategory(type: "expense");
+    _incomeCategory = CategorySharedPreferences.getCategory(type: "income");
     
     // check what is the default category for expense
     if(_userMe.defaultCategoryExpense != null) {
@@ -88,7 +88,7 @@ class _UserPageState extends State<UserPage> {
     _selectedWallet = _currentWallet;
 
     // get list of wallets from shared preferences
-    _wallets = WalletSharedPreferences.getWallets(false);
+    _wallets = WalletSharedPreferences.getWallets(showDisabled: false);
     if(_userMe.defaultWallet != null && _wallets.isNotEmpty) {
       for (int i=0; i<_wallets.length; i++) {
         if(_userMe.defaultWallet == _wallets[i].id) {
@@ -690,7 +690,11 @@ class _UserPageState extends State<UserPage> {
       // update the budget provider and budget shared preferences
       // now we can set the shared preferences of budget
       _futureBudgetList.then((value) {
-        BudgetSharedPreferences.setBudget(currencyID, currentBudgetDate, value);
+        BudgetSharedPreferences.setBudget(
+          ccyId: currencyID,
+          date: currentBudgetDate,
+          budgets: value
+        );
       });
 
       if (mounted) {
