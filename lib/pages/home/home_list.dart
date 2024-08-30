@@ -131,10 +131,10 @@ class _HomeListState extends State<HomeList> {
                   );
                 },
                 selectedDayPredicate: (day) {
-                  return day.isSameDate(date: _currentFocusedDay);
+                  return day.toLocal().isSameDate(date: _currentFocusedDay.toLocal());
                 },
                 onDaySelected: (selectedDay, focusedDay) {
-                  if (!(selectedDay.isSameDate(date: _currentFocusedDay))) {
+                  if (!(selectedDay.toLocal().isSameDate(date: _currentFocusedDay.toLocal()))) {
                     _setFocusedDay(selectedDay);
                     _getData = _refreshTransaction(
                       refreshDay: selectedDay,
@@ -146,6 +146,7 @@ class _HomeListState extends State<HomeList> {
                 calendarBuilders: CalendarBuilders(
                   todayBuilder: (context, day, focusedDay) {
                     return Container(
+                      color: Colors.transparent,
                       alignment: Alignment.center,
                       child: Text(
                         Globals.dfd.format(day.toLocal()),
@@ -205,7 +206,7 @@ class _HomeListState extends State<HomeList> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    (_currentFocusedDay.isSameDate(date: DateTime.now())
+                    (_currentFocusedDay.toLocal().isSameDate(date: DateTime.now().toLocal())
                       ? "Today"
                       : Globals.dfddMMMMyyyy.format(_currentFocusedDay.toLocal())
                     ),
