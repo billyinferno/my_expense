@@ -53,10 +53,10 @@ packages:
     dependency: "direct main"
     description:
       name: calendar_date_picker2
-      sha256: c7684d1a6bae19dc78c0b59101b272b47d78713d4aa0fcca55e55cf2dde9e3e4
+      sha256: d3f9695749226ad4376869f77b764d83833b2f5781edf41399753280ff217d80
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.5"
+    version: "1.1.6"
   characters:
     dependency: transitive
     description:
