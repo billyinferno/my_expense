@@ -47,8 +47,15 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
   }
 
   int _computeTotalMonths(DateTime start, DateTime end) {
+    // ensure the start and end date is correct
+    assert(start.year <= end.year);
+    if (start.year == end.year) {
+      assert(start.month <= end.month);
+    }
+    
     DateTime startDate = start;
     int total = 0;
+
     while(startDate.year != end.year || startDate.month != end.month) {
       startDate = DateTime(start.year, start.month + total);
       //print(_start.toString() + " - " + end.toString());
