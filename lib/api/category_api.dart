@@ -20,7 +20,12 @@ class CategoryHTTPService {
       url: '${Globals.apiURL}categories/default/${type.toLowerCase()}',
       body: body,
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on updateDefaultCategory',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // success, it will return the userMe model, so we can just replace the current userMe
@@ -48,7 +53,12 @@ class CategoryHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}categories',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchCategory',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the category data

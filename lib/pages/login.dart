@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:http/http.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -30,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   late Future<bool> _checkIsLogin;
   late bool _isLogin;
   late String _type;
+  late Color _typeColor;
 
   String _bearerToken = "";
   bool _isTokenExpired = false;
@@ -41,7 +41,9 @@ class _LoginPageState extends State<LoginPage> {
     _isTokenExpired = false;
 
     // get the type of the application running now (whether WASM or JS)
-    _type = Globals.runAs();
+    var (type, typeColor) = Globals.runAs();
+    _type = type;
+    _typeColor = typeColor;
 
     // get the current date
     _currentDate =
@@ -103,13 +105,41 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         Center(
-          child: Text(
-            'version - ${Globals.appVersion}$_type',
-            style: const TextStyle(
-              color: textColor2,
-              fontSize: 10,
-              fontStyle: FontStyle.italic,
-            ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'version - ${Globals.appVersion} - run as (',
+                style: const TextStyle(
+                  color: textColor2,
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              Icon(
+                Ionicons.rocket,
+                color: _typeColor,
+                size: 10,
+              ),
+              const SizedBox(width: 2,),
+              Text(
+                _type,
+                style: TextStyle(
+                  color: _typeColor,
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              const Text(
+                ')',
+                style: TextStyle(
+                  color: textColor2,
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                ),
+              )
+            ],
           ),
         ),
       ],
@@ -267,11 +297,7 @@ class _LoginPageState extends State<LoginPage> {
                             await _login(
                               _usernameController.text,
                               _passwordController.text
-                            ).then((error) async {
-                              if (error) {
-                                Log.error(message: "⛔ Wrong login information");
-                              }
-                            });
+                            );
                           }
                         }),
                         color: accentColors[6],
@@ -448,64 +474,48 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  Future<bool> _login(String username, String password) async {
-    bool isError = false;
-
+  Future<void> _login(String username, String password) async {
     // all good, showed the loading
     LoadingScreen.instance().show(context: context);
 
     // try to fetch users/me endpoint to check if we have credentials to access
     // this page or not?
-    try {
-      await _userHTTP.login(
-        identifier: username,
-        password: password
-      ).then((loginModel) {
-        // login success, now we can just store this on the shared preferences
-        _storeCredentials(loginModel);
-      }).whenComplete(
-        () {
-          LoadingScreen.instance().hide();
-        },
-      );
-    }
-    on NetErrorModel catch (netError, stackTrace) {
-      Log.error(
-        message: "Error during login",
-        error: netError,
-        stackTrace: stackTrace,
-      );
-
-      if (netError.statusCode > 0) {
-        isError = true;
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            createSnackBar(
-              message: "Wrong login info"
-            )
-          );
-        }
-      } else {
-        isError = true;
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            createSnackBar(
-              message: "Services unavailable"
-            )
-          );
-        }
-      }
-    }
-    on NetException catch(error, stackTrace) {
+    await _userHTTP.login(
+      identifier: username,
+      password: password
+    ).then((loginModel) {
+      // login success, now we can just store this on the shared preferences
+      _storeCredentials(loginModel);
+    }).whenComplete(
+      () {
+        LoadingScreen.instance().hide();
+      },
+    ).onError<NetException>((error, stackTrace) {
       Log.error(
         message: error.message,
         error: error,
         stackTrace: stackTrace,
       );
-
+      debugPrint("${error.code}");
       if (mounted) {
+        // if rejected with -1 this means that this is client error
+        if (error.code == -1) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            createSnackBar(
+              message: 'Server timeout',
+            )
+          );
+        }
+        // if rejected with -2 this means that this is generic error
+        else if (error.code == -2) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            createSnackBar(
+              message: 'Error on the application',
+            )
+          );
+        }
         // check whether this is rejected with 400
-        if (error.code == 400) {
+        else if (error.code == 400) {
           // then it means that the rejection is due to the invalid identifier
           ScaffoldMessenger.of(context).showSnackBar(
             createSnackBar(
@@ -521,23 +531,7 @@ class _LoginPageState extends State<LoginPage> {
           );
         }
       }
-    }
-    on ClientException catch (error, stackTrace) {
-      Log.error(
-        message: error.message,
-        error: error,
-        stackTrace: stackTrace,
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          createSnackBar(
-            message: "Got error: ${error.message}",
-          )
-        );
-      }
-    }
-    catch (error, stackTrace) {
+    },).onError((error, stackTrace) {
       Log.error(
         message: "Generic error during login",
         error: error,
@@ -551,8 +545,6 @@ class _LoginPageState extends State<LoginPage> {
           )
         );
       }
-    }
-
-    return isError;
+    },);
   }
 }

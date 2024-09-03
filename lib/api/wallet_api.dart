@@ -24,7 +24,12 @@ class WalletHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}wallets',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchWallets',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -59,7 +64,12 @@ class WalletHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}wallets/findcurrencies',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchWalletCurrencies',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -81,7 +91,12 @@ class WalletHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}wallets/$id',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchWalletsID',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse json data
@@ -118,7 +133,12 @@ class WalletHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}wallets/worth/$dateTo',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchWalletsWorth',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -155,7 +175,12 @@ class WalletHTTPService {
       url: '${Globals.apiURL}wallets',
       body: walletAdd
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on addWallet',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // here the server will response with the WalletModel, so we can just
@@ -184,7 +209,12 @@ class WalletHTTPService {
       url: '${Globals.apiURL}wallets/${txn.id}',
       body: walletEdit
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on updateWallet',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // here the server will response with the WalletModel, so we can just
@@ -200,14 +230,24 @@ class WalletHTTPService {
     await NetUtils.delete(
       url: '${Globals.apiURL}wallets/$id',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on deleteWallets',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // if delete success, get the latest wallet data now from the API services
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}wallets',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on deleteWallets',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -236,7 +276,12 @@ class WalletHTTPService {
       url: '${Globals.apiURL}wallets/enable/${txn.id}',
       body: enableWallet
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on enableWallet',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // Here the server will return with the updated wallet model, so now
@@ -347,7 +392,12 @@ class WalletHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}wallet-types',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchWalletTypes',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -381,7 +431,12 @@ class WalletHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}currencies',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchCurrency',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -413,7 +468,12 @@ class WalletHTTPService {
       url: '${Globals.apiURL}wallets/default',
       body: body
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on updateDefaultWallet',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // success, it will return the userMe model, so we can just replace the current userMe
@@ -426,7 +486,12 @@ class WalletHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}wallets/stat/$id',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on getStat',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -445,7 +510,12 @@ class WalletHTTPService {
     final String result = await NetUtils.get(
       url: url,
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on getAllStat',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result

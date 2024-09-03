@@ -14,7 +14,12 @@ class TransactionHTTPService {
       url: '${Globals.apiURL}transactions/${prevTxn.id}',
       body: txn.toJson()
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on updateTransaction',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // fetch the added data and put it into TransactionListModel
@@ -88,7 +93,12 @@ class TransactionHTTPService {
       url: '${Globals.apiURL}transactions/add',
       body: txn.toJson()
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on addTransaction',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // fetch the added data and put it into TransactionListModel
@@ -132,7 +142,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/date/$date',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchTransaction',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result and return the transaction list
@@ -169,7 +184,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/last/$type',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchLastTransaction',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result to get the last transaction list
@@ -208,7 +228,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/budget/${categoryId.toString()}/date/$date/currency/${currencyId.toString()}',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchTransactionBudget',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result to get list of transaction based on the budget id
@@ -233,7 +258,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/budget/stat/$categoryId/currency/$currencyId',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchTransactionBudgetStat',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the budget data
@@ -248,7 +278,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/budget/stat/currency/$currencyId',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchTransactionBudgetStatSummary',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the budget data
@@ -278,7 +313,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/wallet/${walletId.toString()}/date/$date',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchTransactionWallet',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the wallet list transaction
@@ -316,7 +356,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '$url?_limit=$limit&_start=$start',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on findTransaction',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result and get the find transaction list
@@ -352,7 +397,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/incomeexpense/ccy/${ccyId.toString()}/from/$dateFrom/to/$dateTo',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchIncomeExpense',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // get the income and expense data
@@ -383,7 +433,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/stats/ccy/${ccyId.toString()}/wallet/${walletId.toString()}/from/$dateFrom/to/$dateTo/name/${(name.isEmpty ? '*' : name)}/search/${search.toLowerCase()}',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchIncomeExpenseCategory',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the income and expense category data
@@ -410,7 +465,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/detailstats/type/$type/category/${categoryId.toString()}/ccy/${ccyId.toString()}/wallet/${walletId.toString()}/from/$dateFrom/to/$dateTo/name/${(name.isEmpty ? '*' : name)}/search/${search.toLowerCase()}',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchIncomeExpenseCategoryDetail',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -424,7 +484,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/minmax',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchMinMaxDate',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse tje result
@@ -469,7 +534,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/minmax/wallet/$walletId',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchWalletMinMaxDate',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -487,7 +557,12 @@ class TransactionHTTPService {
     await NetUtils.delete(
       url: '${Globals.apiURL}transactions/${txn.id}',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on deleteTransaction',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
   }
 
@@ -511,7 +586,12 @@ class TransactionHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}transactions/top/type/$type/ccy/$ccy/from/$from/to/$to',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchTransactionTop',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result and return the transaction list

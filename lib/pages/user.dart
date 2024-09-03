@@ -28,6 +28,8 @@ class _UserPageState extends State<UserPage> {
   late CategoryModel? _currentIncomeCategory;
   late CurrencyModel? _currentCurrency;
   late WalletModel? _currentWallet;
+  late String _runType;
+  late Color _runTypeColor;
   
   late CategoryModel? _selectedExpenseCategory;
   late CategoryModel? _selectedIncomeCategory;
@@ -106,6 +108,11 @@ class _UserPageState extends State<UserPage> {
         _isPinEnabled = true;
       }
     }
+
+    // get the type of application that we running
+    var (type, color) = Globals.runAs();
+    _runType = type;
+    _runTypeColor = color;
     
     super.initState();
   }
@@ -410,7 +417,7 @@ class _UserPageState extends State<UserPage> {
                       value: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
-                          '${Globals.appVersion}${Globals.runAs()}',
+                          Globals.appVersion,
                           style: const TextStyle(
                             color: textColor,
                           ),
@@ -421,8 +428,25 @@ class _UserPageState extends State<UserPage> {
                       }),
                     ),
                     UserButton(
-                      icon: Ionicons.information,
-                      iconColor: accentColors[7],
+                      icon: Ionicons.rocket,
+                      iconColor: accentColors[9],
+                      label: "Run As",
+                      value: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          _runType,
+                          style: TextStyle(
+                            color: _runTypeColor,
+                          ),
+                        ),
+                      ),
+                      callback: (() {
+                        // do nothing
+                      }),
+                    ),
+                    UserButton(
+                      icon: Ionicons.cog,
+                      iconColor: accentColors[9],
                       label: "Flutter SDK",
                       value: Align(
                         alignment: Alignment.centerRight,

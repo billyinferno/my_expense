@@ -31,14 +31,14 @@ class Globals {
   static final NumberFormat fCCY2 = NumberFormat("0.00", "en_US");
   static final NumberFormat fCCYnf = NumberFormat.decimalPattern("en_US")..maximumFractionDigits = 2;
 
-  static String runAs() {
+  static (String, Color) runAs() {
     if (kIsWasm) {
-      return " run as WASM";
+      return ("WASM", accentColors[1]);
     }
     if (kIsWeb) {
-      return " run as JS";
+      return ("JS", accentColors[0]);
     }
-    return "";
+    return ("Native", accentColors[2]);
   }
 
   static ThemeData themeData = ThemeData(

@@ -18,7 +18,12 @@ class PinHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}pins',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on getPin',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the login data and get the login model
@@ -37,7 +42,12 @@ class PinHTTPService {
       url: '${Globals.apiURL}pins',
       body: {"pin": pinNumber}
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on setPin',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the login data and get the login model
@@ -55,7 +65,12 @@ class PinHTTPService {
       url: '${Globals.apiURL}pins',
       body: {"pin": pinNumber}
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on updatePin',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the login data and get the login model
@@ -71,7 +86,12 @@ class PinHTTPService {
     await NetUtils.delete(
       url: '${Globals.apiURL}pins',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on deletePin',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // set the pin as NULL

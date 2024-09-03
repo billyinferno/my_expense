@@ -18,7 +18,12 @@ class BudgetHTTPService {
       url: '${Globals.apiURL}budgets/defaultcurrency',
       body: body,
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on updateBudgetCurrency',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // parse the result
@@ -45,7 +50,12 @@ class BudgetHTTPService {
       url: '${Globals.apiURL}budgets',
       body: body,
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on addBudgetList',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // success, it will return the complete budget model
@@ -79,7 +89,12 @@ class BudgetHTTPService {
       url: '${Globals.apiURL}budgets/currency/$currencyId',
       body: body,
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on updateBudgetList',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // success, decode the response as budget model
@@ -96,7 +111,12 @@ class BudgetHTTPService {
     final String result = await NetUtils.delete(
       url: '${Globals.apiURL}budgets/currency/${currencyId.toString()}/id/${budgetId.toString()}',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on deleteBudgetList',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // success, it will return the complete budget model
@@ -125,7 +145,12 @@ class BudgetHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}budgets/list/$currencyID',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchBudgetsList',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // if got success response, then parse json data and then put on the budget list model
@@ -159,7 +184,12 @@ class BudgetHTTPService {
     final String result = await NetUtils.get(
       url: '${Globals.apiURL}budgets/currency/$currencyID/date/$date',
     ).onError((error, stackTrace) {
-      throw Exception(error);
+      Log.error(
+        message: 'Error on fetchBudgetDate',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
     });
 
     // success, it will return the List of Budget Model
