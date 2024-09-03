@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
         children: _pages,
       ),
       bottomNavigationBar: MySafeArea(
-        bottomPadding: 15,
+        bottomPadding: 10,
         color: primaryDark,
         child: BottomAppBar(
           elevation: 0.0,
