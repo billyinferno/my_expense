@@ -98,61 +98,64 @@ class _HomePageState extends State<HomePage> {
         index: _currentIndex,
         children: _pages,
       ),
-      bottomNavigationBar: BottomAppBar(
-        elevation: 0.0,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 5,
+      bottomNavigationBar: MySafeArea(
+        bottomPadding: 15,
         color: primaryDark,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            BarButton(
-              index: 0,
-              currentIndex: _currentIndex,
-              icon: Ionicons.calendar,
-              text: "Calendar",
-              onTap: (() {
-                setState(() {
-                  _currentIndex = 0;
-                });
-              }),
-            ),
-            BarButton(
-              index: 1,
-              currentIndex: _currentIndex,
-              icon: Ionicons.stats_chart,
-              text: "Stats",
-              onTap: (() {
-                setState(() {
-                  _currentIndex = 1;
-                });
-              }),
-            ),
-            const Expanded(child: SizedBox(),),
-            BarButton(
-              index: 2,
-              currentIndex: _currentIndex,
-              icon: Ionicons.list,
-              text: "Budget",
-              onTap: (() {
-                setState(() {
-                  _currentIndex = 2;
-                });
-              }),
-            ),
-            BarButton(
-              index: 3,
-              currentIndex: _currentIndex,
-              icon: Ionicons.wallet,
-              text: "Account",
-              onTap: (() {
-                setState(() {
-                  _currentIndex = 3;
-                });
-              }),
-            ),
-          ],
+        child: BottomAppBar(
+          elevation: 0.0,
+          notchMargin: 5,
+          color: primaryDark,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              BarButton(
+                index: 0,
+                currentIndex: _currentIndex,
+                icon: Ionicons.calendar,
+                text: "Calendar",
+                onTap: (() {
+                  setState(() {
+                    _currentIndex = 0;
+                  });
+                }),
+              ),
+              BarButton(
+                index: 1,
+                currentIndex: _currentIndex,
+                icon: Ionicons.stats_chart,
+                text: "Stats",
+                onTap: (() {
+                  setState(() {
+                    _currentIndex = 1;
+                  });
+                }),
+              ),
+              const Expanded(child: SizedBox(),),
+              BarButton(
+                index: 2,
+                currentIndex: _currentIndex,
+                icon: Ionicons.list,
+                text: "Budget",
+                onTap: (() {
+                  setState(() {
+                    _currentIndex = 2;
+                  });
+                }),
+              ),
+              BarButton(
+                index: 3,
+                currentIndex: _currentIndex,
+                icon: Ionicons.wallet,
+                text: "Account",
+                onTap: (() {
+                  setState(() {
+                    _currentIndex = 3;
+                  });
+                }),
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: _createFloatingAddButton(),
