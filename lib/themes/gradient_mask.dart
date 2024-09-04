@@ -25,7 +25,7 @@ class RadiantGradientMask extends StatelessWidget {
       shaderCallback: (bounds) => RadialGradient(
         center: align,
         radius: radius,
-        colors: [color, (endColor ?? lighten(color))],
+        colors: [color, (endColor ?? (color.lighten()))],
         tileMode: tileMode,
       ).createShader(bounds),
       child: child,

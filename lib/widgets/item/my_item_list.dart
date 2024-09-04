@@ -106,7 +106,7 @@ class MyItemList extends StatelessWidget {
                 child: Text(
                   "${symbolTo ?? ''} ${Globals.fCCY.format(amountTo ?? 0)}",
                   style: TextStyle(
-                    color: lighten((amountColorTo ?? (amountColor ?? textColor)), amount: 0.25),
+                    color: (amountColorTo ?? (amountColor ?? textColor)).lighten(amount: 0.25),
                   ),
                   textAlign: TextAlign.right,
                 ),

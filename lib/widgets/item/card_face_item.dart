@@ -18,7 +18,7 @@ class CardFace extends StatelessWidget {
           gradient: LinearGradient(
               colors: <Color>[
                 (wallet.enabled ? IconList.getColor(wallet.walletType.type) : secondaryDark),
-                (wallet.enabled ? lighten(IconList.getDarkColor(wallet.walletType.type), amount: 0.1) : secondaryBackground),
+                (wallet.enabled ? IconList.getDarkColor(wallet.walletType.type).lighten(amount: 0.1) : secondaryBackground),
               ]
           ),
         ),

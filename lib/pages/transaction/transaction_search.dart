@@ -471,7 +471,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             child: Text(
               "${transaction.walletTo != null ? transaction.walletTo!.currency : ''} ${Globals.fCCY.format(transaction.amount * transaction.exchangeRate)}",
               style: TextStyle(
-                color: lighten(accentColors[5], amount: 0.25),
+                color: accentColors[5].lighten(amount: 0.25),
               ),
               textAlign: TextAlign.right,
             ),
