@@ -13,7 +13,8 @@ class HomeWallet extends StatefulWidget {
 }
 
 class _HomeWalletState extends State<HomeWallet> {
-  final _walletHttpService = WalletHTTPService();
+  final WalletHTTPService _walletHTTP = WalletHTTPService();
+  final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
 
   final ScrollController _scrollControllerWallet = ScrollController();
   late Future<bool> _getData;
@@ -126,8 +127,8 @@ class _HomeWalletState extends State<HomeWallet> {
     LoadingScreen.instance().show(context: context);
 
     await Future.wait([
-      walletList = _walletHttpService.deleteWallets(id: id),
-      walletCurrencyList = _walletHttpService.fetchWalletCurrencies(force: true),
+      walletList = _walletHTTP.deleteWallets(id: id),
+      walletCurrencyList = _walletHTTP.fetchWalletCurrencies(force: true),
     ]).then((_) {
       // set the provider so it can tell the consumer to update/build the widget.
       walletList.then((wallets) {
@@ -182,7 +183,7 @@ class _HomeWalletState extends State<HomeWallet> {
 
     // fetch the new wallet data from API
     await Future.wait([
-      futureWallets = _walletHttpService.fetchWallets(
+      futureWallets = _walletHTTP.fetchWallets(
         showDisabled: true,
         force: true,
       ),
@@ -302,7 +303,12 @@ class _HomeWalletState extends State<HomeWallet> {
             ),
           ],
         ),
-        child: Wallet(wallet: wallet),
+        child: Wallet(
+          wallet: wallet,
+          onTap: () {
+            Navigator.pushNamed(context, '/wallet/transaction', arguments: wallet);
+          },
+        ),
       ),
     );
   }
@@ -315,11 +321,11 @@ class _HomeWalletState extends State<HomeWallet> {
     LoadingScreen.instance().show(context: context);
 
     await Future.wait([
-      walletList = _walletHttpService.enableWallet(
+      walletList = _walletHTTP.enableWallet(
         txn: wallet,
         isEnabled: !wallet.enabled
       ),
-      walletCurrencyList = _walletHttpService.fetchWalletCurrencies(force: true),
+      walletCurrencyList = _walletHTTP.fetchWalletCurrencies(force: true),
     ]).then((_) {
       // set the provider with the new wallets we got
       walletList.then((wallets) {
@@ -356,27 +362,49 @@ class _HomeWalletState extends State<HomeWallet> {
   }
 
   Future<void> _clearCache() async {
-    // clear the cache here, we will clear the transaction
-    // provider and cache, user will be need to refresh the
-    // application once finished.
+    // show the loading screen
     LoadingScreen.instance().show(context: context);
 
+    // first clear all the cache data
     Provider.of<HomeProvider>(context, listen: false).clearTransactionList();
     Provider.of<HomeProvider>(context, listen: false).clearBudgetList();
-    Future.wait([
-      TransactionSharedPreferences.clearTransaction(),
-      BudgetSharedPreferences.clearBudget(),
-      //TODO: clear the statistic also, and then after that we can perform hard refresh to all the transaction, and budget
-    ]).then((_) {
-      // do nothing
+    await Future.microtask(() async {
+      await TransactionSharedPreferences.clearTransaction();
+      await BudgetSharedPreferences.clearBudget();
+      
+      await _walletHTTP.fetchWalletCurrencies(force: true).then((_) async {
+        Log.success(message: "⏳ Fetch Wallet User Currency");
+        await _fetchAllBudget();
+      });
+    }).then((_) {
+      Log.success(message: "💯 Clear cache and get data again");
     }).onError((error, stackTrace) {
       Log.error(
-        message: "Error at _clearCache",
+        message: "🛑 Error when clear cache and get data",
         error: error,
         stackTrace: stackTrace,
       );
     }).whenComplete(() {
       LoadingScreen.instance().hide();
     });
+  }
+  
+  Future<void> _fetchAllBudget() async {
+    // loop thru all the currencies and get the budget
+    List<CurrencyModel> ccyLists = WalletSharedPreferences.getWalletUserCurrency();
+    for (CurrencyModel ccy in ccyLists) {
+      // fetch the budget for this ccy
+      await _budgetHTTP.fetchBudgetDate(
+        currencyID: ccy.id,
+        date: Globals.dfyyyyMMdd.format(
+          DateTime(DateTime.now().year,
+          DateTime.now().month,
+          1).toLocal()
+        ),
+        force: true
+      ).then((_) {
+        Log.success(message: "⏳ Fetch current budget for ${ccy.name}");
+      },);
+    }
   }
 }
