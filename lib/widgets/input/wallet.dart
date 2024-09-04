@@ -3,13 +3,26 @@ import 'package:my_expense/_index.g.dart';
 
 class Wallet extends StatelessWidget {
   final WalletModel wallet;
-  const Wallet({super.key, required this.wallet});
+  final Function() onTap;
+  final Function()? onLongPress;
+  const Wallet({
+    super.key,
+    required this.wallet,
+    required this.onTap,
+    this.onLongPress,
+  });
 
   @override
   Widget build(BuildContext context) {    
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/wallet/transaction', arguments: wallet);
+        // call the on tap function
+        onTap();
+      },
+      onLongPress: () {
+        if (onLongPress != null) {
+          onLongPress!();
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -18,7 +31,7 @@ class Wallet extends StatelessWidget {
           gradient: LinearGradient(
             colors: <Color>[
               (wallet.enabled ? IconList.getColor(wallet.walletType.type) : secondaryDark),
-              (wallet.enabled ? lighten(IconList.getDarkColor(wallet.walletType.type), amount: 0.1) : secondaryBackground),
+              (wallet.enabled ? IconList.getDarkColor(wallet.walletType.type).lighten(amount: 0.1) : secondaryBackground),
             ]
           ),
         ),
