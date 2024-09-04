@@ -101,7 +101,12 @@ class NetUtils {
             message: 'Gateway Timeout for $url'
           );
         },
-      );
+      ).onError((error, _) {
+        throw NetException(
+          code: -2,
+          type: NetType.post,
+          message: '[Exception] ${error.toString()}');
+      },);
 
       // check the response we got from http
       if (response.statusCode == 200) {
@@ -124,11 +129,7 @@ class NetUtils {
       );
     }
     catch (error) {
-      throw NetException(
-        code: -2,
-        type: NetType.get,
-        message: '[Error] ${error.toString()}',
-      );
+      rethrow;
     }
   }
 
@@ -199,7 +200,12 @@ class NetUtils {
             message: 'Gateway Timeout for $url'
           );
         },
-      );
+      ).onError((error, _) {
+        throw NetException(
+          code: -2,
+          type: NetType.post,
+          message: '[Exception] ${error.toString()}');
+      },);
 
       // check the response we got from http
       if (response.statusCode == 200) {
@@ -223,11 +229,7 @@ class NetUtils {
     }
     catch (error) {
       // common error
-      throw NetException(
-        code: -2,
-        type: NetType.post,
-        message: '[Error] ${error.toString()}',
-      );
+      rethrow;
     }
   }
 
@@ -275,7 +277,12 @@ class NetUtils {
             message: 'Gateway Timeout for $url'
           );
         },
-      );
+      ).onError((error, _) {
+        throw NetException(
+          code: -2,
+          type: NetType.post,
+          message: '[Exception] ${error.toString()}');
+      },);
 
       // check the response we got from http
       if (response.statusCode == 200) {
@@ -299,11 +306,7 @@ class NetUtils {
     }
     catch (error) {
       // common error
-      throw NetException(
-        code: -2,
-        type: NetType.delete,
-        message: '[Error] ${error.toString()}',
-      );
+      rethrow;
     }
   }
 
@@ -354,7 +357,12 @@ class NetUtils {
             message: 'Gateway Timeout for $url'
           );
         },
-      );
+      ).onError((error, _) {
+        throw NetException(
+          code: -2,
+          type: NetType.post,
+          message: '[Exception] ${error.toString()}');
+      },);
 
       // check the response we got from http
       if (response.statusCode == 200) {
@@ -377,12 +385,7 @@ class NetUtils {
       );
     }
     catch (error) {
-      // common error
-      throw NetException(
-        code: -2,
-        type: NetType.patch,
-        message: '[Error] ${error.toString()}',
-      );
+      rethrow;
     }
   }
 
@@ -433,7 +436,12 @@ class NetUtils {
             message: 'Gateway Timeout for $url'
           );
         },
-      );
+      ).onError((error, _) {
+        throw NetException(
+          code: -2,
+          type: NetType.post,
+          message: '[Exception] ${error.toString()}');
+      },);
 
       // check the response we got from http
       if (response.statusCode == 200) {
@@ -456,12 +464,7 @@ class NetUtils {
       );
     }
     catch (error) {
-      // common error
-      throw NetException(
-        code: -2,
-        type: NetType.put,
-        message: '[Error] ${error.toString()}',
-      );
+      rethrow;
     }
   }
 
@@ -512,7 +515,12 @@ class NetUtils {
             message: 'Gateway Timeout for $url'
           );
         },
-      );
+      ).onError((error, _) {
+        throw NetException(
+          code: -2,
+          type: NetType.post,
+          message: '[Exception] ${error.toString()}');
+      },);
 
       // check the response we got from http
       if (response.statusCode == 200) {
@@ -535,12 +543,7 @@ class NetUtils {
       );
     }
     catch (error) {
-      // common error
-      throw NetException(
-        code: -2,
-        type: NetType.put,
-        message: '[Error] ${error.toString()}',
-      );
+      rethrow;
     }
   }
 }

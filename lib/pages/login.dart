@@ -491,12 +491,6 @@ class _LoginPageState extends State<LoginPage> {
         LoadingScreen.instance().hide();
       },
     ).onError<NetException>((error, stackTrace) {
-      Log.error(
-        message: error.message,
-        error: error,
-        stackTrace: stackTrace,
-      );
-      debugPrint("${error.code}");
       if (mounted) {
         // if rejected with -1 this means that this is client error
         if (error.code == -1) {
@@ -531,20 +525,6 @@ class _LoginPageState extends State<LoginPage> {
           );
         }
       }
-    },).onError((error, stackTrace) {
-      Log.error(
-        message: "Generic error during login",
-        error: error,
-        stackTrace: stackTrace,
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          createSnackBar(
-            message: "Unexpected error during login",
-          )
-        );
-      }
-    },);
+    });
   }
 }
