@@ -53,10 +53,10 @@ packages:
     dependency: "direct main"
     description:
       name: calendar_date_picker2
-      sha256: d3f9695749226ad4376869f77b764d83833b2f5781edf41399753280ff217d80
+      sha256: "986955aea43081c8cf70fe01735ccdfe9a7041218b2be53ed92d5d4e639e8a1a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.6"
+    version: "1.1.7"
   characters:
     dependency: transitive
     description:
@@ -215,10 +215,10 @@ packages:
     dependency: "direct main"
     description:
       name: hive_ce
-      sha256: f58c10f3e4302c43109b66c4446421900a02e2de140834b29ca43858f1ec7e86
+      sha256: d706cd0b1552c89a537627528262b9b08fd8f7f7f18c71109e866bf75d623bf2
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.0+1"
+    version: "2.5.0+2"
   hive_ce_flutter:
     dependency: "direct main"
     description:
