@@ -170,6 +170,9 @@ class _WalletAddPageState extends State<WalletAddPage> {
                         controller: _nameController,
                         decoration: const InputDecoration(
                           hintText: "Account name",
+                          hintStyle: TextStyle(
+                            color: primaryLight,
+                          ),
                           border: OutlineInputBorder(
                             borderSide: BorderSide.none,
                           ),
@@ -208,6 +211,9 @@ class _WalletAddPageState extends State<WalletAddPage> {
                             decimal: true),
                         decoration: const InputDecoration(
                           hintText: "0.00",
+                          hintStyle: TextStyle(
+                            color: primaryLight,
+                          ),
                           border: OutlineInputBorder(
                             borderSide: BorderSide.none,
                           ),

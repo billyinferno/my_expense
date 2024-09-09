@@ -30,6 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   late bool _isLogin;
   late String _type;
   late Color _typeColor;
+  late bool _isObscure;
 
   String _bearerToken = "";
   bool _isTokenExpired = false;
@@ -51,6 +52,7 @@ class _LoginPageState extends State<LoginPage> {
     _currentDateString = Globals.dfyyyyMMdd.format(_currentDate);
 
     _isLogin = false;
+    _isObscure = true;
     _checkIsLogin = _checkLogin();
 
     super.initState();
@@ -211,8 +213,13 @@ class _LoginPageState extends State<LoginPage> {
                             FocusScope.of(context).requestFocus(_usernameFocus);
                           });
                         }),
+                        cursorColor: primaryBackground,
+                        cursorErrorColor: accentColors[2],
                         decoration: InputDecoration(
                           hintText: "username",
+                          hintStyle: TextStyle(
+                            color: textColor.withOpacity(0.3),
+                          ),
                           prefixIcon: Icon(
                             Ionicons.person,
                             color: (_usernameFocus.hasFocus
@@ -247,7 +254,9 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         controller: _passwordController,
                         focusNode: _passwordFocus,
-                        obscureText: true,
+                        obscureText: _isObscure,
+                        cursorColor: primaryBackground,
+                        cursorErrorColor: accentColors[2],
                         validator: ((val) {
                           if (val!.isNotEmpty) {
                             if (val.length < 6) {
@@ -265,6 +274,9 @@ class _LoginPageState extends State<LoginPage> {
                         }),
                         decoration: InputDecoration(
                           hintText: "password",
+                          hintStyle: TextStyle(
+                            color: textColor.withOpacity(0.3),
+                          ),
                           prefixIcon: Icon(
                             Ionicons.key,
                             color: (_passwordFocus.hasFocus
@@ -283,6 +295,17 @@ class _LoginPageState extends State<LoginPage> {
                                   ? accentColors[6]
                                   : textColor2),
                               width: 1.0,
+                            ),
+                          ),
+                          suffix: GestureDetector(
+                            onTap: (() {
+                              setState(() {
+                                _isObscure = !_isObscure;
+                              });
+                            }),
+                            child: Icon(
+                              (_isObscure ? Ionicons.eye : Ionicons.eye_off),
+                              color: textColor,
                             ),
                           ),
                         ),

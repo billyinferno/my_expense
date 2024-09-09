@@ -280,8 +280,12 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                             enableSuggestions: false,
                             keyboardType: TextInputType.name,
                             textAlign: TextAlign.right,
+                            cursorColor: primaryLight,
                             decoration: const InputDecoration(
                               hintText: "Transaction name",
+                              hintStyle: TextStyle(
+                                color: primaryLight,
+                              ),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide.none,
                               ),

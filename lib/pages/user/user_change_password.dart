@@ -79,8 +79,12 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                         children: <Widget>[
                           TextFormField(
                             controller: _currentPassword,
+                            cursorColor: primaryLight,
                             decoration: InputDecoration(
                               labelText: "Current Password",
+                              labelStyle: const TextStyle(
+                                color: primaryLight
+                              ),
                               icon: const Icon(Ionicons.lock_closed_outline),
                               border: const UnderlineInputBorder(
                                 borderSide: BorderSide(
@@ -110,8 +114,12 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                           ),
                           TextFormField(
                             controller: _newPassword,
+                            cursorColor: primaryLight,
                             decoration: InputDecoration(
                               labelText: "New Password",
+                              labelStyle: const TextStyle(
+                                color: primaryLight
+                              ),
                               icon: const Icon(Ionicons.lock_closed_outline),
                               border: const UnderlineInputBorder(
                                 borderSide: BorderSide(
@@ -141,8 +149,12 @@ class _UserChangePasswordState extends State<UserChangePassword> {
                           ),
                           TextFormField(
                             controller: _retypeNewPassword,
+                            cursorColor: primaryLight,
                             decoration: InputDecoration(
                               labelText: "Retype New Password",
+                              labelStyle: const TextStyle(
+                                color: primaryLight
+                              ),
                               icon: const Icon(Ionicons.lock_closed_outline),
                               border: const UnderlineInputBorder(
                                 borderSide: BorderSide(

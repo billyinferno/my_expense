@@ -381,6 +381,7 @@ class _TransactionInputState extends State<TransactionInput> {
                       ),
                       child: Row(
                         children: [
+                          const SizedBox(width: 10,),
                           const Icon(
                             Ionicons.swap_horizontal_sharp,
                             size: 20,
@@ -391,8 +392,12 @@ class _TransactionInputState extends State<TransactionInput> {
                             child: TextFormField(
                               controller: _exchangeController,
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              cursorColor: primaryLight,
                               decoration: const InputDecoration(
                                 hintText: "1.00",
+                                hintStyle: TextStyle(
+                                  color: primaryLight,
+                                ),
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide.none,
                                 ),
@@ -537,11 +542,27 @@ class _TransactionInputState extends State<TransactionInput> {
                       padding: const EdgeInsets.all(10),
                       child: TextFormField(
                         controller: _descriptionController,
+                        cursorColor: textColor.withOpacity(0.6),
                         keyboardType: TextInputType.multiline,
                         maxLines: 8,
                         maxLength: 250,
                         decoration: const InputDecoration(
                           hintText: "Input description",
+                          hintStyle: TextStyle(
+                            color: primaryLight,
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: textColor,
+                              width: 1.0,
+                            ),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: textColor,
+                              width: 1.0,
+                            ),
+                          ),
                         ),
                       ),
                     )
@@ -614,9 +635,13 @@ class _TransactionInputState extends State<TransactionInput> {
                   controller: _nameController,
                   focusNode: _nameFocus,
                   enableSuggestions: false,
+                  cursorColor: textColor.withOpacity(0.6),
                   keyboardType: TextInputType.name,
                   decoration: const InputDecoration(
                     hintText: "Item name",
+                    hintStyle: TextStyle(
+                      color: primaryLight,
+                    ),
                     border: OutlineInputBorder(
                       borderSide: BorderSide.none,
                     ),
