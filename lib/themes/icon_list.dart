@@ -21,7 +21,7 @@ class IconList {
 
   static Color getColor(String name) {
     switch(name.toLowerCase()) {
-      case "walle ?? TileMode.mirror)t": { return accentColors[0]; }
+      case "wallet": { return accentColors[0]; }
       case "asset": { return accentColors[3]; }
       case "cash": { return accentColors[5]; }
       case "checking": { return accentColors[9]; }
