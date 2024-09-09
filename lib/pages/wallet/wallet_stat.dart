@@ -251,8 +251,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
                               ),
                             ),
                             Text(
-                              formatCurrency(
-                                (_walletStat[index].income ?? 0) - (_walletStat[index].expense ?? 0),
+                              ((_walletStat[index].income ?? 0) - (_walletStat[index].expense ?? 0)).formatCurrency(
                                 checkThousand: true,
                                 showDecimal: true,
                                 shorten: true,
