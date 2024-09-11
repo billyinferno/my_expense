@@ -4,22 +4,22 @@ import 'package:my_expense/_index.g.dart';
 class TypeSlide extends StatefulWidget {
   final Function(String) onChange;
   final Map<String, Color> items;
-  final double? height;
-  final double? width;
-  final bool? editable;
-  final String? type;
-  final Color? textActive;
-  final Color? textInactive;
+  final double height;
+  final double width;
+  final bool editable;
+  final String initialItem;
+  final Color textActive;
+  final Color textInactive;
   const TypeSlide({
     super.key,
     required this.onChange,
     required this.items,
-    this.height,
-    this.width,
-    this.editable,
-    this.type,
-    this.textActive,
-    this.textInactive
+    this.height = 30,
+    this.width = 100,
+    this.editable = true,
+    required this.initialItem,
+    this.textActive = textColor,
+    this.textInactive = primaryBackground
   });
 
   @override
@@ -28,93 +28,30 @@ class TypeSlide extends StatefulWidget {
 
 class _TypeSlideState extends State<TypeSlide> {
   // animation variable
-  double _currentContainerPositioned = 0;
+  late double _currentContainerPositioned;
+  late Color _currentContainerColor;
   final _animationDuration = const Duration(milliseconds: 150);
-  Color _currentContainerColor = accentColors[2]; // default to expense color
-
-  late double _height;
-  late double _width;
   late double _containerWidth;
-  late bool _editable;
   late String _type;
-  late Color _textActive;
-  late Color _textInactive;
 
   @override
   void initState() {
     super.initState();
 
-    _height = (widget.height ?? 30);
-    _width = (widget.width ?? 100);
-    _containerWidth = (_width * widget.items.length);
-    _editable = (widget.editable ?? true);
-    _type = (widget.type ?? "expense");
-    _textActive = (widget.textActive ?? textColor);
-    _textInactive = (widget.textInactive ?? primaryBackground);
+    // ensure items is not empty
+    assert(widget.items.isNotEmpty);
+
+    // get type slide type and ensure that 
+    _type = widget.initialItem;
+    
+    // initialize the default container position and color
+    _currentContainerPositioned = 0;
+    _currentContainerColor = (widget.items[widget.items.keys.elementAt(0)] ?? accentColors[2]);
+
+    _containerWidth = (widget.width * widget.items.length);
 
     // call to get the positioned and color
     _getPositionedAndColor();
-  }
-
-  void _getPositionedAndColor() {
-    // check in the map whether we got this type or not?
-    // check this key is number what on map list
-    int index = 0;
-    for(String key in widget.items.keys) {
-      if(key.toLowerCase() == _type.toLowerCase()) {
-        _currentContainerPositioned = (_width * index);
-        _currentContainerColor = widget.items[key]!;
-        break;
-      }
-      else {
-        // check if the index = 0, if 0 then put the default value here
-        if(index == 0) {
-          _currentContainerPositioned = (_width * index);
-          _currentContainerColor = widget.items[key]!;
-        }
-        index++;
-      }
-    }
-  }
-
-  List<Widget> _generateTabs() {
-    List<Widget> tabs = [];
-    double index = 0;
-
-    widget.items.forEach((key, color) {
-      double position = index * _width;
-      Widget tab = Expanded(
-        child: GestureDetector(
-          onTap: () {
-            if(_editable) {
-              setState(() {
-                _currentContainerColor = color;
-                _currentContainerPositioned = position;
-                _type = key.toLowerCase();
-                widget.onChange(key.toLowerCase());
-              });
-            }
-          },
-          child: Container(
-            color: Colors.transparent,
-            height: _height,
-            child: Center(
-              child: Text(
-                key,
-                style: TextStyle(
-                  color: (_editable || _type == key.toLowerCase() ? _textActive : _textInactive)
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      tabs.add(tab);
-      index = index + 1;
-    });
-
-    return tabs;
   }
 
   @override
@@ -122,7 +59,7 @@ class _TypeSlideState extends State<TypeSlide> {
     return Center(
       child: Container(
         width: _containerWidth,
-        height: _height,
+        height: widget.height,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
           color: secondaryBackground,
@@ -133,8 +70,8 @@ class _TypeSlideState extends State<TypeSlide> {
               left: _currentContainerPositioned,
               duration: _animationDuration,
               child: AnimatedContainer(
-                width: _width,
-                height: _height,
+                width: widget.width,
+                height: widget.height,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                   color: _currentContainerColor,
@@ -151,5 +88,64 @@ class _TypeSlideState extends State<TypeSlide> {
         ),
       ),
     );
+  }
+
+  List<Widget> _generateTabs() {
+    List<Widget> tabs = [];
+    double index = 0;
+
+    widget.items.forEach((key, color) {
+      double position = index * widget.width;
+      Widget tab = Expanded(
+        child: GestureDetector(
+          onTap: () {
+            if(widget.editable) {
+              setState(() {
+                _currentContainerColor = color;
+                _currentContainerPositioned = position;
+                _type = key.toLowerCase();
+                widget.onChange(key.toLowerCase());
+              });
+            }
+          },
+          child: Container(
+            color: Colors.transparent,
+            height: widget.height,
+            child: Center(
+              child: Text(
+                key,
+                style: TextStyle(
+                  color: (
+                    widget.editable || _type == key.toLowerCase() ?
+                    widget.textActive :
+                    widget.textInactive
+                  )
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      tabs.add(tab);
+      index = index + 1;
+    });
+
+    return tabs;
+  }
+
+  void _getPositionedAndColor() {
+    // check in the map whether we got this type or not?
+    // check this key is number what on map list
+    String key;
+    for(int i=0; i<widget.items.keys.length; i++) {
+      key = widget.items.keys.elementAt(i);
+      if (key.toLowerCase() == _type.toLowerCase()) {
+        _currentContainerPositioned = (widget.width * i);
+        _currentContainerColor = widget.items[key]!;
+        break;
+      }
+    }
   }
 }

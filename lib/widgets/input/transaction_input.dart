@@ -323,7 +323,7 @@ class _TransactionInputState extends State<TransactionInput> {
                 ),
                 const SizedBox(height: 10,),
                 TypeSlide(
-                  type: _currentType,
+                  initialItem: _currentType,
                   editable: (widget.type == TransactionInputType.add ? true : false),
                   onChange: ((selected) {
                     setState(() {

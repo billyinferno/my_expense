@@ -164,7 +164,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           height: 10,
         ),
         TypeSlide(
-          type: _currentType,
+          initialItem: _currentType,
           onChange: ((selected) {
             setState(() {
               _currentType = selected.toLowerCase();

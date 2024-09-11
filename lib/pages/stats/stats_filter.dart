@@ -371,6 +371,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                   _currentType = selected;
                 });
               }),
+              initialItem: 'month',
               items: <String, Color>{
                 "Month": accentColors[6],
                 "Year": accentColors[6],
