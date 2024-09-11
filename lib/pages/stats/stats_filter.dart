@@ -754,11 +754,11 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   String _getTitleText() {
     if (_currentType == "month") {
-      return Globals.dfMMMMyyyy.format(_currentToDate.toLocal());
+      return Globals.dfMMMMyyyy.formatLocal(_currentToDate);
     } else if (_currentType == "year") {
-      return Globals.dfyyyy.format(_currentToDate.toLocal());
+      return Globals.dfyyyy.formatLocal(_currentToDate);
     } else {
-      return "${Globals.dfddMMyyyy.format(_currentFromDate.toLocal())} - ${Globals.dfddMMyyyy.format(_currentToDate.toLocal())}";
+      return "${Globals.dfddMMyyyy.formatLocal(_currentFromDate)} - ${Globals.dfddMMyyyy.formatLocal(_currentToDate)}";
     }
   }
 

@@ -157,7 +157,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  "(${txn.walletName}) ${Globals.dfddMMyy.format(txn.date.toLocal())}",
+                  "(${txn.walletName}) ${Globals.dfddMMyy.formatLocal(txn.date)}",
                   style: const TextStyle(
                     fontSize: 12,
                     color: textColor2,

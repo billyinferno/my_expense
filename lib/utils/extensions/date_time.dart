@@ -3,11 +3,11 @@ extension CustomDateExtestion on DateTime {
     required DateTime date
   }) {
     // check if year same or not?
-    if (year == date.year) {
+    if (toLocal().year == date.toLocal().year) {
       // same, now check if month is the same or not?
-      if (month == date.month) {
+      if (toLocal().month == date.toLocal().month) {
         // same month, now check if the day is the same or not?
-        if (day == date.day) {
+        if (toLocal().day == date.toLocal().day) {
           // same day, so this is same day
           return true;
         }
@@ -20,7 +20,10 @@ extension CustomDateExtestion on DateTime {
     required DateTime from,
     required DateTime to
   }) {
-    if ((isAtSameMomentAs(from) || isAfter(from)) && (isAtSameMomentAs(to) || isBefore(to))) {
+    if (
+      (toLocal().isAtSameMomentAs(from.toLocal()) || toLocal().isAfter(from.toLocal())) &&
+      (toLocal().isAtSameMomentAs(to.toLocal()) || toLocal().isBefore(to.toLocal()))
+    ) {
       return true;
     }
     return false;

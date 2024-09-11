@@ -58,20 +58,18 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         );
 
         // default the date as the same as the home list date
-        String date = Globals.dfyyyyMMdd.format(currentListTxnDate.toLocal());
+        String date = Globals.dfyyyyMMdd.formatLocal(currentListTxnDate);
 
         // check if this is the same date or not?
         // if not the same then we will need to refresh bot transaction list
         // both on the transaction update date and the home list date.
-        if (!txnUpdate.date.toLocal().isSameDate(
-          date: currentListTxnDate.toLocal()
-        )) {
+        if (!txnUpdate.date.isSameDate(date: currentListTxnDate)) {
           // since the update transaction and current home list is different date
           // get both data and stored it on the transaction shared preferences
           await _refreshHomeList(
-            txnDate: txnUpdate.date.toLocal(),
-            homeListDate: currentListTxnDate.toLocal())
-          .onError((error, stackTrace) async {
+            txnDate: txnUpdate.date,
+            homeListDate: currentListTxnDate
+          ).onError((error, stackTrace) async {
             Log.error(
               message: "Error when update the home list transaction",
               error: error,
@@ -154,12 +152,12 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
   }) async {
     await Future.wait([
       _transactionHttp.fetchTransaction(
-        date: Globals.dfyyyyMMdd.format(txnDate),
+        date: Globals.dfyyyyMMdd.formatLocal(txnDate),
         force: true
       ).then((resp) {
         // once got the response store this on the TransactionSharedPreferences
         TransactionSharedPreferences.setTransaction(
-          date: Globals.dfyyyyMMdd.format(txnDate),
+          date: Globals.dfyyyyMMdd.formatLocal(txnDate),
           txn: resp
         );
       }).onError(
@@ -169,12 +167,12 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       ),
 
       _transactionHttp.fetchTransaction(
-        date: Globals.dfyyyyMMdd.format(homeListDate),
+        date: Globals.dfyyyyMMdd.formatLocal(homeListDate),
         force: true
       ).then((resp) {
         // once got the response store this on the TransactionSharedPreferences
         TransactionSharedPreferences.setTransaction(
-          date: Globals.dfyyyyMMdd.format(homeListDate),
+          date: Globals.dfyyyyMMdd.formatLocal(homeListDate),
           txn: resp
         );
       }).onError(
@@ -212,8 +210,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       DateTime.now().month + 1,
       1
     ).subtract(const Duration(days: 1));
-    String fromString = Globals.dfyyyyMMdd.format(from);
-    String toString = Globals.dfyyyyMMdd.format(to);
+    String fromString = Globals.dfyyyyMMdd.formatLocal(from);
+    String toString = Globals.dfyyyyMMdd.formatLocal(to);
 
     // check whether this transaction moved from one wallet to another wallet?
     // first check whether this is expense, income, or transfer?

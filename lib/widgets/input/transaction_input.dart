@@ -1238,12 +1238,12 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   String _calendarText() {
-    if(_currentDate.toLocal().isSameDate(date: DateTime.now().toLocal())) {
+    if(_currentDate.isSameDate(date: DateTime.now())) {
       return "Today";
     }
     else {
       // format selected date with Day, dd MMM yyyy
-      return Globals.dfeMMMMddyyyy.format(_currentDate.toLocal());
+      return Globals.dfeMMMMddyyyy.formatLocal(_currentDate);
     }
   }
 

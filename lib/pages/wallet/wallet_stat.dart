@@ -245,7 +245,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              Globals.dfyyyyMM.format(_walletStat[index].date.toLocal()),
+                              Globals.dfyyyyMM.formatLocal(_walletStat[index].date),
                               style: const TextStyle(
                                 fontSize: 11,
                               ),
@@ -313,15 +313,15 @@ class _WalletStatPageState extends State<WalletStatPage> {
     _maxAmount = double.infinity * -1;
 
     _walletDateRange.forEach((key, value) {
-      walletListIncome[Globals.dfMMyy.format(key)] = 0;
-      walletListExpense[Globals.dfMMyy.format(key)] = 0;
-      walletListTotal[Globals.dfMMyy.format(key)] = 0;
+      walletListIncome[Globals.dfMMyy.formatLocal(key)] = 0;
+      walletListExpense[Globals.dfMMyy.formatLocal(key)] = 0;
+      walletListTotal[Globals.dfMMyy.formatLocal(key)] = 0;
     });
 
     for (WalletStatModel data in _walletStat) {
       // generate the wallet list income, expense, and total
-      walletListIncome[Globals.dfMMyy.format(data.date)] = (data.income ?? 0);
-      walletListExpense[Globals.dfMMyy.format(data.date)] = (data.expense ?? 0);
+      walletListIncome[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
+      walletListExpense[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
       
       _totalIncome += data.income!;
       _totalExpense += data.expense!;
@@ -343,8 +343,8 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
     // loop thru _walletDataRange again to calculate the total
     _walletDateRange.forEach((key, value) {
-      total += walletListIncome[Globals.dfMMyy.format(key)]! - walletListExpense[Globals.dfMMyy.format(key)]!;
-      walletListTotal[Globals.dfMMyy.format(key)] = total;
+      total += (walletListIncome[Globals.dfMMyy.formatLocal(key)] ?? 0) - (walletListExpense[Globals.dfMMyy.formatLocal(key)] ?? 0);
+      walletListTotal[Globals.dfMMyy.formatLocal(key)] = total;
     });
 
     _dateOffset = walletListTotal.length ~/ 8;

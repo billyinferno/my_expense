@@ -61,7 +61,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       // update necessary information after we add the transaction
       await _updateInformation(result).then((_) {
         // get the transaction edit date
-        String date = Globals.dfyyyyMMdd.format(txn.date.toLocal());
+        String date = Globals.dfyyyyMMdd.formatLocal(txn.date);
 
         // get the transaction list from this date
         List<TransactionListModel> txnListShared =
@@ -71,7 +71,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // to show this transaction, because currently we are in a different date between the transaction
         // being add and the date being selected on the home list
         if (
-          txn.date.toLocal().isSameDate(date: _selectedDate.toLocal()) &&
+          txn.date.isSameDate(date: _selectedDate) &&
           mounted
         ) {
           Provider.of<HomeProvider>(

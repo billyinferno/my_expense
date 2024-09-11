@@ -47,9 +47,12 @@ class _LoginPageState extends State<LoginPage> {
     _typeColor = typeColor;
 
     // get the current date
-    _currentDate =
-        DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
-    _currentDateString = Globals.dfyyyyMMdd.format(_currentDate);
+    _currentDate = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      1
+    );
+    _currentDateString = Globals.dfyyyyMMdd.formatLocal(_currentDate);
 
     _isLogin = false;
     _isObscure = true;

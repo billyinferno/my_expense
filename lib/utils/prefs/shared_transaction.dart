@@ -279,9 +279,7 @@ class TransactionSharedPreferences {
           transaction[j] = swp;
         }
         else {
-          if(transaction[i].date.toLocal().isSameDate(
-            date: transaction[j].date.toLocal()
-          )) {
+          if(transaction[i].date.isSameDate(date: transaction[j].date)) {
             // check which ID is bigger
             if(transaction[i].id > transaction[j].id) {
               // swap the data

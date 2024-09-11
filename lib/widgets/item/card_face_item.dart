@@ -112,7 +112,7 @@ class CardFace extends StatelessWidget {
     }
     else {
       return Text(
-        Globals.dfddMMMyyyy.format(date),
+        Globals.dfddMMMyyyy.formatLocal(date),
         style: const TextStyle(
           fontSize: 10,
         ),

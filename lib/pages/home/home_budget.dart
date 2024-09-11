@@ -446,7 +446,7 @@ class _HomeBudgetState extends State<HomeBudget> {
 
     // fetch the budget, in case it null it will fetch the budget from the
     // backend instead.
-    String budgetDate = Globals.dfyyyyMMdd.format(_selectedDate.toLocal());
+    String budgetDate = Globals.dfyyyyMMdd.formatLocal(_selectedDate);
 
     // show the debug print to know that we are refreshing/fetching budget
     Log.info(message: "📃 Refresh Budget at $budgetDate");

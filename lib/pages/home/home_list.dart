@@ -48,8 +48,8 @@ class _HomeListState extends State<HomeList> {
   void initState() {
     _userMe = UserSharedPreferences.getUserMe();
 
-    _appTitleMonth = Globals.dfMMMM.format(_currentFocusedDay.toLocal());
-    _appTitleYear = Globals.dfyyyy.format(_currentFocusedDay.toLocal());
+    _appTitleMonth = Globals.dfMMMM.formatLocal(_currentFocusedDay);
+    _appTitleYear = Globals.dfyyyy.formatLocal(_currentFocusedDay);
 
     _getData = _refreshTransaction(
       refreshDay: _currentFocusedDay,
@@ -131,10 +131,10 @@ class _HomeListState extends State<HomeList> {
                   );
                 },
                 selectedDayPredicate: (day) {
-                  return day.toLocal().isSameDate(date: _currentFocusedDay.toLocal());
+                  return day.isSameDate(date: _currentFocusedDay);
                 },
                 onDaySelected: (selectedDay, focusedDay) {
-                  if (!(selectedDay.toLocal().isSameDate(date: _currentFocusedDay.toLocal()))) {
+                  if (!(selectedDay.isSameDate(date: _currentFocusedDay))) {
                     _setFocusedDay(selectedDay);
                     _getData = _refreshTransaction(
                       refreshDay: selectedDay,
@@ -149,7 +149,7 @@ class _HomeListState extends State<HomeList> {
                       color: Colors.transparent,
                       alignment: Alignment.center,
                       child: Text(
-                        Globals.dfd.format(day.toLocal()),
+                        Globals.dfd.formatLocal(day),
                         style: TextStyle(
                           color: accentColors[1],
                         ),
@@ -206,9 +206,9 @@ class _HomeListState extends State<HomeList> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    (_currentFocusedDay.toLocal().isSameDate(date: DateTime.now().toLocal())
+                    (_currentFocusedDay.isSameDate(date: DateTime.now())
                       ? "Today"
-                      : Globals.dfddMMMMyyyy.format(_currentFocusedDay.toLocal())
+                      : Globals.dfddMMMMyyyy.formatLocal(_currentFocusedDay)
                     ),
                     style: const TextStyle(
                       fontSize: 12,
@@ -378,8 +378,8 @@ class _HomeListState extends State<HomeList> {
   void _setFocusedDay(DateTime focusedDay) {
     setState(() {
       _currentFocusedDay = focusedDay;
-      _appTitleMonth = Globals.dfMMMM.format(_currentFocusedDay.toLocal());
-      _appTitleYear = Globals.dfyyyy.format(_currentFocusedDay.toLocal());
+      _appTitleMonth = Globals.dfMMMM.formatLocal(_currentFocusedDay);
+      _appTitleYear = Globals.dfyyyy.formatLocal(_currentFocusedDay);
 
       // return back the selected date to the router
       widget.userDateSelect(_currentFocusedDay.toLocal());
@@ -501,7 +501,7 @@ class _HomeListState extends State<HomeList> {
       date: refreshDay.toLocal()
     );
 
-    String strRefreshDay = Globals.dfyyyyMMdd.format(refreshDay.toLocal());
+    String strRefreshDay = Globals.dfyyyyMMdd.formatLocal(refreshDay);
 
     if (force) {
       Log.info(message: "🧺 Refresh Transaction $strRefreshDay (force)");
@@ -553,7 +553,7 @@ class _HomeListState extends State<HomeList> {
         ).transactionList;
 
         // save the current transaction on the provider to the shared preferences
-        String date = Globals.dfyyyyMMdd.format(txnDeleted.date.toLocal());
+        String date = Globals.dfyyyyMMdd.formatLocal(txnDeleted.date);
         TransactionSharedPreferences.setTransaction(
           date: date,
           txn: txnListModel
@@ -577,7 +577,7 @@ class _HomeListState extends State<HomeList> {
   Future<void> _updateInformation({
     required TransactionListModel txnInfo
   }) async {
-    _refreshDay = Globals.dfyyyyMMdd.format(
+    _refreshDay = Globals.dfyyyyMMdd.formatLocal(
       DateTime(
         txnInfo.date.toLocal().year,
         txnInfo.date.toLocal().month,
@@ -594,8 +594,8 @@ class _HomeListState extends State<HomeList> {
     (from, to) = TransactionSharedPreferences.getStatDate();
 
     // format the from and to string
-    fromString = Globals.dfyyyyMMdd.format(from);
-    toString = Globals.dfyyyyMMdd.format(to);
+    fromString = Globals.dfyyyyMMdd.formatLocal(from);
+    toString = Globals.dfyyyyMMdd.formatLocal(to);
 
     // delete the transaction from wallet transaction
     await TransactionSharedPreferences.deleteTransactionWallet(

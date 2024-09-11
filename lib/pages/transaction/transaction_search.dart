@@ -898,7 +898,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  "${Globals.dfddMMyyyy.format(startDate.toLocal())} - ${Globals.dfddMMyyyy.format(endDate.toLocal())}",
+                  "${Globals.dfddMMyyyy.formatLocal(startDate)} - ${Globals.dfddMMyyyy.formatLocal(endDate)}",
                   style: const TextStyle(
                     fontSize: 10,
                   ),
@@ -950,7 +950,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: IconColorList.getExpenseIcon((txn.category!.name)),
           type: txn.type.toLowerCase(),
           title: txn.name,
-          subTitle: Globals.dfeddMMMyyyy.format(txn.date.toLocal()),
+          subTitle: Globals.dfeddMMMyyyy.formatLocal(txn.date),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
           descriptionStyle:
@@ -965,11 +965,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: IconColorList.getIncomeIcon((txn.category!.name)),
           type: txn.type.toLowerCase(),
           title: txn.name,
-          subTitle: Globals.dfeddMMMyyyy.format(txn.date.toLocal()),
+          subTitle: Globals.dfeddMMMyyyy.formatLocal(txn.date),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
-          descriptionStyle:
-              const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          descriptionStyle: const TextStyle(
+            fontSize: 10,
+            fontStyle: FontStyle.italic
+          ),
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[6],
@@ -983,11 +985,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           ),
           type: txn.type.toLowerCase(),
           title: '-',
-          subTitle: Globals.dfeddMMMyyyy.format(txn.date.toLocal()),
+          subTitle: Globals.dfeddMMMyyyy.formatLocal(txn.date),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
-          descriptionStyle:
-              const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          descriptionStyle: const TextStyle(
+            fontSize: 10,
+            fontStyle: FontStyle.italic
+          ),
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[4],
@@ -1000,11 +1004,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: IconColorList.getExpenseIcon((txn.category!.name)),
           type: txn.type.toLowerCase(),
           title: txn.name,
-          subTitle: Globals.dfeddMMMyyyy.format(txn.date.toLocal()),
+          subTitle: Globals.dfeddMMMyyyy.formatLocal(txn.date),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
-          descriptionStyle:
-              const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          descriptionStyle: const TextStyle(
+            fontSize: 10,
+            fontStyle: FontStyle.italic
+          ),
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],

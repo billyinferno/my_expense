@@ -39,7 +39,7 @@ class BudgetTransactionItem extends StatelessWidget {
                   itemName
                 ),
                 Text(
-                  Globals.dfeddMMMyyyy.format(itemDate.toLocal()),
+                  Globals.dfeddMMMyyyy.formatLocal(itemDate),
                   style: const TextStyle(
                     fontSize: 10,
                   ),

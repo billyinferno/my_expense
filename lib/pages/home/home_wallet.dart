@@ -396,10 +396,12 @@ class _HomeWalletState extends State<HomeWallet> {
       // fetch the budget for this ccy
       await _budgetHTTP.fetchBudgetDate(
         currencyID: ccy.id,
-        date: Globals.dfyyyyMMdd.format(
-          DateTime(DateTime.now().year,
-          DateTime.now().month,
-          1).toLocal()
+        date: Globals.dfyyyyMMdd.formatLocal(
+          DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            1
+          )
         ),
         force: true
       ).then((_) {

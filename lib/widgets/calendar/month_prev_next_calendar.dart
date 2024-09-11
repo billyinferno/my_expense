@@ -101,7 +101,7 @@ class MonthPrevNextCalendar extends StatelessWidget {
                 color: Colors.transparent,
                 child: Center(
                   child: Text(
-                    Globals.dfMMMMyyyy.format(initialDate)
+                    Globals.dfMMMMyyyy.formatLocal(initialDate)
                   ),
                 ),
               ),

@@ -6,8 +6,8 @@ class TransactionHTTPService {
     required TransactionModel txn,
     required TransactionListModel prevTxn
   }) async {
-    bool sameDate = txn.date.toLocal().isSameDate(date: prevTxn.date.toLocal());
-    String date = Globals.dfyyyyMMdd.format(prevTxn.date.toLocal());
+    bool sameDate = txn.date.isSameDate(date: prevTxn.date);
+    String date = Globals.dfyyyyMMdd.formatLocal(prevTxn.date);
     
     // send the request to update the transaction
     final String result = await NetUtils.put(
@@ -65,7 +65,7 @@ class TransactionHTTPService {
         txnListShared = removeTxnList;
         
         // fetch the date that we got from then _txnUpdate
-        String txnUpdateDate = Globals.dfyyyyMMdd.format(txnUpdate.date.toLocal());
+        String txnUpdateDate = Globals.dfyyyyMMdd.formatLocal(txnUpdate.date);
         
         // ensure to force fetch the transaction
         await fetchTransaction(date: txnUpdateDate, force: true);
@@ -86,7 +86,7 @@ class TransactionHTTPService {
     required TransactionModel txn,
     required DateTime selectedDate
   }) async {
-    String date = Globals.dfyyyyMMdd.format(txn.date.toLocal());
+    String date = Globals.dfyyyyMMdd.formatLocal(txn.date);
 
     // send the request to add the transaction
     final String result = await NetUtils.post(
@@ -376,8 +376,8 @@ class TransactionHTTPService {
     required DateTime to,
     bool force = false,
   }) async {
-    String dateFrom = Globals.dfyyyyMMdd.format(from.toLocal());
-    String dateTo = Globals.dfyyyyMMdd.format(to.toLocal());
+    String dateFrom = Globals.dfyyyyMMdd.formatLocal(from);
+    String dateTo = Globals.dfyyyyMMdd.formatLocal(to);
 
     // check if we got data on the sharedPreferences or not?
     if (!force) {
@@ -426,8 +426,8 @@ class TransactionHTTPService {
     required DateTime from,
     required DateTime to
   }) async {
-    String dateFrom = Globals.dfyyyyMMdd.format(from.toLocal());
-    String dateTo = Globals.dfyyyyMMdd.format(to.toLocal());
+    String dateFrom = Globals.dfyyyyMMdd.formatLocal(from);
+    String dateTo = Globals.dfyyyyMMdd.formatLocal(to);
 
     // send the request to get income and expense based on category
     final String result = await NetUtils.get(
@@ -458,8 +458,8 @@ class TransactionHTTPService {
     required DateTime from,
     required DateTime to
   }) async {
-    String dateFrom = Globals.dfyyyyMMdd.format(from.toLocal());
-    String dateTo = Globals.dfyyyyMMdd.format(to.toLocal());
+    String dateFrom = Globals.dfyyyyMMdd.formatLocal(from);
+    String dateTo = Globals.dfyyyyMMdd.formatLocal(to);
 
     // send the request to get income and expense category detail
     final String result = await NetUtils.get(

@@ -60,8 +60,8 @@ class _HomeStatsState extends State<HomeStats> {
     // initialize the from and to variable
     _from = DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
     _to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1)).toLocal();
-    _fromString = Globals.dfyyyyMMdd.format(_from.toLocal());
-    _toString = Globals.dfyyyyMMdd.format(_to.toLocal());
+    _fromString = Globals.dfyyyyMMdd.formatLocal(_from);
+    _toString = Globals.dfyyyyMMdd.formatLocal(_to);
     
     // get the currencies
     _currencies = WalletSharedPreferences.getWalletUserCurrency();
@@ -219,8 +219,8 @@ class _HomeStatsState extends State<HomeStats> {
                   _to = to;
           
                   // set the current from and to string
-                  _fromString = Globals.dfyyyyMMdd.format(_from.toLocal());
-                  _toString = Globals.dfyyyyMMdd.format(_to.toLocal());
+                  _fromString = Globals.dfyyyyMMdd.formatLocal(_from);
+                  _toString = Globals.dfyyyyMMdd.formatLocal(_to);
 
                   // stored the from and to on the shared preferences
                   TransactionSharedPreferences.setStatDate(from: from, to: to);
@@ -644,7 +644,13 @@ class _HomeStatsState extends State<HomeStats> {
     bool isShowDialog = (showDialog ?? false);
     List<BudgetModel> currentBudget = [];
     double maxBudget = 0;
-    String currentDateString = Globals.dfyyyyMMdd.format(DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal());
+    String currentDateString = Globals.dfyyyyMMdd.formatLocal(
+      DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        1
+      )
+    );
 
     // check if the currencies is not empty
     if (_currencies.isNotEmpty) {

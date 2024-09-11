@@ -42,7 +42,14 @@ class BudgetSharedPreferences {
   }
 
   static Future setBudgetCurrent({required DateTime date}) async {
-    String strDate = Globals.dfyyyyMMdd.format(DateTime(date.toLocal().year, date.toLocal().month, 1));
+    String strDate = Globals.dfyyyyMMdd.formatLocal(
+      DateTime(
+        date.toLocal().year,
+        date.toLocal().month,
+        1
+      )
+    );
+
     await MyBox.putString(key: _keyCurrentBudgetDate, value: strDate);
   }
 
@@ -53,7 +60,13 @@ class BudgetSharedPreferences {
       return date;
     }
     else {
-      return Globals.dfyyyyMMdd.format(DateTime(DateTime.now().toLocal().year, DateTime.now().toLocal().month, 1));
+      return Globals.dfyyyyMMdd.formatLocal(
+        DateTime(
+          DateTime.now().toLocal().year,
+          DateTime.now().toLocal().month,
+          1
+        )
+      );
     }
   }
 

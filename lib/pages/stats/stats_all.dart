@@ -266,7 +266,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                         child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                            Globals.dfyyyyMM.format(_walletStatAll[0].data[index].date),
+                            Globals.dfyyyyMM.formatLocal(_walletStatAll[0].data[index].date),
                           ),
                         ),
                       ),
@@ -328,19 +328,19 @@ class _StatsAllPageState extends State<StatsAllPage> {
     // loop thru all the stat all date to add as key on the wallet list income
     // expense, and total
     _walletDateRange.forEach((key, value) {
-      walletListIncome[Globals.dfMMyy.format(key)] = 0;
-      walletListExpense[Globals.dfMMyy.format(key)] = 0;
-      walletListTotal[Globals.dfMMyy.format(key)] = 0;
+      walletListIncome[Globals.dfMMyy.formatLocal(key)] = 0;
+      walletListExpense[Globals.dfMMyy.formatLocal(key)] = 0;
+      walletListTotal[Globals.dfMMyy.formatLocal(key)] = 0;
     });
 
     for (WalletStatAllModel ccy in _walletStatAll) {
       for (Datum data in ccy.data) {
         // generate the wallet list income, expense, and total
-        walletListIncome[Globals.dfMMyy.format(data.date)] = (data.income ?? 0);
-        walletListExpense[Globals.dfMMyy.format(data.date)] = (data.expense ?? 0);
+        walletListIncome[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
+        walletListExpense[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
 
         total += (data.diff ?? 0);
-        walletListTotal[Globals.dfMMyy.format(data.date)] = total;
+        walletListTotal[Globals.dfMMyy.formatLocal(data.date)] = total;
 
         _totalIncome += data.income!;
         _totalExpense += data.expense!;

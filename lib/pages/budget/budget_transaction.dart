@@ -187,7 +187,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                       children: <Widget>[
                         Expanded(
                           child: Text(
-                            Globals.dfddMMMyyyy.format(header.date.toLocal())
+                            Globals.dfddMMMyyyy.formatLocal(header.date)
                           ),
                         ),
                         Text(
@@ -272,7 +272,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
         // loop thru the transactions that have the same date and add this to the list
         isLoop = true;
         while(idx < txnList.length && isLoop) {
-          if (txnList[idx].date.toLocal().isSameDate(date: key.toLocal())
+          if (txnList[idx].date.isSameDate(date: key)
           ) {
             // add to the transaction list
             WalletTransactionList data = WalletTransactionList();
@@ -294,7 +294,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   Future<bool> _fetchBudget([bool? force]) async {
     bool isForce = (force ?? false);
 
-    String date = Globals.dfyyyyMMdd.format(_selectedDate.toLocal());
+    String date = Globals.dfyyyyMMdd.formatLocal(_selectedDate);
     await _transactionHttp.fetchTransactionBudget(
       categoryId: _categoryId,
       date: date,

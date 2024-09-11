@@ -112,7 +112,7 @@ class WalletHTTPService {
     required DateTime to,
     bool force = false,
   }) async {
-    String dateTo = Globals.dfyyyyMMdd.format(to.toLocal());
+    String dateTo = Globals.dfyyyyMMdd.formatLocal(to);
     
     // check if we need to force to get the wallet or not?
     // if not need, it means we will just load it from shared preferences

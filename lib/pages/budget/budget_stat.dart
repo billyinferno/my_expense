@@ -809,29 +809,45 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       // last date of the data
 
       // first generate the monthly date range
-      DateTime nextDate =
-          DateTime(DateTime.now().year, DateTime.now().month + 1, 1);
+      DateTime nextDate = DateTime(
+        DateTime.now().year,
+        DateTime.now().month + 1,
+        1
+      );
+      
       DateTime lastDate = DateTime.parse(
-          "${_budgetStat.monthly[_budgetStat.monthly.length - 1].date}-01");
+        "${_budgetStat.monthly[_budgetStat.monthly.length - 1].date}-01"
+      );
+      
       _monthlyDateRange.clear();
+      
       while (lastDate.isBefore(nextDate)) {
-        _monthlyDateRange[Globals.dfyyyyMM.format(lastDate)] = 0;
+        _monthlyDateRange[Globals.dfyyyyMM.formatLocal(lastDate)] = 0;
         lastDate = DateTime(lastDate.year, lastDate.month + 1, 1);
       }
+
       if (_monthlyDateRange.length > 12) {
         monthDateOffset = _monthlyDateRange.length ~/ 7;
       } else {
         monthDateOffset = 1;
       }
 
-      nextDate = DateTime(DateTime.now().year + 1, 12, 1);
+      nextDate = DateTime(
+        DateTime.now().year + 1,
+        12,
+        1
+      );
+      
       lastDate = DateTime.parse(
-          "${_budgetStat.yearly[_budgetStat.yearly.length - 1].date}-12-01");
+        "${_budgetStat.yearly[_budgetStat.yearly.length - 1].date}-12-01"
+      );
+
       _yearlyDateRange.clear();
       while (lastDate.isBefore(nextDate)) {
-        _yearlyDateRange[Globals.dfyyyy.format(lastDate)] = 0;
+        _yearlyDateRange[Globals.dfyyyy.formatLocal(lastDate)] = 0;
         lastDate = DateTime(lastDate.year + 1, 12, 1);
       }
+      
       if (_yearlyDateRange.length > 12) {
         yearlyDateOffset = _yearlyDateRange.length ~/ 7;
       } else {
@@ -841,28 +857,28 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       _monthlyData.clear();
       _totalMonthlyAmount = 0;
       _totalMonthlyDailyAmount = 0;
+
       for (BudgetStatDetail data in _budgetStat.monthly.reversed) {
         _monthlyDateRange[data.date] = data.totalAmount;
         _totalMonthlyAmount += data.totalAmount;
         _totalMonthlyDailyAmount += data.averageAmount;
       }
+      
       _averageMonthlyAmount = _totalMonthlyAmount / _monthlyDateRange.length;
-      _averageMonthlyDailyAmount =
-          _totalMonthlyDailyAmount / _monthlyDateRange.length;
-      // _monthlyDateRange = Map.fromEntries(_yearlyDateRange.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+      _averageMonthlyDailyAmount = _totalMonthlyDailyAmount / _monthlyDateRange.length;
       _monthlyData.add(_monthlyDateRange);
 
       _yearlyData.clear();
       _totalYearlyAmount = 0;
+
       for (BudgetStatDetail data in _budgetStat.yearly.reversed) {
         _yearlyDateRange[data.date] = data.totalAmount;
         _totalYearlyAmount += data.totalAmount;
         _totalYearlyDailyAmount += data.averageAmount;
       }
-      // _yearlyDateRange = Map.fromEntries(_yearlyDateRange.entries.toList()..sort((a, b) => a.key.compareTo(b.key)));
+      
       _averageYearlyAmount = _totalYearlyAmount / _yearlyDateRange.length;
-      _averageYearlyDailyAmount =
-          _totalYearlyDailyAmount / _yearlyDateRange.length;
+      _averageYearlyDailyAmount = _totalYearlyDailyAmount / _yearlyDateRange.length;
       _yearlyData.add(_yearlyDateRange);
 
       // put on different list so we can manipulate it as this is not final one
