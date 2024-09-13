@@ -86,7 +86,19 @@ class _UserPageState extends State<UserPage> {
     }
 
     // initialize the user default wallet
-    _currentWallet = WalletModel(-1, "", 0.0, 0.0, 0.0, true, true, WalletTypeModel(-1, ""), CurrencyModel(-1, "", "", ""), UserPermissionModel(-1, "", ""));
+    _currentWallet = WalletModel(
+      -1,
+      "",
+      0.0,
+      0.0,
+      0.0,
+      true,
+      true,
+      -1,
+      WalletTypeModel(-1, ""),
+      CurrencyModel(-1, "", "", ""),
+      UserPermissionModel(-1, "", "")
+    );
     _selectedWallet = _currentWallet;
 
     // get list of wallets from shared preferences

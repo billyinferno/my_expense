@@ -753,6 +753,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       _wallet.futureAmount,
       _wallet.useForStats,
       _wallet.enabled,
+      _wallet.limit,
       _wallet.walletType,
       _wallet.currency,
       _wallet.userPermissionUsers
@@ -888,6 +889,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         _wallet.futureAmount,
         _wallet.useForStats,
         _wallet.enabled,
+        _wallet.limit,
         _wallet.walletType,
         _wallet.currency,
         _wallet.userPermissionUsers

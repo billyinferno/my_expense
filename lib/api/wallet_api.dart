@@ -158,16 +158,18 @@ class WalletHTTPService {
     return worth;
   }
 
-  Future<WalletModel> addWallet({required WalletModel txn}) async {
+  Future<WalletModel> addWallet({required WalletModel wallet}) async {
     // prepare the JSON data
     var walletAdd = {
-      "name": txn.name,
-      "startBalance": txn.startBalance,
+      "name": wallet.name,
+      "startBalance": wallet.startBalance,
       "changeBalance": 0,
-      "useForStats": txn.useForStats,
-      "wallet_type": {"id": txn.walletType.id},
-      "currency": {"id": txn.currency.id},
-      "users_permissions_user": {"id": txn.userPermissionUsers.id}
+      "useForStats": wallet.useForStats,
+      "enabled": wallet.enabled,
+      "limit": wallet.limit,
+      "wallet_type": {"id": wallet.walletType.id},
+      "currency": {"id": wallet.currency.id},
+      "users_permissions_user": {"id": wallet.userPermissionUsers.id}
     };
     
     // send the request to add new wallet
@@ -191,22 +193,23 @@ class WalletHTTPService {
     return ret;
   }
 
-  Future<WalletModel> updateWallet({required WalletModel txn}) async {
+  Future<WalletModel> updateWallet({required WalletModel wallet}) async {
     // prepare the JSON data
     var walletEdit = {
-      "name": txn.name,
-      "startBalance": txn.startBalance,
+      "name": wallet.name,
+      "startBalance": wallet.startBalance,
       "changeBalance": 0,
-      "useForStats": txn.useForStats,
-      "enabled": txn.enabled,
-      "wallet_type": {"id": txn.walletType.id},
-      "currency": {"id": txn.currency.id},
-      "users_permissions_user": {"id": txn.userPermissionUsers.id}
+      "useForStats": wallet.useForStats,
+      "enabled": wallet.enabled,
+      "limit": wallet.limit,
+      "wallet_type": {"id": wallet.walletType.id},
+      "currency": {"id": wallet.currency.id},
+      "users_permissions_user": {"id": wallet.userPermissionUsers.id}
     };
     
     // send the request to update wallet
     final String result = await NetUtils.put(
-      url: '${Globals.apiURL}wallets/${txn.id}',
+      url: '${Globals.apiURL}wallets/${wallet.id}',
       body: walletEdit
     ).onError((error, stackTrace) {
       Log.error(

@@ -110,6 +110,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         0.0,
         true,
         true,
+        -1,
         WalletTypeModel(-1, ""),
         CurrencyModel(-1, "", "", ""),
         UserPermissionModel(-1, "", ""))

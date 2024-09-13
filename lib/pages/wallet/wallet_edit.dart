@@ -30,10 +30,12 @@ class _WalletEditPageState extends State<WalletEditPage> {
   String _currentWalletCurrencySymbol = "";
   bool _currentUseForStats = true;
   bool _currentEnabled = true;
+  double _currentLimit = -1;
   double _currentStartBalance = 0;
 
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _limitController = TextEditingController();
   final ScrollController _scrollControllerWallet = ScrollController();
   final ScrollController _scrollControllerCurrency = ScrollController();
 
@@ -55,14 +57,16 @@ class _WalletEditPageState extends State<WalletEditPage> {
     _currentWalletCurrencySymbol = walletData.currency.symbol;
     _currentUseForStats = walletData.useForStats;
     _currentEnabled = walletData.enabled;
+    _currentLimit = walletData.limit;
     _currentStartBalance = walletData.startBalance;
 
     // set all the input data based on the initialize data above
     _nameController.text = walletData.name;
     if(_currentStartBalance > 0) {
-      _amountController.text = Globals.fCCY2.format(_currentStartBalance);
+      _amountController.text = "$_currentStartBalance";
       _currentAmountFontSize = 25 - ((10/6) * (_amountController.text.length - 6));
     }
+    _limitController.text = "$_currentLimit";
 
     super.initState();
   }
@@ -71,6 +75,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
   void dispose() {
     _amountController.dispose();
     _nameController.dispose();
+    _limitController.dispose();
     _scrollControllerWallet.dispose();
     _scrollControllerCurrency.dispose();
     super.dispose();
@@ -259,6 +264,8 @@ class _WalletEditPageState extends State<WalletEditPage> {
                                 _currentStartBalance = double.parse(value);
                               }
                               catch(e) {
+                                // if failed to parse then default this to -1
+                                // to make it invalid when save
                                 _currentStartBalance = -1;
                               }
                             }
@@ -278,6 +285,63 @@ class _WalletEditPageState extends State<WalletEditPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                Container(
+                  height: 50,
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: primaryLight,
+                        width: 1.0
+                      )
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Ionicons.alert_circle_outline,
+                        size: 20,
+                        color: textColor,
+                      ),
+                      const SizedBox(width: 10,),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _limitController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: InputDecoration(
+                            hintText: "Limit",
+                            hintStyle: TextStyle(
+                              color: textColor.withOpacity(0.5),
+                            ),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                            isCollapsed: true,
+                          ),
+                          cursorColor: primaryDark,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(12),
+                            DecimalTextInputFormatter(decimalRange: 2),
+                          ],
+                          onChanged: (value) {
+                            // convert the string to double
+                            if(value.isNotEmpty) {
+                              try {
+                                _currentLimit = double.parse(value);
+                              }
+                              catch(e) {
+                                // if failed to parse then default this to -1
+                                // to make it default to unlimited
+                                _currentLimit = -1;
+                              }
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 GestureDetector(
                   child: Container(
                     height: 50,
@@ -453,6 +517,12 @@ class _WalletEditPageState extends State<WalletEditPage> {
       throw Exception("Start balance is invalid");
     }
 
+    // check if the limit is 0 or -1
+    // if 0 or less than -1, then just default it to -1
+    if(_currentLimit == 0 || _currentLimit < -1) {
+      _currentLimit = -1;
+    }
+
     // all is good, we can generate a wallet data here before passed it to the
     // wallet API for add the transaction
     WalletTypeModel walletType = WalletTypeModel(
@@ -481,6 +551,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
       0,
       _currentUseForStats,
       _currentEnabled,
+      _currentLimit,
       walletType,
       walletCurrency,
       userPermission
@@ -491,7 +562,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
     Future <List<CurrencyModel>> walletCurrencyList;
 
     await Future.wait([
-      walletEdit = _walletHttp.updateWallet(txn: wallet),
+      walletEdit = _walletHttp.updateWallet(wallet: wallet),
       walletCurrencyList = _walletHttp.fetchWalletCurrencies(force: true),
     ]).then((_) {
       walletEdit.then((walletEdit) {

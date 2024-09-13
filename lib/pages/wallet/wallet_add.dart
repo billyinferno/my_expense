@@ -28,12 +28,14 @@ class _WalletAddPageState extends State<WalletAddPage> {
   String _currentWalletCurrencySymbol = "";
   bool _currentUseForStats = true;
   bool _currentEnabled = true;
+  double _currentLimit = -1;
   double _currentStartBalance = 0;
 
   final ScrollController _scrollControllerWallet = ScrollController();
   final ScrollController _scrollControllerCurrencies = ScrollController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _limitController = TextEditingController();
 
   @override
   void initState() {
@@ -47,6 +49,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
   void dispose() {
     _amountController.dispose();
     _nameController.dispose();
+    _limitController.dispose();
     _scrollControllerWallet.dispose();
     _scrollControllerCurrencies.dispose();
     super.dispose();
@@ -246,6 +249,8 @@ class _WalletAddPageState extends State<WalletAddPage> {
                               try {
                                 _currentStartBalance = double.parse(value);
                               } catch (e) {
+                                // default the start balance as -1 if unable
+                                // to parse the value
                                 _currentStartBalance = -1;
                               }
                             }
@@ -265,6 +270,63 @@ class _WalletAddPageState extends State<WalletAddPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                Container(
+                  height: 50,
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: primaryLight,
+                        width: 1.0
+                      )
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Ionicons.alert_circle_outline,
+                        size: 20,
+                        color: textColor,
+                      ),
+                      const SizedBox(width: 10,),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _limitController,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          decoration: InputDecoration(
+                            hintText: "Limit",
+                            hintStyle: TextStyle(
+                              color: textColor.withOpacity(0.5),
+                            ),
+                            border: const OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: EdgeInsets.zero,
+                            isCollapsed: true,
+                          ),
+                          cursorColor: primaryDark,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(12),
+                            DecimalTextInputFormatter(decimalRange: 2),
+                          ],
+                          onChanged: (value) {
+                            // convert the string to double
+                            if(value.isNotEmpty) {
+                              try {
+                                _currentLimit = double.parse(value);
+                              }
+                              catch(e) {
+                                // if failed to parse then default this to -1
+                                // to make it default to unlimited
+                                _currentLimit = -1;
+                              }
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 GestureDetector(
                   child: Container(
                     height: 50,
@@ -458,6 +520,12 @@ class _WalletAddPageState extends State<WalletAddPage> {
       throw Exception("Start balance is invalid");
     }
 
+    // check if the limit is 0 or < -1
+    if (_currentLimit == 0 || _currentLimit < -1) {
+      // default to -1
+      _currentLimit - 1;
+    }
+
     // all is good, we can generate a wallet data here before passed it to the
     // wallet API for add the transaction
     WalletTypeModel walletType = WalletTypeModel(
@@ -486,6 +554,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
       0,
       _currentUseForStats,
       _currentEnabled,
+      _currentLimit,
       walletType,
       walletCurrency,
       userPermission
@@ -496,7 +565,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
     Future<List<CurrencyModel>> walletCurrencyList;
 
     await Future.wait([
-      walletAdd = _walletHttp.addWallet(txn: wallet),
+      walletAdd = _walletHttp.addWallet(wallet: wallet),
       walletCurrencyList = _walletHttp.fetchWalletCurrencies(force: true),
     ]).then((_) {
       walletAdd.then((walletAdd) {

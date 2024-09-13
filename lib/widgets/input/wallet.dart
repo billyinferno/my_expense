@@ -14,6 +14,18 @@ class Wallet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {    
+    // calculate the wallet usage
+    double walletUsage = wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1);
+    Color walletColor = IconList.getColor(wallet.walletType.type);
+    Color walletDarkColor = IconList.getDarkColor(wallet.walletType.type);
+
+    // calculate the progress bar for the limit
+    int percentageUse = -1;
+    if (wallet.limit > 0) {
+      // we got limit, now check the wallet usage with the limit
+      percentageUse = ((walletUsage.makePositive() / wallet.limit) * 100).toInt();
+    }
+
     return GestureDetector(
       onTap: () {
         // call the on tap function
@@ -25,13 +37,13 @@ class Wallet extends StatelessWidget {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.fromLTRB(0, 12, 0, 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           gradient: LinearGradient(
             colors: <Color>[
-              (wallet.enabled ? IconList.getColor(wallet.walletType.type) : secondaryDark),
-              (wallet.enabled ? IconList.getDarkColor(wallet.walletType.type).lighten(amount: 0.1) : secondaryBackground),
+              (wallet.enabled ? walletColor : secondaryDark),
+              (wallet.enabled ? walletDarkColor.lighten(amount: 0.1) : secondaryBackground),
             ]
           ),
         ),
@@ -40,57 +52,136 @@ class Wallet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 30,
-                  width: 30,
-                  child: IconList.getIcon(wallet.walletType.type),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 30,
+                    width: 30,
+                    child: IconList.getIcon(wallet.walletType.type),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          wallet.name,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                        Text(
+                          wallet.walletType.type,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(fontSize: 10),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+              child: Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  (wallet.futureAmount == 0 ? "" : "${wallet.currency.symbol} ${Globals.fCCY.format(wallet.futureAmount)}"),
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                    fontSize: 10,
+                  ),
                 ),
-                const SizedBox(width: 10),
+              ),
+            ),
+            (
+              percentageUse < 0 ?
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    "${wallet.currency.symbol} ${Globals.fCCY.format(walletUsage)}",
+                    textAlign: TextAlign.right,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ) :
+              _buildUsageBarChar(
+                walletUsage: walletUsage,
+                percentageUse: percentageUse,
+                barColor: walletDarkColor,
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUsageBarChar({
+    required double walletUsage,
+    required int percentageUse,
+    required Color barColor,
+  }) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: barColor.darken(amount: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Stack(
+        alignment: Alignment.centerRight,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        wallet.name,
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(fontSize: 15),
+                  flex: (100 - percentageUse),
+                  child: Container(
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: percentageUse,
+                  child: Container(
+                    height: 22,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.red, barColor]
                       ),
-                      Text(
-                        wallet.walletType.type,
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(fontSize: 10),
-                      )
-                    ],
+                      borderRadius: BorderRadius.circular(22),
+                    ),
                   ),
                 ),
               ],
             ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Text(
-                (wallet.futureAmount == 0 ? "" : "${wallet.currency.symbol} ${Globals.fCCY.format(wallet.futureAmount)}"),
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontSize: 10,
-                ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(7, 0, 7, 0),
+            child: Text(
+              "${wallet.currency.symbol} ${Globals.fCCY.format(walletUsage)}",
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
               ),
             ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Text(
-                "${wallet.currency.symbol} ${Globals.fCCY.format(wallet.startBalance + wallet.changeBalance + (wallet.futureAmount * -1))}",
-                textAlign: TextAlign.right,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
