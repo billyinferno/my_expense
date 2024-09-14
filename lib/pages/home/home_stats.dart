@@ -33,7 +33,9 @@ class _HomeStatsState extends State<HomeStats> {
   final Map<int, IncomeExpenseModel> _incomeExpense = {};
   final Map<int, Map<String, List<TransactionTopModel>>> _transactionTop = {};
   final Map<int, double> _maxBudget = {};
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollControllerChart = ScrollController();
+  final ScrollController _scrollControllerExpense = ScrollController();
+  final ScrollController _scrollControllerIncome = ScrollController();
   final ScrollController _scrollControllerCurrencies = ScrollController();
   late Future<bool> _getStat;
   late bool _clampToBudget;
@@ -101,7 +103,9 @@ class _HomeStatsState extends State<HomeStats> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _scrollControllerChart.dispose();
+    _scrollControllerExpense.dispose();
+    _scrollControllerIncome.dispose();
     _scrollControllerCurrencies.dispose();
     super.dispose();
   }
@@ -259,51 +263,65 @@ class _HomeStatsState extends State<HomeStats> {
                       ),
                       child: _worthBar(),
                     ),
+                    const SizedBox(height: 5,),
                     Visibility(
                       visible: ((_maxBudget[_currentCurrencyId] ?? 0) > 0),
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(0, 5, 0, 0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            SizedBox(
-                              height: 15,
-                              width: 30,
-                              child: Transform.scale(
-                                scale: 0.6,
-                                child: CupertinoSwitch(
-                                  value: _clampToBudget,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _clampToBudget = value;
-                                      if (_clampToBudget) {
-                                        _currentMaxAmount = (_maxBudget[_currentCurrencyId] ?? 0);
-                                      }
-                                      else {
-                                        _currentMaxAmount = 0;
-                                      }
-                                    });
-                                  },
+                      child: GestureDetector(
+                        onTap: (() {
+                          setState(() {
+                            _clampToBudget = !_clampToBudget;
+                            if (_clampToBudget) {
+                              _currentMaxAmount = (_maxBudget[_currentCurrencyId] ?? 0);
+                            }
+                            else {
+                              _currentMaxAmount = 0;
+                            }
+                          });
+                        }),
+                        child: Container(
+                          color: Colors.transparent,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              SizedBox(
+                                height: 20,
+                                width: 30,
+                                child: Transform.scale(
+                                  scale: 0.7,
+                                  child: CupertinoSwitch(
+                                    value: _clampToBudget,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _clampToBudget = value;
+                                        if (_clampToBudget) {
+                                          _currentMaxAmount = (_maxBudget[_currentCurrencyId] ?? 0);
+                                        }
+                                        else {
+                                          _currentMaxAmount = 0;
+                                        }
+                                      });
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 11,),
-                            Text(
-                              "Clamp to avg daily budget ($_currentCurrencySymbol ${Globals.fCCY.format(_maxBudget[_currentCurrencyId] ?? 0)})",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: textColor,
-                              ),
-                            )
-                          ],
+                              const SizedBox(width: 11,),
+                              Text(
+                                "Clamp to avg daily budget ($_currentCurrencySymbol ${Globals.fCCY.format(_maxBudget[_currentCurrencyId] ?? 0)})",
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  color: textColor,
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 10,),
+              const SizedBox(height: 5,),
               Container(
                 padding: const EdgeInsets.all(10),
                 child: Center(
@@ -342,18 +360,7 @@ class _HomeStatsState extends State<HomeStats> {
                     _getStat = _fetchData(showDialog: true);
                   }),
                   color: accentColors[0],
-                  child: SingleChildScrollView(
-                    controller: _scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        _generateSubPage(),
-                        const SizedBox(height: 30,),
-                      ],
-                    ),
-                  ),
+                  child: _generateSubPage(),
                 ),
               ),
             ],
@@ -559,48 +566,90 @@ class _HomeStatsState extends State<HomeStats> {
           type = 'income';
         }
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: List<Widget>.generate(
-            _transactionTop[_currentCurrencyId]![_resultPageName]!.length,
-            ((index) {
-              if (type == 'expense') {
-                return MyItemList(
-                  height: 70,
-                  iconColor: IconColorList.getExpenseColor(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
-                  icon: IconColorList.getExpenseIcon(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
-                  type: type,
-                  title: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionName,
-                  subTitle: "(${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName}) ${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName}",
-                  symbol: _currentCurrencySymbol,
-                  amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount,
-                  amountColor: accentColors[2],
-                );
-              }
-              else {
-                return MyItemList(
-                  height: 70,
-                  iconColor: IconColorList.getIncomeColor(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
-                  icon: IconColorList.getIncomeIcon(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
-                  type: type,
-                  title: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionName,
-                  subTitle: "(${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName}) ${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName}",
-                  symbol: _currentCurrencySymbol,
-                  amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount,
-                  amountColor: accentColors[6],
-                );
-              }
-            }),
-          ),
-        );
+        if (type == 'expense') {
+          return SingleChildScrollView(
+            controller: _scrollControllerExpense,
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: List<Widget>.generate(
+                    _transactionTop[_currentCurrencyId]![_resultPageName]!.length,
+                    ((index) {
+                      return MyItemList(
+                        height: 70,
+                        iconColor: IconColorList.getExpenseColor(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                        icon: IconColorList.getExpenseIcon(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                        type: type,
+                        title: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionName,
+                        subTitle: "(${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName}) ${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName}",
+                        symbol: _currentCurrencySymbol,
+                        amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount,
+                        amountColor: accentColors[2],
+                      );
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 30,),
+              ],
+            ),
+          );
+        }
+        else {
+          return SingleChildScrollView(
+            controller: _scrollControllerIncome,
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: List<Widget>.generate(
+                    _transactionTop[_currentCurrencyId]![_resultPageName]!.length,
+                    ((index) {
+                     return MyItemList(
+                      height: 70,
+                      iconColor: IconColorList.getIncomeColor(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                      icon: IconColorList.getIncomeIcon(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                      type: type,
+                      title: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionName,
+                      subTitle: "(${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName}) ${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName}",
+                      symbol: _currentCurrencySymbol,
+                      amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount,
+                      amountColor: accentColors[6],
+                    );
+                    }),
+                  ),
+                ),
+                const SizedBox(height: 30,),
+              ],
+            ),
+          );
+        }
       case 'chart':
-        return BarChart(
-          from: _from,
-          to: _to,
-          data: (_getData(_incomeExpense[_currentCurrencyId])),
-          showed: true,
-          maxAmount: _currentMaxAmount,
+        return SingleChildScrollView(
+          controller: _scrollControllerChart,
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              BarChart(
+                from: _from,
+                to: _to,
+                data: (_getData(_incomeExpense[_currentCurrencyId])),
+                showed: true,
+                maxAmount: _currentMaxAmount,
+              ),
+              const SizedBox(height: 30,),
+            ],
+          ),
         );
       default:
         return const SizedBox.shrink();
