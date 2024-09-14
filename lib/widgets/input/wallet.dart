@@ -129,6 +129,39 @@ class Wallet extends StatelessWidget {
     required int percentageUse,
     required Color barColor,
   }) {
+    // get the correct end color for the linear gradient on the limit bar
+    Color endColor = Colors.green[900]!;
+    if (percentageUse >= 90) {
+      endColor = Colors.red[900]!;
+    }
+    else if (percentageUse >= 80) {
+      endColor = Colors.red[700]!;
+    }
+    else if (percentageUse >= 70) {
+      endColor = Colors.red;
+    }
+    else if (percentageUse >= 60) {
+      endColor = Colors.orange[900]!;
+    }
+    else if (percentageUse >= 50) {
+      endColor = Colors.orange[700]!;
+    }
+    else if (percentageUse >= 40) {
+      endColor = Colors.orange;
+    }
+    else if (percentageUse >= 30) {
+      endColor = Colors.yellow;
+    }
+    else if (percentageUse >= 20) {
+      endColor = Colors.green;
+    }
+    else if (percentageUse >= 10) {
+      endColor = Colors.green[700]!;
+    }
+    else {
+      endColor = Colors.green;
+    }
+
     return Container(
       margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
       width: double.infinity,
@@ -161,7 +194,7 @@ class Wallet extends StatelessWidget {
                     height: 22,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.red, barColor]
+                        colors: [endColor, barColor]
                       ),
                       borderRadius: BorderRadius.circular(22),
                     ),
