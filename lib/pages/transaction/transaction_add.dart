@@ -43,7 +43,18 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       title: "Add Transaction",
       type: TransactionInputType.add,
       saveTransaction: (value) {
-        _saveTransaction(value);
+        try {
+          _saveTransaction(value);
+        }
+        catch (error) {
+          // show the error dialog
+          ShowMyDialog(
+            cancelEnabled: false,
+            confirmText: "OK",
+            dialogTitle: "Error Add",
+            dialogText: error.toString())
+          .show(context);
+        }
       },
       selectedDate: _selectedDate.toLocal(),
     );
@@ -92,15 +103,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           stackTrace: stackTrace,
         );
 
-        if (mounted) {
-          // show the error dialog
-          await ShowMyDialog(
-            cancelEnabled: false,
-            confirmText: "OK",
-            dialogTitle: "Error Refresh",
-            dialogText: "Error when refresh information.")
-          .show(context);
-        }
+        throw Exception("Error when refresh information.");
       });
     }).onError((error, stackTrace) async {
       // print the error
@@ -110,15 +113,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         stackTrace: stackTrace,
       );
 
-      if (mounted) {
-        // show the error dialog
-        await ShowMyDialog(
-          cancelEnabled: false,
-          confirmText: "OK",
-          dialogTitle: "Error Add",
-          dialogText: "Error when add transaction.")
-        .show(context);
-      }
+      throw Exception("Error when add transaction.");
     }).whenComplete(() {
       // remove the loading screen
       LoadingScreen.instance().hide();

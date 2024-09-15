@@ -79,11 +79,11 @@ class _PinSetupPageState extends State<PinSetupPage> {
                           // show error, and reset all
                           // show the error dialog
                           await ShowMyDialog(
-                                  cancelEnabled: false,
-                                  confirmText: "OK",
-                                  dialogTitle: "Error",
-                                  dialogText: "PIN didn't match.")
-                              .show(context);
+                            cancelEnabled: false,
+                            confirmText: "OK",
+                            dialogTitle: "Error",
+                            dialogText: "PIN didn't match."
+                          ).show(context);
 
                           setState(() {
                             _stage = 1;
@@ -92,7 +92,17 @@ class _PinSetupPageState extends State<PinSetupPage> {
                           });
                         } else {
                           // send this to backend
-                          _savePin();
+                          await _savePin().onError((error, stackTrace) async {
+                            if (context.mounted) {
+                              // show the error dialog
+                              await ShowMyDialog(
+                                cancelEnabled: false,
+                                confirmText: "OK",
+                                dialogTitle: "Error Save",
+                                dialogText: "Error when Save PIN")
+                              .show(context);
+                            }
+                          },);
                         }
                       }
                     }
@@ -129,21 +139,9 @@ class _PinSetupPageState extends State<PinSetupPage> {
         _firstPin = "";
         _secondPin = "";
       });
-
-      if (mounted) {
-        // show the error dialog
-        await ShowMyDialog(
-          cancelEnabled: false,
-          confirmText: "OK",
-          dialogTitle: "Error Save",
-          dialogText: "Error when Save PIN")
-        .show(context);
-      }
-    }).whenComplete(
-      () {
-        // remove the loading screen
-        LoadingScreen.instance().hide();
-      },
-    );
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 }

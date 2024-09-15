@@ -787,9 +787,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   Future<void> _filterStats() async {
     // fetch the transaction data for this
     if (_currentCurrencies!.id >= 0 && _currentWallet != null) {
-      // show loading screen
-      LoadingScreen.instance().show(context: context);
-
       await _fetchStats().then((_) {
         StatsDetailArgs args = StatsDetailArgs(
           type: _currentType,
@@ -825,16 +822,16 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             dialogText: "Error while fetching stats information from server.")
           .show(context);
         }
-      }).whenComplete(() {
-        // remove the loading screen
-        LoadingScreen.instance().hide();
       });
     }
   }
 
   Future<void> _fetchStats() async {
     String name = _nameController.text.trim();
-    
+
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
+
     await _transactionHttp.fetchIncomeExpenseCategory(
       name: name,
       search: _searchType,
@@ -852,6 +849,9 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         stackTrace: stackTrace,
       );
       throw Exception("Error when trying to fetch statistics");
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 }

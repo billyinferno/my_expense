@@ -29,7 +29,18 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       title: "Edit Transaction",
       type: TransactionInputType.edit,
       saveTransaction: (value) {
-        _saveTransaction(value);
+        try {
+          _saveTransaction(value);
+        }
+        catch (error) {
+          // show the error dialog
+          ShowMyDialog(
+            cancelEnabled: false,
+            confirmText: "OK",
+            dialogTitle: "Error Refresh",
+            dialogText: error.toString())
+          .show(context);
+        }
       },
       selectedDate: _paramsData.date,
       currentTransaction: _paramsData,
@@ -76,15 +87,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
               stackTrace: stackTrace,
             );
 
-            if (mounted) {
-              // show the error dialog
-              await ShowMyDialog(
-                cancelEnabled: false,
-                confirmText: "OK",
-                dialogTitle: "Error Refresh",
-                dialogText: "Error when refresh home list.")
-              .show(context);
-            }
+            throw Exception("Error when refresh home list.");
           });
         }
 
@@ -112,15 +115,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           stackTrace: stackTrace,
         );
 
-        if (mounted) {
-          // show the error dialog
-          await ShowMyDialog(
-            cancelEnabled: false,
-            confirmText: "OK",
-            dialogTitle: "Error Refresh",
-            dialogText: "Error when refresh information.")
-          .show(context);
-        }
+        throw Exception("Error when refresh information.");
       });
     }).onError((error, stackTrace) async {
       // print the error
@@ -130,15 +125,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
         stackTrace: stackTrace,
       );
 
-      if (mounted) {
-        // show the error dialog
-        await ShowMyDialog(
-          cancelEnabled: false,
-          confirmText: "OK",
-          dialogTitle: "Error Update",
-          dialogText: "Error when update transaction.")
-        .show(context);
-      }
+      throw Exception("Error when update transaction.");
     }).whenComplete(() {
         // remove the loading screen
         LoadingScreen.instance().hide();

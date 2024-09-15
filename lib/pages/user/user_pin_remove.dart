@@ -72,17 +72,27 @@ class _PinRemovePageState extends State<PinRemovePage> {
                   onError: (() async {
                     // show the error dialog
                     await ShowMyDialog(
-                            cancelEnabled: false,
-                            confirmText: "OK",
-                            dialogTitle: "Error",
-                            dialogText: "Wrong Passcode ($_tries tries).")
-                        .show(context);
+                      cancelEnabled: false,
+                      confirmText: "OK",
+                      dialogTitle: "Error",
+                      dialogText: "Wrong Passcode ($_tries tries)."
+                    ).show(context);
 
                     // add tries
                     _tries += 1;
                   }),
-                  onSuccess: (() {
-                    _removePin();
+                  onSuccess: (() async {
+                    await _removePin().onError((error, stackTrace) async {
+                      if (context.mounted) {
+                        // show the error dialog
+                        await ShowMyDialog(
+                          cancelEnabled: false,
+                          confirmText: "OK",
+                          dialogTitle: "Error",
+                          dialogText: "Error when removing PIN from backend.")
+                        .show(context);
+                      }
+                    },);
                   }),
                 ),
               ],
@@ -110,21 +120,9 @@ class _PinRemovePageState extends State<PinRemovePage> {
         error: error,
         stackTrace: stackTrace,
       );
-
-      if (mounted) {
-        // show the error dialog
-        await ShowMyDialog(
-          cancelEnabled: false,
-          confirmText: "OK",
-          dialogTitle: "Error",
-          dialogText: "Error when removing PIN from backend.")
-        .show(context);
-      }
-    }).whenComplete(
-      () {
-        // remove the loading screen
-        LoadingScreen.instance().hide();
-      },
-    );
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 }

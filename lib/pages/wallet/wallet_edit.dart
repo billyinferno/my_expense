@@ -97,8 +97,6 @@ class _WalletEditPageState extends State<WalletEditPage> {
         actions: <Widget>[
           IconButton(
             onPressed: () async {
-              LoadingScreen.instance().show(context: context);
-
               await _updateWallet().then((_) {
                 if (context.mounted) {
                   // finished, so we can just go back to the previous page
@@ -121,10 +119,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
                     dialogText: "Unable to update wallet data."
                   ).show(context);
                 }
-              }).whenComplete(() {
-                // remove the loading screen
-                LoadingScreen.instance().hide();
-              },);
+              });
             },
             icon: const Icon(
               Ionicons.checkmark,
@@ -561,6 +556,9 @@ class _WalletEditPageState extends State<WalletEditPage> {
     Future <WalletModel> walletEdit;
     Future <List<CurrencyModel>> walletCurrencyList;
 
+    // show the loading screen
+    LoadingScreen.instance().show(context: context);
+
     await Future.wait([
       walletEdit = _walletHttp.updateWallet(wallet: wallet),
       walletCurrencyList = _walletHttp.fetchWalletCurrencies(force: true),
@@ -608,6 +606,9 @@ class _WalletEditPageState extends State<WalletEditPage> {
         stackTrace: stackTrace,
       );
       throw Exception("Error when edit wallet");
-    });
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
   }
 }
