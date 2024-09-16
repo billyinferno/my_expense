@@ -8,6 +8,7 @@
     "description": "Personal Expense Tracker.",
     "orientation": "portrait",
     "prefer_related_applications": false,
+    "categories": ["utility", "tracker", "finance", "expense", "income"],
     "icons": [
         {
             "src": "icons/Icon-192.png",
