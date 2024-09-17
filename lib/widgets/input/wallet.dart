@@ -21,9 +21,13 @@ class Wallet extends StatelessWidget {
 
     // calculate the progress bar for the limit
     int percentageUse = -1;
-    if (wallet.limit > 0) {
-      // we got limit, now check the wallet usage with the limit
-      percentageUse = ((walletUsage.makePositive() / wallet.limit) * 100).toInt();
+    // wallet limit should be only use for wallet that enabled only
+    if (wallet.enabled) {
+      // check if wallet limit is more than 0
+      if (wallet.limit > 0) {
+        // we got limit, now check the wallet usage with the limit
+        percentageUse = ((walletUsage.makePositive() / wallet.limit) * 100).toInt();
+      }
     }
 
     return GestureDetector(
