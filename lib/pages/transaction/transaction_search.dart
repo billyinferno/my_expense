@@ -38,8 +38,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final List<TransactionListModel> _expense = [];
   final List<TransactionListModel> _transfer = [];
   final Map<String, List<TransactionListModel>> _summaryIncome = {};
+  final Map<String, Map<String, TransactionListModel>> _subSummaryIncome = {};
   final Map<String, List<TransactionListModel>> _summaryExpense = {};
+  final Map<String, Map<String, TransactionListModel>> _subSummaryExpense = {};
   final Map<String, List<TransactionListModel>> _summaryTransfer = {};
+  final Map<String, Map<String, TransactionListModel>> _subSummaryTransfer = {};
   Map<String, double> _totalAmountIncome = {};
   Map<String, double> _totalAmountExpense = {};
   final Map<String, double> _totalAmountTransfer = {};
@@ -518,13 +521,20 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _expense.clear();
     _transfer.clear();
     _summaryIncome.clear();
+    _subSummaryIncome.clear();
     _totalAmountIncome.clear();
+
     _summaryExpense.clear();
+    _subSummaryExpense.clear();
     _totalAmountExpense.clear();
+
     _summaryTransfer.clear();
+    _subSummaryTransfer.clear();
     _totalAmountTransfer.clear();
 
     String summaryKey = "";
+    String subSummaryKey = "";
+    TransactionListModel tmpSubSummaryData;
 
     // now compute the summary data so we can showed it on the summary page
     // based on the income, and expense
@@ -549,13 +559,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           _summaryIncome[summaryKey]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
-          if (!_totalAmountIncome
-              .containsKey(_filterTransactions[i].wallet.currency)) {
+          if (!_totalAmountIncome.containsKey(_filterTransactions[i].wallet.currency)) {
             _totalAmountIncome[_filterTransactions[i].wallet.currency] = 0;
           }
           _totalAmountIncome[_filterTransactions[i].wallet.currency] =
-              _totalAmountIncome[_filterTransactions[i].wallet.currency]! +
-                  _filterTransactions[i].amount;
+            _totalAmountIncome[_filterTransactions[i].wallet.currency]! +
+            _filterTransactions[i].amount;
 
           _income.add(_filterTransactions[i]);
           break;
@@ -567,13 +576,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           _summaryExpense[summaryKey]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
-          if (!_totalAmountExpense
-              .containsKey(_filterTransactions[i].wallet.currency)) {
+          if (!_totalAmountExpense.containsKey(_filterTransactions[i].wallet.currency)) {
             _totalAmountExpense[_filterTransactions[i].wallet.currency] = 0;
           }
           _totalAmountExpense[_filterTransactions[i].wallet.currency] =
-              _totalAmountExpense[_filterTransactions[i].wallet.currency]! +
-                  _filterTransactions[i].amount;
+            _totalAmountExpense[_filterTransactions[i].wallet.currency]! +
+            _filterTransactions[i].amount;
 
           _expense.add(_filterTransactions[i]);
           break;
@@ -585,13 +593,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           _summaryTransfer[summaryKey]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
-          if (!_totalAmountTransfer
-              .containsKey(_filterTransactions[i].wallet.currency)) {
+          if (!_totalAmountTransfer.containsKey(_filterTransactions[i].wallet.currency)) {
             _totalAmountTransfer[_filterTransactions[i].wallet.currency] = 0;
           }
           _totalAmountTransfer[_filterTransactions[i].wallet.currency] =
-              _totalAmountTransfer[_filterTransactions[i].wallet.currency]! +
-                  _filterTransactions[i].amount;
+            _totalAmountTransfer[_filterTransactions[i].wallet.currency]! +
+            _filterTransactions[i].amount;
 
           _transfer.add(_filterTransactions[i]);
           break;
@@ -645,6 +652,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       endDate = null;
       count = 0;
 
+      // create the sub summary expense for this key
+      _subSummaryExpense[key] = {};
+
       for (TransactionListModel data in value) {
         if (startDate == null) {
           startDate = data.date;
@@ -664,6 +674,48 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
         amount += data.amount;
         count++;
+
+        // add the transaction list on the sub summary list based on the
+        // month and year
+        subSummaryKey = Globals.dfyyyy.format(data.date);
+        
+        // check if subSummaryKey is exists or not?
+        if (!_subSummaryExpense[key]!.containsKey(subSummaryKey)) {
+          // if not exists create the 1st data
+          _subSummaryExpense[key]![subSummaryKey] = TransactionListModel(
+            -1,
+            data.name,
+            data.type,
+            DateTime(data.date.year, data.date.month, 1),
+            data.description,
+            data.category,
+            data.wallet,
+            data.walletTo,
+            data.usersPermissionsUser,
+            data.cleared,
+            data.amount,
+            data.exchangeRate
+          );
+        }
+        else {
+          // exists, get the previous data
+          tmpSubSummaryData = _subSummaryExpense[key]![subSummaryKey]!;
+          // and combine it with current data
+          _subSummaryExpense[key]![subSummaryKey] = TransactionListModel(
+            -1,
+            data.name,
+            data.type,
+            DateTime(data.date.year, data.date.month, 1),
+            data.description,
+            data.category,
+            data.wallet,
+            data.walletTo,
+            data.usersPermissionsUser,
+            data.cleared,
+            (data.amount + tmpSubSummaryData.amount),
+            data.exchangeRate
+          );
+        }
       }
 
       // create TransactionModel based on the value
@@ -681,8 +733,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           amount,
           1);
 
-      _summaryList.add(_createSummaryItem(
-          txn: txn, startDate: startDate!, endDate: endDate!, count: count));
+      _summaryList.add(_createExpandableItem(
+        txn: txn,
+        startDate: startDate!,
+        endDate: endDate!,
+        count: count,
+        subTxn: (_subSummaryExpense[key] ?? {}),
+      ));
     });
 
     // add the income bar on the _summaryList
@@ -716,6 +773,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       endDate = null;
       count = 0;
 
+      // generate subSummaryIncome for this key
+      _subSummaryIncome[key] = {};
+
       for (TransactionListModel data in value) {
         if (startDate == null) {
           startDate = data.date;
@@ -735,6 +795,48 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
         amount += data.amount;
         count++;
+
+        // add the transaction list on the sub summary list based on the
+        // month and year
+        subSummaryKey = Globals.dfyyyy.format(data.date);
+        
+        // check if subSummaryKey is exists or not?
+        if (!_subSummaryIncome[key]!.containsKey(subSummaryKey)) {
+          // if not exists create the 1st data
+          _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
+            -1,
+            data.name,
+            data.type,
+            DateTime(data.date.year, data.date.month, 1),
+            data.description,
+            data.category,
+            data.wallet,
+            data.walletTo,
+            data.usersPermissionsUser,
+            data.cleared,
+            data.amount,
+            data.exchangeRate
+          );
+        }
+        else {
+          // exists, get the previous data
+          tmpSubSummaryData = _subSummaryIncome[key]![subSummaryKey]!;
+          // and combine it with current data
+          _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
+            -1,
+            data.name,
+            data.type,
+            DateTime(data.date.year, data.date.month, 1),
+            data.description,
+            data.category,
+            data.wallet,
+            data.walletTo,
+            data.usersPermissionsUser,
+            data.cleared,
+            (data.amount + tmpSubSummaryData.amount),
+            data.exchangeRate
+          );
+        }
       }
 
       // create TransactionModel based on the value
@@ -752,8 +854,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           amount,
           1);
 
-      _summaryList.add(_createSummaryItem(
-          txn: txn, startDate: startDate!, endDate: endDate!, count: count));
+      _summaryList.add(_createExpandableItem(
+        txn: txn,
+        startDate: startDate!,
+        endDate: endDate!,
+        count: count,
+        subTxn: (_subSummaryIncome[key] ?? {}),
+      ));
     });
 
     // add the transfer bar on the _summaryList
@@ -787,6 +894,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       endDate = null;
       count = 0;
 
+      // initialize sub summary transfer for this key
+      _subSummaryTransfer[key] = {};
+
       for (TransactionListModel data in value) {
         if (startDate == null) {
           startDate = data.date;
@@ -806,6 +916,48 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
         amount += data.amount;
         count++;
+
+        // add the transaction list on the sub summary list based on the
+        // month and year
+        subSummaryKey = Globals.dfyyyy.format(data.date);
+        
+        // check if subSummaryKey is exists or not?
+        if (!_subSummaryTransfer[key]!.containsKey(subSummaryKey)) {
+          // if not exists create the 1st data
+          _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
+            -1,
+            data.name,
+            data.type,
+            DateTime(data.date.year, data.date.month, 1),
+            data.description,
+            data.category,
+            data.wallet,
+            data.walletTo,
+            data.usersPermissionsUser,
+            data.cleared,
+            data.amount,
+            data.exchangeRate
+          );
+        }
+        else {
+          // exists, get the previous data
+          tmpSubSummaryData = _subSummaryTransfer[key]![subSummaryKey]!;
+          // and combine it with current data
+          _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
+            -1,
+            data.name,
+            data.type,
+            DateTime(data.date.year, data.date.month, 1),
+            data.description,
+            data.category,
+            data.wallet,
+            data.walletTo,
+            data.usersPermissionsUser,
+            data.cleared,
+            (data.amount + tmpSubSummaryData.amount),
+            data.exchangeRate
+          );
+        }
       }
 
       // create TransactionModel based on the value
@@ -823,8 +975,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           amount,
           1);
 
-      _summaryList.add(_createSummaryItem(
-          txn: txn, startDate: startDate!, endDate: endDate!, count: count));
+      _summaryList.add(_createExpandableItem(
+        txn: txn,
+        startDate: startDate!,
+        endDate: endDate!,
+        count: count,
+        subTxn: (_subSummaryTransfer[key] ?? {}),
+      ));
     });
   }
 
@@ -867,16 +1024,127 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     return ret;
   }
 
+  Widget _createExpandableItem({
+    required TransactionListModel txn,
+    required DateTime startDate,
+    required DateTime endDate,
+    required int count,
+    required Map<String, TransactionListModel> subTxn,
+  }) {
+    return Theme(
+      data: Globals.themeData.copyWith(
+        dividerColor: Colors.transparent,
+      ),
+      child: ListTileTheme(
+        contentPadding: const EdgeInsets.all(0),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.all(0),
+          childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
+          backgroundColor: primaryBackground,
+          collapsedBackgroundColor: primaryBackground,
+          iconColor: primaryLight,
+          collapsedIconColor: primaryLight,
+          title: _createSummaryItem(
+            txn: txn,
+            startDate: startDate,
+            endDate: endDate,
+            count: count,
+            needBorder: false,
+          ),
+          children: _createExpandableChilds(subTxn: subTxn),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _createExpandableChilds({
+    required Map<String, TransactionListModel> subTxn,
+  }) {
+    List<Widget> ret = [];
+
+    // loop thru subTxn
+    subTxn.forEach((key, txn) {
+      // generate an item for each key
+      ret.add(
+        // create container
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: primaryBackground,
+                width: 1.0
+              )
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              _categoryIcon(
+                  name: (txn.category != null ? txn.category!.name : ''),
+                  type: txn.type),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      txn.name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      key,
+                      style: const TextStyle(
+                        fontSize: 10,
+                      ),
+                    ),
+                    (
+                      txn.category == null ?
+                      const SizedBox.shrink() :
+                      Text(
+                        (txn.category != null ? txn.category!.name : ''),
+                        style: const TextStyle(
+                          fontSize: 10,
+                        ),
+                      )
+                    ),
+                    const SizedBox(height: 5,),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              _getAmount(txn),
+            ],
+          ),
+        )
+      );
+    },);
+
+    return ret;
+  }
+
   Widget _createSummaryItem({
     required TransactionListModel txn,
     required DateTime startDate,
     required DateTime endDate,
     required int count,
+    bool needBorder = true,
   }) {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: primaryLight,
+            width: (needBorder ? 1.0 : 0.0)
+          )
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -898,7 +1166,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  "${Globals.dfddMMyyyy.formatLocal(startDate)} - ${Globals.dfddMMyyyy.formatLocal(endDate)}",
+                  "${Globals.dfddMMyy.formatLocal(startDate)} - ${Globals.dfddMMyy.formatLocal(endDate)}",
                   style: const TextStyle(
                     fontSize: 10,
                   ),
