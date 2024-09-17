@@ -542,7 +542,7 @@ class _TransactionInputState extends State<TransactionInput> {
                       padding: const EdgeInsets.all(10),
                       child: TextFormField(
                         controller: _descriptionController,
-                        cursorColor: textColor.withOpacity(0.6),
+                        cursorColor: textColor.withValues(alpha: 0.6),
                         keyboardType: TextInputType.multiline,
                         maxLines: 8,
                         maxLength: 250,
@@ -635,7 +635,7 @@ class _TransactionInputState extends State<TransactionInput> {
                   controller: _nameController,
                   focusNode: _nameFocus,
                   enableSuggestions: false,
-                  cursorColor: textColor.withOpacity(0.6),
+                  cursorColor: textColor.withValues(alpha: 0.6),
                   keyboardType: TextInputType.name,
                   decoration: const InputDecoration(
                     hintText: "Item name",

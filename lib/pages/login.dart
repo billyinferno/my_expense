@@ -221,7 +221,7 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           hintText: "username",
                           hintStyle: TextStyle(
-                            color: textColor.withOpacity(0.3),
+                            color: textColor.withValues(alpha: 0.3),
                           ),
                           prefixIcon: Icon(
                             Ionicons.person,
@@ -278,7 +278,7 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           hintText: "password",
                           hintStyle: TextStyle(
-                            color: textColor.withOpacity(0.3),
+                            color: textColor.withValues(alpha: 0.3),
                           ),
                           prefixIcon: Icon(
                             Ionicons.key,

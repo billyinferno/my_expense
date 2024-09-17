@@ -66,7 +66,12 @@ class _WalletEditPageState extends State<WalletEditPage> {
       _amountController.text = "$_currentStartBalance";
       _currentAmountFontSize = 25 - ((10/6) * (_amountController.text.length - 6));
     }
-    _limitController.text = "$_currentLimit";
+
+    // check if _currentLimit is > 0, if more then we put the limit on the
+    // text fields, if not defaulted to empty.
+    if (_currentLimit > 0) {
+      _limitController.text = "$_currentLimit";
+    }
 
     super.initState();
   }
@@ -304,9 +309,9 @@ class _WalletEditPageState extends State<WalletEditPage> {
                           controller: _limitController,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           decoration: InputDecoration(
-                            hintText: "Limit",
+                            hintText: "No Limit",
                             hintStyle: TextStyle(
-                              color: textColor.withOpacity(0.5),
+                              color: textColor.withValues(alpha: 0.5),
                             ),
                             border: const OutlineInputBorder(
                               borderSide: BorderSide.none,
@@ -330,6 +335,10 @@ class _WalletEditPageState extends State<WalletEditPage> {
                                 // to make it default to unlimited
                                 _currentLimit = -1;
                               }
+                            }
+                            else {
+                              // if value is empty, default the value into -1
+                              _currentLimit = -1;
                             }
                           },
                         ),

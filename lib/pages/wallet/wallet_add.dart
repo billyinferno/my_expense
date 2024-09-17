@@ -296,7 +296,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                           decoration: InputDecoration(
                             hintText: "Limit",
                             hintStyle: TextStyle(
-                              color: textColor.withOpacity(0.5),
+                              color: textColor.withValues(alpha: 0.5),
                             ),
                             border: const OutlineInputBorder(
                               borderSide: BorderSide.none,
