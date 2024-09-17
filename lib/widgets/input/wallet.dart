@@ -154,7 +154,7 @@ class Wallet extends StatelessWidget {
       endColor = Colors.orange;
     }
     else if (percentageUse >= 30) {
-      endColor = Colors.yellow;
+      endColor = Colors.yellow[600]!;
     }
     else if (percentageUse >= 20) {
       endColor = Colors.green;
