@@ -17,17 +17,27 @@ class _HomeWalletState extends State<HomeWallet> {
   final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
 
   final ScrollController _scrollControllerWallet = ScrollController();
+  final ScrollController _accountTypeController = ScrollController();
   late Future<bool> _getData;
+  final Map<String, String> _accountMap = {};
+  final Map<String, List<WalletModel>> _walletsFilter = {};
+  late String _tabSelected;
 
   @override
   void initState() {
+    // default the tab selected to 'all'
+    _tabSelected = 'all';
+
+    // get wallet
     _getData = _refreshWallet();
+
     super.initState();
   }
 
   @override
   void dispose() {
     _scrollControllerWallet.dispose();
+    _accountTypeController.dispose();
     super.dispose();
   }
 
@@ -88,31 +98,55 @@ class _HomeWalletState extends State<HomeWallet> {
   Widget _generateWalletView() {
     // generate the wallet list view
     List<WalletModel> wallets = [];
+
     return Consumer<HomeProvider>(
       builder: (context, homeProvider, child) {
         wallets = homeProvider.walletList;
+
+        // generate wallet filter that we will use to show the data
+        _generateWalletFilter(wallets: wallets);
+        
         return (Container(
           padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-          child: RefreshIndicator(
-            color: accentColors[6],
-            onRefresh: () async {
-              _getData = _refreshWallet(showDialog: true);
-            },
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              controller: _scrollControllerWallet,
-              itemCount: wallets.length + 1,
-              itemBuilder: (BuildContext ctx, int index) {
-                if (index < wallets.length) {
-                  WalletModel wallet = wallets[index];
-                  return _generateSlidable(wallet);
-                } else {
-                  return const SizedBox(
-                    height: 30,
-                  );
-                }
-              },
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              ScrollableTab(
+                controller: _accountTypeController,
+                data: _accountMap,
+                onTap: ((tab) {
+                  setState(() {
+                    _tabSelected = tab;
+                  });
+                }),
+              ),
+              const SizedBox(height: 10,),
+              Expanded(
+                child: RefreshIndicator(
+                  color: accentColors[6],
+                  onRefresh: () async {
+                    _getData = _refreshWallet(showDialog: true);
+                  },
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    controller: _scrollControllerWallet,
+                    itemCount: _walletsFilter[_tabSelected]!.length + 1,
+                    itemBuilder: (BuildContext ctx, int index) {
+                      if (index < _walletsFilter[_tabSelected]!.length) {
+                        return _generateSlidable(
+                          wallet: _walletsFilter[_tabSelected]![index]
+                        );
+                      } else {
+                        return const SizedBox(
+                          height: 30,
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ));
       },
@@ -189,6 +223,9 @@ class _HomeWalletState extends State<HomeWallet> {
       ),
     ]).then((_) {
       futureWallets.then((wallets) {
+        // generate the account map
+        _generateAccountMap(wallets: wallets);
+
         if (wallets.isNotEmpty && mounted) {
           Provider.of<HomeProvider>(
             context,
@@ -212,7 +249,7 @@ class _HomeWalletState extends State<HomeWallet> {
     return true;
   }
 
-  Widget _generateSlidable(WalletModel wallet) {
+  Widget _generateSlidable({required WalletModel wallet}) {
     return Container(
       margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
       child: Slidable(
@@ -407,6 +444,45 @@ class _HomeWalletState extends State<HomeWallet> {
       ).then((_) {
         Log.success(message: "⏳ Fetch current budget for ${ccy.name}");
       },);
+    }
+  }
+
+  void _generateAccountMap({required List<WalletModel> wallets}) {
+    // clear the current account map
+    _accountMap.clear();
+
+    // add the account map, with initial value as "All"
+    _accountMap['all'] = 'All';
+
+    // loop thru wallets, and add the account map
+    for (WalletModel wallet in wallets) {
+      // check if this wallet type already in account map or not?
+      if (!_accountMap.containsKey(wallet.walletType.type)) {
+        // add this wallet type to the account map
+        _accountMap[wallet.walletType.type] = wallet.walletType.type;
+      }
+    }
+  }
+
+  void _generateWalletFilter({required List<WalletModel> wallets}) {
+    // clear the _walletsFilter
+    _walletsFilter.clear();
+
+    // default add 'all' to the wallets filter, we will put all the wallet
+    // inside here as default
+    _walletsFilter['all'] = [];
+
+    // loop thru wallets, and add the account map
+    for (WalletModel wallet in wallets) {
+      // check if this wallet type already in wallet filter or not?
+      if (!_walletsFilter.containsKey(wallet.walletType.type)) {
+        _walletsFilter[wallet.walletType.type] = [];
+      }
+
+      // add the wallet to the correct wallet filter
+      _walletsFilter[wallet.walletType.type]!.add(wallet);
+      // add also the wallet to all
+      _walletsFilter['all']!.add(wallet);
     }
   }
 }
