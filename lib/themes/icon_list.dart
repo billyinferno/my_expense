@@ -22,7 +22,7 @@ class IconList {
   static Color getColor(String name) {
     switch(name.toLowerCase()) {
       case "wallet": { return accentColors[0]; }
-      case "asset": { return accentColors[3]; }
+      case "asset": { return accentColors[10]; }
       case "cash": { return accentColors[5]; }
       case "checking": { return accentColors[9]; }
       case "credit card": { return accentColors[6]; }
@@ -38,7 +38,7 @@ class IconList {
   static Color getDarkColor(String name) {
     switch(name.toLowerCase()) {
       case "wallet": { return darkAccentColors[0]; }
-      case "asset": { return darkAccentColors[3]; }
+      case "asset": { return darkAccentColors[10]; }
       case "cash": { return darkAccentColors[5]; }
       case "checking": { return darkAccentColors[9]; }
       case "credit card": { return darkAccentColors[6]; }
@@ -54,7 +54,7 @@ class IconList {
   static Color getLightColor(String name) {
     switch(name.toLowerCase()) {
       case "wallet": { return lightAccentColors[0]; }
-      case "asset": { return lightAccentColors[3]; }
+      case "asset": { return lightAccentColors[10]; }
       case "cash": { return lightAccentColors[5]; }
       case "checking": { return lightAccentColors[9]; }
       case "credit card": { return lightAccentColors[6]; }
