@@ -334,7 +334,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         icon: Ionicons.calendar_outline,
         iconColor: accentColors[6],
         label: "Date",
-        value: Align(
+        trailing: Align(
           alignment: Alignment.centerRight,
           child: Text(
             _getTitleText(),
@@ -656,7 +656,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         icon: Ionicons.wallet_outline,
         iconColor: accentColors[5],
         label: "Account",
-        value: Align(
+        trailing: Align(
           alignment: Alignment.centerRight,
           child: Text(
             _currentWallet!.name,
@@ -685,7 +685,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         icon: Ionicons.cash_outline,
         iconColor: accentColors[9],
         label: "Currency",
-        value: Align(
+        trailing: Align(
           alignment: Alignment.centerRight,
           child: Text(
             _currentCurrencies!.description,

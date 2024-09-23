@@ -4,16 +4,28 @@ import 'package:my_expense/_index.g.dart';
 
 class UserButton extends StatelessWidget {
   final IconData icon;
+  final double iconSize;
   final Color iconColor;
   final String label;
-  final Widget value;
+  final Widget? trailing;
+  final bool showArrow;
+  final Color arrowColor;
   final VoidCallback callback;
 
-  const UserButton({super.key, required this.icon, required this.iconColor, required this.label, required this.value, required this.callback});
+  const UserButton({
+    super.key,
+    required this.icon,
+    this.iconSize = 20,
+    required this.iconColor,
+    required this.label,
+    this.trailing,
+    this.showArrow = true,
+    this.arrowColor = primaryLight,
+    required this.callback
+  });
 
   @override
   Widget build(BuildContext context) {
-    double sizedBoxMargin = (label.isNotEmpty ? 10 : 0);
     return Container(
       width: double.infinity,
       height: 50,
@@ -30,6 +42,7 @@ class UserButton extends StatelessWidget {
               Icon(
                 icon,
                 color: iconColor,
+                size: iconSize,
               ),
               const SizedBox(width: 10,),
               Text(
@@ -38,19 +51,19 @@ class UserButton extends StatelessWidget {
                   color: textColor2,
                 ),
               ),
-              SizedBox(width: sizedBoxMargin,),
+              (label.isNotEmpty ? const SizedBox(width: 10,) : const SizedBox.shrink()),
               Expanded(
-                child: Container(
-                  height: 50,
-                  width: double.infinity,
-                  color: Colors.transparent,
-                  child: value,
+                child: SizedBox(
+                  child: (trailing ?? const SizedBox.shrink()),
                 ),
               ),
               const SizedBox(width: 10,),
-              const Icon(
-                Ionicons.chevron_forward_outline,
-                color: primaryLight,
+              Visibility(
+                visible: showArrow,
+                child: Icon(
+                  Ionicons.chevron_forward_outline,
+                  color: arrowColor,
+                ),
               ),
             ],
           ),

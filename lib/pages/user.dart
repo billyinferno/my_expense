@@ -194,11 +194,13 @@ class _UserPageState extends State<UserPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
+                    const SizedBox(height: 10,),
+                    const LabelHeader("Default"),
                     UserButton(
                       icon: Ionicons.fast_food_outline,
                       iconColor: accentColors[2],
                       label: "Default Expense",
-                      value: Align(
+                      trailing: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
                           _selectedExpenseCategory!.name.toString(),
@@ -229,7 +231,7 @@ class _UserPageState extends State<UserPage> {
                       icon: Ionicons.cash_outline,
                       iconColor: accentColors[0],
                       label: "Default Income",
-                      value: Align(
+                      trailing: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
                           _selectedIncomeCategory!.name.toString(),
@@ -258,7 +260,7 @@ class _UserPageState extends State<UserPage> {
                       icon: Ionicons.list,
                       iconColor: accentColors[9],
                       label: "Default Budget Currency",
-                      value: Align(
+                      trailing: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
                           _selectedCurrency!.symbol.toString(),
@@ -315,7 +317,7 @@ class _UserPageState extends State<UserPage> {
                       icon: Ionicons.wallet,
                       iconColor: accentColors[5],
                       label: "Default Wallet",
-                      value: Align(
+                      trailing: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
                           _selectedWallet!.name.toString(),
@@ -363,11 +365,13 @@ class _UserPageState extends State<UserPage> {
                         );
                       }),
                     ),
+                    const SizedBox(height: 20,),
+                    const LabelHeader("Tags"),
                     UserButton(
                       icon: Ionicons.pricetag_outline,
                       iconColor: accentColors[4],
                       label: "",
-                      value: const Align(
+                      trailing: const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Refresh Transaction Tags",
@@ -384,11 +388,13 @@ class _UserPageState extends State<UserPage> {
                         });
                       }),
                     ),
+                    const SizedBox(height: 20,),
+                    const LabelHeader("Security"),
                     UserButton(
                       icon: Ionicons.lock_closed_outline,
                       iconColor: accentColors[1],
                       label: "",
-                      value: const Align(
+                      trailing: const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Change Password",
@@ -406,9 +412,11 @@ class _UserPageState extends State<UserPage> {
                       icon: Ionicons.keypad_outline,
                       iconColor: accentColors[3],
                       label: "Setup PIN",
-                      value: Align(
+                      trailing: Align(
                         alignment: Alignment.centerRight,
-                        child: MySwitch(enabled: _isPinEnabled,),
+                        child: MySwitch(
+                          enabled: _isPinEnabled,
+                        ),
                       ),
                       callback: (() {
                         if(_isPinEnabled) {
@@ -422,11 +430,13 @@ class _UserPageState extends State<UserPage> {
                         }
                       }),
                     ),
+                    const SizedBox(height: 20,),
+                    const LabelHeader("Information"),
                     UserButton(
                       icon: Ionicons.information,
                       iconColor: accentColors[7],
                       label: "Version",
-                      value: Align(
+                      trailing: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
                           Globals.appVersion,
@@ -443,7 +453,7 @@ class _UserPageState extends State<UserPage> {
                       icon: Ionicons.rocket,
                       iconColor: accentColors[9],
                       label: "Run As",
-                      value: Align(
+                      trailing: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
                           _runType,
@@ -460,7 +470,7 @@ class _UserPageState extends State<UserPage> {
                       icon: Ionicons.cog,
                       iconColor: accentColors[9],
                       label: "Flutter SDK",
-                      value: Align(
+                      trailing: Align(
                         alignment: Alignment.centerRight,
                         child: Text(
                           Globals.flutterVersion,
@@ -473,11 +483,13 @@ class _UserPageState extends State<UserPage> {
                         // do nothing
                       }),
                     ),
+                    const SizedBox(height: 20,),
+                    const LabelHeader("Action"),
                     UserButton(
                       icon: Ionicons.log_out_outline,
                       iconColor: accentColors[2],
                       label: "",
-                      value: const Align(
+                      trailing: const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
                           "Logout",
