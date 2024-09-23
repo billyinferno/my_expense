@@ -114,54 +114,63 @@ class _HomeWalletState extends State<HomeWallet> {
         // generate wallet filter that we will use to show the data
         _generateWalletFilter(wallets: wallets);
         
-        return (Container(
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              ScrollableTab(
-                controller: _accountTypeController,
-                data: _accountMap,
-                onTap: ((tab) {
-                  setState(() {
-                    _tabSelected = tab;
-                  });
-                }),
-              ),
-              const SizedBox(height: 10,),
-              WalletSummary(
-                type: _tabSelected,
-                data: (_walletsFilterSummary[_tabSelected] ?? {}),
-                currencies: _currencies
-              ),
-              const SizedBox(height: 10,),
-              Expanded(
-                child: RefreshIndicator(
-                  color: accentColors[6],
-                  onRefresh: () async {
-                    _getData = _refreshWallet(showDialog: true);
-                  },
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    controller: _scrollControllerWallet,
-                    itemCount: _walletsFilter[_tabSelected]!.length + 1,
-                    itemBuilder: (BuildContext ctx, int index) {
-                      if (index < _walletsFilter[_tabSelected]!.length) {
-                        return _generateSlidable(
-                          wallet: _walletsFilter[_tabSelected]![index]
-                        );
-                      } else {
-                        return const SizedBox(
-                          height: 30,
-                        );
-                      }
-                    },
+        return (Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              color: secondaryDark,
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  ScrollableTab(
+                    controller: _accountTypeController,
+                    data: _accountMap,
+                    borderColor: secondaryBackground,
+                    backgroundColor: secondaryDark,
+                    onTap: ((tab) {
+                      setState(() {
+                        _tabSelected = tab;
+                      });
+                    }),
                   ),
+                  const SizedBox(height: 10,),
+                  WalletSummary(
+                    type: _tabSelected,
+                    data: (_walletsFilterSummary[_tabSelected] ?? {}),
+                    currencies: _currencies
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10,),
+            Expanded(
+              child: RefreshIndicator(
+                color: accentColors[6],
+                onRefresh: () async {
+                  _getData = _refreshWallet(showDialog: true);
+                },
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  controller: _scrollControllerWallet,
+                  itemCount: _walletsFilter[_tabSelected]!.length + 1,
+                  itemBuilder: (BuildContext ctx, int index) {
+                    if (index < _walletsFilter[_tabSelected]!.length) {
+                      return _generateSlidable(
+                        wallet: _walletsFilter[_tabSelected]![index]
+                      );
+                    } else {
+                      return const SizedBox(
+                        height: 30,
+                      );
+                    }
+                  },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ));
       },
     );
@@ -262,7 +271,7 @@ class _HomeWalletState extends State<HomeWallet> {
 
   Widget _generateSlidable({required WalletModel wallet}) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+      margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
       child: Slidable(
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
