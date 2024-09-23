@@ -2,30 +2,29 @@ import 'package:flutter/material.dart';
 
 class SlideButton extends StatelessWidget {
   final IconData icon;
-  final double? iconSize;
+  final double iconSize;
   final Color iconColor;
   final String? text;
   final Color? textColor;
   final double? textSize;
-  final Color? bgColor;
+  final Color bgColor;
   final BoxBorder? border;
   final Function? onTap;
   const SlideButton({
     super.key,
     required this.icon,
-    this.iconSize,
+    this.iconSize = 20,
     required this.iconColor,
     this.text,
     this.textColor,
     this.textSize,
-    this.bgColor,
+    this.bgColor = Colors.transparent,
     this.border,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    
     return Expanded(
       child: InkWell(
         onTap: () {
@@ -35,7 +34,7 @@ class SlideButton extends StatelessWidget {
         },
         child: Container(
           decoration: BoxDecoration(
-            color: (bgColor ?? Colors.transparent),
+            color: bgColor,
             border: border,
           ),
           child: Column(
@@ -44,7 +43,7 @@ class SlideButton extends StatelessWidget {
             children: <Widget>[
               Icon(
                 icon,
-                size: (iconSize ?? 20),
+                size: iconSize,
                 color: iconColor,
               ),
               (
