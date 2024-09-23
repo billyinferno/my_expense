@@ -36,8 +36,6 @@ class _TypeSlideState extends State<TypeSlide> {
 
   @override
   void initState() {
-    super.initState();
-
     // ensure items is not empty
     assert(widget.items.isNotEmpty);
 
@@ -52,6 +50,8 @@ class _TypeSlideState extends State<TypeSlide> {
 
     // call to get the positioned and color
     _getPositionedAndColor();
+    
+    super.initState();
   }
 
   @override

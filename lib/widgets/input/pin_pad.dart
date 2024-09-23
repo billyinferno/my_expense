@@ -10,7 +10,14 @@ class PinPad extends StatefulWidget {
   final VoidCallback? onSuccess;
   final Function(String)? getPin;
 
-  const PinPad({ super.key, required this.hashKey, required this.hashPin, this.onError, this.onSuccess, this.getPin });
+  const PinPad({
+    super.key,
+    required this.hashKey,
+    required this.hashPin,
+    this.onError,
+    this.onSuccess,
+    this.getPin,
+  });
 
   @override
   PinPadState createState() => PinPadState();
@@ -23,8 +30,6 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
 
   @override
   void initState() {
-    super.initState();
-
     _wrongInputAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -40,8 +45,12 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
 
     _wiggleAnimation = Tween<double>(begin: 0.0, end: 24.0).animate(
       CurvedAnimation(
-        parent: _wrongInputAnimationController, curve: Curves.elasticIn),
+        parent: _wrongInputAnimationController,
+        curve: Curves.elasticIn
+      ),
     );
+
+    super.initState();
   }
 
   @override
@@ -104,7 +113,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("1");
+                        _setCurrentText("1");
                       }),
                     ),
                      _button(
@@ -119,7 +128,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("2");
+                        _setCurrentText("2");
                       }),
                     ),
                      _button(
@@ -134,7 +143,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("3");
+                        _setCurrentText("3");
                       }),
                     ),
                   ],
@@ -153,7 +162,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("4");
+                        _setCurrentText("4");
                       }),
                     ),
                      _button(
@@ -168,7 +177,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("5");
+                        _setCurrentText("5");
                       }),
                     ),
                      _button(
@@ -183,7 +192,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("6");
+                        _setCurrentText("6");
                       }),
                     ),
                   ],
@@ -202,7 +211,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("7");
+                        _setCurrentText("7");
                       }),
                     ),
                      _button(
@@ -217,7 +226,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("8");
+                        _setCurrentText("8");
                       }),
                     ),
                      _button(
@@ -232,7 +241,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("9");
+                        _setCurrentText("9");
                       }),
                     ),
                   ],
@@ -263,7 +272,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        setCurrentText("2");
+                        _setCurrentText("2");
                       }),
                     ),
                      _button(
@@ -276,7 +285,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
                         ),
                       ),
                       onPress: (() {
-                        deleteCurrentText();
+                        _deleteCurrentText();
                       }),
                     ),
                   ],
@@ -289,11 +298,11 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
     );
   }
 
-  void notifyWrongInput() {
+  void _notifyWrongInput() {
     _wrongInputAnimationController.forward();
   }
 
-  void setCurrentText(String text) {
+  void _setCurrentText(String text) {
     if(_pinInput.length < 6) {
       setState(() {
         _pinInput = _pinInput + text;
@@ -313,7 +322,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
       if(!_verifyPIN()) {
         // wrong PIN, reset the _pinInput into ""
         // and showed the animation
-        notifyWrongInput();
+        _notifyWrongInput();
         _pinInput = "";
 
         // if we got call for onError
@@ -331,7 +340,7 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
     }
   }
 
-  void deleteCurrentText() {
+  void _deleteCurrentText() {
     if(_pinInput.isNotEmpty) {
       setState(() {
         _pinInput = _pinInput.substring(0, _pinInput.length - 1);
@@ -350,13 +359,15 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
     return false;
   }
 
-  Widget _button({required Widget value, Color? color, double? height, int? flex, VoidCallback? onPress}) {
-    Color currentColor = (color ?? Colors.transparent);
-    double currentHeight = (height ?? 30);
-    int flexNum = (flex ?? 1);
-
+  Widget _button({
+    required Widget value,
+    Color color = Colors.transparent,
+    double height = 30,
+    int flex = 1,
+    VoidCallback? onPress
+  }) {
     return Expanded(
-      flex: flexNum,
+      flex: flex,
       child: GestureDetector(
         onTap: (() {
           if(onPress != null) {
@@ -364,8 +375,8 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
           }
         }),
         child: Container(
-          height: currentHeight,
-          color: currentColor,
+          height: height,
+          color: color,
           child: value,
         ),
       ),

@@ -19,8 +19,8 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
 
   @override
   void initState() {
-    super.initState();
     _paramsData = widget.params as TransactionListModel;
+    super.initState();
   }
 
   @override

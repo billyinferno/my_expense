@@ -24,7 +24,6 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
 
   @override
   void initState() {
-    super.initState();
     _stats = widget.args as StatsDetailArgs;
 
     // get the total page we will showed
@@ -36,6 +35,8 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
       _totalPage += 1;
     }
     _getMaxAmount();
+    
+    super.initState();
   }
 
   @override

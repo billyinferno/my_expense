@@ -20,8 +20,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    super.initState();
-
     // get the pin data
     _pin = PinSharedPreferences.getPin();
     if(_pin != null) {
@@ -42,6 +40,8 @@ class _HomePageState extends State<HomePage> {
     _pages.add(const HomeStats());
     _pages.add(const HomeBudget());
     _pages.add(const HomeWallet());
+    
+    super.initState();
   }
 
   Widget _showPinScreen() {
@@ -89,6 +89,7 @@ class _HomePageState extends State<HomePage> {
     // check whether we got pin enabled or not?
     // if got pin enabled then we will show the pin screen instead of home screen
     if (_isPinEnabled) {
+      Log.info(message: '🔒 Show PIN screen');
       return _showPinScreen();
     }
     

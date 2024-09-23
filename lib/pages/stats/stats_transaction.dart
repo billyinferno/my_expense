@@ -21,7 +21,6 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
 
   @override
   void initState() {
-    super.initState();
     _args = widget.args as StatsTransactionArgs;
 
     // initialize all default value
@@ -29,6 +28,8 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
 
     // now try to fetch the transaction data
     _getData = _fetchStatsDetail();
+    
+    super.initState();
   }
 
   @override

@@ -39,8 +39,6 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
   @override
   void initState() {
-    super.initState();
-
     // init the wallet
     _wallet = widget.wallet as WalletModel;
 
@@ -49,6 +47,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
     // set the scroll controller
     _scrollController = ScrollController();
+    
+    super.initState();
   }
 
   @override
