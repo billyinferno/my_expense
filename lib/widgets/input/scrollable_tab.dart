@@ -54,19 +54,22 @@ class _ScrollableTabState extends State<ScrollableTab> {
           GestureDetector(
             onDoubleTap: (() {
               // when double tab return to the first key
-              setState(() {
-                _tabSelected = widget.data.keys.first;
-                widget.onTap(_tabSelected);
+              if (_tabSelected != widget.data.keys.first) {
+                setState(() {
+                  _tabSelected = widget.data.keys.first;
+                  widget.onTap(_tabSelected);
+                });
+              }
 
-                // check if controller is not null
-                if (widget.controller != null) {
-                  widget.controller!.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.fastOutSlowIn
-                  );
-                }
-              });
+              // check if controller is not null
+              if (widget.controller != null) {
+                // if not null then move the single child scroll view back to 0
+                widget.controller!.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.fastOutSlowIn
+                );
+              }
             }),
             child: Container(
               height: 38,
