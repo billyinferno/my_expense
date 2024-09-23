@@ -6,11 +6,15 @@ class ScrollableTab extends StatefulWidget {
   final ScrollController? controller;
   final Map<String, String> data;
   final Function(String) onTap;
+  final Color backgroundColor;
+  final Color borderColor;
   const ScrollableTab({
     super.key,
     this.controller,
     required this.data,
     required this.onTap,
+    this.backgroundColor = primaryBackground,
+    this.borderColor = primaryLight,
   });
 
   @override
@@ -25,7 +29,6 @@ class _ScrollableTabState extends State<ScrollableTab> {
     if (widget.data.isNotEmpty) {
       // set the tab selected as the first data
       _tabSelected = widget.data.keys.first;
-      Log.info(message: _tabSelected);
     }
 
     super.initState();
@@ -35,10 +38,10 @@ class _ScrollableTabState extends State<ScrollableTab> {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border( 
           right: BorderSide(
-            color: primaryLight,
+            color: widget.borderColor,
             width: 1.0,
             style: BorderStyle.solid,
           )
@@ -48,23 +51,32 @@ class _ScrollableTabState extends State<ScrollableTab> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          Container(
-            height: 38,
-            padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
-            decoration: const BoxDecoration(
-              color: primaryBackground,
-              border: Border(
-                right: BorderSide(
-                  color: primaryLight,
-                  width: 1.0,
-                  style: BorderStyle.solid,
-                )
+          GestureDetector(
+            onDoubleTap: (() {
+              // when double tab return to the first key
+              setState(() {
+                _tabSelected = widget.data.keys.first;
+                widget.onTap(_tabSelected);
+              });
+            }),
+            child: Container(
+              height: 38,
+              padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
+              decoration: BoxDecoration(
+                color: widget.backgroundColor,
+                border: Border(
+                  right: BorderSide(
+                    color: widget.borderColor,
+                    width: 1.0,
+                    style: BorderStyle.solid,
+                  )
+                ),
               ),
-            ),
-            child: const Icon(
-              Ionicons.wallet,
-              color: primaryLight,
-              size: 15,
+              child: Icon(
+                Ionicons.wallet,
+                color: widget.borderColor,
+                size: 15,
+              ),
             ),
           ),
           Expanded(
@@ -103,7 +115,7 @@ class _ScrollableTabState extends State<ScrollableTab> {
             decoration: BoxDecoration(
               color: (_tabSelected == key ? IconList.getDarkColor(key.toLowerCase()) : Colors.transparent),
               border: Border.all(
-                color: primaryLight,
+                color: widget.borderColor,
                 width: 1.0,
                 style: BorderStyle.solid,
               ),
