@@ -1454,197 +1454,193 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        CupertinoSearchTextField(
-          controller: _searchController,
-          style:
-              const TextStyle(color: textColor2, fontFamily: '--apple-system'),
-          suffixIcon: const Icon(Ionicons.arrow_forward_circle),
-          onSubmitted: ((_) async {
-            await _submitSearch().then((_) {
-              if (mounted) {
-                // remove the focus from the text
-                FocusScopeNode currentFocus = FocusScope.of(context);
-                if (!currentFocus.hasPrimaryFocus) {
-                  currentFocus.unfocus();
-                }
-              }
-            });
-          }),
-          onSuffixTap: (() async {
-            await _submitSearch().then((_) {
-              if (mounted) {
-                // remove the focus from the text
-                FocusScopeNode currentFocusSuffix = FocusScope.of(context);
-                if (!currentFocusSuffix.hasPrimaryFocus) {
-                  currentFocusSuffix.unfocus();
-                }
-              }
-            });
-          }),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: CupertinoSearchTextField(
+                controller: _searchController,
+                style:
+                    const TextStyle(color: textColor2, fontFamily: '--apple-system'),
+                suffixIcon: const Icon(Ionicons.arrow_forward_circle),
+                onSubmitted: ((_) async {
+                  await _submitSearch().then((_) {
+                    if (mounted) {
+                      // remove the focus from the text
+                      FocusScopeNode currentFocus = FocusScope.of(context);
+                      if (!currentFocus.hasPrimaryFocus) {
+                        currentFocus.unfocus();
+                      }
+                    }
+                  });
+                }),
+                onSuffixTap: (() async {
+                  await _submitSearch().then((_) {
+                    if (mounted) {
+                      // remove the focus from the text
+                      FocusScopeNode currentFocusSuffix = FocusScope.of(context);
+                      if (!currentFocusSuffix.hasPrimaryFocus) {
+                        currentFocusSuffix.unfocus();
+                      }
+                    }
+                  });
+                }),
+              ),
+            ),
+            const SizedBox(width: 5,),
+            GestureDetector(
+              onTap: (() async {
+                await _submitSearch();
+              }),
+              child: Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: primaryDark,
+                  borderRadius: BorderRadius.circular(34),
+                  border: Border.all(
+                    color: secondaryBackground,
+                    width: 1.0,
+                    style: BorderStyle.solid,
+                  )
+                ),
+                child: const Icon(
+                  Ionicons.search,
+                  size: 20,
+                  color: textColor,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(
           height: 10,
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: InkWell(
-                    onTap: (() {
-                      _showCategorySelectionDialog();
-                    }),
-                    child: Container(
-                      height: 30,
-                      decoration: BoxDecoration(
-                          color: primaryDark,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            bottomLeft: Radius.circular(10),
-                          ),
-                          border: Border.all(
-                            color: secondaryBackground,
-                            style: BorderStyle.solid,
-                            width: 1.0,
-                          )),
-                      child: const Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Icon(
-                            Ionicons.add,
-                            size: 20,
-                            color: textColor,
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: Center(
-                                child: Text(
-                              "Add",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            )),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: InkWell(
-                    onTap: (() {
-                      setState(() {
-                        // clear the category
-                        _categorySelected.clear();
-
-                        // clear also the filter
-                        _selectedWalletList.clear();
-
-                        // then filter the transaction and group it again
-                        _filterTheTransaction();
-                        _groupTransactions();
-                      });
-                    }),
-                    child: Container(
-                      height: 30,
-                      decoration: BoxDecoration(
-                          color: primaryDark,
-                          border: Border.all(
-                            color: secondaryBackground,
-                            style: BorderStyle.solid,
-                            width: 1.0,
-                          )),
-                      child: const Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Icon(
-                            Ionicons.trash,
-                            size: 20,
-                            color: textColor,
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: Center(
-                                child: Text(
-                              "Clear",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            )),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: InkWell(
-                    onTap: (() async {
-                      await _submitSearch();
-                    }),
-                    child: Container(
-                      height: 30,
-                      decoration: BoxDecoration(
-                          color: primaryDark,
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(10),
-                            bottomRight: Radius.circular(10),
-                          ),
-                          border: Border.all(
-                            color: secondaryBackground,
-                            style: BorderStyle.solid,
-                            width: 1.0,
-                          )),
-                      child: const Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Icon(
-                            Ionicons.search,
-                            size: 20,
-                            color: textColor,
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                            child: Center(
-                                child: Text(
-                              "Search",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            )),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          children: <Widget>[
+            const LabelHeader(
+              "Category",
+              size: 15,
             ),
-            const SizedBox(
-              height: 10,
+            const SizedBox(width: 10,),
+            Expanded(
+              child: InkWell(
+                onTap: (() {
+                  _showCategorySelectionDialog();
+                }),
+                child: Container(
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: primaryDark,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      bottomLeft: Radius.circular(10),
+                    ),
+                    border: Border.all(
+                      color: secondaryBackground,
+                      style: BorderStyle.solid,
+                      width: 1.0,
+                    )
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Icon(
+                        Ionicons.add,
+                        size: 20,
+                        color: textColor,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Center(
+                            child: Text(
+                          "Add",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        )),
+                      )
+                    ],
+                  ),
+                ),
+              ),
             ),
-            Wrap(
+            Expanded(
+              child: InkWell(
+                onTap: (() {
+                  setState(() {
+                    // clear the category
+                    _categorySelected.clear();
+
+                    // clear also the filter
+                    _selectedWalletList.clear();
+
+                    // then filter the transaction and group it again
+                    _filterTheTransaction();
+                    _groupTransactions();
+                  });
+                }),
+                child: Container(
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: primaryDark,
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
+                    border: Border.all(
+                      color: secondaryBackground,
+                      style: BorderStyle.solid,
+                      width: 1.0,
+                    )
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Icon(
+                        Ionicons.trash,
+                        size: 20,
+                        color: textColor,
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Center(
+                            child: Text(
+                          "Clear",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        )),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 5,),
+        Visibility(
+          visible: _categorySelected.isNotEmpty,
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
+            child: Wrap(
               spacing: 5,
               runSpacing: 5,
               children: _generateChipCategory(),
             ),
-          ],
+          ),
         ),
       ],
     );
