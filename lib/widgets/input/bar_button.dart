@@ -6,16 +6,24 @@ class BarButton extends StatelessWidget {
   final int currentIndex;
   final IconData icon;
   final Color? activeColor;
-  final Color? inactiveColor;
+  final Color inactiveColor;
   final String text;
   final VoidCallback onTap;
 
-  const BarButton({super.key, required this.index, required this.currentIndex, required this.icon, this.activeColor, this.inactiveColor, required this.text, required this.onTap});
+  const BarButton({
+    super.key,
+    required this.index,
+    required this.currentIndex,
+    required this.icon,
+    this.activeColor,
+    this.inactiveColor = Colors.white,
+    required this.text,
+    required this.onTap
+  });
 
   @override
   Widget build(BuildContext context) {
     Color currActiveColor = (activeColor ?? accentColors[1]);
-    Color currInactiveColor = (inactiveColor ?? Colors.white);
 
     return Expanded(
       child: GestureDetector(
@@ -31,7 +39,7 @@ class BarButton extends StatelessWidget {
               Icon(
                 icon,
                 size: 20,
-                color: (currentIndex == index ? currActiveColor : currInactiveColor),
+                color: (currentIndex == index ? currActiveColor : inactiveColor),
               ),
               const SizedBox(height: 4),
               Padding(
@@ -40,7 +48,7 @@ class BarButton extends StatelessWidget {
                   text,
                   maxLines: 1,
                   style: TextStyle(
-                    color: (currentIndex == index ? currActiveColor : currInactiveColor),
+                    color: (currentIndex == index ? currActiveColor : inactiveColor),
                     fontSize: 10,
                   ),
                 ),
