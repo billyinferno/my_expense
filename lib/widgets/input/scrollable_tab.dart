@@ -57,6 +57,15 @@ class _ScrollableTabState extends State<ScrollableTab> {
               setState(() {
                 _tabSelected = widget.data.keys.first;
                 widget.onTap(_tabSelected);
+
+                // check if controller is not null
+                if (widget.controller != null) {
+                  widget.controller!.animateTo(
+                    0,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.fastOutSlowIn
+                  );
+                }
               });
             }),
             child: Container(
