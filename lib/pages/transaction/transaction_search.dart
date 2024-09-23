@@ -137,7 +137,17 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   Widget _getResultPage() {
     // check if we got transactions or not?
     if (_transactions.isEmpty) {
-      return const SizedBox.shrink();
+      return Expanded(
+        child: Center(
+          child: Text(
+            "Enter search text, or add category\nthen press enter or tap search icon\nto search.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: textColor.withValues(alpha: 0.3),
+            ),
+          ),
+        ),
+      );
     }
 
     // if got transaction we will result the transaction
@@ -1497,10 +1507,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                 width: 34,
                 height: 34,
                 decoration: BoxDecoration(
-                  color: primaryDark,
+                  color: accentColors[6],
                   borderRadius: BorderRadius.circular(34),
                   border: Border.all(
-                    color: secondaryBackground,
+                    color: darkAccentColors[6],
                     width: 1.0,
                     style: BorderStyle.solid,
                   )
