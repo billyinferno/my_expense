@@ -496,6 +496,7 @@ class _TransactionInputState extends State<TransactionInput> {
                         const Expanded(child: Text("Cleared")),
                         CupertinoSwitch(
                           value: _currentClear,
+                          activeTrackColor: accentColors[0],
                           onChanged: (value) {
                             setState(() {
                               _currentClear = value;

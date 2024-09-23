@@ -291,6 +291,7 @@ class _HomeStatsState extends State<HomeStats> {
                                   scale: 0.7,
                                   child: CupertinoSwitch(
                                     value: _clampToBudget,
+                                    activeTrackColor: accentColors[0],
                                     onChanged: (value) {
                                       setState(() {
                                         _clampToBudget = value;

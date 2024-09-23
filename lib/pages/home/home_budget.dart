@@ -295,6 +295,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                                 scale: 0.6,
                                 child: CupertinoSwitch(
                                   value: _showNotInBudget,
+                                  activeTrackColor: accentColors[0],
                                   onChanged: (value) {
                                     setState(() {
                                       _showNotInBudget = value;
