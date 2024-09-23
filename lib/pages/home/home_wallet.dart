@@ -21,12 +21,17 @@ class _HomeWalletState extends State<HomeWallet> {
   late Future<bool> _getData;
   final Map<String, String> _accountMap = {};
   final Map<String, List<WalletModel>> _walletsFilter = {};
+  final Map<String, Map<String, double>> _walletsFilterSummary = {};
+  late Map<String, CurrencyModel> _currencies;
   late String _tabSelected;
 
   @override
   void initState() {
     // default the tab selected to 'all'
     _tabSelected = 'all';
+
+    // get the currencies map that will be needed for the wallet summary here
+    _currencies = WalletSharedPreferences.getMapWalletCurrency();
 
     // get wallet
     _getData = _refreshWallet();
@@ -103,6 +108,9 @@ class _HomeWalletState extends State<HomeWallet> {
       builder: (context, homeProvider, child) {
         wallets = homeProvider.walletList;
 
+        // generate the account map
+        _generateAccountMap(wallets: wallets);
+
         // generate wallet filter that we will use to show the data
         _generateWalletFilter(wallets: wallets);
         
@@ -120,6 +128,12 @@ class _HomeWalletState extends State<HomeWallet> {
                     _tabSelected = tab;
                   });
                 }),
+              ),
+              const SizedBox(height: 10,),
+              WalletSummary(
+                type: _tabSelected,
+                data: (_walletsFilterSummary[_tabSelected] ?? {}),
+                currencies: _currencies
               ),
               const SizedBox(height: 10,),
               Expanded(
@@ -223,9 +237,6 @@ class _HomeWalletState extends State<HomeWallet> {
       ),
     ]).then((_) {
       futureWallets.then((wallets) {
-        // generate the account map
-        _generateAccountMap(wallets: wallets);
-
         if (wallets.isNotEmpty && mounted) {
           Provider.of<HomeProvider>(
             context,
@@ -465,6 +476,8 @@ class _HomeWalletState extends State<HomeWallet> {
   }
 
   void _generateWalletFilter({required List<WalletModel> wallets}) {
+    double currentValue = 0;
+
     // clear the _walletsFilter
     _walletsFilter.clear();
 
@@ -483,6 +496,48 @@ class _HomeWalletState extends State<HomeWallet> {
       _walletsFilter[wallet.walletType.type]!.add(wallet);
       // add also the wallet to all
       _walletsFilter['all']!.add(wallet);
+    }
+
+    // once we got the wallets filter, now we can generate the wallet filter
+    // summary.
+
+    // first clear the wallets filter summary.
+    _walletsFilterSummary.clear();
+
+    // loop thru all the data in the wallets filter
+    _walletsFilter.forEach((key, wallets) {
+      // add this key to the wallets filter summary
+      _walletsFilterSummary[key] = {};
+
+      // loop thru wallets, and calculate the summary
+      for(WalletModel wallet in wallets) {
+        // check if wallet is enabled or not?
+        if (wallet.enabled) {
+          // default current value to 0
+          currentValue = 0;
+
+          // check if this currency already in the wallets filter summary or not?
+          if (_walletsFilterSummary[key]!.containsKey(wallet.currency.name)) {
+            // already got data, it means that we need to get the current value
+            // of this data before we calculate
+            currentValue = _walletsFilterSummary[key]![wallet.currency.name]!;
+          }
+
+          // now add the current amount to the wallets filter summary
+          _walletsFilterSummary[key]![wallet.currency.name] = 
+            wallet.startBalance +
+            wallet.changeBalance +
+            wallet.futureAmount +
+            currentValue;
+        }
+      }
+    },);
+
+    // check if tab selected is still exists, if not then we revert back
+    // tab selected to all, this is can happen when user delete the wallet
+    // and that wallet type doesn't have wallet anymore
+    if (!_walletsFilter.containsKey(_tabSelected)) {
+      _tabSelected = 'all';
     }
   }
 }

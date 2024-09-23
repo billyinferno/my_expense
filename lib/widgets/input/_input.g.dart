@@ -6,4 +6,5 @@ export './switch.dart';
 export './transaction_input.dart';
 export './type_slide.dart';
 export './user_button.dart';
+export './wallet_summary.dart';
 export './wallet.dart';
