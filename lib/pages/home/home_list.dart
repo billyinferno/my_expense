@@ -39,7 +39,6 @@ class _HomeListState extends State<HomeList> {
   late Future<List<WalletModel>> _futureWallets;
   final ScrollController _scrollController = ScrollController();
 
-  List<TransactionListModel> _transactionData = [];
   List<BudgetModel> _budgets = [];
   late UsersMeModel _userMe;
   late Future<bool> _getData;
@@ -111,164 +110,169 @@ class _HomeListState extends State<HomeList> {
           Navigator.pushNamed(context, "/transaction/search");
         },
       ),
-      body: Column(
-        children: [
-          GestureDetector(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: primaryDark,
-              ),
-              child: TableCalendar(
-                focusedDay: _currentFocusedDay,
-                firstDay: _firstDay,
-                lastDay: _lastDay,
-                calendarFormat: _currentCalendarFormat,
-                onPageChanged: (focusedDay) {
-                  _setFocusedDay(focusedDay);
-                  _getData = _refreshTransaction(
-                    refreshDay: focusedDay,
-                    showLoading: true,
-                  );
-                },
-                selectedDayPredicate: (day) {
-                  return day.isSameDate(date: _currentFocusedDay);
-                },
-                onDaySelected: (selectedDay, focusedDay) {
-                  if (!(selectedDay.isSameDate(date: _currentFocusedDay))) {
-                    _setFocusedDay(selectedDay);
+      body: Consumer<HomeProvider>(builder: (context, homeProvider, child) {
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            GestureDetector(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: primaryDark,
+                ),
+                child: TableCalendar(
+                  focusedDay: _currentFocusedDay,
+                  firstDay: _firstDay,
+                  lastDay: _lastDay,
+                  calendarFormat: _currentCalendarFormat,
+                  onPageChanged: (focusedDay) {
+                    _setFocusedDay(focusedDay);
                     _getData = _refreshTransaction(
-                      refreshDay: selectedDay,
+                      refreshDay: focusedDay,
                       showLoading: true,
                     );
-                  }
-                },
-                headerVisible: false,
-                calendarBuilders: CalendarBuilders(
-                  todayBuilder: (context, day, focusedDay) {
-                    return Container(
-                      color: Colors.transparent,
-                      alignment: Alignment.center,
-                      child: Text(
-                        Globals.dfd.formatLocal(day),
-                        style: TextStyle(
-                          color: accentColors[1],
-                        ),
-                      ),
-                    );
                   },
-                ),
-                calendarStyle: CalendarStyle(
-                  weekendTextStyle: TextStyle(color: accentColors[2]),
+                  selectedDayPredicate: (day) {
+                    return day.isSameDate(date: _currentFocusedDay);
+                  },
+                  onDaySelected: (selectedDay, focusedDay) {
+                    if (!(selectedDay.isSameDate(date: _currentFocusedDay))) {
+                      _setFocusedDay(selectedDay);
+                      _getData = _refreshTransaction(
+                        refreshDay: selectedDay,
+                        showLoading: true,
+                      );
+                    }
+                  },
+                  headerVisible: false,
+                  calendarBuilders: CalendarBuilders(
+                    todayBuilder: (context, day, focusedDay) {
+                      return Container(
+                        color: Colors.transparent,
+                        alignment: Alignment.center,
+                        child: Text(
+                          Globals.dfd.formatLocal(day),
+                          style: TextStyle(
+                            color: accentColors[1],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  calendarStyle: CalendarStyle(
+                    weekendTextStyle: TextStyle(color: accentColors[2]),
+                  ),
                 ),
               ),
             ),
-          ),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                if (_currentCalendarFormat == CalendarFormat.week) {
-                  _currentCalendarFormat = CalendarFormat.month;
-                  _currentCalendarIcon =
-                      const Icon(Ionicons.caret_up, size: 10);
-                } else {
-                  _currentCalendarFormat = CalendarFormat.week;
-                  _currentCalendarIcon =
-                      const Icon(Ionicons.caret_down, size: 10);
-                }
-              });
-            },
-            child: Container(
+            InkWell(
+              splashColor: secondaryDark,
+              onTap: () {
+                setState(() {
+                  if (_currentCalendarFormat == CalendarFormat.week) {
+                    _currentCalendarFormat = CalendarFormat.month;
+                    _currentCalendarIcon = const Icon(
+                      Ionicons.caret_up,
+                      size: 10
+                    );
+                  } else {
+                    _currentCalendarFormat = CalendarFormat.week;
+                    _currentCalendarIcon = const Icon(
+                      Ionicons.caret_down,
+                      size: 10
+                    );
+                  }
+                });
+              },
+              child: Ink(
+                width: double.infinity,
+                height: 15,
+                decoration: const BoxDecoration(
+                  color: secondaryDark,
+                ),
+                child: Center(
+                  child: _currentCalendarIcon,
+                ),
+              ),
+            ),
+            Container(
+              height: 36,
               width: double.infinity,
-              height: 15,
               decoration: const BoxDecoration(
-                color: secondaryDark,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _currentCalendarIcon,
-                ],
-              ),
-            ),
-          ),
-          Container(
-            height: 36,
-            width: double.infinity,
-            decoration: const BoxDecoration(
-                border: Border(
-              bottom: BorderSide(width: 1.0, color: primaryLight),
-            )),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    (_currentFocusedDay.isSameDate(date: DateTime.now())
-                      ? "Today"
-                      : Globals.dfddMMMMyyyy.formatLocal(_currentFocusedDay)
+                  border: Border(
+                bottom: BorderSide(width: 1.0, color: primaryLight),
+              )),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      (_currentFocusedDay.isSameDate(date: DateTime.now())
+                        ? "Today"
+                        : Globals.dfddMMMMyyyy.formatLocal(_currentFocusedDay)
+                      ),
+                      style: const TextStyle(
+                        fontSize: 12,
+                      ),
                     ),
-                    style: const TextStyle(
-                      fontSize: 12,
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      color: Colors.transparent,
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Consumer<HomeProvider>(
-                            builder: (context, homeProvider, child) {
-                          return _getTotalIncomeExpense(
+                    Expanded(
+                      child: Container(
+                        color: Colors.transparent,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: _getTotalIncomeExpense(
                             transactionData: homeProvider.transactionList
-                          );
-                        }),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: FutureBuilder(
-              future: _getData,
-              builder: ((context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Center(
-                    child: Text("Error when get transaction list"),
-                  );
-                } else if (snapshot.hasData) {
-                  return _generateView();
-                } else {
-                  // show loading
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SpinKitFadingCube(
-                        color: accentColors[6],
-                        size: 25,
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      const Text(
-                        "loading...",
-                        style: TextStyle(
-                          color: textColor2,
-                          fontSize: 10,
+                          ),
                         ),
                       ),
-                    ],
-                  );
-                }
-              }),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
-      ),
+            Expanded(
+              child: FutureBuilder(
+                future: _getData,
+                builder: ((context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text("Error when get transaction list"),
+                    );
+                  } else if (snapshot.hasData) {
+                    return _generateView(
+                      transactions: homeProvider.transactionList
+                    );
+                  } else {
+                    // show loading
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SpinKitFadingCube(
+                          color: accentColors[6],
+                          size: 25,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Text(
+                          "loading...",
+                          style: TextStyle(
+                            color: textColor2,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                }),
+              ),
+            ),
+          ],
+        );
+      },),
     );
   }
 
@@ -315,63 +319,60 @@ class _HomeListState extends State<HomeList> {
     });
   }
 
-  Widget _generateView() {
-    return Consumer<HomeProvider>(
-      builder: (context, homeProvider, child) {
-        _transactionData = homeProvider.transactionList;
-        return GestureDetector(
-          onHorizontalDragEnd: ((DragEndDetails details) {
-            double velocity = (details.primaryVelocity ?? 0);
-            if (velocity != 0) {
-              if (velocity > 0) {
-                // go to the previous day
-                _setFocusedDay(_currentFocusedDay.subtract(
-                  const Duration(days: 1))
+  Widget _generateView({required List<TransactionListModel> transactions}) {
+    return GestureDetector(
+      onHorizontalDragEnd: ((DragEndDetails details) {
+        double velocity = (details.primaryVelocity ?? 0);
+        if (velocity != 0) {
+          if (velocity > 0) {
+            // go to the previous day
+            _setFocusedDay(_currentFocusedDay.subtract(
+              const Duration(days: 1))
+            );
+            _getData = _refreshTransaction(
+              refreshDay: _currentFocusedDay,
+              showLoading: true
+            );
+          } else if (velocity < 0) {
+            // go to the next day
+            _setFocusedDay(_currentFocusedDay.add(const Duration(days: 1)));
+            _getData = _refreshTransaction(
+              refreshDay: _currentFocusedDay,
+              showLoading: true,
+            );
+          }
+        }
+      }),
+      child: (Container(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+        child: RefreshIndicator(
+          color: accentColors[6],
+          onRefresh: () async {
+            _getData = _refreshTransaction(
+              refreshDay: _currentFocusedDay,
+              force: true,
+              showLoading: true,
+            );
+          },
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            controller: _scrollController,
+            itemCount: transactions.length + 1,
+            itemBuilder: (BuildContext ctx, int index) {
+              if (index < transactions.length) {
+                TransactionListModel txn = transactions[index];
+                return _generateListItem(
+                  index: index,
+                  txn: txn,
+                  context: context
                 );
-                _getData = _refreshTransaction(
-                  refreshDay: _currentFocusedDay,
-                  showLoading: true
-                );
-              } else if (velocity < 0) {
-                // go to the next day
-                _setFocusedDay(_currentFocusedDay.add(const Duration(days: 1)));
-                _getData = _refreshTransaction(
-                  refreshDay: _currentFocusedDay,
-                  showLoading: true,
-                );
+              } else {
+                return const SizedBox(height: 30,);
               }
-            }
-          }),
-          child: (Container(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-            child: RefreshIndicator(
-              color: accentColors[6],
-              onRefresh: () async {
-                _getData = _refreshTransaction(
-                  refreshDay: _currentFocusedDay,
-                  force: true,
-                  showLoading: true,
-                );
-              },
-              child: ListView.builder(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                itemCount: _transactionData.length + 1,
-                itemBuilder: (BuildContext ctx, int index) {
-                  if (index < _transactionData.length) {
-                    TransactionListModel txn = _transactionData[index];
-                    return _generateListItem(index, txn, context);
-                  } else {
-                    return const SizedBox(
-                      height: 30,
-                    );
-                  }
-                },
-              ),
-            ),
-          )),
-        );
-      },
+            },
+          ),
+        ),
+      )),
     );
   }
 
@@ -386,8 +387,11 @@ class _HomeListState extends State<HomeList> {
     });
   }
 
-  Widget _generateListItem(
-      int index, TransactionListModel txn, BuildContext context) {
+  Widget _generateListItem({
+    required int index,
+    required TransactionListModel txn,
+    required BuildContext context
+  }) {
     return Slidable(
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
