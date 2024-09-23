@@ -30,31 +30,13 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     ),
   );
 
-  DateTime _minDate = DateTime(
-    DateTime.now().toLocal().year,
-    DateTime.now().toLocal().month,
-    1
-  );
-  
-  DateTime _maxDate = DateTime(
-    DateTime.now().toLocal().year,
-    DateTime.now().toLocal().month + 1,
-    1
-  ).subtract(const Duration(days: 1));
+  late DateTime _minDate;
+  late DateTime _maxDate;
+  late DateTime _currentFromDate;
+  late DateTime _currentToDate;
 
-  String _currentType = "month";
-  DateTime _currentFromDate = DateTime(
-    DateTime.now().toLocal().year,
-    DateTime.now().toLocal().month,
-    1
-  );
-  DateTime _currentToDate = DateTime(
-    DateTime.now().toLocal().year,
-    DateTime.now().toLocal().month + 1,
-    1
-  ).subtract(const Duration(days: 1));
-
-  bool _showCalendar = false;
+  late String _currentType;
+  late bool _showCalendar;
   late String _searchType;
 
   late List<CurrencyModel> _currencies;
@@ -69,10 +51,10 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   @override
   void initState() {
-    super.initState();
-
     // default the name into "Any"
     _searchType = "Any";
+    _currentType = "month";
+    _showCalendar = false;
 
     _userMe = UserSharedPreferences.getUserMe();
 
@@ -126,6 +108,9 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     _minDate = TransactionSharedPreferences.getTransactionMinDate();
     _maxDate = TransactionSharedPreferences.getTransactionMaxDate();
 
+    // set the minimum date as the 1 day of the minimum transaction date
+    _minDate = DateTime(_minDate.year, 1, 1);
+
     // compare the max date with the DateTime.Now(), which one is lesser?
     // if _maxDate is lesser, then change the _maxDate with current date
     if (_maxDate.isBefore(DateTime.now().toLocal())) {
@@ -134,10 +119,21 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         DateTime.now().toLocal().year + 1, 1, 1
       ).subtract(const Duration(days: 1));
     }
-    // set the minimum date as the 1 day of the minimum transaction date
-    _minDate = DateTime(_minDate.year, 1, 1);
+
+    _currentFromDate = DateTime(
+      DateTime.now().toLocal().year,
+      DateTime.now().toLocal().month,
+      1
+    );
+    _currentToDate = DateTime(
+      DateTime.now().toLocal().year,
+      DateTime.now().toLocal().month + 1,
+      1
+    ).subtract(const Duration(days: 1));
 
     _selectedDateTime = [];
+
+    super.initState();
   }
 
   @override
@@ -274,26 +270,29 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                         const SizedBox(
                           width: 10,
                         ),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _nameController,
-                            enabled: (_searchType.toLowerCase() == "any" ? false : true),
-                            enableSuggestions: false,
-                            keyboardType: TextInputType.name,
-                            textAlign: TextAlign.right,
-                            cursorColor: primaryLight,
-                            decoration: const InputDecoration(
-                              hintText: "Transaction name",
-                              hintStyle: TextStyle(
-                                color: primaryLight,
+                        Visibility(
+                          visible: (_searchType.toLowerCase() != 'any'),
+                          child: Expanded(
+                            child: TextFormField(
+                              controller: _nameController,
+                              enabled: (_searchType.toLowerCase() == "any" ? false : true),
+                              enableSuggestions: false,
+                              keyboardType: TextInputType.name,
+                              textAlign: TextAlign.right,
+                              cursorColor: primaryLight,
+                              decoration: const InputDecoration(
+                                hintText: "Transaction name",
+                                hintStyle: TextStyle(
+                                  color: primaryLight,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: EdgeInsets.zero,
+                                isCollapsed: true,
                               ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: EdgeInsets.zero,
-                              isCollapsed: true,
+                              textInputAction: TextInputAction.done,
                             ),
-                            textInputAction: TextInputAction.done,
                           ),
                         ),
                       ],
@@ -551,7 +550,10 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       children: <Widget>[
         Expanded(
           child: CalendarDatePicker2(
-            config: _calendarConfig,
+            config: _calendarConfig.copyWith(
+              firstDate: _minDate,
+              lastDate: _maxDate,
+            ),
             value: _selectedDateTime,
             onValueChanged: ((newDate) {
               if (newDate.length == 2) {
@@ -795,9 +797,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           currency: _currentCurrencies!,
           wallet: _currentWallet!,
           incomeExpenseCategory: _currentIncomeExpenseCategory,
-          name: (_nameController.text.isEmpty
-              ? '*'
-              : _nameController.text.trim()),
+          name: (_nameController.text.isEmpty ? '*' : _nameController.text.trim()),
           search: _searchType,
         );
 
