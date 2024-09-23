@@ -17,19 +17,16 @@ class _WalletAddPageState extends State<WalletAddPage> {
   double _currentAmountFontSize = 25;
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
+  
   late List<WalletTypeModel> _walletType = [];
   late List<CurrencyModel> _currencies = [];
   late UsersMeModel? _userMe;
-
-  int _currentWalletTypeID = -1;
-  String _currentWalletTypeName = "";
-  int _currentWalletCurrencyID = -1;
-  String _currentWalletCurrencyDescription = "";
-  String _currentWalletCurrencySymbol = "";
-  bool _currentUseForStats = true;
-  bool _currentEnabled = true;
-  double _currentLimit = -1;
-  double _currentStartBalance = 0;
+  late CurrencyModel _currentCurrency;
+  late WalletTypeModel _currentWalletType;
+  late bool _currentUseForStats;
+  late bool _currentEnabled;
+  late double _currentLimit;
+  late double _currentStartBalance;
 
   final ScrollController _scrollControllerWallet = ScrollController();
   final ScrollController _scrollControllerCurrencies = ScrollController();
@@ -42,6 +39,19 @@ class _WalletAddPageState extends State<WalletAddPage> {
     _walletType = WalletSharedPreferences.getWalletTypes();
     _currencies = WalletSharedPreferences.getWalletCurrency();
     _userMe = UserSharedPreferences.getUserMe();
+
+    // initialize the currency model
+    _currentCurrency = CurrencyModel(-1, "", "", "");
+
+    // initialize the wallet type model
+    _currentWalletType = WalletTypeModel(-1, "");
+
+    // initialize rest of the variable needed for wallet add
+    _currentUseForStats = true;
+    _currentEnabled = true;
+    _currentLimit = -1;
+    _currentStartBalance = 0;
+
     super.initState();
   }
 
@@ -52,6 +62,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
     _limitController.dispose();
     _scrollControllerWallet.dispose();
     _scrollControllerCurrencies.dispose();
+    
     super.dispose();
   }
 
@@ -143,13 +154,11 @@ class _WalletAddPageState extends State<WalletAddPage> {
                                   ),
                                   title: _walletType[index].type,
                                   isSelected: (
-                                    _currentWalletTypeID ==
-                                    _walletType[index].id
+                                    _currentWalletType.id == _walletType[index].id
                                   ),
                                   onTap: (() {
                                     setState(() {
-                                      _currentWalletTypeID = _walletType[index].id;
-                                      _currentWalletTypeName = _walletType[index].type;
+                                      _currentWalletType = _walletType[index];
                                     });
                                     Navigator.pop(context);
                                   }),
@@ -184,10 +193,10 @@ class _WalletAddPageState extends State<WalletAddPage> {
                         ),
                       ),
                       const SizedBox(height: 5,),
-                      Text(
-                        (_currentWalletTypeID < 0
-                            ? "Account type"
-                            : _currentWalletTypeName),
+                      Text((
+                        _currentWalletType.id < 0 ?
+                        "Account type" :
+                        _currentWalletType.type),
                         style: const TextStyle(
                           color: textColor2,
                         ),
@@ -364,7 +373,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                         ),
                         const SizedBox(width: 10,),
                         Text(
-                          (_currentWalletCurrencyID < 0 ? "Currency" : "$_currentWalletCurrencyDescription ($_currentWalletCurrencySymbol)")
+                          (_currentCurrency.id < 0 ? "Currency" : "${_currentCurrency.description} (${_currentCurrency.symbol})")
                         ),
                       ],
                     ),
@@ -384,12 +393,10 @@ class _WalletAddPageState extends State<WalletAddPage> {
                               return SimpleItem(
                                 color: accentColors[6],
                                 title: _currencies[index].description,
-                                isSelected: _currentWalletCurrencyID == _currencies[index].id,
+                                isSelected: _currentCurrency.id == _currencies[index].id,
                                 onTap: (() {
                                   setState(() {
-                                    _currentWalletCurrencyID = _currencies[index].id;
-                                    _currentWalletCurrencyDescription = _currencies[index].description;
-                                    _currentWalletCurrencySymbol = _currencies[index].symbol.toUpperCase();
+                                    _currentCurrency = _currencies[index];
                                   });
                                   Navigator.pop(context);
                                 }),
@@ -487,7 +494,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
   Widget _getCurrentWalletTypeIcon() {
     // check what is the current wallet type being selected
-    if (_currentWalletTypeID < 0) {
+    if (_currentWalletType.id < 0) {
       return Container(
         height: 50,
         width: 50,
@@ -506,9 +513,9 @@ class _WalletAddPageState extends State<WalletAddPage> {
         width: 50,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(50),
-          color: IconList.getColor(_currentWalletTypeName),
+          color: IconList.getColor(_currentWalletType.type),
         ),
-        child: IconList.getIcon(_currentWalletTypeName),
+        child: IconList.getIcon(_currentWalletType.type),
       );
     }
   }
@@ -520,7 +527,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
     // first check if walletTypeID is less than 0?
     // if so, user haven't select any walletType for this
-    if (_currentWalletTypeID < 0) {
+    if (_currentWalletType.id < 0) {
       throw Exception("Please select account type");
     }
 
@@ -530,7 +537,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
     }
 
     // check if user already selected any currency?
-    if (_currentWalletCurrencyID < 0) {
+    if (_currentCurrency.id < 0) {
       throw Exception("Please select account currency");
     }
 
@@ -547,18 +554,6 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
     // all is good, we can generate a wallet data here before passed it to the
     // wallet API for add the transaction
-    WalletTypeModel walletType = WalletTypeModel(
-      _currentWalletTypeID,
-      _currentWalletTypeName
-    );
-
-    CurrencyModel walletCurrency = CurrencyModel(
-      _currentWalletCurrencyID,
-      "",
-      _currentWalletCurrencyDescription,
-      _currentWalletCurrencySymbol
-    );
-
     UserPermissionModel userPermission = UserPermissionModel(
       _userMe!.id,
       _userMe!.username,
@@ -574,8 +569,8 @@ class _WalletAddPageState extends State<WalletAddPage> {
       _currentUseForStats,
       _currentEnabled,
       _currentLimit,
-      walletType,
-      walletCurrency,
+      _currentWalletType,
+      _currentCurrency,
       userPermission
     );
 
