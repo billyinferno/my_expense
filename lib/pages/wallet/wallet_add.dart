@@ -294,7 +294,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                           controller: _limitController,
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           decoration: InputDecoration(
-                            hintText: "Limit",
+                            hintText: "No Limit",
                             hintStyle: TextStyle(
                               color: textColor.withValues(alpha: 0.5),
                             ),
@@ -322,6 +322,23 @@ class _WalletAddPageState extends State<WalletAddPage> {
                               }
                             }
                           },
+                        ),
+                      ),
+                      const SizedBox(width: 10,),
+                      GestureDetector(
+                        onTap: (() {
+                          // remove limit
+                          _limitController.text = '';
+                        }),
+                        child: Container(
+                          width: 40,
+                          height: 30,
+                          color: Colors.transparent,
+                          child: Icon(
+                            Ionicons.close_circle,
+                            size: 20,
+                            color: accentColors[2].lighten(),
+                          ),
                         ),
                       ),
                     ],
@@ -415,6 +432,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                       const Expanded(child: Text("Use For Stats")),
                       CupertinoSwitch(
                         value: _currentUseForStats,
+                        activeTrackColor: accentColors[0],
                         onChanged: (value) {
                           setState(() {
                             _currentUseForStats = value;
@@ -449,6 +467,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                       const Expanded(child: Text("Enabled")),
                       CupertinoSwitch(
                         value: _currentEnabled,
+                        activeTrackColor: accentColors[0],
                         onChanged: (value) {
                           setState(() {
                             _currentEnabled = value;

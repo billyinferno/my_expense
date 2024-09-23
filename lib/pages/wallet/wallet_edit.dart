@@ -343,6 +343,24 @@ class _WalletEditPageState extends State<WalletEditPage> {
                           },
                         ),
                       ),
+                      const SizedBox(width: 10,),
+                      GestureDetector(
+                        onTap: (() {
+                          // remove limit
+                          _limitController.text = '';
+                          _currentLimit = -1;
+                        }),
+                        child: Container(
+                          width: 40,
+                          height: 30,
+                          color: Colors.transparent,
+                          child: Icon(
+                            Ionicons.close_circle,
+                            size: 20,
+                            color: accentColors[2].lighten(),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
