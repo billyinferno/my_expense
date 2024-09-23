@@ -136,7 +136,6 @@ class _HomeWalletState extends State<HomeWallet> {
                       });
                     }),
                   ),
-                  const SizedBox(height: 10,),
                   WalletSummary(
                     type: _tabSelected,
                     data: (_walletsFilterSummary[_tabSelected] ?? {}),

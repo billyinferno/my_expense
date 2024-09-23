@@ -14,8 +14,15 @@ class WalletSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // check if data is empty or not?
+    // if empty then just return sized box shrink
+    if (data.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
       padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
       decoration: BoxDecoration(
         color: IconList.getDarkColor(type),
