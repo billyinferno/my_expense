@@ -37,6 +37,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // initialize variable needed for login
     _bearerToken = "";
     _isTokenExpired = false;
@@ -57,8 +59,6 @@ class _LoginPageState extends State<LoginPage> {
     _isLogin = false;
     _isObscure = true;
     _checkIsLogin = _checkLogin();
-
-    super.initState();
   }
 
   @override

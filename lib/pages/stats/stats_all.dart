@@ -34,6 +34,8 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // get the current ccy
     _ccy = widget.ccy as int;
 
@@ -54,8 +56,6 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
     // get the data from API
     _getData = _getWalletStatAllData();
-
-    super.initState();
   }
 
   @override

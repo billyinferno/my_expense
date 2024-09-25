@@ -36,6 +36,8 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
   @override
   void initState() {
+    super.initState();
+
     _walletType = WalletSharedPreferences.getWalletTypes();
     _currencies = WalletSharedPreferences.getWalletCurrency();
     _userMe = UserSharedPreferences.getUserMe();
@@ -51,8 +53,6 @@ class _WalletAddPageState extends State<WalletAddPage> {
     _currentEnabled = true;
     _currentLimit = -1;
     _currentStartBalance = 0;
-
-    super.initState();
   }
 
   @override

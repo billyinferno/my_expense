@@ -20,10 +20,10 @@ class _AnimationExpandState extends State<AnimationExpand> with SingleTickerProv
 
   @override
   void initState() {
+    super.initState();
+
     // init widget for animation
     _prepareAnimation();
-    
-    super.initState();
   }
 
   @override

@@ -26,12 +26,12 @@ class _ScrollableTabState extends State<ScrollableTab> {
 
   @override
   void initState() {
+    super.initState();
+
     if (widget.data.isNotEmpty) {
       // set the tab selected as the first data
       _tabSelected = widget.data.keys.first;
     }
-
-    super.initState();
   }
 
   @override

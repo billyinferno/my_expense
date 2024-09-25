@@ -85,6 +85,8 @@ class _TransactionInputState extends State<TransactionInput> {
 
   @override
   void initState() {
+    super.initState();
+
     // get ME
     _userMe = UserSharedPreferences.getUserMe();
 
@@ -147,8 +149,6 @@ class _TransactionInputState extends State<TransactionInput> {
         _initEdit();
         break;
     }
-
-    super.initState();
   }
 
   @override

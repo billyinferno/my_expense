@@ -20,6 +20,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    super.initState();
+
     // get the pin data
     _pin = PinSharedPreferences.getPin();
     if(_pin != null) {
@@ -40,8 +42,6 @@ class _HomePageState extends State<HomePage> {
     _pages.add(const HomeStats());
     _pages.add(const HomeBudget());
     _pages.add(const HomeWallet());
-    
-    super.initState();
   }
 
   Widget _showPinScreen() {

@@ -32,7 +32,9 @@ class _HomeBudgetState extends State<HomeBudget> {
 
   @override
   void initState() {
-    // static prefs for each shared preferences is already initialize during
+    super.initState();
+
+    // static prefs for each shared preferences are already initialize during
     // the application startup.
     _currencies = WalletSharedPreferences.getWalletUserCurrency();
     _userMe = UserSharedPreferences.getUserMe();
@@ -67,8 +69,6 @@ class _HomeBudgetState extends State<HomeBudget> {
     }
 
     _getData = _fetchBudget();
-
-    super.initState();
   }
 
   @override

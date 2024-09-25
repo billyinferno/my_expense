@@ -40,6 +40,8 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // convert arguments to Budget Transaction Arguments
     _budgetTransaction = widget.arguments as BudgetTransactionArgs;
 
@@ -61,8 +63,6 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
 
     // get the budget stat data from backend
     _getData = _getBudgetStatData();
-
-    super.initState();
   }
 
   @override

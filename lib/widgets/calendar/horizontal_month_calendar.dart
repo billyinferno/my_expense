@@ -21,6 +21,8 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
 
   @override
   void initState() {
+    super.initState();
+
     _diffMonths = _computeTotalMonths(widget.firstDay, widget.lastDay);
 
     // check if this is the same month, then we can just showed 1 page
@@ -37,8 +39,6 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
 
     int initialPages = _initialPage ~/ 3;
     _controller = PageController(initialPage: initialPages);
-
-    super.initState();
   }
 
   @override

@@ -37,6 +37,8 @@ class _WalletEditPageState extends State<WalletEditPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // get the wallet data from param
     final WalletModel walletData = widget.walletData as WalletModel;
 
@@ -65,8 +67,6 @@ class _WalletEditPageState extends State<WalletEditPage> {
     if (_currentLimit > 0) {
       _limitController.text = "$_currentLimit";
     }
-
-    super.initState();
   }
 
   @override

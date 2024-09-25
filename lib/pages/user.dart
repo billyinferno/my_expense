@@ -42,6 +42,8 @@ class _UserPageState extends State<UserPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // get the current user information
     _userMe = UserSharedPreferences.getUserMe();
 
@@ -125,8 +127,6 @@ class _UserPageState extends State<UserPage> {
     var (type, color) = Globals.runAs();
     _runType = type;
     _runTypeColor = color;
-    
-    super.initState();
   }
 
   @override

@@ -30,6 +30,8 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
   @override
   void initState() {
+    super.initState();
+    
     // get the wallet data
     _wallet = widget.wallet as WalletModel;
 
@@ -52,7 +54,6 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
     // get the data from API
     _getData = _getWalletStatData();
-    super.initState();
   }
 
   @override

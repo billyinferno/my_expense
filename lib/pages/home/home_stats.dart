@@ -53,6 +53,8 @@ class _HomeStatsState extends State<HomeStats> {
 
   @override
   void initState() {
+    super.initState();
+
     // get the user information
     _userMe = UserSharedPreferences.getUserMe();
 
@@ -97,8 +99,6 @@ class _HomeStatsState extends State<HomeStats> {
     // default clamp to budget to false, and max amount as 0
     _clampToBudget = false;
     _currentMaxAmount = 0;
-
-    super.initState();
   }
 
   @override

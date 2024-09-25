@@ -45,6 +45,8 @@ class _HomeListState extends State<HomeList> {
 
   @override
   void initState() {
+    super.initState();
+
     _userMe = UserSharedPreferences.getUserMe();
 
     _appTitleMonth = Globals.dfMMMM.formatLocal(_currentFocusedDay);
@@ -54,8 +56,6 @@ class _HomeListState extends State<HomeList> {
       refreshDay: _currentFocusedDay,
       force: true
     );
-
-    super.initState();
   }
 
   @override

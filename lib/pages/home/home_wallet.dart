@@ -27,6 +27,8 @@ class _HomeWalletState extends State<HomeWallet> {
 
   @override
   void initState() {
+    super.initState();
+
     // default the tab selected to 'all'
     _tabSelected = 'all';
 
@@ -35,8 +37,6 @@ class _HomeWalletState extends State<HomeWallet> {
 
     // get wallet
     _getData = _refreshWallet();
-
-    super.initState();
   }
 
   @override

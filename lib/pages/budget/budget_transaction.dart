@@ -30,6 +30,8 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // convert the parameter being sent from main
     BudgetTransactionArgs args = widget.arguments as BudgetTransactionArgs;
     _selectedDate = args.selectedDate;
@@ -42,8 +44,6 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
 
     // get data from server
     _getData = _fetchBudget(true);
-
-    super.initState();
   }
 
   @override

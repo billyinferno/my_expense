@@ -12,7 +12,7 @@ class TransactionAddPage extends StatefulWidget {
 }
 
 class _TransactionAddPageState extends State<TransactionAddPage> {
-  DateTime _selectedDate = DateTime.now();
+  late DateTime _selectedDate;
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
@@ -22,19 +22,11 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
   @override
   void initState() {
-    DateTime? prefCurrentTime;
-
-    _selectedDate = widget.params as DateTime;
+    super.initState();
 
     // check on the shared preferences if the transaction list current time is already set or not?
-    // if not then use params.
-    prefCurrentTime =
-        TransactionSharedPreferences.getTransactionListCurrentDate();
-    if (prefCurrentTime != null) {
-      _selectedDate = prefCurrentTime;
-    }
-
-    super.initState();
+    // if not then use default to widget.params.
+    _selectedDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? widget.params as DateTime);
   }
 
   @override

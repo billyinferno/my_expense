@@ -25,13 +25,13 @@ class _UserChangePasswordState extends State<UserChangePassword> {
 
   @override
   void initState() {
+    super.initState();
+
     _showCurrentPassword = false;
     _showNewPassword = false;
     _showRetypeNewPassword = false;
 
     _userMe = UserSharedPreferences.getUserMe();
-
-    super.initState();
   }
 
   @override

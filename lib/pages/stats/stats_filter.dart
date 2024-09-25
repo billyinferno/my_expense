@@ -51,6 +51,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // default the name into "Any"
     _searchType = "Any";
     _currentType = "month";
@@ -132,8 +134,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     ).subtract(const Duration(days: 1));
 
     _selectedDateTime = [];
-
-    super.initState();
   }
 
   @override

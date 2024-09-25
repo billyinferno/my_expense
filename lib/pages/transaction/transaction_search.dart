@@ -67,6 +67,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // get the category expense and income list from shared preferences
     _categoryExpenseList = CategorySharedPreferences.getCategory(type: 'expense');
     _categoryIncomeList = CategorySharedPreferences.getCategory(type: 'income');
@@ -76,8 +78,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // get the wallet list
     _walletList = WalletSharedPreferences.getWallets(showDisabled: false);
-
-    super.initState();
   }
 
   @override

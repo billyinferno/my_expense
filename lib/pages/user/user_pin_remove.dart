@@ -16,10 +16,10 @@ class _PinRemovePageState extends State<PinRemovePage> {
 
   @override
   void initState() {
+    super.initState();
+
     _pin = PinSharedPreferences.getPin();
     _tries = 1;
-
-    super.initState();
   }
 
   @override

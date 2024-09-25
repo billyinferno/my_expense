@@ -30,6 +30,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
   @override
   void initState() {
+    super.initState();
+
     // initialize value
     _budgetList = null;
     _budgetAmount = 0;
@@ -42,8 +44,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
     // fetch the current budget
     _getData = _fetchBudget(true);
-    
-    super.initState();
   }
 
   @override

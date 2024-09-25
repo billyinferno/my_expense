@@ -30,6 +30,8 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
 
   @override
   void initState() {
+    super.initState();
+
     _wrongInputAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -49,8 +51,6 @@ class PinPadState extends State<PinPad> with SingleTickerProviderStateMixin  {
         curve: Curves.elasticIn
       ),
     );
-
-    super.initState();
   }
 
   @override
