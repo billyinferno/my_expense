@@ -272,6 +272,7 @@ class _HomeWalletState extends State<HomeWallet> {
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
       child: Slidable(
+        key: Key("slide_${wallet.name}_${wallet.id}"),
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
           extentRatio: 0.9,
