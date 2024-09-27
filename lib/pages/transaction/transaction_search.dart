@@ -1231,8 +1231,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           subTitle: Globals.dfeddMMMyyyy.formatLocal(txn.date),
           subTitleStyle: const TextStyle(fontSize: 10),
           description: txn.description,
-          descriptionStyle:
-              const TextStyle(fontSize: 10, fontStyle: FontStyle.italic),
+          descriptionStyle: const TextStyle(
+            fontSize: 10,
+            fontStyle: FontStyle.italic
+          ),
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],
@@ -1296,8 +1298,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     }
   }
 
-  void _setTransactions(
-      List<TransactionListModel> transactions, int limit, int start) {
+  void _setTransactions({
+    required List<TransactionListModel> transactions,
+    required int limit,
+    required int start}
+  ) {
     setState(() {
       _transactions.clear();
       _transactions.addAll(transactions);
@@ -1341,13 +1346,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     }
   }
 
-  Future<void> _findTransaction(
-    String searchText,
-    String categoryId,
-    String type,
-    int limit,
-    int start
-  ) async {
+  Future<void> _findTransaction({
+    required String searchText,
+    required String categoryId,
+    required String type,
+    required int limit,
+    required int start
+  }) async {
     await _transactionHttp.findTransaction(
       type: type,
       name: searchText,
@@ -1355,7 +1360,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       limit: limit,
       start: start
     ).then((results) {
-      _setTransactions(results, limit, start);
+      _setTransactions(
+        transactions: results,
+        limit: limit,
+        start: start
+      );
     });
   }
 
@@ -1432,11 +1441,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // try to find the transaction
     await _findTransaction(
-      _searchText,
-      _categoryId,
-      _type,
-      _limit,
-      _start
+      searchText: _searchText,
+      categoryId: _categoryId,
+      type: _type,
+      limit: _limit,
+      start: _start,
     ).onError((error, stackTrace) {
       Log.error(
         message: "Error when searching transaction",
