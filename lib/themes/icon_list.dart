@@ -31,6 +31,7 @@ class IconList {
       case "loan": { return accentColors[2]; }
       case "savings": { return accentColors[4]; }
       case "other": { return accentColors[3]; }
+      case "all": { return secondaryBackground.lighten(); }
       default: { return Colors.grey[800]!; }
     }
   }
@@ -47,6 +48,7 @@ class IconList {
       case "loan": { return darkAccentColors[2]; }
       case "savings": { return darkAccentColors[4]; }
       case "other": { return darkAccentColors[3]; }
+      case "all": { return secondaryBackground; }
       default: { return Colors.grey[900]!; }
     }
   }
@@ -63,6 +65,7 @@ class IconList {
       case "loan": { return lightAccentColors[2]; }
       case "savings": { return lightAccentColors[4]; }
       case "other": { return lightAccentColors[3]; }
+      case "all": { return secondaryBackground.lighten(amount: 0.3); }
       default: { return Colors.grey[700]!; }
     }
   }
