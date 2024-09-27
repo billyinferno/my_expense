@@ -14,8 +14,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
 
   late Future<bool> _getData;
-  late List<WalletStatAllModel> _walletStatAll;
-  late List<WalletStatAllModel> _origWalletStatAll;
+  late WalletStatAllModel _walletStatAll;
+  late WalletStatAllModel _origWalletStatAll;
+  late WalletStatAllModel _origWalletStatAllReverse;
   late double _maxAmount;
   late double _totalIncome;
   late int _countIncome;
@@ -40,8 +41,6 @@ class _StatsAllPageState extends State<StatsAllPage> {
     _ccy = widget.ccy as int;
 
     // init the wallet list into empty list
-    _walletStatAll = [];
-    _origWalletStatAll = [];
     _walletLineChartData = [];
     _totalIncome = 0;
     _countIncome = 0;
@@ -92,7 +91,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
         } else if (snapshot.hasData) {
           return Scaffold(
             appBar: AppBar(
-              title: Center(child: Text("Stat For ${_walletStatAll[0].ccy}")),
+              title: Center(child: Text("Stat For ${_walletStatAll.ccy}")),
               leading: IconButton(
                 icon: const Icon(Ionicons.close_outline, color: textColor),
                 onPressed: (() {
@@ -218,17 +217,17 @@ class _StatsAllPageState extends State<StatsAllPage> {
           Expanded(
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: _walletStatAll[0].data.length,
+              itemCount: _walletStatAll.data.length,
               itemBuilder: ((context, index) {
                 Color indicator = Colors.white;
                 if (
-                  _walletStatAll[0].data[index].income! >
-                  _walletStatAll[0].data[index].expense!
+                  _walletStatAll.data[index].income! >
+                  _walletStatAll.data[index].expense!
                 ) {
                   indicator = accentColors[0];
                 } else if (
-                  _walletStatAll[0].data[index].income! <
-                  _walletStatAll[0].data[index].expense!
+                  _walletStatAll.data[index].income! <
+                  _walletStatAll.data[index].expense!
                 ) {
                   indicator = accentColors[2];
                 }
@@ -266,7 +265,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                         child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                            Globals.dfyyyyMM.formatLocal(_walletStatAll[0].data[index].date),
+                            Globals.dfyyyyMM.formatLocal(_walletStatAll.data[index].date),
                           ),
                         ),
                       ),
@@ -277,26 +276,26 @@ class _StatsAllPageState extends State<StatsAllPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Bar(
-                              amount: _walletStatAll[0].data[index].income!,
+                              amount: _walletStatAll.data[index].income!,
                               maxAmount: _maxAmount,
                               text: Globals.fCCY.format(
-                                _walletStatAll[0].data[index].income!
+                                _walletStatAll.data[index].income!
                               ),
                               color: accentColors[0]
                             ),
                             Bar(
-                              amount: _walletStatAll[0].data[index].expense!,
+                              amount: _walletStatAll.data[index].expense!,
                               maxAmount: _maxAmount,
                               text: Globals.fCCY.format(
-                                _walletStatAll[0].data[index].expense!
+                                _walletStatAll.data[index].expense!
                               ),
                               color: accentColors[2]
                             ),
                             Bar(
-                              amount: _walletStatAll[0].data[index].balance!,
+                              amount: _walletStatAll.data[index].balance!,
                               maxAmount: _maxAmount,
                               text: Globals.fCCY.format(
-                                _walletStatAll[0].data[index].balance!
+                                _walletStatAll.data[index].balance!
                               ),
                               color: accentColors[4]
                             ),
@@ -333,33 +332,31 @@ class _StatsAllPageState extends State<StatsAllPage> {
       walletListTotal[Globals.dfMMyy.formatLocal(key)] = 0;
     });
 
-    for (WalletStatAllModel ccy in _walletStatAll) {
-      for (Datum data in ccy.data) {
-        // generate the wallet list income, expense, and total
-        walletListIncome[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
-        walletListExpense[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
+    for (Datum data in _walletStatAll.data) {
+      // generate the wallet list income, expense, and total
+      walletListIncome[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
+      walletListExpense[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
 
-        total += (data.diff ?? 0);
-        walletListTotal[Globals.dfMMyy.formatLocal(data.date)] = total;
+      total += (data.diff ?? 0);
+      walletListTotal[Globals.dfMMyy.formatLocal(data.date)] = total;
 
-        _totalIncome += data.income!;
-        _totalExpense += data.expense!;
+      _totalIncome += data.income!;
+      _totalExpense += data.expense!;
 
-        if (data.income! > data.expense!) {
-          _countIncome += 1;
-        } else if (data.income! < data.expense!) {
-          _countExpense += 1;
-        }
+      if (data.income! > data.expense!) {
+        _countIncome += 1;
+      } else if (data.income! < data.expense!) {
+        _countExpense += 1;
+      }
 
-        if (data.income! > _maxAmount) {
-          _maxAmount = data.income!;
-        }
-        if (data.expense! > _maxAmount) {
-          _maxAmount = data.expense!;
-        }
-        if (data.balance! > _maxAmount) {
-          _maxAmount = data.balance!;
-        }
+      if (data.income! > _maxAmount) {
+        _maxAmount = data.income!;
+      }
+      if (data.expense! > _maxAmount) {
+        _maxAmount = data.expense!;
+      }
+      if (data.balance! > _maxAmount) {
+        _maxAmount = data.balance!;
       }
     }
 
@@ -377,19 +374,24 @@ class _StatsAllPageState extends State<StatsAllPage> {
       // perform the get company detail information here
       await _walletHTTP.getAllStat(ccy: _ccy).then((resp) {
         // copy the response to company detail data
-        _walletStatAll = resp;
-        _origWalletStatAll.addAll(resp);
+        _walletStatAll = resp[0];
+        _origWalletStatAll = resp[0];
+        _origWalletStatAllReverse = WalletStatAllModel(
+          ccy: resp[0].ccy,
+          symbol: resp[0].symbol,
+          data: resp[0].data.reversed.toList(),
+        );
 
-        if (_origWalletStatAll[0].data.isNotEmpty) {
+        if (_origWalletStatAll.data.isNotEmpty) {
           _minDate = DateTime(
-            _origWalletStatAll[0].data[0].date.year,
-            _origWalletStatAll[0].data[0].date.month,
+            _origWalletStatAll.data[0].date.year,
+            _origWalletStatAll.data[0].date.month,
             1
           );
           
           _maxDate = DateTime(
-            _origWalletStatAll[0].data[_origWalletStatAll[0].data.length - 1].date.year,
-            _origWalletStatAll[0].data[_origWalletStatAll[0].data.length - 1].date.month,
+            _origWalletStatAll.data[_origWalletStatAll.data.length - 1].date.year,
+            _origWalletStatAll.data[_origWalletStatAll.data.length - 1].date.month,
             1
           );
 
@@ -424,11 +426,10 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
   void _sortWalletStat() {
     setState(() {
-      _walletStatAll.clear();
       if (_sortAscending) {
-        _walletStatAll.addAll(_origWalletStatAll.toList());
+        _walletStatAll = _origWalletStatAll;
       } else {
-        _walletStatAll.addAll(_origWalletStatAll.reversed.toList());
+        _walletStatAll = _origWalletStatAllReverse;
       }
     });
   }
