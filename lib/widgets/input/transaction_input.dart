@@ -449,30 +449,39 @@ class _TransactionInputState extends State<TransactionInput> {
                     expand: _showCalendar,
                     child: SizedBox(
                       height: 200,
-                      child: CupertinoTheme(
-                        data: const CupertinoThemeData(
-                          brightness: Brightness.dark,
-                          textTheme: CupertinoTextThemeData(
-                            textStyle: TextStyle(
-                              fontFamily: '--apple-system',
-                              fontSize: 20,
-                            ),
-                            dateTimePickerTextStyle: TextStyle(
-                              fontFamily: '--apple-system',
-                              fontSize: 20,
-                            ),
-                          )
-                        ),
-                        child: CupertinoDatePicker(
-                          mode: CupertinoDatePickerMode.date,
-                          initialDateTime: _currentDate.toLocal(),
-                          onDateTimeChanged: (val) {
-                            setState(() {
-                              _currentDate = val.toLocal();
-                            });
-                          },
-                        ),
+                      child: ScrollDatePicker(
+                        initialDate: _currentDate.toLocal(),
+                        minDate: DateTime(2010, 1, 1),
+                        onDateChange: ((val) {
+                          setState(() {
+                            _currentDate = val.toLocal();
+                          });
+                        }),
                       ),
+                      // child: CupertinoTheme(
+                      //   data: const CupertinoThemeData(
+                      //     brightness: Brightness.dark,
+                      //     textTheme: CupertinoTextThemeData(
+                      //       textStyle: TextStyle(
+                      //         fontFamily: '--apple-system',
+                      //         fontSize: 20,
+                      //       ),
+                      //       dateTimePickerTextStyle: TextStyle(
+                      //         fontFamily: '--apple-system',
+                      //         fontSize: 20,
+                      //       ),
+                      //     )
+                      //   ),
+                      //   child: CupertinoDatePicker(
+                      //     mode: CupertinoDatePickerMode.date,
+                      //     initialDateTime: _currentDate.toLocal(),
+                      //     onDateTimeChanged: (val) {
+                      //       setState(() {
+                      //         _currentDate = val.toLocal();
+                      //       });
+                      //     },
+                      //   ),
+                      // ),
                     ),
                   ),
                   Visibility(

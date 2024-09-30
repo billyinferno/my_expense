@@ -2,6 +2,7 @@ export './bar_button.dart';
 export './my_switch.dart';
 export './pin_pad.dart';
 export './slide_button.dart';
+export './scroll_date_picker.dart';
 export './scrollable_tab.dart';
 export './transaction_input.dart';
 export './type_slide.dart';
