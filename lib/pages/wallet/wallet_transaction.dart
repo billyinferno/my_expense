@@ -24,6 +24,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   late ScrollController _scrollController;
   late WalletModel _wallet;
   late TransactionWalletMinMaxDateModel _walletMinMaxDate;
+  late DateTime _walletMinDate;
+  late DateTime _walletMaxDAte;
 
   final Map<DateTime, WalletTransactionExpenseIncome> _totalDate = {};
   final List<WalletTransactionList> _list = [];
@@ -42,6 +44,19 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
     // init the wallet
     _wallet = widget.wallet as WalletModel;
+
+    // init min and max date
+    _walletMinDate = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      1
+    );
+
+    _walletMaxDAte = DateTime(
+      DateTime.now().year,
+      DateTime.now().month + 1,
+      1
+    ).subtract(Duration(days: 1));
 
     // fetch the transaction
     _getData = _fetchInitData();
@@ -273,6 +288,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       )
     );
 
+    Log.info(message: "⏳ Fetch transaction wallet on $fetchDate");
+
     await _transactionHttp.fetchTransactionWallet(
       walletId: _wallet.id,
       date: date,
@@ -300,6 +317,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       walletId: _wallet.id
     ).then((walletTxnDate) async {
       _walletMinMaxDate = walletTxnDate;
+      if (_walletMinMaxDate.minDate != null) {
+        _walletMinDate = _walletMinMaxDate.minDate!;
+      }
+      if (_walletMinMaxDate.maxDate != null) {
+        _walletMaxDAte = _walletMinMaxDate.maxDate!;
+      }
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error when <_fetchWalletMinMaxDate>",
@@ -321,8 +344,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         ),
         const SizedBox(height: 10,),
         MonthPrevNextCalendar(
-          minDate: (_walletMinMaxDate.minDate ?? DateTime.now().toLocal()),
-          maxDate: (_walletMinMaxDate.maxDate ?? DateTime.now().toLocal()),
+          minDate: _walletMinDate,
+          maxDate: _walletMaxDAte,
           initialDate: _currentDate,
           border: secondaryBackground,
           subChild: RichText(
