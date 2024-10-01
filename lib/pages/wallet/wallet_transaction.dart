@@ -468,7 +468,6 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   bgColor: accentColors[2],
                   text: 'Delete',
                   onTap: () {
-                    //TODO: error when delete the transaction during fetchBudget
                     late Future<bool?> result = ShowMyDialog(
                       dialogTitle: "Delete Item",
                       dialogText: "Do you want to delete ${txn.name}?",
@@ -840,7 +839,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     DateTime to;
     String fromString;
     String toString;
-    int txnCurrencyId = txnInfo.wallet.currencyId;
+    int txnCurrencyId = _wallet.currency.id;
 
     // get the from and to date
     (from, to) = TransactionSharedPreferences.getStatDate();
