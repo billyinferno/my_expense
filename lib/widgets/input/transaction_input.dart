@@ -68,6 +68,7 @@ class _TransactionInputState extends State<TransactionInput> {
   late String _currentWalletToCCY;
 
   late bool _currentClear;
+  late String _currentRepeat;
 
   late double _currentExchangeRate;
 
@@ -120,6 +121,9 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // set clear as true
     _currentClear = true;
+
+    // set repeat as single
+    _currentRepeat = 'single';
 
     // initialize the filter list and get the last expense and income
     // transaction to build the auto complete
@@ -247,7 +251,10 @@ class _TransactionInputState extends State<TransactionInput> {
                 // call parent save, all the handler on the async call should be
                 // coming from the parent instead here.
                 try {
-                  TransactionModel? gen = _generateTransaction();
+                  // TODO: to generate transaction as list
+                  List<TransactionModel?> gen;
+                  gen = [];
+                  gen.add(_generateTransaction());
 
                   // if all good then check the date whether this is future date
                   // or not?
@@ -468,6 +475,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     visible: (_currentType != 'transfer'),
                     child: _buildIncomeExpenseWalletSelection(),
                   ),
+                  ..._repeatTransactionInput(),
                   Container(
                     height: 50,
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -1159,6 +1167,71 @@ class _TransactionInputState extends State<TransactionInput> {
         ],
       ),
     );
+  }
+
+  List<Widget> _repeatTransactionInput() {
+    // if this is edit then no need to show this
+    if (widget.type != TransactionInputType.add) {
+      return const [SizedBox.shrink()];
+    }
+
+    // TODO: to finished the repeat transaction
+    List<Widget> ret = [];
+    ret.add(
+        Container(
+        height: 50,
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Ionicons.repeat,
+              size: 20,
+              color: textColor,
+            ),
+            const SizedBox(width: 10,),
+            const Expanded(child: Text("Repeat")),
+            const SizedBox(width: 10,),
+            TypeSlide(
+              onChange: ((value) {
+                setState(() {                
+                  _currentRepeat = value;
+                });
+              }),
+              items: {
+                "single": accentColors[0],
+                "repeat": accentColors[4]
+              },
+              initialItem: "single",
+              editable: (widget.type == TransactionInputType.add ? true : false),
+            )
+          ],
+        ),
+      ),
+    );
+
+    ret.add(
+      AnimationExpand(
+        expand: _currentRepeat == 'repeat',
+        child: SizedBox(
+          height: 50,
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text("Repeat"),
+              ],
+            )
+          ),
+        ),
+      )
+    );
+
+    return ret;
   }
 
   void _filterAutoComplete(String lookup) {

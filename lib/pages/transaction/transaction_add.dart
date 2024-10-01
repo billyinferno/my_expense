@@ -34,25 +34,30 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     return TransactionInput(
       title: "Add Transaction",
       type: TransactionInputType.add,
-      saveTransaction: (value) {
+      saveTransaction: (value) async {
         try {
-          _saveTransaction(value);
+          // loop to add the transaction in API
+          for (TransactionModel? txn in value) {
+            await _saveTransaction(txn);
+          }
         }
         catch (error) {
-          // show the error dialog
-          ShowMyDialog(
-            cancelEnabled: false,
-            confirmText: "OK",
-            dialogTitle: "Error Add",
-            dialogText: error.toString())
-          .show(context);
+          if (context.mounted) {            
+            // show the error dialog
+            ShowMyDialog(
+              cancelEnabled: false,
+              confirmText: "OK",
+              dialogTitle: "Error Add",
+              dialogText: error.toString())
+            .show(context);
+          }
         }
       },
       selectedDate: _selectedDate.toLocal(),
     );
   }
 
-  void _saveTransaction(TransactionModel? txn) async {
+  Future<void> _saveTransaction(TransactionModel? txn) async {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 

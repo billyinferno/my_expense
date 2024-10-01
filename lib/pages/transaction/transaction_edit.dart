@@ -28,9 +28,11 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     return TransactionInput(
       title: "Edit Transaction",
       type: TransactionInputType.edit,
-      saveTransaction: (value) {
+      saveTransaction: (value) async {
         try {
-          _saveTransaction(value);
+          for(TransactionModel? txn in value) {
+            await _saveTransaction(txn);
+          }
         }
         catch (error) {
           // show the error dialog
@@ -47,7 +49,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     );
   }
 
-  void _saveTransaction(TransactionModel? txn) async {
+  Future<void> _saveTransaction(TransactionModel? txn) async {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
