@@ -57,6 +57,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
           onPressed: (() {
             Navigator.pop(context);
           }),
+          //TODO: to add sort button so we can sort the highest, lowest, or default (category)
         ),
         actions: <Widget>[
           // make the title to still center even without any action buttons
