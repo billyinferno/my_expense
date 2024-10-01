@@ -28,6 +28,8 @@ class MonthPrevNextCalendar extends StatefulWidget {
 
 class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
   late DateTime _currentDate;
+  late DateTime _minDate;
+  late DateTime _maxDate;
 
   @override
   void initState() {
@@ -35,6 +37,20 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
 
     // set current date same as initial date
     _currentDate = widget.initialDate;
+
+    // check if _maxDate is less than today date?
+    _maxDate = widget.maxDate;
+    if (_maxDate.isBefore(DateTime.now())) {
+      // change max date to today date
+      _maxDate = DateTime.now().toLocal();
+    }
+
+    // check if min date is more than max date?
+    _minDate = widget.minDate;
+    if (_minDate.isAfter(_maxDate)) {
+      // changemin date to max date
+      _minDate = _maxDate;
+    }
   }
 
   @override
@@ -45,8 +61,8 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
         await showMonthPicker(
           context: context,
           initialDate: _currentDate,
-          firstDate: widget.minDate,
-          lastDate: widget.maxDate,
+          firstDate: _minDate,
+          lastDate: _maxDate,
           monthPickerDialogSettings: MonthPickerDialogSettings(
             buttonsSettings: PickerButtonsSettings(
               unselectedMonthsTextColor: textColor2,
@@ -189,16 +205,10 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
 
   void _goPrevMonth() {
     setState(() {
-      // change current date to previous month
-      _currentDate = DateTime(
-        _currentDate.year,
-        _currentDate.month - 1,
-        1
-      );
-
+      // calculate the from and to date
       DateTime from = DateTime(
         _currentDate.year,
-        _currentDate.month-1,
+        _currentDate.month - 1,
         1
       ).toLocal();
       
@@ -207,20 +217,18 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
         _currentDate.month,
         1
       ).subtract(const Duration(days: 1)).toLocal();
-      
+
+      // change current date to be the same as from date
+      _currentDate = from;
+
+      // call on date change
       widget.onDateChange(from, to);
     });
   }
 
   void _goNextMonth() {
     setState(() {
-      // change current date to next month
-      _currentDate = DateTime(
-        _currentDate.year,
-        _currentDate.month + 1,
-        1
-      );
-
+      // calculate the from and to date
       DateTime from = DateTime(
         _currentDate.year,
         _currentDate.month+1,
@@ -233,6 +241,10 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
         1
       ).subtract(const Duration(days: 1)).toLocal();
 
+      // change curent date to be the same as from date
+      _currentDate = from;
+
+      // call on date change
       widget.onDateChange(from, to);
     });
   }
