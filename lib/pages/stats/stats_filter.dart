@@ -310,6 +310,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                   await _filterStats();
                 }),
                 color: accentColors[6],
+                focusColor: accentColors[6],
+                highlightColor: accentColors[0],
                 height: 50,
                 child: const Center(
                   child: Text("Filter Statistics"),
