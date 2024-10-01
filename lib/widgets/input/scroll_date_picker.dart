@@ -272,44 +272,67 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
 
   void _setCurrentDate() {
     setState(() {
+      debugPrint("-------");
       int prevNumDays = _numOfDays;
-      //TODO: remove when finished fix
-      debugPrint("Prev Num Days: $_numOfDays");
 
       // calculate again the number of days
       _calculateNumOfDays();
-      //TODO: remove when finished fix
-      debugPrint("Current Num Days: $_numOfDays");
 
       // get current selected item from day controller
       int selectedItem = _dayController.selectedItem;
-      
-      // loop while selected item is < 0
-      while(selectedItem < 0) {
-        selectedItem += _numOfDays;
+      int times = 0;
+
+      // calculate the actual selected item to match with our current day
+      // being selected.
+
+      // if selected item less than 0, it means that user scroll to top
+      if (selectedItem < 0) {
+        while(selectedItem < 0) {
+          selectedItem += prevNumDays;
+          times -= 1;
+        }
+      }
+      else if (selectedItem >= _numOfDays) {
+        // for selected item 30, it means that this is 31 in date
+        // so if num of days is 30 (which means we only have 30 day)
+        // re-calculate the selectedItem
+        while(selectedItem >= prevNumDays) {
+          selectedItem -= prevNumDays;
+          times += 1;
+        }
       }
 
-      if (_dayController.selectedItem > 0) {
+      // check if selected item is same or more than _numOfDays
+      // re-calculate the selected item
+      if (selectedItem >= _numOfDays) {
         if (prevNumDays > _numOfDays) {
           selectedItem = selectedItem - (prevNumDays - _numOfDays);
         }
         else if (_numOfDays > prevNumDays) {
           selectedItem = selectedItem + (_numOfDays - prevNumDays);
-        }
-
-        // set current day based on the calculated selected item
-        _currentDay = (selectedItem + 1);
-        
-        if (_dayController.selectedItem != selectedItem) {
-          _dayController.animateToItem(
-            selectedItem,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.fastOutSlowIn
-          );
-        }
+        }          
       }
-      else if (_dayController.selectedItem < 0) {
-        //TODO: to fix for the minus selected item
+
+      // calculate the current day based on the selectedabove
+      _currentDay = (selectedItem + 1);
+      while (_currentDay > _numOfDays) {
+        _currentDay -= _numOfDays;
+      }
+
+      // revert back the selected item
+      if (times < 0) {
+        selectedItem = selectedItem + (_numOfDays * times);
+      }
+      else {
+        selectedItem = selectedItem + (_numOfDays * times);
+      }
+
+      if (_dayController.selectedItem != selectedItem) {
+        _dayController.animateToItem(
+          selectedItem,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.fastOutSlowIn
+        );
       }
 
       // set current date
