@@ -40,6 +40,8 @@ class _TransactionInputState extends State<TransactionInput> {
   final TextEditingController _nameController  = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _exchangeController = TextEditingController();
+  final TextEditingController _repeatController = TextEditingController();
+  final TextEditingController _timesController = TextEditingController();
 
   final FocusNode _nameFocus = FocusNode();
 
@@ -69,6 +71,7 @@ class _TransactionInputState extends State<TransactionInput> {
 
   late bool _currentClear;
   late String _currentRepeat;
+  late String _repeatType;
 
   late double _currentExchangeRate;
 
@@ -125,6 +128,9 @@ class _TransactionInputState extends State<TransactionInput> {
     // set repeat as single
     _currentRepeat = 'single';
 
+    // default repeat type as month
+    _repeatType = 'month';
+
     // initialize the filter list and get the last expense and income
     // transaction to build the auto complete
     _filterList = [];
@@ -166,9 +172,10 @@ class _TransactionInputState extends State<TransactionInput> {
     // name fields
     _nameFocus.dispose();
     _nameController.dispose();
-
     _descriptionController.dispose();
     _exchangeController.dispose();
+    _repeatController.dispose();
+    _timesController.dispose();
     
     super.dispose();
   }
@@ -180,6 +187,10 @@ class _TransactionInputState extends State<TransactionInput> {
     // set exchange rate as 1 (assuming that we will always send the same CCY)
     _currentExchangeRate = 1;
     _exchangeController.text = Globals.fCCY2.format(_currentExchangeRate);
+
+    // default the repeat and times
+    _repeatController.text = "1";
+    _timesController.text = "3";
 
     // set default user from and to
     _getUserFromWalletInfo(walletId: _userMe.defaultWallet);
@@ -1223,7 +1234,86 @@ class _TransactionInputState extends State<TransactionInput> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Text("Repeat"),
+                Text("Every"),
+                const SizedBox(width: 10,),
+                Container(
+                  width: 50,
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: secondaryBackground,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: TextFormField(
+                    controller: _repeatController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    cursorColor: primaryLight,
+                    decoration: const InputDecoration(
+                      hintText: "1",
+                      hintStyle: TextStyle(
+                        color: primaryLight,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      isCollapsed: true,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 15,
+                    ),
+                    textAlign: TextAlign.center,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(3),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10,),
+                MySelector(
+                  data: {
+                    "day": "Day",
+                    "week": "Week",
+                    "month": "Month",
+                    "year": "Year",
+                  },
+                  initialKeys: "month",
+                  onChange: ((key) {
+                    _repeatType = key;
+                  }),
+                ),
+                const SizedBox(width: 10,),
+                Container(
+                  width: 50,
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: secondaryBackground,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: TextFormField(
+                    controller: _timesController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    cursorColor: primaryLight,
+                    decoration: const InputDecoration(
+                      hintText: "1",
+                      hintStyle: TextStyle(
+                        color: primaryLight,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      isCollapsed: true,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 15,
+                    ),
+                    textAlign: TextAlign.center,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(3),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10,),
+                Text("times"),
               ],
             )
           ),
