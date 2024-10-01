@@ -46,6 +46,8 @@ class Globals {
     brightness: Brightness.dark,
     appBarTheme: const AppBarTheme(backgroundColor: primaryDark),
     scaffoldBackgroundColor: primaryBackground,
+    splashColor: primaryBackground,
+    dividerColor: primaryLight,
     primaryColor: primaryBackground,
     //accentColor: accentColors[0],
     iconTheme: const IconThemeData().copyWith(color: textColor),
