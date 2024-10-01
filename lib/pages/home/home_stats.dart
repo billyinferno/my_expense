@@ -217,7 +217,7 @@ class _HomeStatsState extends State<HomeStats> {
                 minDate: _minTxnDate,
                 maxDate: _maxTxnDate,
                 initialDate: _from,
-                onPress: ((from, to) {
+                onDateChange: ((from, to) {
                   // set the new from and to date
                   _from = from;
                   _to = to;

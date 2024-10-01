@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -321,172 +320,49 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           minMaxDate: _walletMinMaxDate,
         ),
         const SizedBox(height: 10,),
-        Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            border: Border(bottom: BorderSide(color: secondaryBackground, width: 1.0)),
-            color: secondaryDark,
-          ),
-          child: InkWell(
-            onTap: (() async {
-              await showMonthPicker(
-                context: context,
-                initialDate: _currentDate,
-                firstDate: (_walletMinMaxDate.minDate ?? DateTime.now().toLocal()),
-                lastDate: (_walletMinMaxDate.maxDate ?? DateTime.now().toLocal()),
-              ).then((newDate) async {
-                if (newDate != null) {
-                  // ensure that the new date is different date with current date
-                  if (_currentDate.isAfter(newDate) || _currentDate.isBefore(newDate)) {
-                    // fetch the transaction wallet for this new date
-                    await _fetchTransactionWallet(fetchDate: newDate).then((_) {
-                      _setDate(newDate);
-                    }).onError((error, stackTrace) {
-                      Log.error(
-                        message: "Error when fetch wallet for ${Globals.dfMMMMyyyy.formatLocal(newDate)}",
-                        error: error,
-                        stackTrace: stackTrace,
-                      );
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          createSnackBar(
-                            message: "Error when fetch wallet transaction"
-                          )
-                        );
-                      }
-                    });
-                  }
-                }
-              });
-            }),
-            onDoubleTap: (() async {
-              // set the date as today date
-              DateTime newDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
-            
-              await _fetchTransactionWallet(fetchDate: newDate).then((_) {
-                _setDate(newDate);
-              }).onError((error, stackTrace) {
-                Log.error(
-                  message: "Error when fetch wallet for ${Globals.dfMMMMyyyy.formatLocal(newDate)}",
-                  error: error,
-                  stackTrace: stackTrace,
-                );
-
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    createSnackBar(
-                      message: "Error when fetch wallet transaction"
-                    )
-                  );
-                }
-              });
-            }),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: (() async {
-                    DateTime newDate = DateTime(_currentDate.year, _currentDate.month - 1, 1);
-            
-                    await _fetchTransactionWallet(fetchDate: newDate).then((_) {
-                      _setDate(newDate);
-                    }).onError((error, stackTrace) {
-                      Log.error(
-                        message: "Error when fetch wallet for ${Globals.dfMMMMyyyy.formatLocal(newDate)}",
-                        error: error,
-                        stackTrace: stackTrace,
-                      );
-                      
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          createSnackBar(
-                            message: "Error when fetch wallet transaction"
-                          )
-                        );
-                      }
-                    });
-                  }),
-                  child: Container(
-                    width: 70,
-                    height: 50,
-                    color: Colors.transparent,
-                    child: const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Icon(
-                        Ionicons.caret_back,
-                        color: textColor2,
-                      ),
-                    ),
-                  ),
+        MonthPrevNextCalendar(
+          minDate: (_walletMinMaxDate.minDate ?? DateTime.now().toLocal()),
+          maxDate: (_walletMinMaxDate.maxDate ?? DateTime.now().toLocal()),
+          initialDate: _currentDate,
+          border: secondaryBackground,
+          subChild: RichText(
+            text: TextSpan(
+              children: <TextSpan>[
+                TextSpan(
+                  text: "(${Globals.fCCY.format(_expenseAmount)})",
+                  style: TextStyle(
+                    color: accentColors[2]
+                  )
                 ),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(Globals.dfMMMMyyyy.formatLocal(_currentDate)),
-                        RichText(
-                          text: TextSpan(
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: "(${Globals.fCCY.format(_expenseAmount)})",
-                                style: TextStyle(
-                                  color: accentColors[2]
-                                )
-                              ),
-                              const TextSpan(text: " "),
-                              TextSpan(
-                                text: "(${Globals.fCCY.format(_incomeAmount)})",
-                                style: TextStyle(
-                                  color: accentColors[6]
-                                )
-                              ),
-                            ]
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                const TextSpan(text: " "),
+                TextSpan(
+                  text: "(${Globals.fCCY.format(_incomeAmount)})",
+                  style: TextStyle(
+                    color: accentColors[6]
+                  )
                 ),
-                GestureDetector(
-                  onTap: (() async {
-                    DateTime newDate = DateTime(_currentDate.year, _currentDate.month + 1, 1);
-            
-                    await _fetchTransactionWallet(fetchDate: newDate).then((_) {
-                      _setDate(newDate);
-                    }).onError((error, stackTrace) {
-                      Log.error(
-                        message: "Error when fetch wallet for ${Globals.dfMMMMyyyy.formatLocal(newDate)}",
-                        error: error,
-                        stackTrace: stackTrace,
-                      );
-
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          createSnackBar(
-                            message: "Error when fetch wallet transaction"
-                          )
-                        );
-                      }
-                    });
-                  }),
-                  child: Container(
-                    width: 70,
-                    height: 50,
-                    color: Colors.transparent,
-                    child: const Align(
-                      alignment: Alignment.centerRight,
-                      child: Icon(
-                        Ionicons.caret_forward,
-                        color: textColor2,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ]
             ),
           ),
+          onDateChange: ((from, to) async {
+            await _fetchTransactionWallet(fetchDate: from).then((_) {
+              _setDate(from);
+            }).onError((error, stackTrace) {
+              Log.error(
+                message: "Error when fetch wallet from ${Globals.dfMMMMyyyy.formatLocal(from)} to ${Globals.dfMMMMyyyy.formatLocal(to)}",
+                error: error,
+                stackTrace: stackTrace,
+              );
+
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  createSnackBar(
+                    message: "Error when fetch wallet transaction"
+                  )
+                );
+              }
+            });
+          }),
         ),
         Expanded(
           child: RefreshIndicator(

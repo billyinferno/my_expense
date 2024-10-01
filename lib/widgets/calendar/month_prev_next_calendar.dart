@@ -3,121 +3,181 @@ import 'package:ionicons/ionicons.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:my_expense/_index.g.dart';
 
-class MonthPrevNextCalendar extends StatelessWidget {
+class MonthPrevNextCalendar extends StatefulWidget {
   final Color background;
   final Color border;
   final DateTime initialDate;
   final DateTime minDate;
   final DateTime maxDate;
-  final Function(DateTime, DateTime) onPress;
+  final Widget? subChild;
+  final Function(DateTime, DateTime) onDateChange;
   const MonthPrevNextCalendar({
+    super.key,
     this.background = secondaryDark,
     this.border = primaryBackground,
     required this.maxDate,
     required this.minDate,
     required this.initialDate,
-    required this.onPress,
-    super.key
+    required this.onDateChange,
+    this.subChild,
   });
 
   @override
+  State<MonthPrevNextCalendar> createState() => _MonthPrevNextCalendarState();
+}
+
+class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
+  late DateTime _currentDate;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // set current date same as initial date
+    _currentDate = widget.initialDate;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: (() async {
         // show the month dialog
         await showMonthPicker(
           context: context,
-          initialDate: initialDate,
-          firstDate: minDate,
-          lastDate: maxDate,
+          initialDate: _currentDate,
+          firstDate: widget.minDate,
+          lastDate: widget.maxDate,
+          monthPickerDialogSettings: MonthPickerDialogSettings(
+            buttonsSettings: PickerButtonsSettings(
+              unselectedMonthsTextColor: textColor2,
+              selectedMonthTextColor: textColor,
+              currentMonthTextColor: accentColors[0],
+              unselectedYearsTextColor: textColor2,
+              selectedYearTextColor: textColor,
+              currentYearTextColor: accentColors[0],
+            ),
+          ),
+          cancelWidget: Text(
+            "Cancel",
+            style: TextStyle(
+              color: textColor2,
+            ),
+          ),
+          confirmWidget: Text(
+            "Confirm",
+            style: TextStyle(
+              color: accentColors[6],
+            ),
+          ),
         ).then((newDate) async {
           if (newDate != null) {
-            DateTime from = DateTime(
-              newDate.year,
-              newDate.month,
-              1
-            ).toLocal();
-            
-            DateTime to = DateTime(
-              newDate.year,
-              newDate.month+1,
-              1
-            ).subtract(const Duration(days: 1)).toLocal();
+            setState(() {
+              // set current date as new date
+              _currentDate = newDate;
 
-            onPress(from, to);
+              // calculate the begining and end of the date
+              DateTime from = DateTime(
+                newDate.year,
+                newDate.month,
+                1
+              ).toLocal();
+              
+              DateTime to = DateTime(
+                newDate.year,
+                newDate.month+1,
+                1
+              ).subtract(const Duration(days: 1)).toLocal();
+
+              // call the onDateChange
+              widget.onDateChange(from, to);
+            });
           }
         });
       }),
       onDoubleTap: (() {
-        DateTime from = DateTime(
-          DateTime.now().year,
-          DateTime.now().month,
-          1
-        ).toLocal();
+        setState(() {
+          // set current date as todays date
+          _currentDate = DateTime.now();
 
-        DateTime to = DateTime(
-          DateTime.now().year,
-          DateTime.now().month + 1,
-          1
-        ).subtract(const Duration(days: 1)).toLocal();
-    
-        onPress(from, to);
+          // calculate from and to range for current date   
+          DateTime from = DateTime(
+            _currentDate.year,
+            _currentDate.month,
+            1
+          ).toLocal();
+
+          DateTime to = DateTime(
+            _currentDate.year,
+            _currentDate.month + 1,
+            1
+          ).subtract(const Duration(days: 1)).toLocal();
+
+          // call onDateChange
+          widget.onDateChange(from, to);
+        });
       }),
       child: Container(
-        height: 35,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: background,
+          color: widget.background,
           border: Border(
             bottom: BorderSide(
-              color: border,
+              color: widget.border,
               width: 1.0,
-              style: BorderStyle.solid
+              style: BorderStyle.solid,
             )
           )
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            InkWell(
+            GestureDetector(
               onTap: (() {
-                // change the date
                 _goPrevMonth();
               }),
               child: Container(
-                color: Colors.transparent,
+                padding: const EdgeInsets.all(5),
                 width: 50,
-                height: 35,
-                child: const Icon(
-                  Ionicons.arrow_back_circle,
-                  size: 20,
-                  color: textColor,
+                color: Colors.transparent,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: const Icon(
+                    Ionicons.caret_back,
+                    color: textColor,
+                  ),
                 ),
               ),
             ),
             Expanded(
               child: Container(
-                color: Colors.transparent,
-                child: Center(
-                  child: Text(
-                    Globals.dfMMMMyyyy.formatLocal(initialDate)
-                  ),
+                padding: EdgeInsets.all((widget.subChild != null ? 10 : 0)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      Globals.dfMMMMyyyy.formatLocal(_currentDate)
+                    ),
+                    _generateSubChild(),
+                  ],
                 ),
-              ),
+              )
             ),
-            InkWell(
+            GestureDetector(
               onTap: (() {
                 _goNextMonth();
               }),
               child: Container(
-                color: Colors.transparent,
+                padding: const EdgeInsets.all(5),
                 width: 50,
-                height: 35,
-                child: const Icon(
-                  Ionicons.arrow_forward_circle,
-                  size: 20,
-                  color: textColor,
+                color: Colors.transparent,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: const Icon(
+                    Ionicons.caret_forward,
+                    color: textColor,
+                  ),
                 ),
               ),
             ),
@@ -128,34 +188,56 @@ class MonthPrevNextCalendar extends StatelessWidget {
   }
 
   void _goPrevMonth() {
-    DateTime from = DateTime(
-      initialDate.year,
-      initialDate.month-1,
-      1
-    ).toLocal();
-    
-    DateTime to = DateTime(
-      initialDate.year,
-      initialDate.month,
-      1
-    ).subtract(const Duration(days: 1)).toLocal();
-    
-    onPress(from, to);
+    setState(() {
+      // change current date to previous month
+      _currentDate = DateTime(
+        _currentDate.year,
+        _currentDate.month - 1,
+        1
+      );
+
+      DateTime from = DateTime(
+        _currentDate.year,
+        _currentDate.month-1,
+        1
+      ).toLocal();
+      
+      DateTime to = DateTime(
+        _currentDate.year,
+        _currentDate.month,
+        1
+      ).subtract(const Duration(days: 1)).toLocal();
+      
+      widget.onDateChange(from, to);
+    });
   }
 
   void _goNextMonth() {
-    DateTime from = DateTime(
-      initialDate.year,
-      initialDate.month+1,
-      1
-    ).toLocal();
-    
-    DateTime to = DateTime(
-      initialDate.year,
-      initialDate.month+2,
-      1
-    ).subtract(const Duration(days: 1)).toLocal();
+    setState(() {
+      // change current date to next month
+      _currentDate = DateTime(
+        _currentDate.year,
+        _currentDate.month + 1,
+        1
+      );
 
-    onPress(from, to);
+      DateTime from = DateTime(
+        _currentDate.year,
+        _currentDate.month+1,
+        1
+      ).toLocal();
+      
+      DateTime to = DateTime(
+        _currentDate.year,
+        _currentDate.month+2,
+        1
+      ).subtract(const Duration(days: 1)).toLocal();
+
+      widget.onDateChange(from, to);
+    });
+  }
+
+  Widget _generateSubChild() {
+    return (widget.subChild ?? const SizedBox.shrink());
   }
 }
