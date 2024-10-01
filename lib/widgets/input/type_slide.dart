@@ -3,6 +3,7 @@ import 'package:my_expense/_index.g.dart';
 
 class TypeSlide extends StatefulWidget {
   final Function(String) onChange;
+  //TODO: to change this to be more dynamic so we can use any widget as item instead of String only
   final Map<String, Color> items;
   final double height;
   final double width;
