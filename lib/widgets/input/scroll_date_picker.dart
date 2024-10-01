@@ -272,8 +272,14 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
 
   void _setCurrentDate() {
     setState(() {
+      int prevNumDays = _numOfDays;
+      //TODO: remove when finished fix
+      debugPrint("Prev Num Days: $_numOfDays");
+
       // calculate again the number of days
       _calculateNumOfDays();
+      //TODO: remove when finished fix
+      debugPrint("Current Num Days: $_numOfDays");
 
       // get current selected item from day controller
       int selectedItem = _dayController.selectedItem;
@@ -283,8 +289,28 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
         selectedItem += _numOfDays;
       }
 
-      // set current day based on the calculated selected item
-      _currentDay = (selectedItem + 1);
+      if (_dayController.selectedItem > 0) {
+        if (prevNumDays > _numOfDays) {
+          selectedItem = selectedItem - (prevNumDays - _numOfDays);
+        }
+        else if (_numOfDays > prevNumDays) {
+          selectedItem = selectedItem + (_numOfDays - prevNumDays);
+        }
+
+        // set current day based on the calculated selected item
+        _currentDay = (selectedItem + 1);
+        
+        if (_dayController.selectedItem != selectedItem) {
+          _dayController.animateToItem(
+            selectedItem,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.fastOutSlowIn
+          );
+        }
+      }
+      else if (_dayController.selectedItem < 0) {
+        //TODO: to fix for the minus selected item
+      }
 
       // set current date
       _currentDate = DateTime(_currentYear, _currentMonth, _currentDay);
