@@ -165,22 +165,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _createFloatingAddButton() {
-    return FloatingActionButton(
-      elevation: 0.0,
-      backgroundColor: Colors.transparent,
-      onPressed: () {
+    return GestureDetector(
+      onTap: (() {
         Navigator.pushNamed(context, '/transaction/add', arguments: _selectedDate);
-      },
+      }),
       child: Container(
-        width: 75,
-        height: 75,
+        width: 60,
+        height: 60,
         decoration: BoxDecoration(
           color: accentColors[0],
-          borderRadius: BorderRadius.circular(75)
+          borderRadius: BorderRadius.circular(75),
         ),
         child: const Icon(
           Ionicons.add,
-          size: 25,
+          size: 40,
           color: textColor,
         ),
       ),
