@@ -419,12 +419,14 @@ class _TransactionInputState extends State<TransactionInput> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      setState(() {
-                        if (_showDescription) {
-                          _showDescription = !_showDescription;
-                        }
-                        _showCalendar = !_showCalendar;
-                      });
+                      if (!_isDisabled) {
+                        setState(() {
+                          if (_showDescription) {
+                            _showDescription = !_showDescription;
+                          }
+                          _showCalendar = !_showCalendar;
+                        });
+                      }
                     },
                     child: Container(
                       height: 50,
@@ -452,36 +454,14 @@ class _TransactionInputState extends State<TransactionInput> {
                       child: ScrollDatePicker(
                         initialDate: _currentDate.toLocal(),
                         minDate: DateTime(2010, 1, 1),
+                        barColor: accentColors[0],
+                        selectedColor: primaryDark,
                         onDateChange: ((val) {
                           setState(() {
                             _currentDate = val.toLocal();
                           });
                         }),
                       ),
-                      // child: CupertinoTheme(
-                      //   data: const CupertinoThemeData(
-                      //     brightness: Brightness.dark,
-                      //     textTheme: CupertinoTextThemeData(
-                      //       textStyle: TextStyle(
-                      //         fontFamily: '--apple-system',
-                      //         fontSize: 20,
-                      //       ),
-                      //       dateTimePickerTextStyle: TextStyle(
-                      //         fontFamily: '--apple-system',
-                      //         fontSize: 20,
-                      //       ),
-                      //     )
-                      //   ),
-                      //   child: CupertinoDatePicker(
-                      //     mode: CupertinoDatePickerMode.date,
-                      //     initialDateTime: _currentDate.toLocal(),
-                      //     onDateTimeChanged: (val) {
-                      //       setState(() {
-                      //         _currentDate = val.toLocal();
-                      //       });
-                      //     },
-                      //   ),
-                      // ),
                     ),
                   ),
                   Visibility(
@@ -506,23 +486,26 @@ class _TransactionInputState extends State<TransactionInput> {
                         CupertinoSwitch(
                           value: _currentClear,
                           activeTrackColor: accentColors[0],
-                          onChanged: (value) {
+                          inactiveTrackColor: primaryLight,
+                          onChanged: (_isDisabled ? null : (value) {
                             setState(() {
                               _currentClear = value;
                             });
-                          },
+                          }),
                         ),
                       ],
                     ),
                   ),
                   GestureDetector(
                     onTap: () {
-                      setState(() {
-                        if(_showCalendar) {
-                          _showCalendar = false;
-                        }
-                        _showDescription = !_showDescription;
-                      });
+                      if (!_isDisabled) {
+                        setState(() {
+                          if(_showCalendar) {
+                            _showCalendar = false;
+                          }
+                          _showDescription = !_showDescription;
+                        });
+                      }
                     },
                     child: Container(
                       height: 50,
@@ -593,6 +576,37 @@ class _TransactionInputState extends State<TransactionInput> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         GestureDetector(
+          onTap: () {
+            if (!_isDisabled) {
+              // only show the modal bottom sheet if this is not transfer
+              if (_currentType != 'transfer')
+              {
+                // show the modal bottom sheet
+                showModalBottomSheet(
+                  context: context,
+                  builder: (BuildContext context) {
+                    String title = "";
+                    if (_currentType == 'income') {
+                      title = "Income Category";
+                    }
+                    else {
+                      title = "Expense Category";
+                    }
+
+                    return MyBottomSheet(
+                      context: context,
+                      title: title,
+                      screenRatio: 0.75,
+                      child:  GridView.count(
+                        crossAxisCount: 4,
+                        children: _generateIconCategory(),
+                      ),
+                    );
+                  }
+                );
+              }
+            }
+          },
           child: Container(
             width: 50,
             height: 50,
@@ -602,35 +616,6 @@ class _TransactionInputState extends State<TransactionInput> {
             ),
             child: _currentCategoryIcon,
           ),
-          onTap: () {
-            // only show the modal bottom sheet if this is not transfer
-            if (_currentType != 'transfer')
-            {
-              // show the modal bottom sheet
-              showModalBottomSheet(
-                context: context,
-                builder: (BuildContext context) {
-                  String title = "";
-                  if (_currentType == 'income') {
-                    title = "Income Category";
-                  }
-                  else {
-                    title = "Expense Category";
-                  }
-
-                  return MyBottomSheet(
-                    context: context,
-                    title: title,
-                    screenRatio: 0.75,
-                    child:  GridView.count(
-                      crossAxisCount: 4,
-                      children: _generateIconCategory(),
-                    ),
-                  );
-                }
-              );
-            }
-          },
         ),
         const SizedBox(width: 10,),
         Expanded(
@@ -644,6 +629,7 @@ class _TransactionInputState extends State<TransactionInput> {
                 child: TextFormField(
                   controller: _nameController,
                   focusNode: _nameFocus,
+                  enabled: (!_isDisabled),
                   enableSuggestions: false,
                   cursorColor: textColor.withValues(alpha: 0.6),
                   keyboardType: TextInputType.name,
@@ -698,7 +684,9 @@ class _TransactionInputState extends State<TransactionInput> {
           flex: 4,
           child: GestureDetector(
             onTap: (() async {
-              await _showCalculator();
+              if (!_isDisabled) {
+                await _showCalculator();
+              }
             }),
             child: AutoSizeText(
               Globals.fCCY.format(_currentAmount),
@@ -880,18 +868,20 @@ class _TransactionInputState extends State<TransactionInput> {
   Widget _buildIncomeExpenseWalletSelection() {
     return GestureDetector(
       onTap: () async {
-        await _showAccountSelection(
-          title: "Account",
-          selectedId: _currentWalletFromID,
-          onTap: ((index) {
-            setState(() {
-              _currentWalletFromID = _walletList[index].id;
-              _currentWalletFromName = _walletList[index].name;
-              _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-              _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-            });
-          })
-        );
+        if (!_isDisabled) {
+          await _showAccountSelection(
+            title: "Account",
+            selectedId: _currentWalletFromID,
+            onTap: ((index) {
+              setState(() {
+                _currentWalletFromID = _walletList[index].id;
+                _currentWalletFromName = _walletList[index].name;
+                _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+              });
+            })
+          );
+        }
       },
       child: Container(
         height: 50,
@@ -929,19 +919,21 @@ class _TransactionInputState extends State<TransactionInput> {
           Expanded(
             child: GestureDetector(
               onTap: () async {
-                await _showAccountSelection(
-                  title: "From Account",
-                  selectedId: _currentWalletFromID,
-                  disableID: _currentWalletToID,
-                  onTap: ((index) {
-                    setState(() {
-                      _currentWalletFromID = _walletList[index].id;
-                      _currentWalletFromName = _walletList[index].name;
-                      _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                      _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                    });
-                  })
-                );
+                if (!_isDisabled) {
+                  await _showAccountSelection(
+                    title: "From Account",
+                    selectedId: _currentWalletFromID,
+                    disableID: _currentWalletToID,
+                    onTap: ((index) {
+                      setState(() {
+                        _currentWalletFromID = _walletList[index].id;
+                        _currentWalletFromName = _walletList[index].name;
+                        _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                        _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+                      });
+                    })
+                  );
+                }
               },
               child: Container(
                 color: Colors.transparent,
@@ -978,19 +970,21 @@ class _TransactionInputState extends State<TransactionInput> {
           Expanded(
             child: GestureDetector(
               onTap: () async {
-                await _showAccountSelection(
-                  title: "To Account",
-                  selectedId: _currentWalletToID,
-                  disableID: _currentWalletFromID,
-                  onTap: ((index) {
-                    setState(() {
-                      _currentWalletToID = _walletList[index].id;
-                      _currentWalletToName = _walletList[index].name;
-                      _currentWalletToType = _walletList[index].walletType.type.toLowerCase();
-                      _currentWalletToCCY = _walletList[index].currency.name.toLowerCase();
-                    });
-                  })
-                );
+                if (!_isDisabled) {
+                  await _showAccountSelection(
+                    title: "To Account",
+                    selectedId: _currentWalletToID,
+                    disableID: _currentWalletFromID,
+                    onTap: ((index) {
+                      setState(() {
+                        _currentWalletToID = _walletList[index].id;
+                        _currentWalletToName = _walletList[index].name;
+                        _currentWalletToType = _walletList[index].walletType.type.toLowerCase();
+                        _currentWalletToCCY = _walletList[index].currency.name.toLowerCase();
+                      });
+                    })
+                  );
+                }
               },
               child: Container(
                 color: Colors.transparent,

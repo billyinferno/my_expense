@@ -6,12 +6,18 @@ class ScrollDatePicker extends StatefulWidget {
   final DateTime? minDate;
   final DateTime? maxDate;
   final Function(DateTime)? onDateChange;
+  final Color barColor;
+  final Color selectedColor;
+  final Color borderColor;
   const ScrollDatePicker({
     super.key,
     this.initialDate,
     this.minDate,
     this.maxDate,
     this.onDateChange,
+    this.barColor = Colors.blue,
+    this.selectedColor = Colors.black,
+    this.borderColor = primaryLight,
   });
 
   @override
@@ -19,9 +25,9 @@ class ScrollDatePicker extends StatefulWidget {
 }
 
 class _ScrollDatePickerState extends State<ScrollDatePicker> {
-  late ScrollController _dayController;
-  late ScrollController _monthController;
-  late ScrollController _yearController;
+  late FixedExtentScrollController _dayController;
+  late FixedExtentScrollController _monthController;
+  late FixedExtentScrollController _yearController;
 
   late DateTime _currentDate;
   late int _currentDay;
@@ -29,6 +35,8 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
   late int _currentYear;
 
   late DateTime _minDate;
+  late int _minYear;
+
   late DateTime _maxDate;
 
   late int _numOfDays;
@@ -45,26 +53,29 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
     _currentYear = _currentDate.year;
 
     // initialize _min and _maxDate
-    _minDate = (widget.minDate ?? DateTime(_currentDate.year - 5, 1, 1));
-    _maxDate = (widget.maxDate ?? DateTime(_currentDate.year + 5, 12, 31));
+    _minDate = (widget.minDate ?? DateTime(_currentYear - 5, 1, 1));
+    _maxDate = (widget.maxDate ?? DateTime(_currentYear + 5, 12, 31));
+
+    // get minimum date year
+    _minYear = _minDate.year;
 
     // calculate number of year
-    _numOfYears = (_maxDate.year - _minDate.year) + 1;
+    _numOfYears = (_maxDate.year - _minYear) + 1;
 
     // get _numOfDays
     _calculateNumOfDays();
 
     // set the initial index for  day, month, and year
     _dayController = FixedExtentScrollController(
-      initialItem: (_currentDate.day - 1),
+      initialItem: (_currentDay - 1),
     );
 
     _monthController = FixedExtentScrollController(
-      initialItem: (_currentDate.month - 1),
+      initialItem: (_currentMonth - 1),
     );
 
     _yearController = FixedExtentScrollController(
-      initialItem: (_currentDate.year - _minDate.year),
+      initialItem: (_currentYear - _minYear),
     );
   }
 
@@ -82,11 +93,33 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
     return GestureDetector(
       onDoubleTap: (() {
         // set the date back to current date
-        setState(() {
-          _currentDate = DateTime.now();
-        });
+        _currentDate = DateTime.now();
+        _currentDay = _currentDate.day;
+        _currentMonth = _currentDate.month;
+        _currentYear = _currentDate.year;
 
-        //TODO: to move the controller to the correct position
+        if (widget.onDateChange != null) {
+          widget.onDateChange!(_currentDate);
+        }
+        
+        // move the controller to the correct position
+        _dayController.animateToItem(
+          _currentDay - 1,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.fastOutSlowIn
+        );
+
+        _monthController.animateToItem(
+          _currentMonth - 1,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.fastOutSlowIn
+        );
+
+        _yearController.animateToItem(
+          _currentYear - _minYear,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.fastOutSlowIn
+        );
       }),
       child: Container(
         padding: const EdgeInsets.all(15),
@@ -105,7 +138,7 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
                       padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: Colors.blue,
+                        color: widget.barColor,
                       ),
                     ),
                   ),
@@ -136,7 +169,17 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
                               itemExtent: 22.0,
                               childDelegate: ListWheelChildLoopingListDelegate(
                                 children: List<Widget>.generate(_numOfDays, (int index) {
-                                  return Text("${index + 1}");
+                                  if ((index+1) == _currentDay) {
+                                    return Text(
+                                      "${index + 1}",
+                                      style: TextStyle(
+                                        color: widget.selectedColor
+                                      ),
+                                    );
+                                  }
+                                  else {
+                                    return Text("${index + 1}");
+                                  }
                                 }),
                               ),
                             ),
@@ -154,7 +197,17 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
                             itemExtent: 22.0,
                             childDelegate: ListWheelChildLoopingListDelegate(
                               children: List<Widget>.generate(12, (int index) {
-                                return Text(Globals.dfMMMM.format(DateTime(_currentDate.year, (index+1), 1)));
+                                if ((index + 1) == _currentMonth) {
+                                  return Text(
+                                    Globals.dfMMMM.format(DateTime(_currentDate.year, (index+1), 1)),
+                                    style: TextStyle(
+                                      color: widget.selectedColor
+                                    ),
+                                  );
+                                }
+                                else {
+                                  return Text(Globals.dfMMMM.format(DateTime(_currentDate.year, (index+1), 1)));
+                                }
                               }),
                             ),
                           ),
@@ -166,7 +219,7 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
                               border: Border(
                                 left: BorderSide(
                                   width: 1.0,
-                                  color: primaryLight,
+                                  color: widget.borderColor,
                                   style: BorderStyle.solid,
                                 )
                               ),
@@ -175,13 +228,23 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
                               controller: _yearController,
                               physics: FixedExtentScrollPhysics(),
                               onSelectedItemChanged: ((int index) {
-                                _currentYear = (_minDate.year + index);
+                                _currentYear = (_minYear + index);
                                 _setCurrentDate();
                               }),
                               itemExtent: 22.0,
                               childDelegate: ListWheelChildLoopingListDelegate(
                                 children: List<Widget>.generate(_numOfYears, (int index) {
-                                  return Text("${_minDate.year + index}");
+                                  if ((_minYear + index) == _currentYear) {
+                                    return Text(
+                                      "${_minYear + index}",
+                                      style: TextStyle(
+                                        color: widget.selectedColor
+                                      ),
+                                    );
+                                  }
+                                  else {
+                                    return Text("${_minYear + index}");
+                                  }
                                 }),
                               ),
                             ),
@@ -201,7 +264,7 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
 
   void _calculateNumOfDays() {
     // get the last day of the _currentDate
-    DateTime lastDate = DateTime(_currentDate.year, _currentDate.month + 1, 1).subtract(Duration(days: 1));
+    DateTime lastDate = DateTime(_currentYear, _currentMonth + 1, 1).subtract(Duration(days: 1));
 
     // set the _numOfDays
     _numOfDays = lastDate.day;
@@ -209,7 +272,24 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
 
   void _setCurrentDate() {
     setState(() {
+      // calculate again the number of days
+      _calculateNumOfDays();
+
+      // get current selected item from day controller
+      int selectedItem = _dayController.selectedItem;
+      
+      // loop while selected item is < 0
+      while(selectedItem < 0) {
+        selectedItem += _numOfDays;
+      }
+
+      // set current day based on the calculated selected item
+      _currentDay = (selectedItem + 1);
+
+      // set current date
       _currentDate = DateTime(_currentYear, _currentMonth, _currentDay);
+
+      // call the on date change function if this is not null
       if (widget.onDateChange != null) {
         widget.onDateChange!(_currentDate);
       }
