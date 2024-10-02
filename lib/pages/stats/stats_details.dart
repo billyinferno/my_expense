@@ -21,6 +21,16 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
   final ScrollController _expenseController = ScrollController();
 
   late int _totalPage;
+  late bool _sortAsc;
+  late String _sortType;
+  final Map<String, String> _typeMap = {
+    "default": "Default",
+    "name": "Category Name",
+    "amount": "Amount",
+  };
+
+  late List<CategoryStatsModel> _filterIncome;
+  late List<CategoryStatsModel> _filterExpense;
 
   @override
   void initState() {
@@ -36,6 +46,17 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
     if(_stats.incomeExpenseCategory.expense.isNotEmpty) {
       _totalPage += 1;
     }
+
+    // default the sorting to ascending
+    _sortAsc = true;
+
+    // default the sorting type to default
+    _sortType = 'default';
+
+    // initialize the filter data from stats result
+    _filterIncome = _stats.incomeExpenseCategory.income.toList();
+    _filterExpense = _stats.incomeExpenseCategory.expense.toList();
+
     _getMaxAmount();
   }
 
@@ -57,11 +78,40 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
           onPressed: (() {
             Navigator.pop(context);
           }),
-          //TODO: to add sort button so we can sort the highest, lowest, or default (category)
         ),
         actions: <Widget>[
-          // make the title to still center even without any action buttons
-          Container(width: 50, color: Colors.transparent,),
+          IconButton(
+            onPressed: (() {
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return MyBottomSheet(
+                    screenRatio: 0.25,
+                    context: context,
+                    title: 'Select Filter',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: _generateFilter(),
+                    )
+                  );
+                },
+              );
+            }),
+            icon: Icon(
+              Ionicons.filter,
+              size: 15,
+            )
+          ),
+          IconButton(
+            onPressed: (() {
+              setState(() {
+                _sortAsc = !_sortAsc;
+                _filterData();
+              });
+            }),
+            icon: SortIcon(asc: _sortAsc)
+          ),
         ],
       ),
       body: _checkBodyData(),
@@ -126,16 +176,31 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
     List<Widget> page = [];
 
     if(_stats.incomeExpenseCategory.income.isNotEmpty) {
-      page.add(_generateListView("income", _stats.currency.symbol, _stats.incomeExpenseCategory.income, _incomeController));
+      page.add(_generateListView(
+        type: "income",
+        ccy: _stats.currency.symbol,
+        data: _filterIncome,
+        controller: _incomeController
+      ));
     }
     if(_stats.incomeExpenseCategory.expense.isNotEmpty) {
-      page.add(_generateListView("expense", _stats.currency.symbol, _stats.incomeExpenseCategory.expense, _expenseController));
+      page.add(_generateListView(
+        type: "expense",
+        ccy: _stats.currency.symbol,
+        data: _filterExpense,
+        controller: _expenseController
+      ));
     }
 
     return page;
   }
 
-  Widget _generateListView(String type, String ccy, List<CategoryStatsModel> data, ScrollController controller) {
+  Widget _generateListView({
+    required String type,
+    required String ccy,
+    required List<CategoryStatsModel> data,
+    required ScrollController controller
+  }) {
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       controller: controller,
@@ -343,6 +408,70 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
     );
   }
 
+  List<Widget> _generateFilter() {
+    List<Widget> ret = [];
+
+    // loop thru filter map
+    _typeMap.forEach((key, value) {
+      ret.add(
+        GestureDetector(
+          onTap: (() {
+            setState(() {
+              _sortType = key;
+              _filterData();
+            });
+            Navigator.pop(context);
+          }),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: secondaryLight,
+                  width: 1.0,
+                  style: BorderStyle.solid,
+                )
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: secondaryDark,
+                    border: Border.all(
+                      color: accentColors[1],
+                      width: 1.0,
+                      style: BorderStyle.solid,
+                    ),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Center(
+                    child: Text(
+                      key.trim().substring(0,1).toUpperCase(),
+                      style: TextStyle(
+                        color: accentColors[1],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10,),
+                Text(value),
+              ],
+            ),
+          ),
+        )
+      );
+    },);
+
+    return ret;
+  }
+
   String _getAppBarTitle() {
     if(_stats.wallet.id < 0) {
       // use currency instead of wallet name
@@ -417,6 +546,50 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
       // calculate the number of jump we need to go to the page
       double jumpPosition = MediaQuery.of(context).size.width / 2;
       _pageController.jumpTo(jumpPosition * pageToGo);
+    }
+  }
+
+  void _filterData() {
+    if (_stats.incomeExpenseCategory.income.isNotEmpty) {
+      switch(_sortType) {
+        case "name":
+          _filterIncome = _stats.incomeExpenseCategory.income.toList()..sort(
+            (a, b) => a.categoryName.compareTo(b.categoryName)
+          );
+          break;
+        case "amount":
+          _filterIncome = _stats.incomeExpenseCategory.income.toList()..sort(
+            (a, b) => (a.amount.compareTo(b.amount))
+          );
+        default:
+          _filterIncome = _stats.incomeExpenseCategory.income.toList();
+      }
+
+      if (!_sortAsc) {
+        _filterIncome = _filterIncome.reversed.toList();
+      }
+    }
+
+    if (_stats.incomeExpenseCategory.expense.isNotEmpty) {
+      switch(_sortType) {
+        case "name":
+          _filterExpense = _stats.incomeExpenseCategory.expense.toList()..sort(
+            (a, b) => a.categoryName.compareTo(b.categoryName)
+          );
+          break;
+        case "amount":
+          // for expense as it stored as negative we compare b to a for
+          // sort as ascending.
+          _filterExpense = _stats.incomeExpenseCategory.expense.toList()..sort(
+            (a, b) => (b.amount.compareTo(a.amount))
+          );
+        default:
+          _filterExpense = _stats.incomeExpenseCategory.expense.toList();
+      }
+
+      if (!_sortAsc) {
+        _filterExpense = _filterExpense.reversed.toList();
+      }
     }
   }
 }
