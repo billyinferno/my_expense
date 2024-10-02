@@ -176,6 +176,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                       decoration: const BoxDecoration(
                         border: Border(bottom: BorderSide(width: 1.0, color: secondaryBackground)),
                       ),
+                      //TODO: to check any issue on the page as in some IOS the date is not selected properly
                       child: HorizontalMonthCalendar(
                         firstDay: _firstDay,
                         lastDay: _lastDay,
