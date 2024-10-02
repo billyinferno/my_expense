@@ -35,13 +35,15 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
           }
         }
         catch (error) {
-          // show the error dialog
-          ShowMyDialog(
-            cancelEnabled: false,
-            confirmText: "OK",
-            dialogTitle: "Error Refresh",
-            dialogText: error.toString())
-          .show(context);
+          if (context.mounted) {
+            // show the error dialog
+            ShowMyDialog(
+              cancelEnabled: false,
+              confirmText: "OK",
+              dialogTitle: "Error Refresh",
+              dialogText: error.toString())
+            .show(context);
+          }
         }
       },
       selectedDate: _paramsData.date,
