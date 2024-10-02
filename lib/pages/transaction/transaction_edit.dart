@@ -28,18 +28,36 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     return TransactionInput(
       title: "Edit Transaction",
       type: TransactionInputType.edit,
-      saveTransaction: (value) {
+      saveTransaction: (value) async {
         try {
-          _saveTransaction(value);
+          // ensure only have 1 data
+          if (value.length == 1) {
+            await _saveTransaction(value[0]);
+          }
+          else {
+            Log.error(message: "❌ edit transaction have data more than 1");
+
+            if (context.mounted) {
+              // show the error dialog
+              ShowMyDialog(
+                cancelEnabled: false,
+                confirmText: "OK",
+                dialogTitle: "Error update",
+                dialogText: "Invalid transaction data when update")
+              .show(context);
+            }
+          }
         }
         catch (error) {
-          // show the error dialog
-          ShowMyDialog(
-            cancelEnabled: false,
-            confirmText: "OK",
-            dialogTitle: "Error Refresh",
-            dialogText: error.toString())
-          .show(context);
+          if (context.mounted) {
+            // show the error dialog
+            ShowMyDialog(
+              cancelEnabled: false,
+              confirmText: "OK",
+              dialogTitle: "Error Refresh",
+              dialogText: error.toString())
+            .show(context);
+          }
         }
       },
       selectedDate: _paramsData.date,
@@ -47,7 +65,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     );
   }
 
-  void _saveTransaction(TransactionModel? txn) async {
+  Future<void> _saveTransaction(TransactionModel? txn) async {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 

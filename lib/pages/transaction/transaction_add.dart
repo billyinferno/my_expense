@@ -34,82 +34,87 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     return TransactionInput(
       title: "Add Transaction",
       type: TransactionInputType.add,
-      saveTransaction: (value) {
+      saveTransaction: (value) async {
         try {
-          _saveTransaction(value);
+          // loop to add the transaction in API
+          await _saveTransaction(value);
         }
         catch (error) {
-          // show the error dialog
-          ShowMyDialog(
-            cancelEnabled: false,
-            confirmText: "OK",
-            dialogTitle: "Error Add",
-            dialogText: error.toString())
-          .show(context);
+          if (context.mounted) {            
+            // show the error dialog
+            ShowMyDialog(
+              cancelEnabled: false,
+              confirmText: "OK",
+              dialogTitle: "Error Add",
+              dialogText: error.toString())
+            .show(context);
+          }
         }
       },
       selectedDate: _selectedDate.toLocal(),
     );
   }
 
-  void _saveTransaction(TransactionModel? txn) async {
+  Future<void> _saveTransaction(List<TransactionModel?> transactions) async {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
-    // now we can try to send updated data to the backend
-    await _transactionHttp.addTransaction(
-      txn: txn!,
-      selectedDate: _selectedDate
-    ).then((result) async {
-      // update necessary information after we add the transaction
-      await _updateInformation(result).then((_) {
-        // get the transaction edit date
-        String date = Globals.dfyyyyMMdd.formatLocal(txn.date);
+    for(TransactionModel? txn in transactions) {
+      // now we can try to send updated data to the backend
+      await _transactionHttp.addTransaction(
+        txn: txn!,
+        selectedDate: _selectedDate
+      ).then((result) async {
+        // update necessary information after we add the transaction
+        await _updateInformation(result).then((_) {
+          // get the transaction edit date
+          String date = Globals.dfyyyyMMdd.formatLocal(txn.date);
 
-        // get the transaction list from this date
-        List<TransactionListModel> txnListShared =
-          (TransactionSharedPreferences.getTransaction(date) ?? []);
+          // get the transaction list from this date
+          List<TransactionListModel> txnListShared =
+            (TransactionSharedPreferences.getTransaction(date) ?? []);
 
-        // for transaction that actually add on the different date, we cannot notify the home list
-        // to show this transaction, because currently we are in a different date between the transaction
-        // being add and the date being selected on the home list
-        if (
-          txn.date.isSameDate(date: _selectedDate) &&
-          mounted
-        ) {
-          Provider.of<HomeProvider>(
-            context,
-            listen: false
-          ).setTransactionList(transactions: txnListShared);
-        }
+          // for transaction that actually add on the different date, we cannot notify the home list
+          // to show this transaction, because currently we are in a different date between the transaction
+          // being add and the date being selected on the home list
+          if (
+            txn.date.isSameDate(date: _selectedDate) &&
+            mounted
+          ) {
+            Provider.of<HomeProvider>(
+              context,
+              listen: false
+            ).setTransactionList(transactions: txnListShared);
+          }
+        }).onError((error, stackTrace) async {
+          // print the error
+          Log.error(
+            message: "Error when refresh transaction after save",
+            error: error,
+            stackTrace: stackTrace,
+          );
 
-        // finished update information, return back to the previous page
-        if (mounted) {
-          Navigator.pop(context);
-        }
+          throw Exception("Error when refresh information.");
+        });
       }).onError((error, stackTrace) async {
         // print the error
         Log.error(
-          message: "Error when refresh transaction after save",
+          message: "Error when add transaction",
           error: error,
           stackTrace: stackTrace,
         );
 
-        throw Exception("Error when refresh information.");
+        throw Exception("Error when add transaction.");
       });
-    }).onError((error, stackTrace) async {
-      // print the error
-      Log.error(
-        message: "Error when add transaction",
-        error: error,
-        stackTrace: stackTrace,
-      );
+    }
 
-      throw Exception("Error when add transaction.");
-    }).whenComplete(() {
-      // remove the loading screen
-      LoadingScreen.instance().hide();
-    },);
+    // remove the loading screen
+    LoadingScreen.instance().hide();
+
+    // finished update information, return back to the previous page
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   Future<void> _updateInformation(TransactionListModel txnAdd) async {

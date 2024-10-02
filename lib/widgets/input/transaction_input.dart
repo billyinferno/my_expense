@@ -40,13 +40,25 @@ class _TransactionInputState extends State<TransactionInput> {
   final TextEditingController _nameController  = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _exchangeController = TextEditingController();
+  final TextEditingController _repeatController = TextEditingController();
+  final TextEditingController _timesController = TextEditingController();
 
   final FocusNode _nameFocus = FocusNode();
 
   late UsersMeModel _userMe;
 
   late DateTime _currentDate;
-  final DateTime _todayDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day); 
+  final DateTime _todayDate = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day
+  );
+  final Map<String, String> _repeatMap = {
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "year": "Year",
+  };
 
   late Map<int, CategoryModel> _currentCategoryList;
 
@@ -68,6 +80,8 @@ class _TransactionInputState extends State<TransactionInput> {
   late String _currentWalletToCCY;
 
   late bool _currentClear;
+  late String _currentRepeat;
+  late String _repeatType;
 
   late double _currentExchangeRate;
 
@@ -121,6 +135,12 @@ class _TransactionInputState extends State<TransactionInput> {
     // set clear as true
     _currentClear = true;
 
+    // set repeat as single
+    _currentRepeat = 'single';
+
+    // default repeat type as month
+    _repeatType = 'month';
+
     // initialize the filter list and get the last expense and income
     // transaction to build the auto complete
     _filterList = [];
@@ -162,9 +182,10 @@ class _TransactionInputState extends State<TransactionInput> {
     // name fields
     _nameFocus.dispose();
     _nameController.dispose();
-
     _descriptionController.dispose();
     _exchangeController.dispose();
+    _repeatController.dispose();
+    _timesController.dispose();
     
     super.dispose();
   }
@@ -176,6 +197,10 @@ class _TransactionInputState extends State<TransactionInput> {
     // set exchange rate as 1 (assuming that we will always send the same CCY)
     _currentExchangeRate = 1;
     _exchangeController.text = Globals.fCCY2.format(_currentExchangeRate);
+
+    // default the repeat and times
+    _repeatController.text = "1";
+    _timesController.text = "3";
 
     // set default user from and to
     _getUserFromWalletInfo(walletId: _userMe.defaultWallet);
@@ -247,7 +272,12 @@ class _TransactionInputState extends State<TransactionInput> {
                 // call parent save, all the handler on the async call should be
                 // coming from the parent instead here.
                 try {
-                  TransactionModel? gen = _generateTransaction();
+                  List<TransactionModel?> gen = [];
+
+                  // default isOkay to false
+                  bool isOkay = false;
+
+                  gen = _generateTransaction();
 
                   // if all good then check the date whether this is future date
                   // or not?
@@ -257,7 +287,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     
                     late Future<bool?> result = ShowMyDialog(
                         dialogTitle: "Future Date",
-                        dialogText: "Are you sure want to add a future date?.",
+                        dialogText: "Are you sure want to add a future date?",
                         confirmText: "Add",
                         confirmColor: accentColors[0],
                         cancelText: "Cancel"
@@ -267,12 +297,51 @@ class _TransactionInputState extends State<TransactionInput> {
                       // check whether user press Add or Cancel
                       if(value == true) {
                         // user still want to add so add this transaction
-                        widget.saveTransaction(gen);
+                        isOkay = true;
                       }
                     });
                   }
                   else {
                     // same date, so just save the transaction
+                    isOkay = true;
+                  }
+
+                  // check whether generated transaction have more than 1
+                  // transaction or not?
+                  if (
+                    widget.type == TransactionInputType.add &&
+                    gen.length > 1 &&
+                    isOkay
+                  ) {
+                    // set isOkay to false again as we will ask user wheter
+                    // they want to save all transaction or not?
+                    isOkay = false;
+
+                    DateTime firstDate = gen[0]!.date;
+                    DateTime lastDate = gen[gen.length-1]!.date;
+
+                    if (context.mounted) {                        
+                      late Future<bool?> result = ShowMyDialog(
+                          dialogTitle: "Repeat Transaction",
+                          dialogText: "This will automatically add ${gen.length} transactions from ${Globals.dfddMMyyyy.format(firstDate)} until ${Globals.dfddMMyyyy.format(lastDate)}?",
+                          confirmText: "Add",
+                          confirmColor: accentColors[0],
+                          cancelText: "Cancel"
+                      ).show(context);
+
+                      await result.then((value) {
+                        // check whether user press Add or Cancel
+                        if(value == true) {
+                          // user still want to add so add this transaction
+                          isOkay = true;
+                        }
+                      });
+                    }
+                  }
+
+                  // check whether it's okay or not
+                  if (isOkay) {
+                    // save the transaction
                     widget.saveTransaction(gen);
                   }
                 }
@@ -468,6 +537,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     visible: (_currentType != 'transfer'),
                     child: _buildIncomeExpenseWalletSelection(),
                   ),
+                  ..._repeatTransactionInput(),
                   Container(
                     height: 50,
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -1161,6 +1231,144 @@ class _TransactionInputState extends State<TransactionInput> {
     );
   }
 
+  List<Widget> _repeatTransactionInput() {
+    // if this is edit then no need to show this
+    if (widget.type != TransactionInputType.add) {
+      return const [SizedBox.shrink()];
+    }
+
+    List<Widget> ret = [];
+    ret.add(
+        Container(
+        height: 50,
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Ionicons.repeat,
+              size: 20,
+              color: textColor,
+            ),
+            const SizedBox(width: 10,),
+            const Expanded(child: Text("Repeat")),
+            const SizedBox(width: 10,),
+            TypeSlide(
+              onChange: ((value) {
+                setState(() {                
+                  _currentRepeat = value;
+                });
+              }),
+              items: {
+                "single": accentColors[0],
+                "repeat": accentColors[4]
+              },
+              initialItem: "single",
+              editable: (widget.type == TransactionInputType.add ? true : false),
+            )
+          ],
+        ),
+      ),
+    );
+
+    ret.add(
+      AnimationExpand(
+        expand: _currentRepeat == 'repeat',
+        child: SizedBox(
+          height: 50,
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text("Every"),
+                const SizedBox(width: 10,),
+                Container(
+                  width: 50,
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: secondaryBackground,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: TextFormField(
+                    controller: _repeatController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    cursorColor: primaryLight,
+                    decoration: const InputDecoration(
+                      hintText: "1",
+                      hintStyle: TextStyle(
+                        color: primaryLight,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      isCollapsed: true,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 15,
+                    ),
+                    textAlign: TextAlign.center,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(3),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10,),
+                MySelector(
+                  data: _repeatMap,
+                  initialKeys: "month",
+                  onChange: ((key) {
+                    _repeatType = key;
+                  }),
+                ),
+                const SizedBox(width: 10,),
+                Container(
+                  width: 50,
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    color: secondaryBackground,
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: TextFormField(
+                    controller: _timesController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                    cursorColor: primaryLight,
+                    decoration: const InputDecoration(
+                      hintText: "1",
+                      hintStyle: TextStyle(
+                        color: primaryLight,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: EdgeInsets.zero,
+                      isCollapsed: true,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 15,
+                    ),
+                    textAlign: TextAlign.center,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(3),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10,),
+                Text("times"),
+              ],
+            )
+          ),
+        ),
+      )
+    );
+
+    return ret;
+  }
+
   void _filterAutoComplete(String lookup) {
     List<LastTransactionModel> filter = [];
 
@@ -1309,12 +1517,19 @@ class _TransactionInputState extends State<TransactionInput> {
     }
   }
 
-  TransactionModel? _generateTransaction() {
+  List<TransactionModel?> _generateTransaction() {
+    List<TransactionModel?> ret = [];
+    
     double? currentAmount;
     WalletCategoryTransactionModel? category;
     WalletCategoryTransactionModel walletFrom;
     WalletCategoryTransactionModel? walletTo;
     WalletCategoryTransactionModel usersPermissionsUser = WalletCategoryTransactionModel(_userMe.id);
+    DateTime txnDate = _currentDate;
+    String description = _descriptionController.text.trim();
+
+    int times = 1;
+    int repeat = 1;
 
     // if this is expense or income, check for name and category
     if (_currentType == 'expense' || _currentType == 'income') {
@@ -1334,6 +1549,31 @@ class _TransactionInputState extends State<TransactionInput> {
       }
       else {
         category = WalletCategoryTransactionModel(_currentCategoryID!);
+      }
+
+      // check whether this is repeat transaction or not?
+      if (_currentRepeat == 'repeat') {
+        try {
+          times = int.parse(_timesController.text.trim());
+        }
+        catch (error) {
+          throw Exception('Invalid repeat times value');
+        }
+
+        if (times <= 1) {
+          throw Exception('Repeat times should be more than 1');
+        }
+
+        try {
+          repeat = int.parse(_repeatController.text.trim());
+        }
+        catch (error) {
+          throw Exception('Invalid repeat value');
+        }
+
+        if (repeat <= 0) {
+          throw Exception('Repeat value should be more than 0');
+        }
       }
     }
 
@@ -1355,12 +1595,6 @@ class _TransactionInputState extends State<TransactionInput> {
       walletFrom = WalletCategoryTransactionModel(_currentWalletFromID);
     }
 
-    // check the currency exchange
-    if (_currentExchangeRate <= 0) {
-      // exchange rate should be more than 0
-      throw Exception('Exchange rate should be more than 0');
-    }
-
     // if this is transfer then the to wallet should be selected also
     if (_currentType == 'transfer') {
       // check the to wallet id
@@ -1375,21 +1609,79 @@ class _TransactionInputState extends State<TransactionInput> {
       // default the category as -1, since transfer doesn't have any category
       // it's just movement of money.
       category = WalletCategoryTransactionModel(-1);
+
+      // default the _currentExchangeRate as 1
+      _currentExchangeRate = 1;
+
+      // check if wallet from and to have different currency ID
+      if (_currentWalletFromCCY != _currentWalletToCCY) {
+        // try to convert the exchange rate text fields
+        try {
+          _currentExchangeRate = double.parse(_exchangeController.text.trim());
+        }
+        catch (error) {
+          throw Exception('Invalid exchange rate');          
+        }
+
+        // ensure exchange rate should be more than 0
+        if (_currentExchangeRate <= 0) {
+          // exchange rate should be more than 0
+          throw Exception('Exchange rate should be more than 0');
+        }
+      }
     }
 
-    // generate the transaction model
-    return TransactionModel(
-      _nameController.text.trim(),
-      _currentType,
-      category,
-      _currentDate,
-      walletFrom,
-      _currentClear,
-      _descriptionController.text.trim(),
-      usersPermissionsUser,
-      currentAmount,
-      walletTo,
-      _currentExchangeRate
-    );
+    // loop thru times
+    for(int i=0; i<times; i++) {
+      // if times more than 1, add description automatically
+      if (times > 1) {
+        description = '${_nameController.text.trim()} transaction ${i+1} of $times\n${_descriptionController.text.trim()}';
+      }
+
+      // generate the transaction model
+      ret.add(
+        TransactionModel(
+          _nameController.text.trim(),
+          _currentType,
+          category,
+          txnDate,
+          walletFrom,
+          _currentClear,
+          description,
+          usersPermissionsUser,
+          currentAmount,
+          walletTo,
+          _currentExchangeRate
+        )
+      );
+
+      // check if times is > 1, if more than 1 then calculate the next date
+      if (times > 1) {
+        switch(_repeatType) {
+          case "day":
+            txnDate = txnDate.add(Duration(days: repeat));
+            break;
+          case "week":
+            txnDate = txnDate.add(Duration(days: (repeat * 7)));
+            break;
+          case "month":
+            txnDate = DateTime(
+              txnDate.year,
+              txnDate.month + 1,
+              txnDate.day
+            );
+            break;
+          case "year":
+            txnDate = DateTime(
+              txnDate.year + 1,
+              txnDate.month,
+              txnDate.day
+            );
+            break;
+        }
+      }
+    }
+
+    return ret;
   }
 }
