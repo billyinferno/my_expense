@@ -48,7 +48,17 @@ class _TransactionInputState extends State<TransactionInput> {
   late UsersMeModel _userMe;
 
   late DateTime _currentDate;
-  final DateTime _todayDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day); 
+  final DateTime _todayDate = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day
+  );
+  final Map<String, String> _repeatMap = {
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "year": "Year",
+  };
 
   late Map<int, CategoryModel> _currentCategoryList;
 
@@ -262,10 +272,12 @@ class _TransactionInputState extends State<TransactionInput> {
                 // call parent save, all the handler on the async call should be
                 // coming from the parent instead here.
                 try {
-                  // TODO: to generate transaction as list
-                  List<TransactionModel?> gen;
-                  gen = [];
-                  gen.add(_generateTransaction());
+                  List<TransactionModel?> gen = [];
+
+                  // default isOkay to false
+                  bool isOkay = false;
+
+                  gen = _generateTransaction();
 
                   // if all good then check the date whether this is future date
                   // or not?
@@ -275,7 +287,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     
                     late Future<bool?> result = ShowMyDialog(
                         dialogTitle: "Future Date",
-                        dialogText: "Are you sure want to add a future date?.",
+                        dialogText: "Are you sure want to add a future date?",
                         confirmText: "Add",
                         confirmColor: accentColors[0],
                         cancelText: "Cancel"
@@ -285,12 +297,51 @@ class _TransactionInputState extends State<TransactionInput> {
                       // check whether user press Add or Cancel
                       if(value == true) {
                         // user still want to add so add this transaction
-                        widget.saveTransaction(gen);
+                        isOkay = true;
                       }
                     });
                   }
                   else {
                     // same date, so just save the transaction
+                    isOkay = true;
+                  }
+
+                  // check whether generated transaction have more than 1
+                  // transaction or not?
+                  if (
+                    widget.type == TransactionInputType.add &&
+                    gen.length > 1 &&
+                    isOkay
+                  ) {
+                    // set isOkay to false again as we will ask user wheter
+                    // they want to save all transaction or not?
+                    isOkay = false;
+
+                    DateTime firstDate = gen[0]!.date;
+                    DateTime lastDate = gen[gen.length-1]!.date;
+
+                    if (context.mounted) {                        
+                      late Future<bool?> result = ShowMyDialog(
+                          dialogTitle: "Repeat Transaction",
+                          dialogText: "This will automatically add ${gen.length} transactions from ${Globals.dfddMMyyyy.format(firstDate)} until ${Globals.dfddMMyyyy.format(lastDate)}?",
+                          confirmText: "Add",
+                          confirmColor: accentColors[0],
+                          cancelText: "Cancel"
+                      ).show(context);
+
+                      await result.then((value) {
+                        // check whether user press Add or Cancel
+                        if(value == true) {
+                          // user still want to add so add this transaction
+                          isOkay = true;
+                        }
+                      });
+                    }
+                  }
+
+                  // check whether it's okay or not
+                  if (isOkay) {
+                    // save the transaction
                     widget.saveTransaction(gen);
                   }
                 }
@@ -1186,7 +1237,6 @@ class _TransactionInputState extends State<TransactionInput> {
       return const [SizedBox.shrink()];
     }
 
-    // TODO: to finished the repeat transaction
     List<Widget> ret = [];
     ret.add(
         Container(
@@ -1269,12 +1319,7 @@ class _TransactionInputState extends State<TransactionInput> {
                 ),
                 const SizedBox(width: 10,),
                 MySelector(
-                  data: {
-                    "day": "Day",
-                    "week": "Week",
-                    "month": "Month",
-                    "year": "Year",
-                  },
+                  data: _repeatMap,
                   initialKeys: "month",
                   onChange: ((key) {
                     _repeatType = key;
@@ -1472,12 +1517,19 @@ class _TransactionInputState extends State<TransactionInput> {
     }
   }
 
-  TransactionModel? _generateTransaction() {
+  List<TransactionModel?> _generateTransaction() {
+    List<TransactionModel?> ret = [];
+    
     double? currentAmount;
     WalletCategoryTransactionModel? category;
     WalletCategoryTransactionModel walletFrom;
     WalletCategoryTransactionModel? walletTo;
     WalletCategoryTransactionModel usersPermissionsUser = WalletCategoryTransactionModel(_userMe.id);
+    DateTime txnDate = _currentDate;
+    String description = _descriptionController.text.trim();
+
+    int times = 1;
+    int repeat = 1;
 
     // if this is expense or income, check for name and category
     if (_currentType == 'expense' || _currentType == 'income') {
@@ -1497,6 +1549,31 @@ class _TransactionInputState extends State<TransactionInput> {
       }
       else {
         category = WalletCategoryTransactionModel(_currentCategoryID!);
+      }
+
+      // check whether this is repeat transaction or not?
+      if (_currentRepeat == 'repeat') {
+        try {
+          times = int.parse(_timesController.text.trim());
+        }
+        catch (error) {
+          throw Exception('Invalid repeat times value');
+        }
+
+        if (times <= 1) {
+          throw Exception('Repeat times should be more than 1');
+        }
+
+        try {
+          repeat = int.parse(_repeatController.text.trim());
+        }
+        catch (error) {
+          throw Exception('Invalid repeat value');
+        }
+
+        if (repeat <= 0) {
+          throw Exception('Repeat value should be more than 0');
+        }
       }
     }
 
@@ -1518,12 +1595,6 @@ class _TransactionInputState extends State<TransactionInput> {
       walletFrom = WalletCategoryTransactionModel(_currentWalletFromID);
     }
 
-    // check the currency exchange
-    if (_currentExchangeRate <= 0) {
-      // exchange rate should be more than 0
-      throw Exception('Exchange rate should be more than 0');
-    }
-
     // if this is transfer then the to wallet should be selected also
     if (_currentType == 'transfer') {
       // check the to wallet id
@@ -1538,21 +1609,79 @@ class _TransactionInputState extends State<TransactionInput> {
       // default the category as -1, since transfer doesn't have any category
       // it's just movement of money.
       category = WalletCategoryTransactionModel(-1);
+
+      // default the _currentExchangeRate as 1
+      _currentExchangeRate = 1;
+
+      // check if wallet from and to have different currency ID
+      if (_currentWalletFromCCY != _currentWalletToCCY) {
+        // try to convert the exchange rate text fields
+        try {
+          _currentExchangeRate = double.parse(_exchangeController.text.trim());
+        }
+        catch (error) {
+          throw Exception('Invalid exchange rate');          
+        }
+
+        // ensure exchange rate should be more than 0
+        if (_currentExchangeRate <= 0) {
+          // exchange rate should be more than 0
+          throw Exception('Exchange rate should be more than 0');
+        }
+      }
     }
 
-    // generate the transaction model
-    return TransactionModel(
-      _nameController.text.trim(),
-      _currentType,
-      category,
-      _currentDate,
-      walletFrom,
-      _currentClear,
-      _descriptionController.text.trim(),
-      usersPermissionsUser,
-      currentAmount,
-      walletTo,
-      _currentExchangeRate
-    );
+    // loop thru times
+    for(int i=0; i<times; i++) {
+      // if times more than 1, add description automatically
+      if (times > 1) {
+        description = '${_nameController.text.trim()} transaction ${i+1} of $times\n${_descriptionController.text.trim()}';
+      }
+
+      // generate the transaction model
+      ret.add(
+        TransactionModel(
+          _nameController.text.trim(),
+          _currentType,
+          category,
+          txnDate,
+          walletFrom,
+          _currentClear,
+          description,
+          usersPermissionsUser,
+          currentAmount,
+          walletTo,
+          _currentExchangeRate
+        )
+      );
+
+      // check if times is > 1, if more than 1 then calculate the next date
+      if (times > 1) {
+        switch(_repeatType) {
+          case "day":
+            txnDate = txnDate.add(Duration(days: repeat));
+            break;
+          case "week":
+            txnDate = txnDate.add(Duration(days: (repeat * 7)));
+            break;
+          case "month":
+            txnDate = DateTime(
+              txnDate.year,
+              txnDate.month + 1,
+              txnDate.day
+            );
+            break;
+          case "year":
+            txnDate = DateTime(
+              txnDate.year + 1,
+              txnDate.month,
+              txnDate.day
+            );
+            break;
+        }
+      }
+    }
+
+    return ret;
   }
 }

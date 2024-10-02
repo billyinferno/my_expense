@@ -30,8 +30,22 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       type: TransactionInputType.edit,
       saveTransaction: (value) async {
         try {
-          for(TransactionModel? txn in value) {
-            await _saveTransaction(txn);
+          // ensure only have 1 data
+          if (value.length == 1) {
+            await _saveTransaction(value[0]);
+          }
+          else {
+            Log.error(message: "❌ edit transaction have data more than 1");
+
+            if (context.mounted) {
+              // show the error dialog
+              ShowMyDialog(
+                cancelEnabled: false,
+                confirmText: "OK",
+                dialogTitle: "Error update",
+                dialogText: "Invalid transaction data when update")
+              .show(context);
+            }
           }
         }
         catch (error) {
