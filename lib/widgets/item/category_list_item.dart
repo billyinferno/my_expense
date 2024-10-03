@@ -38,6 +38,7 @@ class CategoryListItem extends StatelessWidget {
         color: Colors.transparent,
       ),
       child: Slidable(
+        key: Key("${categoryId}_$categoryName"),
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
           extentRatio: 0.20,
