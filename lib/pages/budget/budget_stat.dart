@@ -14,6 +14,10 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final ScrollController _monthlyScroller = ScrollController();
   final ScrollController _yearlyScroller = ScrollController();
+  final Map<String, TypeSlideItem> _typeSlideItem = {
+    "monthly": TypeSlideItem(color: accentColors[2], text: "Monthly"),
+    "yearly": TypeSlideItem(color: accentColors[0], text: "Yearly"),
+  };
 
   late BudgetTransactionArgs _budgetTransaction;
   late BudgetStatModel _budgetStat;
@@ -175,10 +179,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
               _currentType = selected.toLowerCase();
             });
           }),
-          items: <String, Color>{
-            "Monthly": accentColors[2],
-            "Yearly": accentColors[0],
-          },
+          items: _typeSlideItem,
         ),
         const SizedBox(
           height: 5,

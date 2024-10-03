@@ -1,16 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:my_expense/_index.g.dart';
 
+class TypeSlideItem {
+  final Color color;
+  final IconData? icon;
+  final Color iconColor;
+  final String? text;
+  final Color textColor;
+
+  const TypeSlideItem({
+    required this.color,
+    this.icon,
+    this.iconColor = primaryBackground,
+    this.text,
+    this.textColor = primaryBackground,
+  });
+}
+
 class TypeSlide extends StatefulWidget {
   final Function(String) onChange;
-  //TODO: to change this to be more dynamic so we can use any widget as item instead of String only
-  final Map<String, Color> items;
+  final Map<String, TypeSlideItem> items;
   final double height;
   final double width;
   final bool editable;
   final String initialItem;
   final Color textActive;
-  final Color textInactive;
+  final Color iconActive;
   const TypeSlide({
     super.key,
     required this.onChange,
@@ -20,7 +35,7 @@ class TypeSlide extends StatefulWidget {
     this.editable = true,
     required this.initialItem,
     this.textActive = textColor,
-    this.textInactive = primaryBackground
+    this.iconActive = textColor,
   });
 
   @override
@@ -42,12 +57,16 @@ class _TypeSlideState extends State<TypeSlide> {
     // ensure items is not empty
     assert(widget.items.isNotEmpty);
 
-    // get type slide type and ensure that 
+    // get type slide type and ensure that the initial item is exists
+    assert(widget.items.containsKey(widget.initialItem));
     _type = widget.initialItem;
+
+    // ensure widget width is at least 40
+    assert(widget.width >= 40);
     
     // initialize the default container position and color
     _currentContainerPositioned = 0;
-    _currentContainerColor = (widget.items[widget.items.keys.elementAt(0)] ?? accentColors[2]);
+    _currentContainerColor = widget.items[widget.items.keys.elementAt(0)]!.color;
 
     _containerWidth = (widget.width * widget.items.length);
 
@@ -102,7 +121,7 @@ class _TypeSlideState extends State<TypeSlide> {
           onTap: () {
             if(widget.editable) {
               setState(() {
-                _currentContainerColor = color;
+                _currentContainerColor = widget.items[key]!.color;
                 _currentContainerPositioned = position;
                 _type = key.toLowerCase();
                 widget.onChange(key.toLowerCase());
@@ -110,20 +129,35 @@ class _TypeSlideState extends State<TypeSlide> {
             }
           },
           child: Container(
+            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
             color: Colors.transparent,
             height: widget.height,
-            child: Center(
-              child: Text(
-                key,
-                style: TextStyle(
-                  color: (
-                    widget.editable || _type == key.toLowerCase() ?
-                    widget.textActive :
-                    widget.textInactive
-                  )
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Visibility(
+                  visible: widget.items[key]!.icon != null,
+                  child: Icon(
+                    widget.items[key]!.icon,
+                    size: 20,
+                    color: (_type == key.toLowerCase() ? widget.iconActive : widget.items[key]!.iconColor),
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
+                Visibility(
+                  visible: widget.items[key]!.icon != null && widget.items[key]!.text != null,
+                  child: const SizedBox(width: 10,),
+                ),
+                Visibility(
+                  visible: widget.items[key]!.text != null,
+                  child: Text(
+                    (widget.items[key]!.text ?? ''),
+                    style: TextStyle(
+                      color: (_type == key.toLowerCase() ? widget.textActive : widget.items[key]!.textColor),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -144,7 +178,7 @@ class _TypeSlideState extends State<TypeSlide> {
       key = widget.items.keys.elementAt(i);
       if (key.toLowerCase() == _type.toLowerCase()) {
         _currentContainerPositioned = (widget.width * i);
-        _currentContainerColor = widget.items[key]!;
+        _currentContainerColor = widget.items[key]!.color;
         break;
       }
     }

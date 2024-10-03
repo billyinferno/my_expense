@@ -29,6 +29,11 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       fontWeight: FontWeight.bold,
     ),
   );
+  final Map<String, TypeSlideItem> _typeSlideItem = {
+    "month": TypeSlideItem(color: accentColors[6], text: "Month"),
+    "year": TypeSlideItem(color: accentColors[6], text: "Year"),
+    "custom": TypeSlideItem(color: accentColors[6], text: "Custom"),
+  };
 
   late DateTime _minDate;
   late DateTime _maxDate;
@@ -374,11 +379,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                 });
               }),
               initialItem: 'month',
-              items: <String, Color>{
-                "Month": accentColors[6],
-                "Year": accentColors[6],
-                "Custom": accentColors[6],
-              },
+              items: _typeSlideItem,
             ),
             const SizedBox(height: 10,),
             Expanded(

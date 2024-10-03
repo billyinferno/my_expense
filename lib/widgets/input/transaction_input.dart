@@ -45,6 +45,23 @@ class _TransactionInputState extends State<TransactionInput> {
 
   final FocusNode _nameFocus = FocusNode();
 
+  final Map<String, TypeSlideItem> _txnTypeSlideItem = {
+    "expense": TypeSlideItem(color: accentColors[2], text: "Expense"),
+    "income": TypeSlideItem(color: accentColors[0], text: "Income"),
+    "transfer": TypeSlideItem(color: accentColors[4], text: "Transfer"),
+  };
+
+  final Map<String, TypeSlideItem> _txnSingleRepeatItem = {
+    "single": TypeSlideItem(
+      color: accentColors[0],
+      icon: Ionicons.remove_outline
+    ),
+    "repeat": TypeSlideItem(
+      color: accentColors[4],
+      icon: Ionicons.repeat
+    ),
+  };
+
   late UsersMeModel _userMe;
 
   late DateTime _currentDate;
@@ -415,11 +432,7 @@ class _TransactionInputState extends State<TransactionInput> {
                       _getCurrentCategoryIconAndColor();
                     });
                   }),
-                  items: <String, Color>{
-                    "Expense": accentColors[2],
-                    "Income": accentColors[0],
-                    "Transfer": accentColors[4],
-                  },
+                  items: _txnTypeSlideItem,
                 ),
                 const SizedBox(height: 20,),
                 _buildInput(),
@@ -1253,18 +1266,16 @@ class _TransactionInputState extends State<TransactionInput> {
               color: textColor,
             ),
             const SizedBox(width: 10,),
-            const Expanded(child: Text("Repeat")),
+            Expanded(child: Text("${_currentRepeat.substring(0,1).toUpperCase()}${_currentRepeat.substring(1).toLowerCase()}")),
             const SizedBox(width: 10,),
             TypeSlide(
+              width: 40,
               onChange: ((value) {
                 setState(() {                
                   _currentRepeat = value;
                 });
               }),
-              items: {
-                "single": accentColors[0],
-                "repeat": accentColors[4]
-              },
+              items: _txnSingleRepeatItem,
               initialItem: "single",
               editable: (widget.type == TransactionInputType.add ? true : false),
             )
