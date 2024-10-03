@@ -46,19 +46,33 @@ class _TransactionInputState extends State<TransactionInput> {
   final FocusNode _nameFocus = FocusNode();
 
   final Map<String, TypeSlideItem> _txnTypeSlideItem = {
-    "expense": TypeSlideItem(color: accentColors[2], text: "Expense"),
-    "income": TypeSlideItem(color: accentColors[0], text: "Income"),
-    "transfer": TypeSlideItem(color: accentColors[4], text: "Transfer"),
+    "expense": TypeSlideItem(
+      color: accentColors[2],
+      text: "Expense",
+      textColor: Colors.white.withValues(alpha: 0.7),
+    ),
+    "income": TypeSlideItem(
+      color: accentColors[0],
+      text: "Income",
+      textColor: Colors.white.withValues(alpha: 0.7),
+    ),
+    "transfer": TypeSlideItem(
+      color: accentColors[4],
+      text: "Transfer",
+      textColor: Colors.white.withValues(alpha: 0.7),
+    ),
   };
 
   final Map<String, TypeSlideItem> _txnSingleRepeatItem = {
     "single": TypeSlideItem(
       color: accentColors[0],
-      icon: Ionicons.remove_outline
+      icon: Ionicons.remove_outline,
+      iconColor: Colors.white.withValues(alpha: 0.7),
     ),
     "repeat": TypeSlideItem(
       color: accentColors[4],
-      icon: Ionicons.repeat
+      icon: Ionicons.repeat,
+      iconColor: Colors.white.withValues(alpha: 0.7),
     ),
   };
 
@@ -1246,7 +1260,7 @@ class _TransactionInputState extends State<TransactionInput> {
 
   List<Widget> _repeatTransactionInput() {
     // if this is edit then no need to show this
-    if (widget.type != TransactionInputType.add) {
+    if (widget.type != TransactionInputType.add || _currentType == 'transfer') {
       return const [SizedBox.shrink()];
     }
 

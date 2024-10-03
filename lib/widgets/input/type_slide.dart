@@ -5,15 +5,23 @@ class TypeSlideItem {
   final Color color;
   final IconData? icon;
   final Color iconColor;
+  final Color iconColorActive;
+  final Color iconColorDisabled;
   final String? text;
   final Color textColor;
+  final Color textColorActive;
+  final Color textColorDisabled;
 
   const TypeSlideItem({
     required this.color,
     this.icon,
-    this.iconColor = primaryBackground,
+    this.iconColor = Colors.grey,
+    this.iconColorActive = Colors.white,
+    this.iconColorDisabled = primaryBackground,
     this.text,
-    this.textColor = primaryBackground,
+    this.textColor = Colors.grey,
+    this.textColorActive = Colors.white,
+    this.textColorDisabled = primaryBackground,
   });
 }
 
@@ -24,8 +32,6 @@ class TypeSlide extends StatefulWidget {
   final double width;
   final bool editable;
   final String initialItem;
-  final Color textActive;
-  final Color iconActive;
   const TypeSlide({
     super.key,
     required this.onChange,
@@ -34,8 +40,6 @@ class TypeSlide extends StatefulWidget {
     this.width = 100,
     this.editable = true,
     required this.initialItem,
-    this.textActive = textColor,
-    this.iconActive = textColor,
   });
 
   @override
@@ -115,6 +119,21 @@ class _TypeSlideState extends State<TypeSlide> {
     double index = 0;
 
     widget.items.forEach((key, color) {
+      Color iconColor = widget.items[key]!.iconColor;
+      Color textColor = widget.items[key]!.textColor;
+
+      if (widget.editable) {
+        // check if key is the same as the one selected right now?
+        if (key == _type) {
+          iconColor = widget.items[key]!.iconColorActive;
+          textColor = widget.items[key]!.textColorActive;
+        }
+      }
+      else {
+        iconColor = widget.items[key]!.iconColorDisabled;
+        textColor = widget.items[key]!.textColorDisabled;
+      }
+
       double position = index * widget.width;
       Widget tab = Expanded(
         child: GestureDetector(
@@ -141,7 +160,7 @@ class _TypeSlideState extends State<TypeSlide> {
                   child: Icon(
                     widget.items[key]!.icon,
                     size: 20,
-                    color: (_type == key.toLowerCase() ? widget.iconActive : widget.items[key]!.iconColor),
+                    color: iconColor,
                   ),
                 ),
                 Visibility(
@@ -150,10 +169,15 @@ class _TypeSlideState extends State<TypeSlide> {
                 ),
                 Visibility(
                   visible: widget.items[key]!.text != null,
-                  child: Text(
-                    (widget.items[key]!.text ?? ''),
-                    style: TextStyle(
-                      color: (_type == key.toLowerCase() ? widget.textActive : widget.items[key]!.textColor),
+                  child: Expanded(
+                    child: Center(
+                      child: Text(
+                        (widget.items[key]!.text ?? ''),
+                        style: TextStyle(
+                          color: textColor,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                 ),

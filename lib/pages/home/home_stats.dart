@@ -44,10 +44,22 @@ class _HomeStatsState extends State<HomeStats> {
   late DateTime _minTxnDate;
   late DateTime _maxTxnDate;
 
-  final Map<String, Color> _resultPageColor = {
-    'chart': accentColors[4],
-    'expense': accentColors[2],
-    'income': accentColors[6],
+  final Map<String, TypeSlideItem> _resultPageItem = {
+    'chart': TypeSlideItem(
+      color: accentColors[4],
+      text: 'Chart',
+      textColor: Colors.white.withValues(alpha: 0.7),
+    ),
+    'expense': TypeSlideItem(
+      color: accentColors[2],
+      text: 'Expense',
+      textColor: Colors.white.withValues(alpha: 0.7),
+    ),
+    'income': TypeSlideItem(
+      color: accentColors[6],
+      text: 'Income',
+      textColor: Colors.white.withValues(alpha: 0.7),
+    ),
   };
   String _resultPageName = 'chart';
 
@@ -326,32 +338,14 @@ class _HomeStatsState extends State<HomeStats> {
               Container(
                 padding: const EdgeInsets.all(10),
                 child: Center(
-                  child: CupertinoSegmentedControl<String>(
-                    selectedColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
-                    // Provide horizontal padding around the children.
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    // This represents a currently selected segmented control.
-                    groupValue: _resultPageName,
-                    // Callback that sets the selected segmented control.
-                    onValueChanged: (String value) {
+                  child: TypeSlide(
+                    onChange: ((value) {
                       setState(() {
                         _resultPageName = value;
                       });
-                    },
-                    children: const <String, Widget>{
-                      'chart': Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Text('Chart'),
-                      ),
-                      'expense': Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Text('Expense'),
-                      ),
-                      'income': Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Text('Income'),
-                      ),
-                    },
+                    }),
+                    items: _resultPageItem,
+                    initialItem: _resultPageName,
                   ),
                 ),
               ),

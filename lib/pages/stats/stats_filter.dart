@@ -30,9 +30,21 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     ),
   );
   final Map<String, TypeSlideItem> _typeSlideItem = {
-    "month": TypeSlideItem(color: accentColors[6], text: "Month"),
-    "year": TypeSlideItem(color: accentColors[6], text: "Year"),
-    "custom": TypeSlideItem(color: accentColors[6], text: "Custom"),
+    "month": TypeSlideItem(
+      color: accentColors[6],
+      text: "Month",
+      textColor: Colors.white.withValues(alpha: 0.7),
+    ),
+    "year": TypeSlideItem(
+      color: accentColors[6],
+      text: "Year",
+      textColor: Colors.white.withValues(alpha: 0.7),
+    ),
+    "custom": TypeSlideItem(
+      color: accentColors[6],
+      text: "Custom",
+      textColor: Colors.white.withValues(alpha: 0.7),
+    ),
   };
 
   late DateTime _minDate;
