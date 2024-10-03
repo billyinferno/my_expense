@@ -7,7 +7,13 @@ class HorizontalMonthCalendar extends StatefulWidget {
   final DateTime selectedDate;
   final MyDateTimeCallback? onDateSelected;
 
-  const HorizontalMonthCalendar({super.key, required this.firstDay, required this.lastDay, required this.selectedDate, this.onDateSelected});
+  const HorizontalMonthCalendar({
+    super.key,
+    required this.firstDay,
+    required this.lastDay,
+    required this.selectedDate,
+    this.onDateSelected
+  });
 
   @override
   State<HorizontalMonthCalendar> createState() => _HorizontalMonthCalendarState();
@@ -15,14 +21,20 @@ class HorizontalMonthCalendar extends StatefulWidget {
 
 class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
   late PageController _controller;
-  int _initialPage = 0;
-  int _totalPages = 0;
-  int _diffMonths = 0;
+  late int _initialPage;
+  late int _totalPages;
+  late int _diffMonths;
 
   @override
   void initState() {
     super.initState();
 
+    // default value
+    _initialPage = 0;
+    _totalPages = 0;
+    _diffMonths = 0;
+
+    // calculate total month we have
     _diffMonths = _computeTotalMonths(widget.firstDay, widget.lastDay);
 
     // check if this is the same month, then we can just showed 1 page
@@ -39,6 +51,12 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
 
     int initialPages = _initialPage ~/ 3;
     _controller = PageController(initialPage: initialPages);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
