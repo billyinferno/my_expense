@@ -33,6 +33,7 @@ class CategoryListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(width: 1.0, color: primaryLight)),
         color: Colors.transparent,

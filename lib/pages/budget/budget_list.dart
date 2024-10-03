@@ -170,10 +170,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
           height: 10,
         ),
         Expanded(
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: _generateListItem(),
-          ),
+          child: _generateListItem(),
         ),
         Container(
           padding: const EdgeInsets.all(10),
