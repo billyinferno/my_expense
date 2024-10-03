@@ -122,16 +122,15 @@ class _TypeSlideState extends State<TypeSlide> {
       Color iconColor = widget.items[key]!.iconColor;
       Color textColor = widget.items[key]!.textColor;
 
-      if (widget.editable) {
-        // check if key is the same as the one selected right now?
-        if (key == _type) {
-          iconColor = widget.items[key]!.iconColorActive;
-          textColor = widget.items[key]!.textColorActive;
-        }
+      if (key == _type) {
+        iconColor = widget.items[key]!.iconColorActive;
+        textColor = widget.items[key]!.textColorActive;
       }
       else {
-        iconColor = widget.items[key]!.iconColorDisabled;
-        textColor = widget.items[key]!.textColorDisabled;
+        if (!widget.editable) {
+          iconColor = widget.items[key]!.iconColorDisabled;
+          textColor = widget.items[key]!.textColorDisabled;
+        }
       }
 
       double position = index * widget.width;
