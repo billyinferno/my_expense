@@ -6,7 +6,7 @@ import 'package:my_expense/_index.g.dart';
 
 class Globals {
   static String apiURL = (dotenv.env['API_URL'] ?? 'http://192.168.1.176:1337/');
-  static int apiTimeOut = 10;
+  static int apiTimeOut = 45;
   static String appVersion = (dotenv.env['APP_VERSION'] ?? '0.0.1');
   static String flutterVersion = (dotenv.env['FLUTTER_VERSION'] ?? 'beta');
 
