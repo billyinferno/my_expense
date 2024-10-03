@@ -19,6 +19,12 @@ class BudgetListModel {
     );
   }
 
+  void setBudgets(List<BudgetModel> newBudgets) {
+    // assume we already have budgets here
+    budgets.clear();
+    budgets.addAll(newBudgets);
+  }
+
   Map<String, dynamic> toJson() {
     return {
       "currency": currency.toJson(),

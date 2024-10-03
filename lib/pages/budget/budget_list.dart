@@ -172,11 +172,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
         Expanded(
           child: Container(
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: Consumer<HomeProvider>(
-              builder: ((context, homeProvider, child) {
-                return _generateListItem(homeProvider.budgetAddList);
-              }),
-            ),
+            child: _generateListItem(),
           ),
         ),
         Container(
@@ -204,8 +200,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                           onTap: (() async {
                             // check if this is not already added as budget or not?
                             // if not yet then we can add this new budget to the budget list
-                            if (!_checkIfCategorySelected(
-                                _expenseCategory[key]!.id)) {
+                            if (!_checkIfCategorySelected(_expenseCategory[key]!.id)) {
                               await _addBudget(
                                 _expenseCategory[key]!.id,
                                 _currencyID
@@ -221,6 +216,12 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                     ),
                                   );
                                 }
+
+                                // rebuild so we can get the latest provider data
+                                // that we already added when we add the budget
+                                setState(() {
+                                  debugPrint("Rebuild");
+                                });
                               }).onError((error, stackTrace) async {
                                 // print the error
                                 Log.error(
@@ -262,15 +263,15 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
   }
 
-  Widget _generateListItem(List<BudgetModel> budgetList) {
+  Widget _generateListItem() {
     if (_budgetList == null) {
       return const Text("Loading Budget List");
     } else {
       return ListView.builder(
         controller: _scrollController,
-        itemCount: budgetList.length,
+        itemCount: _budgetList!.budgets.length,
         itemBuilder: (BuildContext ctx, int index) {
-          BudgetModel budget = budgetList[index];
+          BudgetModel budget = _budgetList!.budgets[index];
 
           // generate budget detail arguments
           BudgetDetailArgs budgetArgs = BudgetDetailArgs(
@@ -304,9 +305,16 @@ class _BudgetListPageState extends State<BudgetListPage> {
               .show(context);
 
               // check the result of the dialog box
-              result.then((value) {
+              result.then((value) async {
                 if (value == true) {
-                  _deleteBudgetList(budget.id, budget.currency.id);
+                  await _deleteBudgetList(budget.id, budget.currency.id);
+
+                  if (mounted) {
+                    // show snack bar
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      createSnackBar(message: 'Delete of ${budget.category.name} success'),
+                    );
+                  }
                 }
               });
             }),
@@ -449,12 +457,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                   
                                         // set the new budget and announce
                                         _setBudgetList(newBudgetListModel);
-                                        Provider.of<HomeProvider>(
-                                          context,
-                                          listen: false
-                                        ).setBudgetAddList(
-                                          budgets: newBudgetListModel.budgets
-                                        );
                                   
                                         // remove the dialog
                                         Navigator.pop(context);
@@ -557,12 +559,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
     // fetch the budget from the web
     await _budgetHttp.fetchBudgetsList(_currencyID, isForce).then((result) {
       _setBudgetList(result);
-      if (mounted) {
-        Provider.of<HomeProvider>(
-          context,
-          listen: false
-        ).setBudgetAddList(budgets: result.budgets);
-      }
     }).onError((error, stackTrace) {
       // got error
       Log.error(
@@ -603,59 +599,47 @@ class _BudgetListPageState extends State<BudgetListPage> {
     ).then((budget) {
       // we got the new budget, add this to the shared preferences and the
       // provider
-      if (_budgetList!.budgets.isNotEmpty) {
-        _budgetList!.budgets.removeWhere((element) =>
-          element.id == budget.id &&
-          element.currency.id == budget.currency.id
-        );
+      setState(() {
+        if (_budgetList!.budgets.isNotEmpty) {
+          _budgetList!.budgets.removeWhere((element) =>
+            element.id == budget.id &&
+            element.currency.id == budget.currency.id
+          );
 
-        // create new budget list model with the new budget we added
-        BudgetListModel newBudgetList = BudgetListModel(
-          currency: _budgetList!.currency,
-          budgets: _budgetList!.budgets
-        );
+          // set the budget on the home screen, since the budget on the home screen
+          // is based on date, first we need to get what is the current date being displayed
+          // on the home budget?
+          String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
+          List<BudgetModel>? homeBudgetList = BudgetSharedPreferences.getBudget(
+            ccyId: _currencyID,
+            date: currentBudgetDate
+          );
 
-        _setBudgetList(newBudgetList);
-        if (mounted) {
-          Provider.of<HomeProvider>(
-            context,
-            listen: false
-          ).setBudgetAddList(budgets: newBudgetList.budgets);
-        }
+          if (homeBudgetList != null) {
+            if (homeBudgetList.isNotEmpty) {
+              homeBudgetList.removeWhere((element) =>
+                element.id == budget.id &&
+                element.currency.id == budget.currency.id
+              );
 
-        // set the budget on the home screen, since the budget on the home screen
-        // is based on date, first we need to get what is the curren date being displayed
-        // on the home budget?
-        String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-        List<BudgetModel>? homeBudgetList = BudgetSharedPreferences.getBudget(
-          ccyId: _currencyID,
-          date: currentBudgetDate
-        );
+              // store back the home budget list
+              BudgetSharedPreferences.setBudget(
+                ccyId: _currencyID,
+                date: currentBudgetDate,
+                budgets: homeBudgetList
+              );
 
-        if (homeBudgetList != null) {
-          if (homeBudgetList.isNotEmpty) {
-            homeBudgetList.removeWhere((element) =>
-              element.id == budget.id &&
-              element.currency.id == budget.currency.id
-            );
-
-            // store back the home budget list
-            BudgetSharedPreferences.setBudget(
-              ccyId: _currencyID,
-              date: currentBudgetDate,
-              budgets: homeBudgetList
-            );
-
-            if (mounted) {
-              // after that notify the budget list on the home
-              Provider.of<HomeProvider>(
-                context,
-                listen: false
-              ).setBudgetList(budgets: homeBudgetList);
+              if (mounted) {
+                // after that notify the budget list on the home
+                Provider.of<HomeProvider>(
+                  context,
+                  listen: false
+                ).setBudgetList(budgets: homeBudgetList);
+              }
             }
           }
         }
-      }
+      });
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error on <_deleteBudgetList> at BudgetList",
@@ -678,27 +662,14 @@ class _BudgetListPageState extends State<BudgetListPage> {
     ).then((budget) {
       // we got the new budget, add this to the shared preferences and the
       // provider
-      List<BudgetModel> newBudgets = [];
       if (_budgetList!.budgets.isNotEmpty) {
-        newBudgets = _budgetList!.budgets;
+        _budgetList!.budgets.add(budget);
+
+        // sort budget list
+        List<BudgetModel> newBudget = _budgetList!.budgets.toList()..sort((a,b) => (a.category.name.compareTo(b.category.name)));
+        _budgetList!.setBudgets(newBudget);
       }
-      newBudgets.add(budget);
-
-      // create new budget list model with the new budget we added
-      BudgetListModel newBudgetList = BudgetListModel(
-        currency: _budgetList!.currency,
-        budgets: newBudgets
-      );
-      _budgetList = newBudgetList;
-
-      _setBudgetList(newBudgetList);
-      if (mounted) {
-        Provider.of<HomeProvider>(
-          context,
-          listen: false
-        ).setBudgetAddList(budgets: newBudgetList.budgets);
-      }
-
+      
       // set the budget on the home screen, since the budget on the home screen
       // is based on date, first we need to get what is the curren date being displayed
       // on the home budget?

@@ -5,7 +5,6 @@ class HomeProvider extends ChangeNotifier {
   List<TransactionListModel> transactionList = [];
   List<WalletModel> walletList = [];
   List<BudgetModel> budgetList = [];
-  List<BudgetModel> budgetAddList = [];
   List<CurrencyModel> walletCurrency = [];
   List<WorthModel> netWorth = [];
   Map<int, IncomeExpenseModel> incomeExpense = {};
@@ -46,17 +45,6 @@ class HomeProvider extends ChangeNotifier {
   clearBudgetList() {
     budgetList.clear();
     budgetList = [];
-    notifyListeners();
-  }
-
-  setBudgetAddList({required List<BudgetModel> budgets}) {
-    budgetAddList = budgetList;
-    notifyListeners();
-  }
-
-  clearBudgetAddList() {
-    budgetAddList.clear();
-    budgetAddList = [];
     notifyListeners();
   }
 
@@ -159,9 +147,6 @@ class HomeProvider extends ChangeNotifier {
 
     budgetList.clear();
     budgetList = [];
-
-    budgetAddList.clear();
-    budgetAddList = [];
 
     walletCurrency.clear();
     walletCurrency = [];
