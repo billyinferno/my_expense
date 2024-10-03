@@ -155,6 +155,11 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
   }
 
   Widget _generatePage() {
+    // check whether we got data for the budget statistic or not?
+    if (_budgetStat.monthly.isEmpty || _budgetStat.yearly.isEmpty) {
+      return const Center(child: Text("No data for this budget"),);
+    }
+
     // generate the page for the budget stat
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -799,6 +804,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           categoryId: _budgetTransaction.categoryid,
           currencyId: _budgetTransaction.currencyId
         );
+      }
+
+      // ensure that we have data on the budget stat before we continue
+      if (_budgetStat.monthly.isEmpty || _budgetStat.yearly.isEmpty) {
+        // no data, just return true, we will handle this on the generate page
+        // function to show no data for this statistic
+        return true;
       }
 
       // generate the monthly and yearly data
