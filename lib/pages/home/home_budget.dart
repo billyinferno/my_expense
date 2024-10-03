@@ -14,9 +14,9 @@ class HomeBudget extends StatefulWidget {
 }
 
 class _HomeBudgetState extends State<HomeBudget> {
-  DateTime _firstDay = DateTime(2014, 1, 1); // just default to 2014/01/01
-  DateTime _lastDay = DateTime(DateTime.now().year, DateTime.now().month + 1, 1);
-  DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  late DateTime _firstDay;
+  late DateTime _lastDay;
+  late DateTime _selectedDate;
 
   List<CurrencyModel> _currencies = []; // default to blank
   CurrencyModel? _currentCurrencies;
@@ -48,6 +48,9 @@ class _HomeBudgetState extends State<HomeBudget> {
     _firstDay = DateTime(userMinDate.year, userMinDate.month, 1);
     _lastDay = DateTime(userMaxDate.year, userMaxDate.month, 1);
 
+    // default selected date to today's date
+    _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+
     // now check which currencies is being used by the user
     if(_currencies.isNotEmpty) {
       // defaulted to first currency, in case user default currency is different
@@ -68,6 +71,8 @@ class _HomeBudgetState extends State<HomeBudget> {
       BudgetSharedPreferences.setBudgetCurrent(date: _selectedDate);
     }
 
+    // fetch data, in case there are no currencies it will be handle on the
+    // snapshot has data.
     _getData = _fetchBudget();
   }
 
@@ -353,6 +358,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                         }
 
                         return Slidable(
+                          key: Key(_budgetList[index].category.name),
                           endActionPane: ActionPane(
                             motion: const DrawerMotion(),
                             extentRatio: 0.2,
@@ -441,6 +447,13 @@ class _HomeBudgetState extends State<HomeBudget> {
   Future<bool> _fetchBudget([bool? showLoader, bool? force]) async {
     bool isShowLoader = (showLoader ?? false);
     bool isForce = (force ?? false);
+
+    // check whether current currencies being set or not?
+    if (_currentCurrencies == null) {
+      // just return true, as the empty page will be handle when we generate
+      // the page.
+      return true;
+    }
 
     if(isShowLoader) {
       LoadingScreen.instance().show(context: context);
