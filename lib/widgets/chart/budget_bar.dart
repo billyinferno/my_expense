@@ -9,7 +9,7 @@ class BudgetBar extends StatelessWidget {
   final String symbol;
   final double budgetUsed;
   final double budgetTotal;
-  final bool? showLeftText;
+  final bool showLeftText;
   final Color? barColor;
   final String? type;
 
@@ -17,7 +17,7 @@ class BudgetBar extends StatelessWidget {
     super.key,
     this.icon,
     this.iconColor,
-    this.showLeftText,
+    this.showLeftText = true,
     this.barColor,
     required this.title,
     this.subTitle,
@@ -90,9 +90,9 @@ class BudgetBar extends StatelessWidget {
                     ),
                   ),
                   Visibility(
-                    visible: (showLeftText == null ? true : showLeftText!),
+                    visible: showLeftText,
                     child: Text(
-                      "$symbol ${Globals.fCCY.format(budgetTotal - budgetUsed)}${budgetTotal >= budgetUsed ? " left" : " over"}",
+                      "$symbol ${Globals.fCCY.format((budgetTotal - budgetUsed).makePositive())}${budgetTotal >= budgetUsed ? " left" : " over"}",
                       textAlign: TextAlign.right,
                     ),
                   )
