@@ -216,12 +216,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
                                     ),
                                   );
                                 }
-
-                                // rebuild so we can get the latest provider data
-                                // that we already added when we add the budget
-                                setState(() {
-                                  debugPrint("Rebuild");
-                                });
                               }).onError((error, stackTrace) async {
                                 // print the error
                                 Log.error(
@@ -606,41 +600,11 @@ class _BudgetListPageState extends State<BudgetListPage> {
             element.currency.id == budget.currency.id
           );
 
-          // set the budget on the home screen, since the budget on the home screen
-          // is based on date, first we need to get what is the current date being displayed
-          // on the home budget?
-          String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-
-          //TODO: to fix how it handle the budget on the home_budget page, to instead just set the budget shared preferences, and also handle the home provider with data coming from _budgets
-          List<BudgetModel>? homeBudgetList = BudgetSharedPreferences.getBudget(
-            ccyId: _currencyID,
-            date: currentBudgetDate
-          );
-
-          if (homeBudgetList != null) {
-            if (homeBudgetList.isNotEmpty) {
-              homeBudgetList.removeWhere((element) =>
-                element.id == budget.id &&
-                element.currency.id == budget.currency.id
-              );
-
-              // store back the home budget list
-              BudgetSharedPreferences.setBudget(
-                ccyId: _currencyID,
-                date: currentBudgetDate,
-                budgets: homeBudgetList
-              );
-
-              if (mounted) {
-                // after that notify the budget list on the home
-                Provider.of<HomeProvider>(
-                  context,
-                  listen: false
-                ).setBudgetList(budgets: homeBudgetList);
-              }
-            }
-          }
         }
+
+        // store and update budget list so we can align the current budget list
+        // with the one showed on the home budget page.
+        _storeAndUpdateBudgetList(budget: budget, delete: true);
       });
     }).onError((error, stackTrace) {
       Log.error(
@@ -664,41 +628,19 @@ class _BudgetListPageState extends State<BudgetListPage> {
     ).then((budget) {
       // we got the new budget, add this to the shared preferences and the
       // provider
-      if (_budgetList!.budgets.isNotEmpty) {
-        _budgetList!.budgets.add(budget);
+      setState(() {        
+        if (_budgetList!.budgets.isNotEmpty) {
+          _budgetList!.budgets.add(budget);
 
-        // sort budget list
-        List<BudgetModel> newBudget = _budgetList!.budgets.toList()..sort((a,b) => (a.category.name.compareTo(b.category.name)));
-        _budgetList!.setBudgets(newBudget);
-      }
-      
-      // set the budget on the home screen, since the budget on the home screen
-      // is based on date, first we need to get what is the curren date being displayed
-      // on the home budget?
-      String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
-      //TODO: to fix how it handle the budget on the home_budget page, to instead just set the budget shared preferences, and also handle the home provider with data coming from _budgets
-      List<BudgetModel>? homeBudgetList = (
-        BudgetSharedPreferences.getBudget(
-          ccyId: _currencyID,
-          date: currentBudgetDate
-        ) ?? []
-      );
-      homeBudgetList.add(budget);
-      
-      // store back the home budget list
-      BudgetSharedPreferences.setBudget(
-        ccyId: _currencyID,
-        date: currentBudgetDate,
-        budgets: homeBudgetList
-      );
-
-      if (mounted) {
-        // after that notify the budget list on the home
-        Provider.of<HomeProvider>(
-          context,
-          listen: false
-        ).setBudgetList(budgets: homeBudgetList);
-      }
+          // sort budget list
+          List<BudgetModel> newBudget = _budgetList!.budgets.toList()..sort((a,b) => (a.category.name.compareTo(b.category.name)));
+          _budgetList!.setBudgets(newBudget);
+        }
+        
+        // store and update budget list so we can align the current budget list
+        // with the one showed on the home budget page.
+        _storeAndUpdateBudgetList(budget: budget, delete: false);
+      });
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error on <_addBudget> at BudgetList",
@@ -801,6 +743,56 @@ class _BudgetListPageState extends State<BudgetListPage> {
         // remove the loading screen
         LoadingScreen.instance().hide();
       });
+    }
+  }
+
+  void _storeAndUpdateBudgetList({
+    required BudgetModel budget,
+    bool delete = false,
+  }) {
+    // set the budget on the home screen, since the budget on the home screen
+    // is based on date, first we need to get what is the current date being displayed
+    // on the home budget?
+    String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
+
+    // get the current budget
+    List<BudgetModel> currentBudgetList = (BudgetSharedPreferences.getBudget(
+      ccyId: _currencyID,
+      date: currentBudgetDate
+    ) ?? []);
+
+    // check whether this is delete or add
+    if (delete && currentBudgetList.isNotEmpty) {
+      currentBudgetList.removeWhere(
+        (data) => (
+          data.category.id == budget.category.id &&
+          data.currency.id == _currencyID
+        ),
+      );
+    }
+    else {
+      // add the new budget
+      currentBudgetList.add(budget);
+
+      // once got then sort currentBudgetList
+      currentBudgetList = currentBudgetList.toList()..sort((a, b) => (a.category.name.compareTo(b.category.name)));
+    }
+
+    // store the new budget list
+    BudgetSharedPreferences.setBudget(
+      ccyId: _currencyID,
+      date: currentBudgetDate,
+      budgets: currentBudgetList,
+    );
+
+    // check if mounted, then update the provider so we can show it on the
+    // home budget screen.
+    if (mounted) {
+      // after that notify the budget list on the home
+      Provider.of<HomeProvider>(
+        context,
+        listen: false
+      ).setBudgetList(budgets: currentBudgetList);
     }
   }
 }
