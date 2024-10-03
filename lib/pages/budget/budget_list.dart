@@ -610,6 +610,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
           // is based on date, first we need to get what is the current date being displayed
           // on the home budget?
           String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
+
+          //TODO: to fix how it handle the budget on the home_budget page, to instead just set the budget shared preferences, and also handle the home provider with data coming from _budgets
           List<BudgetModel>? homeBudgetList = BudgetSharedPreferences.getBudget(
             ccyId: _currencyID,
             date: currentBudgetDate
@@ -674,6 +676,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
       // is based on date, first we need to get what is the curren date being displayed
       // on the home budget?
       String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
+      //TODO: to fix how it handle the budget on the home_budget page, to instead just set the budget shared preferences, and also handle the home provider with data coming from _budgets
       List<BudgetModel>? homeBudgetList = (
         BudgetSharedPreferences.getBudget(
           ccyId: _currencyID,
