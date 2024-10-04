@@ -61,7 +61,30 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildHorizontalCalendar();
+    return SizedBox(
+      height: 35,
+      child: PageView.builder(
+        controller: _controller,
+        scrollDirection: Axis.horizontal,
+        itemCount: _totalPages,
+        itemBuilder: ((BuildContext context, int index) {
+          DateTime firstDate = DateTime(widget.firstDay.year, (widget.firstDay.month + ((index * 3) + 0)), widget.firstDay.day);
+          DateTime secondDate = DateTime(widget.firstDay.year, (widget.firstDay.month + ((index * 3) + 1)), widget.firstDay.day);
+          DateTime thirdDate = DateTime(widget.firstDay.year, (widget.firstDay.month + ((index * 3) + 2)), widget.firstDay.day);
+          return SizedBox(
+            height: 20,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _dateItem(firstDate),
+                _dateItem(secondDate),
+                _dateItem(thirdDate),
+              ],
+            ),
+          );
+        }),
+      ),
+    );
   }
 
   int _computeTotalMonths(DateTime start, DateTime end) {
@@ -72,9 +95,17 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
     }
     
     DateTime startDate = start;
+    DateTime endDate = end;
+    
+    // check if endDate is before today date
+    if (endDate.isBefore(DateTime.now())) {
+      // if so then change the endDate into today date instead
+      endDate = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(Duration(days: 1));
+    }
+
     int total = 0;
 
-    while(startDate.year != end.year || startDate.month != end.month) {
+    while(startDate.year != endDate.year || startDate.month != endDate.month) {
       startDate = DateTime(start.year, start.month + total);
       //print(_start.toString() + " - " + end.toString());
 
@@ -131,33 +162,6 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHorizontalCalendar() {
-    return SizedBox(
-      height: 35,
-      child: PageView.builder(
-        controller: _controller,
-        scrollDirection: Axis.horizontal,
-        itemCount: _totalPages,
-        itemBuilder: ((BuildContext context, int index) {
-          DateTime firstDate = DateTime(widget.firstDay.year, (widget.firstDay.month + ((index * 3) + 0)), widget.firstDay.day);
-          DateTime secondDate = DateTime(widget.firstDay.year, (widget.firstDay.month + ((index * 3) + 1)), widget.firstDay.day);
-          DateTime thirdDate = DateTime(widget.firstDay.year, (widget.firstDay.month + ((index * 3) + 2)), widget.firstDay.day);
-          return SizedBox(
-            height: 20,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                _dateItem(firstDate),
-                _dateItem(secondDate),
-                _dateItem(thirdDate),
-              ],
-            ),
-          );
-        }),
       ),
     );
   }
