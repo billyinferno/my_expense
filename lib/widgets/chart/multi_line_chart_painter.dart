@@ -55,8 +55,8 @@ class MultiLineChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+  bool shouldRepaint(covariant MultiLineChartPainter oldDelegate) {
+    return listEquals<Map<String, double>>(oldDelegate.data, data);
   }
 
   void _draw0Point(Canvas canvas, Size size, Offset center) {
