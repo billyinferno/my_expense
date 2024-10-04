@@ -36,9 +36,11 @@ Future main() async {
       );
     },
     (error, stack) {
-      debugPrint("Error on the run zone guarded");
-      debugPrint("Error: ${error.toString()}");
-      debugPrintStack(stackTrace: stack);
+      Log.error(
+        message: "Error during run zone guarded",
+        error: error,
+        stackTrace: stack,
+      );
     },
   );
 }
