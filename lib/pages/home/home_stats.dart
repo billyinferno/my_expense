@@ -258,8 +258,11 @@ class _HomeStatsState extends State<HomeStats> {
                         extentRatio: 0.35,
                         children: <Widget>[
                           SlideButton(
-                            icon: Ionicons.bar_chart,
+                            icon: Ionicons.analytics,
                             iconColor: accentColors[3],
+                            text: 'Stats',
+                            textColor: accentColors[3],
+                            textSize: 10,
                             onTap: () {
                               Navigator.pushNamed(context, '/stats/all', arguments: _currentCurrencyId);
                             },
@@ -267,6 +270,9 @@ class _HomeStatsState extends State<HomeStats> {
                           SlideButton(
                             icon: Ionicons.refresh,
                             iconColor: accentColors[6],
+                            text: 'Refresh',
+                            textColor: accentColors[6],
+                            textSize: 10,
                             onTap: () {
                               _getStat = _fetchData(showDialog: true);
                             },
@@ -373,7 +379,16 @@ class _HomeStatsState extends State<HomeStats> {
     double amount = _currentWorth.walletsStartBalance + _currentWorth.walletsChangesAmount;
     double currentWorthIncome = (_incomeExpense[_currentWorth.currenciesId] != null ? _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.income)) : 0.0);
     double currentWorthExpense = (_incomeExpense[_currentWorth.currenciesId] != null ? _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.expense)) : 0.0);
+    double currentWorthExpensePositive = currentWorthExpense.makePositive();
     double totalCurrentWorth = currentWorthIncome + currentWorthExpense;
+
+    // calculate income and expense flex
+    int incomeFlex = 0;
+    int expenseFlex = 0;
+    if (currentWorthIncome + currentWorthExpensePositive > 0) {
+      incomeFlex = ((currentWorthIncome / (currentWorthIncome + currentWorthExpensePositive)) * 100).toInt();
+      expenseFlex = ((currentWorthExpensePositive / (currentWorthIncome + currentWorthExpensePositive)) * 100).toInt();
+    }
 
     return GestureDetector(
       onTap: (() {
@@ -509,6 +524,49 @@ class _HomeStatsState extends State<HomeStats> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 5,),
+                  Visibility(
+                    visible: ((incomeFlex + expenseFlex) > 0),
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: secondaryBackground,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Visibility(
+                            visible: (incomeFlex > 0),
+                            child: Expanded(
+                              flex: incomeFlex,
+                              child: Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: accentColors[6],
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Visibility(
+                            visible: (expenseFlex > 0),
+                            child: Expanded(
+                              flex: expenseFlex,
+                              child: Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: accentColors[2],
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -628,73 +686,10 @@ class _HomeStatsState extends State<HomeStats> {
           );
         }
       case 'chart':
-        double currentWorthIncome = (
-          _incomeExpense[_currentWorth.currenciesId] != null ?
-          _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.income)) :
-          0.0
-        );
-        double currentWorthExpense = (
-          _incomeExpense[_currentWorth.currenciesId] != null ?
-          _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.expense)) :
-          0.0
-        ).makePositive();
-
-        // calculate income and expense flex
-        int incomeFlex = 0;
-        int expenseFlex = 0;
-        if (currentWorthIncome + currentWorthExpense > 0) {
-          incomeFlex = ((currentWorthIncome / (currentWorthIncome + currentWorthExpense)) * 100).toInt();
-          expenseFlex = ((currentWorthExpense / (currentWorthIncome + currentWorthExpense)) * 100).toInt();
-        }
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Visibility(
-              visible: ((incomeFlex + expenseFlex) > 0),
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(10, 0, 10, 5),
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  color: secondaryBackground,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Visibility(
-                      visible: (incomeFlex > 0),
-                      child: Expanded(
-                        flex: incomeFlex,
-                        child: Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: accentColors[6],
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Visibility(
-                      visible: (expenseFlex > 0),
-                      child: Expanded(
-                        flex: expenseFlex,
-                        child: Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: accentColors[2],
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 5,),
             Expanded(
               child: SingleChildScrollView(
                 controller: _scrollControllerChart,
