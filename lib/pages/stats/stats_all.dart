@@ -13,6 +13,10 @@ class StatsAllPage extends StatefulWidget {
 class _StatsAllPageState extends State<StatsAllPage> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
 
+  final Map<String, double> _walletListIncome = {};
+  final Map<String, double> _walletListExpense = {};
+  final Map<String, double> _walletListTotal = {};
+
   late Future<bool> _getData;
   late WalletStatAllModel _walletStatAll;
   late WalletStatAllModel _origWalletStatAll;
@@ -181,6 +185,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
           MultiLineChart(
             data: _walletLineChartData,
             color: [accentColors[5], accentColors[0], accentColors[2]],
+            //TODO: remove legend, instead using switch so we can turn on or off the chart we want to see
             legend: const ["Total", "Income", "Expense"],
             height: 200,
             dateOffset: _dateOffset,
@@ -188,6 +193,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
           const SizedBox(
             height: 10,
           ),
+          //TODO: add filter to change the duration of the chart
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -234,7 +240,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
                 return Container(
                   width: double.infinity,
-                  height: 65,
+                  height: 45,
                   margin: const EdgeInsets.fromLTRB(0, 0, 0, 5),
                   decoration: BoxDecoration(
                     color: primaryLight,
@@ -247,7 +253,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                       // indicator
                       Container(
                         width: 10,
-                        height: 65,
+                        height: 45,
                         decoration: BoxDecoration(
                           color: indicator,
                           borderRadius: const BorderRadius.only(
@@ -260,7 +266,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                       Container(
                         padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
                         color: secondaryBackground,
-                        height: 65,
+                        height: 45,
                         width: 80,
                         child: Align(
                           alignment: Alignment.center,
@@ -315,11 +321,12 @@ class _StatsAllPageState extends State<StatsAllPage> {
   }
 
   void _getStatData() {
-    Map<String, double> walletListIncome = {};
-    Map<String, double> walletListExpense = {};
-    Map<String, double> walletListTotal = {};
-
     double total = 0;
+
+    // clear all wallet list map
+    _walletListIncome.clear();
+    _walletListExpense.clear();
+    _walletListTotal.clear();
 
     // loop thru _walletStat and get the maximum data
     _maxAmount = double.infinity * -1;
@@ -327,18 +334,18 @@ class _StatsAllPageState extends State<StatsAllPage> {
     // loop thru all the stat all date to add as key on the wallet list income
     // expense, and total
     _walletDateRange.forEach((key, value) {
-      walletListIncome[Globals.dfMMyy.formatLocal(key)] = 0;
-      walletListExpense[Globals.dfMMyy.formatLocal(key)] = 0;
-      walletListTotal[Globals.dfMMyy.formatLocal(key)] = 0;
+      _walletListIncome[Globals.dfMMyy.formatLocal(key)] = 0;
+      _walletListExpense[Globals.dfMMyy.formatLocal(key)] = 0;
+      _walletListTotal[Globals.dfMMyy.formatLocal(key)] = 0;
     });
 
     for (Datum data in _walletStatAll.data) {
       // generate the wallet list income, expense, and total
-      walletListIncome[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
-      walletListExpense[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
+      _walletListIncome[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
+      _walletListExpense[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
 
       total += (data.diff ?? 0);
-      walletListTotal[Globals.dfMMyy.formatLocal(data.date)] = total;
+      _walletListTotal[Globals.dfMMyy.formatLocal(data.date)] = total;
 
       _totalIncome += data.income!;
       _totalExpense += data.expense!;
@@ -360,13 +367,13 @@ class _StatsAllPageState extends State<StatsAllPage> {
       }
     }
 
-    _dateOffset = walletListTotal.length ~/ 8;
+    _dateOffset = _walletListTotal.length ~/ 8;
 
     // set the wallet list data to the _walletList data
     _walletLineChartData.clear();
-    _walletLineChartData.add(walletListTotal);
-    _walletLineChartData.add(walletListIncome);
-    _walletLineChartData.add(walletListExpense);
+    _walletLineChartData.add(_walletListTotal);
+    _walletLineChartData.add(_walletListIncome);
+    _walletLineChartData.add(_walletListExpense);
   }
 
   Future<bool> _getWalletStatAllData() async {

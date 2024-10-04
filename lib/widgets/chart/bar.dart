@@ -21,8 +21,7 @@ class Bar extends StatelessWidget {
               alignment: FractionalOffset.centerLeft,
               widthFactor: ((amount < 0 ? 0 : amount) / maxAmount),
               child: Container(
-                height: 20,
-                width: double.infinity,
+                height: 10,
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.only(
                     topRight: Radius.circular(5),
