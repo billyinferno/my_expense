@@ -59,7 +59,7 @@ class LoadingScreen {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  SpinKitCubeGrid(
+                  SpinKitFadingCube(
                     color: accentColors[0],
                     size: 25,
                   ),
