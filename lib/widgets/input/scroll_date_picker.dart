@@ -24,6 +24,7 @@ class ScrollDatePicker extends StatefulWidget {
   State<ScrollDatePicker> createState() => _ScrollDatePickerState();
 }
 
+//TODO: extend the function to select month/year and year only
 class _ScrollDatePickerState extends State<ScrollDatePicker> {
   late FixedExtentScrollController _dayController;
   late FixedExtentScrollController _monthController;
@@ -142,116 +143,114 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                          flex: 2,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                right: BorderSide(
-                                  width: 1.0,
-                                  color: primaryLight,
-                                  style: BorderStyle.solid,
-                                ),
-                              ),
-                            ),
-                            child: ListWheelScrollView.useDelegate(
-                              controller: _dayController,
-                              physics: FixedExtentScrollPhysics(),
-                              onSelectedItemChanged: ((int index) {
-                                _currentDay = (index + 1);
-                                _setCurrentDate();
-                              }),
-                              itemExtent: 22.0,
-                              childDelegate: ListWheelChildLoopingListDelegate(
-                                children: List<Widget>.generate(_numOfDays, (int index) {
-                                  if ((index+1) == _currentDay) {
-                                    return Text(
-                                      "${index + 1}",
-                                      style: TextStyle(
-                                        color: widget.selectedColor
-                                      ),
-                                    );
-                                  }
-                                  else {
-                                    return Text("${index + 1}");
-                                  }
-                                }),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(
+                                width: 1.0,
+                                color: primaryLight,
+                                style: BorderStyle.solid,
                               ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          flex: 3,
                           child: ListWheelScrollView.useDelegate(
-                            controller: _monthController,
+                            controller: _dayController,
                             physics: FixedExtentScrollPhysics(),
                             onSelectedItemChanged: ((int index) {
-                              _currentMonth = (index + 1);
+                              _currentDay = (index + 1);
                               _setCurrentDate();
                             }),
                             itemExtent: 22.0,
                             childDelegate: ListWheelChildLoopingListDelegate(
-                              children: List<Widget>.generate(12, (int index) {
-                                if ((index + 1) == _currentMonth) {
+                              children: List<Widget>.generate(_numOfDays, (int index) {
+                                if ((index+1) == _currentDay) {
                                   return Text(
-                                    Globals.dfMMMM.format(DateTime(_currentDate.year, (index+1), 1)),
+                                    "${index + 1}",
                                     style: TextStyle(
                                       color: widget.selectedColor
                                     ),
                                   );
                                 }
                                 else {
-                                  return Text(Globals.dfMMMM.format(DateTime(_currentDate.year, (index+1), 1)));
+                                  return Text("${index + 1}");
                                 }
                               }),
                             ),
                           ),
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                left: BorderSide(
-                                  width: 1.0,
-                                  color: widget.borderColor,
-                                  style: BorderStyle.solid,
-                                )
-                              ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: ListWheelScrollView.useDelegate(
+                          controller: _monthController,
+                          physics: FixedExtentScrollPhysics(),
+                          onSelectedItemChanged: ((int index) {
+                            _currentMonth = (index + 1);
+                            _setCurrentDate();
+                          }),
+                          itemExtent: 22.0,
+                          childDelegate: ListWheelChildLoopingListDelegate(
+                            children: List<Widget>.generate(12, (int index) {
+                              if ((index + 1) == _currentMonth) {
+                                return Text(
+                                  Globals.dfMMMM.format(DateTime(_currentDate.year, (index+1), 1)),
+                                  style: TextStyle(
+                                    color: widget.selectedColor
+                                  ),
+                                );
+                              }
+                              else {
+                                return Text(Globals.dfMMMM.format(DateTime(_currentDate.year, (index+1), 1)));
+                              }
+                            }),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              left: BorderSide(
+                                width: 1.0,
+                                color: widget.borderColor,
+                                style: BorderStyle.solid,
+                              )
                             ),
-                            child: ListWheelScrollView.useDelegate(
-                              controller: _yearController,
-                              physics: FixedExtentScrollPhysics(),
-                              onSelectedItemChanged: ((int index) {
-                                _currentYear = (_minYear + index);
-                                _setCurrentDate();
+                          ),
+                          child: ListWheelScrollView.useDelegate(
+                            controller: _yearController,
+                            physics: FixedExtentScrollPhysics(),
+                            onSelectedItemChanged: ((int index) {
+                              _currentYear = (_minYear + index);
+                              _setCurrentDate();
+                            }),
+                            itemExtent: 22.0,
+                            childDelegate: ListWheelChildLoopingListDelegate(
+                              children: List<Widget>.generate(_numOfYears, (int index) {
+                                if ((_minYear + index) == _currentYear) {
+                                  return Text(
+                                    "${_minYear + index}",
+                                    style: TextStyle(
+                                      color: widget.selectedColor
+                                    ),
+                                  );
+                                }
+                                else {
+                                  return Text("${_minYear + index}");
+                                }
                               }),
-                              itemExtent: 22.0,
-                              childDelegate: ListWheelChildLoopingListDelegate(
-                                children: List<Widget>.generate(_numOfYears, (int index) {
-                                  if ((_minYear + index) == _currentYear) {
-                                    return Text(
-                                      "${_minYear + index}",
-                                      style: TextStyle(
-                                        color: widget.selectedColor
-                                      ),
-                                    );
-                                  }
-                                  else {
-                                    return Text("${_minYear + index}");
-                                  }
-                                }),
-                              ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -272,7 +271,6 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
 
   void _setCurrentDate() {
     setState(() {
-      debugPrint("-------");
       int prevNumDays = _numOfDays;
 
       // calculate again the number of days

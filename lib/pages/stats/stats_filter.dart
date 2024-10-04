@@ -407,6 +407,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   Widget _generateCalendarSelection() {
+    //TODO: change calendar for month and year to using ScrollDate instead cupertino
     if (_currentType == "month") {
       // set the _currentToDate as the last day of the month
       _currentFromDate = DateTime(
