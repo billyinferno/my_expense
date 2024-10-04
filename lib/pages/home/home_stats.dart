@@ -628,23 +628,94 @@ class _HomeStatsState extends State<HomeStats> {
           );
         }
       case 'chart':
-        return SingleChildScrollView(
-          controller: _scrollControllerChart,
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              BarChart(
-                from: _from,
-                to: _to,
-                data: (_getData(_incomeExpense[_currentCurrencyId])),
-                showed: true,
-                maxAmount: _currentMaxAmount,
+        double currentWorthIncome = (
+          _incomeExpense[_currentWorth.currenciesId] != null ?
+          _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.income)) :
+          0.0
+        );
+        double currentWorthExpense = (
+          _incomeExpense[_currentWorth.currenciesId] != null ?
+          _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.expense)) :
+          0.0
+        ).makePositive();
+
+        // calculate income and expense flex
+        int incomeFlex = 0;
+        int expenseFlex = 0;
+        if (currentWorthIncome + currentWorthExpense > 0) {
+          incomeFlex = ((currentWorthIncome / (currentWorthIncome + currentWorthExpense)) * 100).toInt();
+          expenseFlex = ((currentWorthExpense / (currentWorthIncome + currentWorthExpense)) * 100).toInt();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Visibility(
+              visible: ((incomeFlex + expenseFlex) > 0),
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(10, 0, 10, 5),
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: secondaryBackground,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Visibility(
+                      visible: (incomeFlex > 0),
+                      child: Expanded(
+                        flex: incomeFlex,
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: accentColors[6],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Visibility(
+                      visible: (expenseFlex > 0),
+                      child: Expanded(
+                        flex: expenseFlex,
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: accentColors[2],
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 30,),
-            ],
-          ),
+            ),
+            const SizedBox(height: 5,),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollControllerChart,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    BarChart(
+                      from: _from,
+                      to: _to,
+                      data: (_getData(_incomeExpense[_currentCurrencyId])),
+                      showed: true,
+                      maxAmount: _currentMaxAmount,
+                    ),
+                    const SizedBox(height: 30,),
+                  ],
+                ),
+              ),
+            ),
+          ],
         );
       default:
         return const SizedBox.shrink();
