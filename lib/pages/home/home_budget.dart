@@ -203,7 +203,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                         extentRatio: 0.2,
                         children: <Widget>[
                           SlideButton(
-                            icon: Ionicons.bar_chart,
+                            icon: Ionicons.analytics,
                             iconColor: accentColors[3],
                             text: 'Stat',
                             onTap: () {
@@ -364,7 +364,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                             extentRatio: 0.2,
                             children: <Widget>[
                               SlideButton(
-                                icon: Ionicons.bar_chart,
+                                icon: Ionicons.analytics,
                                 iconColor: accentColors[3],
                                 text: 'Stat',
                                 onTap: () {

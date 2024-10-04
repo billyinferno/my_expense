@@ -325,7 +325,7 @@ class _HomeWalletState extends State<HomeWallet> {
               },
             ),
             SlideButton(
-              icon: (wallet.enabled ? Ionicons.alert : Ionicons.checkmark),
+              icon: (wallet.enabled ? Ionicons.close : Ionicons.checkmark),
               iconColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
               text: (wallet.enabled ? 'Disable' : 'Enable'),
               onTap: () {
@@ -351,7 +351,7 @@ class _HomeWalletState extends State<HomeWallet> {
               },
             ),
             SlideButton(
-              icon: Ionicons.bar_chart,
+              icon: Ionicons.analytics,
               iconColor: accentColors[3],
               text: 'Stat',
               onTap: () {
