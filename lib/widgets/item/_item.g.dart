@@ -1,3 +1,4 @@
+export './bar_stats.dart';
 export './budget_transaction_item.dart';
 export './card_face_item.dart';
 export './category_list_item.dart';

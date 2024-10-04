@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -30,12 +32,16 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
   // multiline chart data
   late List<Map<String, double>> _walletLineChartData;
+  late List<Color> _walletLineChartColors;
   late int _dateOffset;
   late DateTime _minDate;
   late DateTime _maxDate;
   late Map<DateTime, bool> _walletDateRange;
 
-  bool _sortAscending = true;
+  late bool _sortAscending;
+  late bool _showTotal;
+  late bool _showIncome;
+  late bool _showExpense;
 
   @override
   void initState() {
@@ -46,6 +52,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
     // init the wallet list into empty list
     _walletLineChartData = [];
+    _walletLineChartColors = [accentColors[5], accentColors[0], accentColors[2]];
     _totalIncome = 0;
     _countIncome = 0;
     _totalExpense = 0;
@@ -56,6 +63,15 @@ class _StatsAllPageState extends State<StatsAllPage> {
     _walletDateRange = {};
     _minDate = DateTime.now().add(const Duration(days: -1));
     _maxDate = DateTime.now();
+
+    // default sort into descending, so we can get the latest data on the top
+    // of the list view
+    _sortAscending = false;
+
+    // default show total, income, and expense into true
+    _showTotal = true;
+    _showIncome = true;
+    _showExpense = true;
 
     // get the data from API
     _getData = _getWalletStatAllData();
@@ -152,16 +168,21 @@ class _StatsAllPageState extends State<StatsAllPage> {
             ),
           );
         } else {
-          return const Scaffold(
+          return Scaffold(
             body: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: SizedBox(
-                    child: Center(
-                      child: Text("Load wallet data..."),
-                    ),
+              children: [
+                SpinKitFadingCube(
+                  color: accentColors[6],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                const Text(
+                  "Loading Stats",
+                  style: TextStyle(
+                    color: textColor2,
+                    fontSize: 10,
                   ),
                 )
               ],
@@ -179,19 +200,97 @@ class _StatsAllPageState extends State<StatsAllPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          const SizedBox(
-            height: 10,
-          ),
+          const SizedBox(height: 10,),
           MultiLineChart(
             data: _walletLineChartData,
-            color: [accentColors[5], accentColors[0], accentColors[2]],
-            //TODO: remove legend, instead using switch so we can turn on or off the chart we want to see
-            legend: const ["Total", "Income", "Expense"],
+            color: _walletLineChartColors,
             height: 200,
             dateOffset: _dateOffset,
+            addBottomPadd: false,
           ),
-          const SizedBox(
-            height: 10,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Transform.scale(
+                    scale: 0.7,
+                    child: CupertinoSwitch(
+                      value: _showTotal,
+                      activeTrackColor: accentColors[5],
+                      onChanged: ((value) {
+                        setState(() {
+                          _showTotal = value;
+                          _filterChartData();
+                        });
+                      }),
+                    ),
+                  ),
+                  Text(
+                    "Net Worth",
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 12,
+                    ),
+                  )
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Transform.scale(
+                    scale: 0.7,
+                    child: CupertinoSwitch(
+                      value: _showIncome,
+                      activeTrackColor: accentColors[0],
+                      onChanged: ((value) {
+                        setState(() {
+                          _showIncome = value;
+                          _filterChartData();
+                        });
+                      }),
+                    ),
+                  ),
+                  Text(
+                    "Income",
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 12,
+                    ),
+                  )
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Transform.scale(
+                    scale: 0.7,
+                    child: CupertinoSwitch(
+                      value: _showExpense,
+                      activeTrackColor: accentColors[2],
+                      onChanged: ((value) {
+                        setState(() {
+                          _showExpense = value;
+                          _filterChartData();
+                        });
+                      }),
+                    ),
+                  ),
+                  Text(
+                    "Expense",
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 12,
+                    ),
+                  )
+                ],
+              ),
+            ],
           ),
           //TODO: add filter to change the duration of the chart
           SizedBox(
@@ -225,92 +324,12 @@ class _StatsAllPageState extends State<StatsAllPage> {
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: _walletStatAll.data.length,
               itemBuilder: ((context, index) {
-                Color indicator = Colors.white;
-                if (
-                  _walletStatAll.data[index].income! >
-                  _walletStatAll.data[index].expense!
-                ) {
-                  indicator = accentColors[0];
-                } else if (
-                  _walletStatAll.data[index].income! <
-                  _walletStatAll.data[index].expense!
-                ) {
-                  indicator = accentColors[2];
-                }
-
-                return Container(
-                  width: double.infinity,
-                  height: 45,
-                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 5),
-                  decoration: BoxDecoration(
-                    color: primaryLight,
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      // indicator
-                      Container(
-                        width: 10,
-                        height: 45,
-                        decoration: BoxDecoration(
-                          color: indicator,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(5),
-                            bottomLeft: Radius.circular(5),
-                          )
-                        ),
-                      ),
-                      // date,
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                        color: secondaryBackground,
-                        height: 45,
-                        width: 80,
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            Globals.dfyyyyMM.formatLocal(_walletStatAll.data[index].date),
-                          ),
-                        ),
-                      ),
-                      // bar chart
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Bar(
-                              amount: _walletStatAll.data[index].income!,
-                              maxAmount: _maxAmount,
-                              text: Globals.fCCY.format(
-                                _walletStatAll.data[index].income!
-                              ),
-                              color: accentColors[0]
-                            ),
-                            Bar(
-                              amount: _walletStatAll.data[index].expense!,
-                              maxAmount: _maxAmount,
-                              text: Globals.fCCY.format(
-                                _walletStatAll.data[index].expense!
-                              ),
-                              color: accentColors[2]
-                            ),
-                            Bar(
-                              amount: _walletStatAll.data[index].balance!,
-                              maxAmount: _maxAmount,
-                              text: Globals.fCCY.format(
-                                _walletStatAll.data[index].balance!
-                              ),
-                              color: accentColors[4]
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 5,),
-                    ],
-                  ),
+                return BarStat(
+                  income: _walletStatAll.data[index].income,
+                  expense: _walletStatAll.data[index].expense,
+                  balance: _walletStatAll.data[index].balance,
+                  maxAmount: _maxAmount,
+                  date: _walletStatAll.data[index].date
                 );
               }),
             ),
@@ -339,7 +358,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
       _walletListTotal[Globals.dfMMyy.formatLocal(key)] = 0;
     });
 
-    for (Datum data in _walletStatAll.data) {
+    for (Datum data in _origWalletStatAll.data) {
       // generate the wallet list income, expense, and total
       _walletListIncome[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
       _walletListExpense[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
@@ -381,13 +400,20 @@ class _StatsAllPageState extends State<StatsAllPage> {
       // perform the get company detail information here
       await _walletHTTP.getAllStat(ccy: _ccy).then((resp) {
         // copy the response to company detail data
-        _walletStatAll = resp[0];
         _origWalletStatAll = resp[0];
         _origWalletStatAllReverse = WalletStatAllModel(
           ccy: resp[0].ccy,
           symbol: resp[0].symbol,
           data: resp[0].data.reversed.toList(),
         );
+
+        // check whether this is ascending or descending
+        if (_sortAscending) {
+          _walletStatAll = _origWalletStatAll;
+        }
+        else {
+          _walletStatAll = _origWalletStatAllReverse;
+        }
 
         if (_origWalletStatAll.data.isNotEmpty) {
           _minDate = DateTime(
@@ -439,5 +465,27 @@ class _StatsAllPageState extends State<StatsAllPage> {
         _walletStatAll = _origWalletStatAllReverse;
       }
     });
+  }
+
+  void _filterChartData() {
+    // clear wallet chart data
+    _walletLineChartData.clear();
+    _walletLineChartColors.clear();
+
+    // check which one we need to show?
+    if (_showTotal) {
+      _walletLineChartData.add(_walletListTotal);
+      _walletLineChartColors.add(accentColors[5]);
+    }
+
+    if (_showIncome) {
+      _walletLineChartData.add(_walletListIncome);
+      _walletLineChartColors.add(accentColors[0]);
+    }
+
+    if (_showExpense) {
+      _walletLineChartData.add(_walletListExpense);
+      _walletLineChartColors.add(accentColors[2]);
+    }
   }
 }
