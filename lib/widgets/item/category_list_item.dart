@@ -16,6 +16,7 @@ class CategoryListItem extends StatelessWidget {
   final Function(int)? onTap;
   final Function(int)? onDoubleTap;
   final Function? onDelete;
+  final Function(int)? onEdit;
   const CategoryListItem({super.key,
     required this.index,
     required this.budgetId,
@@ -28,12 +29,13 @@ class CategoryListItem extends StatelessWidget {
     required this.budgetAmount,
     this.onTap,
     this.onDoubleTap,
-    this.onDelete});
+    this.onDelete,
+    this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(width: 1.0, color: primaryLight)),
         color: Colors.transparent,
@@ -42,8 +44,19 @@ class CategoryListItem extends StatelessWidget {
         key: Key("${categoryId}_$categoryName"),
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
-          extentRatio: 0.20,
+          extentRatio: 0.4,
           children: <Widget>[
+            SlideButton(
+              icon: Ionicons.pencil,
+              iconColor: textColor,
+              bgColor: accentColors[6],
+              text: 'Edit',
+              onTap: () {
+                if (onEdit != null) {
+                  onEdit!(index);
+                }
+              },
+            ),
             SlideButton(
               icon: Ionicons.trash,
               iconColor: textColor,
@@ -57,39 +70,42 @@ class CategoryListItem extends StatelessWidget {
             ),
           ],
         ),
-        child: GestureDetector(
-          onTap: (() {
-            if (onTap != null) {
-              onTap!(index);
-            }
-          }),
-          onDoubleTap: (() {
-            if (onDoubleTap != null) {
-              onDoubleTap!(index);
-            }
-          }),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                height: 40,
-                width: 40,
-                margin: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(40),
-                  color: categoryColor,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: GestureDetector(
+            onTap: (() {
+              if (onTap != null) {
+                onTap!(index);
+              }
+            }),
+            onDoubleTap: (() {
+              if (onDoubleTap != null) {
+                onDoubleTap!(index);
+              }
+            }),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  height: 40,
+                  width: 40,
+                  margin: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    color: categoryColor,
+                  ),
+                  child: categoryIcon,
                 ),
-                child: categoryIcon,
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(child: Text(categoryName)),
-              const SizedBox(width: 10,),
-              Text("$currencySymbol ${Globals.fCCY.format(budgetAmount)}"),
-              const SizedBox(width: 5,),
-            ],
+                const SizedBox(
+                  width: 10,
+                ),
+                Expanded(child: Text(categoryName)),
+                const SizedBox(width: 10,),
+                Text("$currencySymbol ${Globals.fCCY.format(budgetAmount)}"),
+                const SizedBox(width: 5,),
+              ],
+            ),
           ),
         ),
       ),
