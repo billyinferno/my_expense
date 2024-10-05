@@ -835,7 +835,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       _monthlyDateRange.clear();
       
       while (lastDate.isBefore(nextDate)) {
-        _monthlyDateRange[Globals.dfyyyyMM.formatLocal(lastDate)] = 0;
+        _monthlyDateRange[Globals.dfMMyy.formatLocal(lastDate)] = 0;
         lastDate = DateTime(lastDate.year, lastDate.month + 1, 1);
       }
 
@@ -871,10 +871,17 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       _totalMonthlyAmount = 0;
       _totalMonthlyDailyAmount = 0;
 
+      DateTime parsedDate;
+      String formatDate;
       for (BudgetStatDetail data in _budgetStat.monthly.reversed) {
-        _monthlyDateRange[data.date] = data.totalAmount;
-        _totalMonthlyAmount += data.totalAmount;
-        _totalMonthlyDailyAmount += data.averageAmount;
+        parsedDate = DateTime.parse("${data.date}-01");
+        formatDate = Globals.dfMMyy.formatLocal(parsedDate);
+
+        if (_monthlyDateRange.containsKey(formatDate)) {
+          _monthlyDateRange[formatDate] = data.totalAmount;
+          _totalMonthlyAmount += data.totalAmount;
+          _totalMonthlyDailyAmount += data.averageAmount;
+        }
       }
       
       _averageMonthlyAmount = _totalMonthlyAmount / _monthlyDateRange.length;
