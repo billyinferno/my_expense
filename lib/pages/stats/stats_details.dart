@@ -581,7 +581,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
           // for expense as it stored as negative we compare b to a for
           // sort as ascending.
           _filterExpense = _stats.incomeExpenseCategory.expense.toList()..sort(
-            (a, b) => (b.amount.compareTo(a.amount))
+            (a, b) => (a.amount.compareTo(b.amount))
           );
         default:
           _filterExpense = _stats.incomeExpenseCategory.expense.toList();
