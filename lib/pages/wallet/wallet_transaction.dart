@@ -458,6 +458,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           TransactionListModel txn = _list[index].data as TransactionListModel;
 
           return Slidable(
+            key: Key("${txn.id}_${txn.wallet.id}_${txn.name}"),
             endActionPane: ActionPane(
               motion: const DrawerMotion(),
               extentRatio: 0.20,

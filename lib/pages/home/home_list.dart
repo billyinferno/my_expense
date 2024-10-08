@@ -393,6 +393,7 @@ class _HomeListState extends State<HomeList> {
     required BuildContext context
   }) {
     return Slidable(
+      key: Key("${txn.id}_${txn.wallet.id}_${txn.type}"),
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
         extentRatio: 0.20,
