@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/widgets/page/common_loading_page.dart';
 
 class StatsAllPage extends StatefulWidget {
   final Object? ccy;
@@ -168,25 +168,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
             ),
           );
         } else {
-          return Scaffold(
-            body: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SpinKitFadingCube(
-                  color: accentColors[6],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Text(
-                  "Loading Stats",
-                  style: TextStyle(
-                    color: textColor2,
-                    fontSize: 10,
-                  ),
-                )
-              ],
-            ),
+          return CommonLoadingPage(
+            isNeedScaffold: true,
+            loadingText: 'Loading stats data...',
           );
         }
       }),

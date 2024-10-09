@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:my_expense/widgets/page/common_loading_page.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -75,25 +75,9 @@ class _HomeWalletState extends State<HomeWallet> {
             return _generateWalletView();
           } else {
             // still loading
-            return Center(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SpinKitFadingCube(
-                  color: accentColors[6],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Text(
-                  "Loading Wallet",
-                  style: TextStyle(
-                    color: textColor2,
-                    fontSize: 10,
-                  ),
-                )
-              ],
-            ));
+            return CommonLoadingPage(
+              isNeedScaffold: false,
+            );
           }
         }),
       ),

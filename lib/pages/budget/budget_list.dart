@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/widgets/page/common_loading_page.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -132,24 +132,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
             );
           }
           else {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SpinKitFadingCube(
-                  color: accentColors[6],
-                  size: 25,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                const Text(
-                  "loading...",
-                  style: TextStyle(
-                    color: textColor2,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
+            return CommonLoadingPage(
+              isNeedScaffold: false,
             );
           }
         },
