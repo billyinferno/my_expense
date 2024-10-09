@@ -526,7 +526,7 @@ class _UserPageState extends State<UserPage> {
     // check the result of the dialog box
     result.then((value) async {
       if (value == true) {
-        Log.info(message: "logout user");
+        Log.info(message: "🔓 logout user");
         await _logout();
       }
     });
