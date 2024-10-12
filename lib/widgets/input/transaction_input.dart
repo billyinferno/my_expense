@@ -1485,16 +1485,15 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   void _getUserFromWalletInfo({int? walletId, String? name}) {
-    // check whether wallet ID is being set or not? and if being set ensure
-    // the ID is > 0.
-    if ((walletId ?? 0) <= 0) {
-      // just put default value for the wallet selection.
-      _currentWalletFromID = -1;
-      _currentWalletFromName = (name ?? "Wallet");
-      _currentWalletFromType = "";
-      _currentWalletFromCCY = "";  
-    }
-    else {
+    // default the value of wallet information
+    _currentWalletFromID = -1;
+    _currentWalletFromName = (name ?? "Wallet");
+    _currentWalletFromType = "";
+    _currentWalletFromCCY = "";
+
+    // check if wallet ID more than 0, if so then we can default the wallet
+    // with the one user selected.
+    if ((walletId ?? 0) > 0) {
       // loop thru wallet list and set the correct info to the wallet
       for(int i = 0; i < _walletListAll.length; i++) {
         // check if the wallet id is the same as the one being sent?
