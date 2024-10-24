@@ -1,5 +1,4 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
@@ -407,7 +406,6 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   Widget _generateCalendarSelection() {
-    //TODO: change calendar for month and year to using ScrollDate instead cupertino
     if (_currentType == "month") {
       // set the _currentToDate as the last day of the month
       _currentFromDate = DateTime(
@@ -446,116 +444,36 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
   }
 
   Widget _generateMonthCalendar() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Expanded(
-          flex: 1,
-          child: Center(
-            child: CupertinoPicker(
-              scrollController: FixedExtentScrollController(
-                initialItem: (_currentToDate.toLocal().month - 1)
-              ),
-              itemExtent: 25,
-              onSelectedItemChanged: (int value) {
-                setState(() {
-                  _currentFromDate = DateTime(
-                    _currentToDate.toLocal().year, value + 1, 1
-                  );
-                  _currentToDate = DateTime(
-                    _currentToDate.toLocal().year, value + 2, 1
-                  ).subtract(const Duration(days: 1));
-                });
-              },
-              children: List.generate(12, ((index) {
-                return Text(
-                  Globals.dfMMM.format(DateTime(_currentToDate.toLocal().year, index + 1, 1)),
-                  style: const TextStyle(
-                    color: textColor2,
-                    fontSize: 20,
-                    fontFamily: '--apple-system'
-                  ),
-                );
-              })),
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Center(
-            child: CupertinoPicker(
-              scrollController: FixedExtentScrollController(
-                initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)
-              ),
-              itemExtent: 25,
-              onSelectedItemChanged: (int value) {
-                setState(() {
-                  _currentFromDate = DateTime(
-                    (_maxDate.toLocal().year - value),
-                    _currentToDate.toLocal().month,
-                    1
-                  );
-                  
-                  _currentToDate = DateTime(
-                    (_maxDate.toLocal().year - value),
-                    (_currentToDate.toLocal().month + 1),
-                    1
-                  ).subtract(const Duration(days: 1));
-                });
-              },
-              children: List.generate(
-                ((_maxDate.toLocal().year - _minDate.toLocal().year) + 1),
-                ((index) {
-                  return Text(
-                    (_maxDate.year - index).toString(),
-                    style: const TextStyle(
-                        color: textColor2,
-                        fontSize: 20,
-                        fontFamily: '--apple-system'),
-                  );
-                })
-              ),
-            ),
-          ),
-        )
-      ],
+    return ScrollDatePicker(
+      initialDate: _currentFromDate,
+      minDate: _minDate,
+      maxDate: _maxDate,
+      type: ScrollDateType.monthYear,
+      selectedColor: textColor2,
+      barColor: accentColors[6],
+      onDateChange: ((value) {
+        setState(() {
+          _currentFromDate = DateTime(value.year, value.month, 1).toLocal();
+          _currentToDate = DateTime(value.year, value.month + 1, 1).subtract(Duration(days: 1)).toLocal();
+        });
+      }),
     );
   }
 
   Widget _generateYearCalendar() {
-    return Center(
-      child: CupertinoPicker(
-        scrollController: FixedExtentScrollController(
-          initialItem: (_maxDate.toLocal().year - _currentToDate.toLocal().year)
-        ),
-        itemExtent: 25,
-        onSelectedItemChanged: (int value) {
-          setState(() {
-            _currentFromDate = DateTime(
-              (_maxDate.toLocal().year - value), 1, 1
-            );
-            _currentToDate = DateTime(
-              (_maxDate.toLocal().year - value) + 1, 1, 1
-            ).subtract(const Duration(days: 1));
-          });
-        },
-        children: List.generate(
-          (
-            (_maxDate.toLocal().year - _minDate.toLocal().year) + 1
-          ),
-          ((index) {
-            return Text(
-              (_maxDate.year - index).toString(),
-              style: const TextStyle(
-                color: textColor2,
-                fontSize: 20,
-                fontFamily: '--apple-system'
-              ),
-            );
-          }),
-        ),
-      ),
+    return ScrollDatePicker(
+      initialDate: _currentFromDate,
+      minDate: _minDate,
+      maxDate: _maxDate,
+      type: ScrollDateType.yearOnly,
+      selectedColor: textColor2,
+      barColor: accentColors[6],
+      onDateChange: ((value) {
+        setState(() {
+          _currentFromDate = DateTime(value.year, 1, 1).toLocal();
+          _currentToDate = DateTime(value.year, 12, 31).toLocal();
+        });
+      }),
     );
   }
 

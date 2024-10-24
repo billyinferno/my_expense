@@ -402,9 +402,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             return _createItem(_transfer[index], false);
           },
         );
-      default:
-        // unknown just return SizedBox.shrink();
-        return const SizedBox.shrink();
     }
   }
 
