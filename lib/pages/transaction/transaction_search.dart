@@ -76,8 +76,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // generate the icon list widget for both expense and income
     _generateIconCategory();
 
-    // get the wallet list
-    _walletList = WalletSharedPreferences.getWallets(showDisabled: false);
+    // get the wallet list, show the disabled also incase we have transaction
+    // that the wallet already disabled as it still being showed in the search
+    // result.
+    _walletList = WalletSharedPreferences.getWallets(showDisabled: true);
   }
 
   @override
@@ -104,6 +106,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: const Icon(Ionicons.close,),
         ),
         actions: <Widget>[
+          //TODO: to add sort so we can sort the search result
           Container(
             width: 45,
             color: Colors.transparent,
@@ -159,11 +162,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           Container(
             width: double.infinity,
             decoration: const BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(
-                        color: primaryLight,
-                        width: 1.0,
-                        style: BorderStyle.solid))),
+              border: Border(
+                bottom: BorderSide(
+                  color: primaryLight,
+                  width: 1.0,
+                  style: BorderStyle.solid
+                )
+              )
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -196,8 +202,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           });
                         },
                         groupValue: _resultPage,
-                        thumbColor: (_resultPageColor[_resultPageName] ??
-                            accentColors[9]),
+                        thumbColor: (_resultPageColor[_resultPageName] ?? accentColors[9]),
                         children: const {
                           0: Text(
                             "Summary",
@@ -291,26 +296,22 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                               itemCount: _walletList.length,
                               itemBuilder: (BuildContext context, int index) {
                                 return SimpleItem(
-                                  color: IconList.getColor(_walletList[index]
-                                      .walletType
-                                      .type
-                                      .toLowerCase()),
+                                  color: IconList.getColor(
+                                    _walletList[index].walletType.type.toLowerCase()
+                                  ),
                                   title: _walletList[index].name,
-                                  isSelected: (_selectedWalletList[
-                                          _walletList[index].id] ??
-                                      false),
+                                  isSelected: (
+                                    _selectedWalletList[_walletList[index].id] ?? false
+                                  ),
                                   onTap: (() {
                                     setState(() {
                                       // check if this ID previously selected or not?
-                                      if (_selectedWalletList
-                                          .containsKey(_walletList[index].id)) {
+                                      if (_selectedWalletList.containsKey(_walletList[index].id)) {
                                         // delete this data
-                                        _selectedWalletList
-                                            .remove(_walletList[index].id);
+                                        _selectedWalletList.remove(_walletList[index].id);
                                       } else {
                                         // new data, set this as true
-                                        _selectedWalletList[
-                                            _walletList[index].id] = true;
+                                        _selectedWalletList[_walletList[index].id] = true;
                                       }
 
                                       // once finished call filter the transaction
@@ -322,10 +323,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                                     });
                                     Navigator.pop(context);
                                   }),
-                                  icon: IconList.getIcon(_walletList[index]
-                                      .walletType
-                                      .type
-                                      .toLowerCase()),
+                                  icon: IconList.getIcon(
+                                    _walletList[index].walletType.type.toLowerCase()
+                                  ),
                                 );
                               },
                             ),
@@ -336,11 +336,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     width: 35,
                     child: badges.Badge(
                       position: badges.BadgePosition.topEnd(end: 5),
-                      badgeStyle:
-                          badges.BadgeStyle(badgeColor: accentColors[2]),
+                      badgeStyle: badges.BadgeStyle(badgeColor: accentColors[2]),
                       badgeContent: Text(
                         _selectedWalletList.length.toString(),
-                        style: const TextStyle(color: textColor, fontSize: 10),
+                        style: const TextStyle(
+                          color: textColor,
+                          fontSize: 10
+                        ),
                       ),
                       child: const Icon(
                         Ionicons.wallet,
@@ -549,11 +551,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       // generate the summary key
       if (_filterTransactions[i].type == 'expense' ||
           _filterTransactions[i].type == 'income') {
-        summaryKey =
-            "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : ''}_${_filterTransactions[i].name}_${_filterTransactions[i].wallet.currency}";
+        summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : ''}_${_filterTransactions[i].name}_${_filterTransactions[i].wallet.currency}";
       } else {
-        summaryKey =
-            "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].wallet.name}_${_filterTransactions[i].wallet.currency}";
+        summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].wallet.name}_${_filterTransactions[i].wallet.currency}";
       }
 
       // check which transaction is being updated
@@ -614,14 +614,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // sorted the total amount income and expense
     // so it will showed in the same order on the summary list
-    List<MapEntry<String, double>> sortedEntriesIncome =
-        _totalAmountIncome.entries.toList()
-          ..sort((a, b) => a.key.compareTo(b.key));
+    List<MapEntry<String, double>> sortedEntriesIncome = _totalAmountIncome.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     _totalAmountIncome = Map.fromEntries(sortedEntriesIncome);
 
-    List<MapEntry<String, double>> sortedEntriesExpense =
-        _totalAmountExpense.entries.toList()
-          ..sort((a, b) => a.key.compareTo(b.key));
+    List<MapEntry<String, double>> sortedEntriesExpense = _totalAmountExpense.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
     _totalAmountExpense = Map.fromEntries(sortedEntriesExpense);
 
     // clear the summary list widget
@@ -646,7 +642,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             height: 5,
           ),
           ..._generateSubSummaryBox(
-              data: _totalAmountExpense, color: accentColors[2]),
+            data: _totalAmountExpense,
+            color: accentColors[2]
+          ),
         ],
       ),
     ));
@@ -768,7 +766,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             height: 5,
           ),
           ..._generateSubSummaryBox(
-              data: _totalAmountIncome, color: accentColors[6]),
+            data: _totalAmountIncome,
+            color: accentColors[6]
+          ),
         ],
       ),
     ));
@@ -889,7 +889,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             height: 5,
           ),
           ..._generateSubSummaryBox(
-              data: _totalAmountTransfer, color: accentColors[4]),
+            data: _totalAmountTransfer,
+            color: accentColors[4]
+          ),
         ],
       ),
     ));
@@ -1089,8 +1091,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               _categoryIcon(
-                  name: (txn.category != null ? txn.category!.name : ''),
-                  type: txn.type),
+                name: (txn.category != null ? txn.category!.name : ''),
+                type: txn.type
+              ),
               const SizedBox(
                 width: 10,
               ),
@@ -1158,8 +1161,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           _categoryIcon(
-              name: (txn.category != null ? txn.category!.name : ''),
-              type: txn.type),
+            name: (txn.category != null ? txn.category!.name : ''),
+            type: txn.type
+          ),
           const SizedBox(
             width: 10,
           ),
@@ -1209,12 +1213,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   Widget _createItem(TransactionListModel txn, [bool? canEdit]) {
     return InkWell(
-        onTap: (() {
-          if (canEdit ?? true) {
-            _showTransactionEditScreen(txn);
-          }
-        }),
-        child: _createItemType(txn));
+      onTap: (() {
+        if (canEdit ?? true) {
+          _showTransactionEditScreen(txn);
+        }
+      }),
+      child: _createItemType(txn)
+    );
   }
 
   Widget _createItemType(TransactionListModel txn) {
@@ -1477,8 +1482,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             Expanded(
               child: CupertinoSearchTextField(
                 controller: _searchController,
-                style:
-                    const TextStyle(color: textColor2, fontFamily: '--apple-system'),
+                style: const TextStyle(
+                  color: textColor2,
+                  fontFamily: '--apple-system'
+                ),
                 suffixIcon: const Icon(Ionicons.arrow_forward_circle),
                 onSubmitted: ((_) async {
                   await _submitSearch().then((_) {
@@ -1728,9 +1735,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   borderRadius: BorderRadius.circular(50),
                   color: iconColor,
                   border: Border.all(
-                    color: (_categorySelected.containsKey(category.id)
-                        ? accentColors[4]
-                        : Colors.transparent),
+                    color: (
+                      _categorySelected.containsKey(category.id) ?
+                      accentColors[4] :
+                      Colors.transparent
+                    ),
                     width: 2.0,
                     style: BorderStyle.solid,
                   )),
@@ -1778,16 +1787,22 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         }),
         child: Chip(
           avatar: _categoryIcon(
-              type: value.type,
-              name: value.name,
-              height: 20,
-              width: 20,
-              size: 15),
+            type: value.type,
+            name: value.name,
+            height: 20,
+            width: 20,
+            size: 15
+          ),
           label: Text(value.name),
-          backgroundColor: (value.type == 'expense'
-              ? IconColorList.getExpenseColor(value.name)
-              : IconColorList.getIncomeColor(value.name)),
-          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+          backgroundColor: (
+            value.type == 'expense' ?
+            IconColorList.getExpenseColor(value.name) :
+            IconColorList.getIncomeColor(value.name)
+          ),
+          padding: const EdgeInsets.symmetric(
+            vertical: 5,
+            horizontal: 5
+          ),
         ),
       ));
     });
@@ -1824,8 +1839,7 @@ class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
           padding: const EdgeInsets.all(10),
           child: Center(
             child: CupertinoSegmentedControl<PageName>(
-              selectedColor: (_resultCategoryColor[_resultCategoryName] ??
-                  accentColors[9]),
+              selectedColor: (_resultCategoryColor[_resultCategoryName] ?? accentColors[9]),
               // Provide horizontal padding around the children.
               padding: const EdgeInsets.symmetric(horizontal: 12),
               // This represents a currently selected segmented control.
@@ -1852,9 +1866,11 @@ class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
         Expanded(
           child: GridView.count(
             crossAxisCount: 4,
-            children: (_resultCategoryName == PageName.expense
-                ? widget.categoryExpense
-                : widget.categoryIncome),
+            children: (
+              _resultCategoryName == PageName.expense ?
+              widget.categoryExpense :
+              widget.categoryIncome
+            ),
           ),
         ),
       ],
