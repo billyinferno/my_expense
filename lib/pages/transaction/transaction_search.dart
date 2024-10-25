@@ -37,24 +37,28 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final List<TransactionListModel> _income = [];
   final List<TransactionListModel> _expense = [];
   final List<TransactionListModel> _transfer = [];
+  late List<TransactionListModel> _filterTransactionsSort;
+  late List<TransactionListModel> _incomeSort;
+  late List<TransactionListModel> _expenseSort;
+  late List<TransactionListModel> _transferSort;
   final Map<String, List<TransactionListModel>> _summaryIncome = {};
   final Map<String, Map<String, TransactionListModel>> _subSummaryIncome = {};
   final Map<String, List<TransactionListModel>> _summaryExpense = {};
   final Map<String, Map<String, TransactionListModel>> _subSummaryExpense = {};
   final Map<String, List<TransactionListModel>> _summaryTransfer = {};
   final Map<String, Map<String, TransactionListModel>> _subSummaryTransfer = {};
-  Map<String, double> _totalAmountIncome = {};
-  Map<String, double> _totalAmountExpense = {};
+  late Map<String, double> _totalAmountIncome;
+  late Map<String, double> _totalAmountExpense;
   final Map<String, double> _totalAmountTransfer = {};
   final List<Widget> _summaryList = [];
 
   final Map<int, CategoryModel> _categorySelected = {};
-  Map<int, CategoryModel> _categoryExpenseList = {};
-  Map<int, CategoryModel> _categoryIncomeList = {};
+  late Map<int, CategoryModel> _categoryExpenseList;
+  late Map<int, CategoryModel> _categoryIncomeList;
   final List<Widget> _categoryExpenseIcon = [];
   final List<Widget> _categoryIncomeIcon = [];
 
-  List<WalletModel> _walletList = [];
+  late List<WalletModel> _walletList;
   final Map<int, bool> _selectedWalletList = {};
 
   final TextEditingController _searchController = TextEditingController();
@@ -65,9 +69,24 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final ScrollController _scrollControllerTransfer = ScrollController();
   final ScrollController _walletController = ScrollController();
 
+  late bool _sortType;
+  late String _filterType;
+
   @override
   void initState() {
     super.initState();
+
+    // initialize variable
+    _totalAmountIncome = {};
+    _totalAmountExpense = {};
+
+    _sortType = false; // descending
+    _filterType = "D"; // date
+
+    _filterTransactionsSort = [];
+    _incomeSort = [];
+    _expenseSort = [];
+    _transferSort = [];
 
     // get the category expense and income list from shared preferences
     _categoryExpenseList = CategorySharedPreferences.getCategory(type: 'expense');
@@ -106,10 +125,95 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           icon: const Icon(Ionicons.close,),
         ),
         actions: <Widget>[
-          //TODO: to add sort so we can sort the search result
-          Container(
-            width: 45,
-            color: Colors.transparent,
+          IconButton(
+            onPressed: (() {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return MyBottomSheet(
+                    context: context,
+                    title: "Select Filter",
+                    screenRatio: 0.3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        SimpleItem(
+                          onTap: (() {
+                            setState(() {
+                              _filterType = "N";
+                              _generateSortedList();
+                            });
+                            Navigator.pop(context);
+                          }),
+                          color: Colors.grey[900]!,
+                          icon: Center(
+                            child: Text(
+                              "AN",
+                              style: TextStyle(
+                                color: textColor2,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                          title: "Name",
+                          isSelected: (_filterType == "N"),
+                        ),
+                        SimpleItem(
+                          onTap: (() {
+                            setState(() {
+                              _filterType = "D";
+                              _generateSortedList();
+                            });
+                            Navigator.pop(context);
+                          }),
+                          color: Colors.grey[900]!,
+                          icon: Icon(
+                            Ionicons.calendar,
+                            color: textColor2,
+                            size: 15,
+                          ),
+                          title: "Date",
+                          isSelected: (_filterType == "D"),
+                        ),
+                        SimpleItem(
+                          onTap: (() {
+                            setState(() {
+                              _filterType = "A";
+                              _generateSortedList();
+                            });
+                            Navigator.pop(context);
+                          }),
+                          color: Colors.grey[900]!,
+                          icon: Icon(
+                            Ionicons.cash,
+                            color: textColor2,
+                            size: 15,
+                          ),
+                          title: "Amount",
+                          isSelected: (_filterType == "A"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            }),
+            icon: Icon(
+              Ionicons.funnel,
+              color: textColor,
+              size: 15,
+            )
+          ),
+          IconButton(
+            onPressed: (() {
+              setState(() {
+                _sortType = !_sortType;
+                _generateSortedList();
+              });
+            }),
+            icon: SortIcon(asc: _sortType),
           ),
         ],
       ),
@@ -283,11 +387,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                                   Navigator.pop(context);
                                 }
                               }),
-                              child: const SizedBox(
+                              child: SizedBox(
+                                height: 20,
+                                width: 20,
                                 child: Icon(
-                                  Ionicons.close_circle,
+                                  Ionicons.trash_bin_outline,
                                   size: 20,
-                                  color: textColor,
+                                  color: accentColors[2],
                                 ),
                               ),
                             ),
@@ -297,7 +403,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                               itemBuilder: (BuildContext context, int index) {
                                 return SimpleItem(
                                   color: IconList.getColor(
-                                    _walletList[index].walletType.type.toLowerCase()
+                                    _walletList[index].walletType.type.toLowerCase(),
+                                    enabled: _walletList[index].enabled
                                   ),
                                   title: _walletList[index].name,
                                   isSelected: (
@@ -334,6 +441,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   }),
                   child: SizedBox(
                     width: 35,
+                    height: 35,
                     child: badges.Badge(
                       position: badges.BadgePosition.topEnd(end: 5),
                       badgeStyle: badges.BadgeStyle(badgeColor: accentColors[2]),
@@ -344,10 +452,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           fontSize: 10
                         ),
                       ),
-                      child: const Icon(
-                        Ionicons.wallet,
-                        size: 15,
-                        color: textColor,
+                      child: const Center(
+                        child: Icon(
+                          Ionicons.wallet,
+                          size: 15,
+                          color: textColor,
+                        ),
                       ),
                     ),
                   ),
@@ -368,9 +478,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       case PageName.all:
         return ListView.builder(
           controller: _scrollController,
-          itemCount: _filterTransactions.length,
+          itemCount: _filterTransactionsSort.length,
           itemBuilder: (context, index) {
-            return _createItem(_filterTransactions[index], true);
+            return _createItem(_filterTransactionsSort[index], true);
           },
         );
       case PageName.summary:
@@ -383,25 +493,25 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       case PageName.income:
         return ListView.builder(
           controller: _scrollControllerIncome,
-          itemCount: _income.length,
+          itemCount: _incomeSort.length,
           itemBuilder: (context, index) {
-            return _createItem(_income[index], false);
+            return _createItem(_incomeSort[index], false);
           },
         );
       case PageName.expense:
         return ListView.builder(
           controller: _scrollControllerExpense,
-          itemCount: _expense.length,
+          itemCount: _expenseSort.length,
           itemBuilder: (context, index) {
-            return _createItem(_expense[index], false);
+            return _createItem(_expenseSort[index], false);
           },
         );
       case PageName.transfer:
         return ListView.builder(
           controller: _scrollControllerTransfer,
-          itemCount: _transfer.length,
+          itemCount: _transferSort.length,
           itemBuilder: (context, index) {
-            return _createItem(_transfer[index], false);
+            return _createItem(_transferSort[index], false);
           },
         );
     }
@@ -529,6 +639,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _income.clear();
     _expense.clear();
     _transfer.clear();
+
     _summaryIncome.clear();
     _subSummaryIncome.clear();
     _totalAmountIncome.clear();
@@ -611,6 +722,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           break;
       }
     }
+
+    // generate listed of sorted income, expense, transfer
+    _generateSortedList();
 
     // sorted the total amount income and expense
     // so it will showed in the same order on the summary list
@@ -1808,6 +1922,49 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     });
 
     return result;
+  }
+
+  void _generateSortedList() {
+    // clear the sorted income, expense, and transfer first
+    _incomeSort.clear();
+    _expenseSort.clear();
+    _transferSort.clear();
+
+    // switch the filter type
+    switch(_filterType) {
+      case "N":
+        _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.name.compareTo(b.name));
+        _incomeSort = _income.toList()..sort((a, b) => a.name.compareTo(b.name));
+        _expenseSort = _expense.toList()..sort((a, b) => a.name.compareTo(b.name));
+        _transferSort = _transfer.toList()..sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case "D":
+        _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.date.compareTo(b.date));
+        _incomeSort = _income.toList()..sort((a, b) => a.date.compareTo(b.date));
+        _expenseSort = _expense.toList()..sort((a, b) => a.date.compareTo(b.date));
+        _transferSort = _transfer.toList()..sort((a, b) => a.date.compareTo(b.date));
+        break;
+      case "A":
+        _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.amount.compareTo(b.amount));
+        _incomeSort = _income.toList()..sort((a, b) => a.amount.compareTo(b.amount));
+        _expenseSort = _expense.toList()..sort((a, b) => a.amount.compareTo(b.amount));
+        _transferSort = _transfer.toList()..sort((a, b) => a.amount.compareTo(b.amount));
+        break;
+      default:
+        _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.date.compareTo(b.date));
+        _incomeSort = _income.toList()..sort((a, b) => a.date.compareTo(b.date));
+        _expenseSort = _expense.toList()..sort((a, b) => a.date.compareTo(b.date));
+        _transferSort = _transfer.toList()..sort((a, b) => a.date.compareTo(b.date));
+        break;
+    }
+
+    // check whether this is ascending or descending
+    if (!_sortType) {
+      _filterTransactionsSort = _filterTransactionsSort.reversed.toList();
+      _incomeSort = _incomeSort.reversed.toList();
+      _expenseSort = _expenseSort.reversed.toList();
+      _transferSort = _transferSort.reversed.toList();
+    }
   }
 }
 
