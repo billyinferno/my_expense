@@ -135,6 +135,7 @@ class MyItemList extends StatelessWidget {
         color: textColor2,
       )),
       overflow: TextOverflow.ellipsis,
+      maxLines: 1,
     );
   }
 }
