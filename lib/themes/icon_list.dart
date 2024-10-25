@@ -19,7 +19,11 @@ class IconList {
     }
   }
 
-  static Color getColor(String name) {
+  static Color getColor(String name, {bool enabled = true}) {
+    if (!enabled) {
+      return Colors.grey[800]!;
+    }
+
     switch(name.toLowerCase()) {
       case "wallet": { return accentColors[0]; }
       case "asset": { return accentColors[10]; }
@@ -36,7 +40,11 @@ class IconList {
     }
   }
 
-  static Color getDarkColor(String name) {
+  static Color getDarkColor(String name, {bool enabled = true}) {
+    if (!enabled) {
+      return Colors.grey[900]!;
+    }
+
     switch(name.toLowerCase()) {
       case "wallet": { return darkAccentColors[0]; }
       case "asset": { return darkAccentColors[10]; }
@@ -53,7 +61,11 @@ class IconList {
     }
   }
 
-  static Color getLightColor(String name) {
+  static Color getLightColor(String name, {bool enabled = true}) {
+    if (!enabled) {
+      return Colors.grey[700]!;
+    }
+
     switch(name.toLowerCase()) {
       case "wallet": { return lightAccentColors[0]; }
       case "asset": { return lightAccentColors[10]; }
