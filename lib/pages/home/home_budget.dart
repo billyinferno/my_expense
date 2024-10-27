@@ -169,15 +169,14 @@ class _HomeBudgetState extends State<HomeBudget> {
                       decoration: const BoxDecoration(
                         border: Border(bottom: BorderSide(width: 1.0, color: secondaryBackground)),
                       ),
-                      //TODO: to check any issue on the page as in some IOS the date is not selected properly
                       child: HorizontalMonthCalendar(
-                        firstDay: _firstDay,
-                        lastDay: _lastDay,
-                        selectedDate: _selectedDate,
+                        firstDay: _firstDay.toLocal(),
+                        lastDay: _lastDay.toLocal(),
+                        selectedDate: _selectedDate.toLocal(),
                         onDateSelected: ((value) {
                           setState(() {
-                            _selectedDate = value;
-                            BudgetSharedPreferences.setBudgetCurrent(date: value);
+                            _selectedDate = value.toLocal();
+                            BudgetSharedPreferences.setBudgetCurrent(date: value.toLocal());
                             // in case we add transaction to other month, just refresh the budget forcefully.
                             _getData = _fetchBudget(true, true);
                           });
