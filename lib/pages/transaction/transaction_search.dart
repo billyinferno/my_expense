@@ -62,7 +62,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final Map<int, bool> _selectedWalletList = {};
 
   final TextEditingController _searchController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollControllerAll = ScrollController();
   final ScrollController _scrollControllerSummary = ScrollController();
   final ScrollController _scrollControllerIncome = ScrollController();
   final ScrollController _scrollControllerExpense = ScrollController();
@@ -104,7 +104,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   @override
   void dispose() {
     _searchController.dispose();
-    _scrollController.dispose();
+    _scrollControllerAll.dispose();
     _scrollControllerSummary.dispose();
     _scrollControllerIncome.dispose();
     _scrollControllerExpense.dispose();
@@ -476,43 +476,48 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   Widget _getResultChild() {
     switch (_resultPageName) {
       case PageName.all:
-        return ListView.builder(
-          controller: _scrollController,
-          itemCount: _filterTransactionsSort.length,
-          itemBuilder: (context, index) {
-            return _createItem(_filterTransactionsSort[index], true);
+        return ListViewWithHeader(
+          controller: _scrollControllerAll,
+          data: _filterTransactionsSort,
+          canEdit: true,
+          headerType: _filterType,
+          showHeader: (_filterType != 'A'),
+          editFunction: (txn) {
+            // show the transaction edit screen
+            _showTransactionEditScreen(txn);
           },
         );
       case PageName.summary:
+        //TODO: to also add summary based on category not just item summary
         return ListView.builder(
-            controller: _scrollControllerSummary,
-            itemCount: _summaryList.length,
-            itemBuilder: ((context, index) {
-              return _summaryList[index];
-            }));
+          controller: _scrollControllerSummary,
+          itemCount: _summaryList.length,
+          itemBuilder: ((context, index) {
+            return _summaryList[index];
+          })
+        );
       case PageName.income:
-        return ListView.builder(
+        return ListViewWithHeader(
           controller: _scrollControllerIncome,
-          itemCount: _incomeSort.length,
-          itemBuilder: (context, index) {
-            return _createItem(_incomeSort[index], false);
-          },
+          data: _incomeSort,
+          canEdit: false,
+          headerType: _filterType,
+          showHeader: (_filterType != 'A'),
         );
       case PageName.expense:
-        return ListView.builder(
+        return ListViewWithHeader(
           controller: _scrollControllerExpense,
-          itemCount: _expenseSort.length,
-          itemBuilder: (context, index) {
-            return _createItem(_expenseSort[index], false);
-          },
+          data: _expenseSort,
+          canEdit: false,
+          headerType: _filterType,
         );
       case PageName.transfer:
-        return ListView.builder(
+        return ListViewWithHeader(
           controller: _scrollControllerTransfer,
-          itemCount: _transferSort.length,
-          itemBuilder: (context, index) {
-            return _createItem(_transferSort[index], false);
-          },
+          data: _transferSort,
+          canEdit: false,
+          headerType: _filterType,
+          showHeader: (_filterType != 'A'),
         );
     }
   }
@@ -737,375 +742,384 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // clear the summary list widget
     _summaryList.clear();
 
-    // add the expense bar on the _summaryList
-    _summaryList.add(Container(
-      padding: const EdgeInsets.all(10),
-      color: secondaryDark,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            "Expense",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: accentColors[2],
+    // check if we have expense or not?
+    if (_summaryExpense.isNotEmpty) {  
+      // add the expense bar on the _summaryList
+      _summaryList.add(Container(
+        padding: const EdgeInsets.all(10),
+        color: secondaryDark,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Expense",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: accentColors[2],
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          ..._generateSubSummaryBox(
-            data: _totalAmountExpense,
-            color: accentColors[2]
-          ),
-        ],
-      ),
-    ));
-
-    // loop thru all the expense data
-    _summaryExpense.forEach((key, value) {
-      // compute the amount
-      amount = 0;
-      startDate = null;
-      endDate = null;
-      count = 0;
-
-      // create the sub summary expense for this key
-      _subSummaryExpense[key] = {};
-
-      for (TransactionListModel data in value) {
-        if (startDate == null) {
-          startDate = data.date;
-        } else {
-          if (startDate!.isAfter(data.date)) {
-            startDate = data.date;
-          }
-        }
-
-        if (endDate == null) {
-          endDate = data.date;
-        } else {
-          if (endDate!.isBefore(data.date)) {
-            endDate = data.date;
-          }
-        }
-
-        amount += data.amount;
-        count++;
-
-        // add the transaction list on the sub summary list based on the
-        // month and year
-        subSummaryKey = Globals.dfyyyy.format(data.date);
-        
-        // check if subSummaryKey is exists or not?
-        if (!_subSummaryExpense[key]!.containsKey(subSummaryKey)) {
-          // if not exists create the 1st data
-          _subSummaryExpense[key]![subSummaryKey] = TransactionListModel(
-            -1,
-            data.name,
-            data.type,
-            DateTime(data.date.year, data.date.month, 1),
-            data.description,
-            data.category,
-            data.wallet,
-            data.walletTo,
-            data.usersPermissionsUser,
-            data.cleared,
-            data.amount,
-            data.exchangeRate
-          );
-        }
-        else {
-          // exists, get the previous data
-          tmpSubSummaryData = _subSummaryExpense[key]![subSummaryKey]!;
-          // and combine it with current data
-          _subSummaryExpense[key]![subSummaryKey] = TransactionListModel(
-            -1,
-            data.name,
-            data.type,
-            DateTime(data.date.year, data.date.month, 1),
-            data.description,
-            data.category,
-            data.wallet,
-            data.walletTo,
-            data.usersPermissionsUser,
-            data.cleared,
-            (data.amount + tmpSubSummaryData.amount),
-            data.exchangeRate
-          );
-        }
-      }
-
-      // create TransactionModel based on the value
-      TransactionListModel txn = TransactionListModel(
-          -1,
-          value[0].name,
-          value[0].type,
-          DateTime.now(),
-          '',
-          value[0].category,
-          value[0].wallet,
-          null,
-          value[0].usersPermissionsUser,
-          true,
-          amount,
-          1);
-
-      _summaryList.add(_createExpandableItem(
-        txn: txn,
-        startDate: startDate!,
-        endDate: endDate!,
-        count: count,
-        subTxn: (_subSummaryExpense[key] ?? {}),
-      ));
-    });
-
-    // add the income bar on the _summaryList
-    _summaryList.add(Container(
-      padding: const EdgeInsets.all(10),
-      color: secondaryDark,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            "Income",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: accentColors[6],
+            const SizedBox(
+              height: 5,
             ),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          ..._generateSubSummaryBox(
-            data: _totalAmountIncome,
-            color: accentColors[6]
-          ),
-        ],
-      ),
-    ));
-
-    _summaryIncome.forEach((key, value) {
-      // compute the amount
-      amount = 0;
-      startDate = null;
-      endDate = null;
-      count = 0;
-
-      // generate subSummaryIncome for this key
-      _subSummaryIncome[key] = {};
-
-      for (TransactionListModel data in value) {
-        if (startDate == null) {
-          startDate = data.date;
-        } else {
-          if (startDate!.isAfter(data.date)) {
-            startDate = data.date;
-          }
-        }
-
-        if (endDate == null) {
-          endDate = data.date;
-        } else {
-          if (endDate!.isBefore(data.date)) {
-            endDate = data.date;
-          }
-        }
-
-        amount += data.amount;
-        count++;
-
-        // add the transaction list on the sub summary list based on the
-        // month and year
-        subSummaryKey = Globals.dfyyyy.format(data.date);
-        
-        // check if subSummaryKey is exists or not?
-        if (!_subSummaryIncome[key]!.containsKey(subSummaryKey)) {
-          // if not exists create the 1st data
-          _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
-            -1,
-            data.name,
-            data.type,
-            DateTime(data.date.year, data.date.month, 1),
-            data.description,
-            data.category,
-            data.wallet,
-            data.walletTo,
-            data.usersPermissionsUser,
-            data.cleared,
-            data.amount,
-            data.exchangeRate
-          );
-        }
-        else {
-          // exists, get the previous data
-          tmpSubSummaryData = _subSummaryIncome[key]![subSummaryKey]!;
-          // and combine it with current data
-          _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
-            -1,
-            data.name,
-            data.type,
-            DateTime(data.date.year, data.date.month, 1),
-            data.description,
-            data.category,
-            data.wallet,
-            data.walletTo,
-            data.usersPermissionsUser,
-            data.cleared,
-            (data.amount + tmpSubSummaryData.amount),
-            data.exchangeRate
-          );
-        }
-      }
-
-      // create TransactionModel based on the value
-      TransactionListModel txn = TransactionListModel(
-          -1,
-          value[0].name,
-          value[0].type,
-          DateTime.now(),
-          '',
-          value[0].category,
-          value[0].wallet,
-          null,
-          value[0].usersPermissionsUser,
-          true,
-          amount,
-          1);
-
-      _summaryList.add(_createExpandableItem(
-        txn: txn,
-        startDate: startDate!,
-        endDate: endDate!,
-        count: count,
-        subTxn: (_subSummaryIncome[key] ?? {}),
-      ));
-    });
-
-    // add the transfer bar on the _summaryList
-    _summaryList.add(Container(
-      padding: const EdgeInsets.all(10),
-      color: secondaryDark,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            "Transfer",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: accentColors[4],
+            ..._generateSubSummaryBox(
+              data: _totalAmountExpense,
+              color: accentColors[2]
             ),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          ..._generateSubSummaryBox(
-            data: _totalAmountTransfer,
-            color: accentColors[4]
-          ),
-        ],
-      ),
-    ));
-
-    _summaryTransfer.forEach((key, value) {
-      // compute the amount
-      amount = 0;
-      startDate = null;
-      endDate = null;
-      count = 0;
-
-      // initialize sub summary transfer for this key
-      _subSummaryTransfer[key] = {};
-
-      for (TransactionListModel data in value) {
-        if (startDate == null) {
-          startDate = data.date;
-        } else {
-          if (startDate!.isAfter(data.date)) {
-            startDate = data.date;
-          }
-        }
-
-        if (endDate == null) {
-          endDate = data.date;
-        } else {
-          if (endDate!.isBefore(data.date)) {
-            endDate = data.date;
-          }
-        }
-
-        amount += data.amount;
-        count++;
-
-        // add the transaction list on the sub summary list based on the
-        // month and year
-        subSummaryKey = Globals.dfyyyy.format(data.date);
-        
-        // check if subSummaryKey is exists or not?
-        if (!_subSummaryTransfer[key]!.containsKey(subSummaryKey)) {
-          // if not exists create the 1st data
-          _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
-            -1,
-            data.name,
-            data.type,
-            DateTime(data.date.year, data.date.month, 1),
-            data.description,
-            data.category,
-            data.wallet,
-            data.walletTo,
-            data.usersPermissionsUser,
-            data.cleared,
-            data.amount,
-            data.exchangeRate
-          );
-        }
-        else {
-          // exists, get the previous data
-          tmpSubSummaryData = _subSummaryTransfer[key]![subSummaryKey]!;
-          // and combine it with current data
-          _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
-            -1,
-            data.name,
-            data.type,
-            DateTime(data.date.year, data.date.month, 1),
-            data.description,
-            data.category,
-            data.wallet,
-            data.walletTo,
-            data.usersPermissionsUser,
-            data.cleared,
-            (data.amount + tmpSubSummaryData.amount),
-            data.exchangeRate
-          );
-        }
-      }
-
-      // create TransactionModel based on the value
-      TransactionListModel txn = TransactionListModel(
-          -1,
-          value[0].wallet.name,
-          value[0].type,
-          DateTime.now(),
-          '',
-          value[0].category,
-          value[0].wallet,
-          null,
-          value[0].usersPermissionsUser,
-          true,
-          amount,
-          1);
-
-      _summaryList.add(_createExpandableItem(
-        txn: txn,
-        startDate: startDate!,
-        endDate: endDate!,
-        count: count,
-        subTxn: (_subSummaryTransfer[key] ?? {}),
+          ],
+        ),
       ));
-    });
+
+      // loop thru all the expense data
+      _summaryExpense.forEach((key, value) {
+        // compute the amount
+        amount = 0;
+        startDate = null;
+        endDate = null;
+        count = 0;
+
+        // create the sub summary expense for this key
+        _subSummaryExpense[key] = {};
+
+        for (TransactionListModel data in value) {
+          if (startDate == null) {
+            startDate = data.date;
+          } else {
+            if (startDate!.isAfter(data.date)) {
+              startDate = data.date;
+            }
+          }
+
+          if (endDate == null) {
+            endDate = data.date;
+          } else {
+            if (endDate!.isBefore(data.date)) {
+              endDate = data.date;
+            }
+          }
+
+          amount += data.amount;
+          count++;
+
+          // add the transaction list on the sub summary list based on the
+          // month and year
+          subSummaryKey = Globals.dfyyyy.format(data.date);
+          
+          // check if subSummaryKey is exists or not?
+          if (!_subSummaryExpense[key]!.containsKey(subSummaryKey)) {
+            // if not exists create the 1st data
+            _subSummaryExpense[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              data.amount,
+              data.exchangeRate
+            );
+          }
+          else {
+            // exists, get the previous data
+            tmpSubSummaryData = _subSummaryExpense[key]![subSummaryKey]!;
+            // and combine it with current data
+            _subSummaryExpense[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              (data.amount + tmpSubSummaryData.amount),
+              data.exchangeRate
+            );
+          }
+        }
+
+        // create TransactionModel based on the value
+        TransactionListModel txn = TransactionListModel(
+            -1,
+            value[0].name,
+            value[0].type,
+            DateTime.now(),
+            '',
+            value[0].category,
+            value[0].wallet,
+            null,
+            value[0].usersPermissionsUser,
+            true,
+            amount,
+            1);
+
+        _summaryList.add(_createExpandableItem(
+          txn: txn,
+          startDate: startDate!,
+          endDate: endDate!,
+          count: count,
+          subTxn: (_subSummaryExpense[key] ?? {}),
+        ));
+      });
+    }
+
+    // check if summary income is not empty
+    if (_summaryIncome.isNotEmpty) {
+      // add the income bar on the _summaryList
+      _summaryList.add(Container(
+        padding: const EdgeInsets.all(10),
+        color: secondaryDark,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Income",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: accentColors[6],
+              ),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            ..._generateSubSummaryBox(
+              data: _totalAmountIncome,
+              color: accentColors[6]
+            ),
+          ],
+        ),
+      ));
+
+      _summaryIncome.forEach((key, value) {
+        // compute the amount
+        amount = 0;
+        startDate = null;
+        endDate = null;
+        count = 0;
+
+        // generate subSummaryIncome for this key
+        _subSummaryIncome[key] = {};
+
+        for (TransactionListModel data in value) {
+          if (startDate == null) {
+            startDate = data.date;
+          } else {
+            if (startDate!.isAfter(data.date)) {
+              startDate = data.date;
+            }
+          }
+
+          if (endDate == null) {
+            endDate = data.date;
+          } else {
+            if (endDate!.isBefore(data.date)) {
+              endDate = data.date;
+            }
+          }
+
+          amount += data.amount;
+          count++;
+
+          // add the transaction list on the sub summary list based on the
+          // month and year
+          subSummaryKey = Globals.dfyyyy.format(data.date);
+          
+          // check if subSummaryKey is exists or not?
+          if (!_subSummaryIncome[key]!.containsKey(subSummaryKey)) {
+            // if not exists create the 1st data
+            _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              data.amount,
+              data.exchangeRate
+            );
+          }
+          else {
+            // exists, get the previous data
+            tmpSubSummaryData = _subSummaryIncome[key]![subSummaryKey]!;
+            // and combine it with current data
+            _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              (data.amount + tmpSubSummaryData.amount),
+              data.exchangeRate
+            );
+          }
+        }
+
+        // create TransactionModel based on the value
+        TransactionListModel txn = TransactionListModel(
+            -1,
+            value[0].name,
+            value[0].type,
+            DateTime.now(),
+            '',
+            value[0].category,
+            value[0].wallet,
+            null,
+            value[0].usersPermissionsUser,
+            true,
+            amount,
+            1);
+
+        _summaryList.add(_createExpandableItem(
+          txn: txn,
+          startDate: startDate!,
+          endDate: endDate!,
+          count: count,
+          subTxn: (_subSummaryIncome[key] ?? {}),
+        ));
+      });
+    }
+
+    // check if summary transfer is not empty
+    if (_summaryTransfer.isNotEmpty) {
+      // add the transfer bar on the _summaryList
+      _summaryList.add(Container(
+        padding: const EdgeInsets.all(10),
+        color: secondaryDark,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Transfer",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: accentColors[4],
+              ),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            ..._generateSubSummaryBox(
+              data: _totalAmountTransfer,
+              color: accentColors[4]
+            ),
+          ],
+        ),
+      ));
+
+      _summaryTransfer.forEach((key, value) {
+        // compute the amount
+        amount = 0;
+        startDate = null;
+        endDate = null;
+        count = 0;
+
+        // initialize sub summary transfer for this key
+        _subSummaryTransfer[key] = {};
+
+        for (TransactionListModel data in value) {
+          if (startDate == null) {
+            startDate = data.date;
+          } else {
+            if (startDate!.isAfter(data.date)) {
+              startDate = data.date;
+            }
+          }
+
+          if (endDate == null) {
+            endDate = data.date;
+          } else {
+            if (endDate!.isBefore(data.date)) {
+              endDate = data.date;
+            }
+          }
+
+          amount += data.amount;
+          count++;
+
+          // add the transaction list on the sub summary list based on the
+          // month and year
+          subSummaryKey = Globals.dfyyyy.format(data.date);
+          
+          // check if subSummaryKey is exists or not?
+          if (!_subSummaryTransfer[key]!.containsKey(subSummaryKey)) {
+            // if not exists create the 1st data
+            _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              data.amount,
+              data.exchangeRate
+            );
+          }
+          else {
+            // exists, get the previous data
+            tmpSubSummaryData = _subSummaryTransfer[key]![subSummaryKey]!;
+            // and combine it with current data
+            _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              (data.amount + tmpSubSummaryData.amount),
+              data.exchangeRate
+            );
+          }
+        }
+
+        // create TransactionModel based on the value
+        TransactionListModel txn = TransactionListModel(
+            -1,
+            value[0].wallet.name,
+            value[0].type,
+            DateTime.now(),
+            '',
+            value[0].category,
+            value[0].wallet,
+            null,
+            value[0].usersPermissionsUser,
+            true,
+            amount,
+            1);
+
+        _summaryList.add(_createExpandableItem(
+          txn: txn,
+          startDate: startDate!,
+          endDate: endDate!,
+          count: count,
+          subTxn: (_subSummaryTransfer[key] ?? {}),
+        ));
+      });
+    }
   }
 
   List<Widget> _generateSubSummaryBox(
@@ -1323,95 +1337,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         ],
       ),
     );
-  }
-
-  Widget _createItem(TransactionListModel txn, [bool? canEdit]) {
-    return InkWell(
-      onTap: (() {
-        if (canEdit ?? true) {
-          _showTransactionEditScreen(txn);
-        }
-      }),
-      child: _createItemType(txn)
-    );
-  }
-
-  Widget _createItemType(TransactionListModel txn) {
-    switch (txn.type.toLowerCase()) {
-      case "expense":
-        return MyItemList(
-          iconColor: IconColorList.getExpenseColor(txn.category!.name),
-          icon: IconColorList.getExpenseIcon((txn.category!.name)),
-          type: txn.type.toLowerCase(),
-          title: txn.name,
-          subTitle: Globals.dfeddMMMyyyy.formatLocal(txn.date),
-          subTitleStyle: const TextStyle(fontSize: 10),
-          description: txn.description,
-          descriptionStyle: const TextStyle(
-            fontSize: 10,
-            fontStyle: FontStyle.italic
-          ),
-          symbol: txn.wallet.symbol,
-          amount: txn.amount,
-          amountColor: accentColors[2],
-        );
-      case "income":
-        return MyItemList(
-          iconColor: IconColorList.getIncomeColor(txn.category!.name),
-          icon: IconColorList.getIncomeIcon((txn.category!.name)),
-          type: txn.type.toLowerCase(),
-          title: txn.name,
-          subTitle: Globals.dfeddMMMyyyy.formatLocal(txn.date),
-          subTitleStyle: const TextStyle(fontSize: 10),
-          description: txn.description,
-          descriptionStyle: const TextStyle(
-            fontSize: 10,
-            fontStyle: FontStyle.italic
-          ),
-          symbol: txn.wallet.symbol,
-          amount: txn.amount,
-          amountColor: accentColors[6],
-        );
-      case "transfer":
-        return MyItemList(
-          iconColor: accentColors[4],
-          icon: const Icon(
-            Ionicons.repeat,
-            color: textColor,
-          ),
-          type: txn.type.toLowerCase(),
-          title: '-',
-          subTitle: Globals.dfeddMMMyyyy.formatLocal(txn.date),
-          subTitleStyle: const TextStyle(fontSize: 10),
-          description: txn.description,
-          descriptionStyle: const TextStyle(
-            fontSize: 10,
-            fontStyle: FontStyle.italic
-          ),
-          symbol: txn.wallet.symbol,
-          amount: txn.amount,
-          amountColor: accentColors[4],
-          symbolTo: txn.walletTo!.symbol,
-          amountTo: (txn.amount * txn.exchangeRate),
-        );
-      default:
-        return MyItemList(
-          iconColor: IconColorList.getExpenseColor(txn.category!.name),
-          icon: IconColorList.getExpenseIcon((txn.category!.name)),
-          type: txn.type.toLowerCase(),
-          title: txn.name,
-          subTitle: Globals.dfeddMMMyyyy.formatLocal(txn.date),
-          subTitleStyle: const TextStyle(fontSize: 10),
-          description: txn.description,
-          descriptionStyle: const TextStyle(
-            fontSize: 10,
-            fontStyle: FontStyle.italic
-          ),
-          symbol: txn.wallet.symbol,
-          amount: txn.amount,
-          amountColor: accentColors[2],
-        );
-    }
   }
 
   void _setTransactions({
