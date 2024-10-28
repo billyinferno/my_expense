@@ -46,6 +46,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
           ),
         ),
         actions: <Widget>[
+          //TODO: to add filter and sort on the transaction list
           Container(width: 45, color: Colors.transparent,),
         ],
       ),

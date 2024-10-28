@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
@@ -38,6 +39,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
   late double _averageYearlyAmount;
   late double _averageYearlyDailyAmount;
   late bool _sortAscending;
+  late bool _showAll;
 
   int monthDateOffset = 12;
   int yearlyDateOffset = 12;
@@ -64,6 +66,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
     _averageYearlyAmount = 0;
     _averageYearlyDailyAmount = 0;
     _sortAscending = true;
+    _showAll = false;
 
     // get the budget stat data from backend
     _getData = _getBudgetStatData();
@@ -215,6 +218,41 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           min: 0,
           addBottomPadd: false,
         ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(
+                height: 15,
+                width: 30,
+                child: Transform.scale(
+                  scale: 0.6,
+                  child: CupertinoSwitch(
+                    value: _showAll,
+                    activeTrackColor: accentColors[6],
+                    onChanged: (value) {
+                      setState(() {
+                        _showAll = value;
+                        _generateBudgetStatData();
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10,),
+              Text(
+                "Show expense not in budget",
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10,),
         SizedBox(
           width: double.infinity,
           child: Row(
@@ -513,6 +551,41 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           min: 0,
           addBottomPadd: false,
         ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SizedBox(
+                height: 15,
+                width: 30,
+                child: Transform.scale(
+                  scale: 0.6,
+                  child: CupertinoSwitch(
+                    value: _showAll,
+                    activeTrackColor: accentColors[6],
+                    onChanged: (value) {
+                      setState(() {
+                        _showAll = value;
+                        _generateBudgetStatData();
+                      });
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10,),
+              Text(
+                "Show expense not in budget",
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10,),
         SizedBox(
           width: double.infinity,
           child: Row(
@@ -814,7 +887,22 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         return true;
       }
 
-      // generate the monthly and yearly data
+      // generate the budget stat data
+      _generateBudgetStatData();
+      
+      return true;
+    } catch (error, stackTrace) {
+      Log.error(
+        message: "Error when get statistic data from server",
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw 'Error when try to get the stock collection data from server';
+    }
+  }
+
+  void _generateBudgetStatData() {
+    // generate the monthly and yearly data
       // as API will not return all the date range, we will need to fill the void
       // of the date range here.
 
@@ -827,9 +915,19 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         DateTime.now().month + 1,
         1
       );
+
+      // put on different list so we can manipulate it as this is not final one
+      if (_showAll) {
+        _budgetMonthly = _budgetStat.monthlyAll.toList();
+        _budgetYearly = _budgetStat.yearlyAll.toList();
+      }
+      else {
+        _budgetMonthly = _budgetStat.monthly.toList();
+        _budgetYearly = _budgetStat.yearly.toList();
+      }
       
       DateTime lastDate = DateTime.parse(
-        "${_budgetStat.monthly[_budgetStat.monthly.length - 1].date}-01"
+        "${_budgetMonthly[_budgetMonthly.length - 1].date}-01"
       );
       
       _monthlyDateRange.clear();
@@ -852,7 +950,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       );
       
       lastDate = DateTime.parse(
-        "${_budgetStat.yearly[_budgetStat.yearly.length - 1].date}-12-01"
+        "${_budgetYearly[_budgetYearly.length - 1].date}-12-01"
       );
 
       _yearlyDateRange.clear();
@@ -873,7 +971,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
 
       DateTime parsedDate;
       String formatDate;
-      for (BudgetStatDetail data in _budgetStat.monthly.reversed) {
+      for (BudgetStatDetail data in _budgetMonthly.reversed) {
         parsedDate = DateTime.parse("${data.date}-01");
         formatDate = Globals.dfMMyy.formatLocal(parsedDate);
 
@@ -891,7 +989,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       _yearlyData.clear();
       _totalYearlyAmount = 0;
 
-      for (BudgetStatDetail data in _budgetStat.yearly.reversed) {
+      for (BudgetStatDetail data in _budgetYearly.reversed) {
         _yearlyDateRange[data.date] = data.totalAmount;
         _totalYearlyAmount += data.totalAmount;
         _totalYearlyDailyAmount += data.averageAmount;
@@ -900,19 +998,5 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       _averageYearlyAmount = _totalYearlyAmount / _yearlyDateRange.length;
       _averageYearlyDailyAmount = _totalYearlyDailyAmount / _yearlyDateRange.length;
       _yearlyData.add(_yearlyDateRange);
-
-      // put on different list so we can manipulate it as this is not final one
-      _budgetMonthly = _budgetStat.monthly.toList();
-      _budgetYearly = _budgetStat.yearly.toList();
-
-      return true;
-    } catch (error, stackTrace) {
-      Log.error(
-        message: "Error when get statistic data from server",
-        error: error,
-        stackTrace: stackTrace,
-      );
-      throw 'Error when try to get the stock collection data from server';
-    }
   }
 }
