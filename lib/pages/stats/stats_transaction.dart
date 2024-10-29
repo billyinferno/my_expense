@@ -16,8 +16,11 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
 
   final ScrollController _scrollController = ScrollController();
   late List<TransactionStatsDetailModel> _transactions;
+  late List<TransactionStatsDetailModel> _transactionsSort;
   late StatsTransactionArgs _args;
   late Future<bool> _getData;
+  late String _filterType;
+  late bool _sortType;
 
   @override
   void initState() {
@@ -27,6 +30,10 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
 
     // initialize all default value
     _transactions = [];
+    _transactionsSort = [];
+
+    _filterType = "D";
+    _sortType = false;
 
     // now try to fetch the transaction data
     _getData = _fetchStatsDetail();
@@ -46,8 +53,96 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
           ),
         ),
         actions: <Widget>[
-          //TODO: to add filter and sort on the transaction list
-          Container(width: 45, color: Colors.transparent,),
+          IconButton(
+            onPressed: (() {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return MyBottomSheet(
+                    context: context,
+                    title: "Select Filter",
+                    screenRatio: 0.3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        SimpleItem(
+                          onTap: (() {
+                            setState(() {
+                              _filterType = "N";
+                              _sortTransactions();
+                            });
+                            Navigator.pop(context);
+                          }),
+                          color: Colors.grey[900]!,
+                          icon: Center(
+                            child: Text(
+                              "AN",
+                              style: TextStyle(
+                                color: textColor2,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                          title: "Name",
+                          isSelected: (_filterType == "N"),
+                        ),
+                        SimpleItem(
+                          onTap: (() {
+                            setState(() {
+                              _filterType = "D";
+                              _sortTransactions();
+                            });
+                            Navigator.pop(context);
+                          }),
+                          color: Colors.grey[900]!,
+                          icon: Icon(
+                            Ionicons.calendar,
+                            color: textColor2,
+                            size: 15,
+                          ),
+                          title: "Date",
+                          isSelected: (_filterType == "D"),
+                        ),
+                        SimpleItem(
+                          onTap: (() {
+                            setState(() {
+                              _filterType = "A";
+                              _sortTransactions();
+                            });
+                            Navigator.pop(context);
+                          }),
+                          color: Colors.grey[900]!,
+                          icon: Icon(
+                            Ionicons.cash,
+                            color: textColor2,
+                            size: 15,
+                          ),
+                          title: "Amount",
+                          isSelected: (_filterType == "A"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            }),
+            icon: Icon(
+              Ionicons.funnel,
+              color: textColor,
+              size: 15,
+            )
+          ),
+          IconButton(
+            onPressed: (() {
+              setState(() {
+                _sortType = !_sortType;
+                _sortTransactions();
+              });
+            }),
+            icon: SortIcon(asc: _sortType),
+          ),
         ],
       ),
       body: _getBody(),
@@ -84,10 +179,10 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
                   child: ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
                     controller: _scrollController,
-                    itemCount: _transactions.length,
+                    itemCount: _transactionsSort.length,
                     itemBuilder: (BuildContext ctx, int index) {
-                      TransactionStatsDetailModel txn = _transactions[index];
-                      return _generateListItem(txn);
+                      TransactionStatsDetailModel txn = _transactionsSort[index];
+                      return _createItem(txn);
                     },
                   ),
                 ),
@@ -107,7 +202,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     );
   }
 
-  Widget _generateListItem(TransactionStatsDetailModel txn) {
+  Widget _createItem(TransactionStatsDetailModel txn) {
     return Container(
       height: 60,
       width: double.infinity,
@@ -182,6 +277,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
       to: _args.toDate,
     ).then((result) {
       _transactions = result;
+      _sortTransactions();
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error on <_fetchStatsDetail>",
@@ -192,5 +288,31 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     });
 
     return true;
+  }
+
+  void _sortTransactions() {
+    // clear current transaction sort
+    _transactionsSort.clear();
+
+    // switch the filter type
+    switch(_filterType) {
+      case "N":
+        _transactionsSort = _transactions.toList()..sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case "D":
+        _transactionsSort = _transactions.toList()..sort((a, b) => a.date.compareTo(b.date));
+        break;
+      case "A":
+        _transactionsSort = _transactions.toList()..sort((a, b) => a.amount.compareTo(b.amount));
+        break;
+      default:
+        _transactionsSort = _transactions.toList()..sort((a, b) => a.date.compareTo(b.date));
+        break;
+    }
+
+    // check whether this is ascending or descending
+    if (!_sortType) {
+      _transactionsSort = _transactionsSort.reversed.toList();
+    }
   }
 }
