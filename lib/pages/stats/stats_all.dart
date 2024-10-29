@@ -15,15 +15,20 @@ class StatsAllPage extends StatefulWidget {
 class _StatsAllPageState extends State<StatsAllPage> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
 
-  final Map<String, double> _walletListIncome = {};
-  final Map<String, double> _walletListExpense = {};
-  final Map<String, double> _walletListTotal = {};
+  final Map<String, double> _walletListIncomeMonthly = {};
+  final Map<String, double> _walletListExpenseMonthly = {};
+  final Map<String, double> _walletListTotalMonthly = {};
+  final Map<String, double> _walletListIncomeYearly = {};
+  final Map<String, double> _walletListExpenseYearly = {};
+  final Map<String, double> _walletListTotalYearly = {};
+  late String _graphType;
 
   late Future<bool> _getData;
   late WalletStatAllModel _walletStatAll;
   late WalletStatAllModel _origWalletStatAll;
   late WalletStatAllModel _origWalletStatAllReverse;
-  late double _maxAmount;
+  late double _maxAmountMonthly;
+  late double _maxAmountYearly;
   late double _totalIncome;
   late int _countIncome;
   late double _totalExpense;
@@ -72,6 +77,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
     _showTotal = true;
     _showIncome = true;
     _showExpense = true;
+
+    // default graph type to monthly
+    _graphType = "M";
 
     // get the data from API
     _getData = _getWalletStatAllData();
@@ -184,7 +192,36 @@ class _StatsAllPageState extends State<StatsAllPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          const SizedBox(height: 10,),
+          const SizedBox(height: 5,),
+          Container(
+            padding: const EdgeInsets.all(10),
+            child: Center(
+              child: CupertinoSegmentedControl<String>(
+                selectedColor: accentColors[6],
+                // Provide horizontal padding around the children.
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                // This represents a currently selected segmented control.
+                groupValue: _graphType,
+                // Callback that sets the selected segmented control.
+                onValueChanged: (String value) {
+                  setState(() {
+                    _graphType = value;
+                    _setGraphData();
+                  });
+                },
+                children: const <String, Widget>{
+                  "M": Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text('Monthly'),
+                  ),
+                  "Y": Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text('Yearly'),
+                  ),
+                },
+              ),
+            ),
+          ),
           MultiLineChart(
             data: _walletLineChartData,
             color: _walletLineChartColors,
@@ -208,7 +245,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                       onChanged: ((value) {
                         setState(() {
                           _showTotal = value;
-                          _filterChartData();
+                          _setGraphData();
                         });
                       }),
                     ),
@@ -234,7 +271,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                       onChanged: ((value) {
                         setState(() {
                           _showIncome = value;
-                          _filterChartData();
+                          _setGraphData();
                         });
                       }),
                     ),
@@ -260,7 +297,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
                       onChanged: ((value) {
                         setState(() {
                           _showExpense = value;
-                          _filterChartData();
+                          _setGraphData();
                         });
                       }),
                     ),
@@ -306,13 +343,14 @@ class _StatsAllPageState extends State<StatsAllPage> {
           Expanded(
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
+              //TODO: also add monthly and yearly data based on graph selection above
               itemCount: _walletStatAll.data.length,
               itemBuilder: ((context, index) {
                 return BarStat(
                   income: _walletStatAll.data[index].income,
                   expense: _walletStatAll.data[index].expense,
                   balance: _walletStatAll.data[index].balance,
-                  maxAmount: _maxAmount,
+                  maxAmount: _maxAmountMonthly,
                   date: _walletStatAll.data[index].date
                 );
               }),
@@ -327,28 +365,40 @@ class _StatsAllPageState extends State<StatsAllPage> {
     double total = 0;
 
     // clear all wallet list map
-    _walletListIncome.clear();
-    _walletListExpense.clear();
-    _walletListTotal.clear();
+    _walletListIncomeMonthly.clear();
+    _walletListExpenseMonthly.clear();
+    _walletListTotalMonthly.clear();
+
+    _walletListIncomeYearly.clear();
+    _walletListExpenseYearly.clear();
+    _walletListTotalYearly.clear();
 
     // loop thru _walletStat and get the maximum data
-    _maxAmount = double.infinity * -1;
+    _maxAmountMonthly = double.infinity * -1;
 
     // loop thru all the stat all date to add as key on the wallet list income
     // expense, and total
     _walletDateRange.forEach((key, value) {
-      _walletListIncome[Globals.dfMMyy.formatLocal(key)] = 0;
-      _walletListExpense[Globals.dfMMyy.formatLocal(key)] = 0;
-      _walletListTotal[Globals.dfMMyy.formatLocal(key)] = 0;
+      // create date range for monthly data
+      _walletListIncomeMonthly[Globals.dfMMyy.formatLocal(key)] = 0;
+      _walletListExpenseMonthly[Globals.dfMMyy.formatLocal(key)] = 0;
+      _walletListTotalMonthly[Globals.dfMMyy.formatLocal(key)] = 0;
+
+      // create date range for yearly data
+      _walletListIncomeYearly[Globals.dfyyyy.formatLocal(key)] = 0;
+      _walletListExpenseYearly[Globals.dfyyyy.formatLocal(key)] = 0;
+      _walletListTotalYearly[Globals.dfyyyy.formatLocal(key)] = 0;
     });
 
+    String yearlyKey = "";
+    double yearlyAmount = 0;
     for (Datum data in _origWalletStatAll.data) {
-      // generate the wallet list income, expense, and total
-      _walletListIncome[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
-      _walletListExpense[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
+      // generate the wallet list income, expense, and total monthly
+      _walletListIncomeMonthly[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
+      _walletListExpenseMonthly[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
 
       total += (data.diff ?? 0);
-      _walletListTotal[Globals.dfMMyy.formatLocal(data.date)] = total;
+      _walletListTotalMonthly[Globals.dfMMyy.formatLocal(data.date)] = total;
 
       _totalIncome += data.income!;
       _totalExpense += data.expense!;
@@ -359,24 +409,93 @@ class _StatsAllPageState extends State<StatsAllPage> {
         _countExpense += 1;
       }
 
-      if (data.income! > _maxAmount) {
-        _maxAmount = data.income!;
+      if (data.income! > _maxAmountMonthly) {
+        _maxAmountMonthly = data.income!;
       }
-      if (data.expense! > _maxAmount) {
-        _maxAmount = data.expense!;
+      if (data.expense! > _maxAmountMonthly) {
+        _maxAmountMonthly = data.expense!;
       }
-      if (data.balance! > _maxAmount) {
-        _maxAmount = data.balance!;
+      if (data.balance! > _maxAmountMonthly) {
+        _maxAmountMonthly = data.balance!;
       }
+
+      // generate the wallet list income, expense, and total yearly
+      yearlyKey = Globals.dfyyyy.formatLocal(data.date);
+      // income yearly
+      yearlyAmount = (_walletListIncomeYearly[yearlyKey] ?? 0);
+      yearlyAmount += (data.income ?? 0);
+      _walletListIncomeYearly[yearlyKey] = yearlyAmount;
+
+      // expense yearly
+      yearlyAmount = (_walletListExpenseYearly[yearlyKey] ?? 0);
+      yearlyAmount += (data.expense ?? 0);
+      _walletListExpenseYearly[yearlyKey] = yearlyAmount;
+
+      // total yearly
+      _walletListTotalYearly[yearlyKey] = total;
     }
 
-    _dateOffset = _walletListTotal.length ~/ 8;
+    // now create the max amount yearly based on the wallet list income and
+    // expense yearly.
+    _maxAmountYearly = double.infinity * -1;
+    _walletListIncomeYearly.forEach((key, value) {
+      if (_maxAmountYearly < value) {
+        _maxAmountYearly = value;
+      }
+    },);
+    _walletListExpenseYearly.forEach((key, value) {
+      if (_maxAmountYearly < value) {
+        _maxAmountYearly = value;
+      }
+    },);
 
-    // set the wallet list data to the _walletList data
+    // set graph data based on selection
+    _setGraphData();
+  }
+
+  void _setGraphData() {
+    // clear current chart data
     _walletLineChartData.clear();
-    _walletLineChartData.add(_walletListTotal);
-    _walletLineChartData.add(_walletListIncome);
-    _walletLineChartData.add(_walletListExpense);
+    _walletLineChartColors.clear();
+
+    // select the graph type
+    if (_graphType == "M") {
+      // set the wallet list data to the _walletList data
+      if (_showTotal) {
+        _walletLineChartData.add(_walletListTotalMonthly);
+        _walletLineChartColors.add(accentColors[5]);
+      }
+
+      if (_showIncome) {
+        _walletLineChartData.add(_walletListIncomeMonthly);
+        _walletLineChartColors.add(accentColors[0]);
+      }
+
+      if (_showExpense) {
+        _walletLineChartData.add(_walletListExpenseMonthly);
+        _walletLineChartColors.add(accentColors[2]);
+      }
+
+      _dateOffset = _walletListTotalMonthly.length ~/ 8;
+    }
+    else {
+      if (_showTotal) {
+        _walletLineChartData.add(_walletListTotalYearly);
+        _walletLineChartColors.add(accentColors[5]);
+      }
+
+      if (_showIncome) {
+        _walletLineChartData.add(_walletListIncomeYearly);
+        _walletLineChartColors.add(accentColors[0]);
+      }
+
+      if (_showExpense) {
+        _walletLineChartData.add(_walletListExpenseYearly);
+        _walletLineChartColors.add(accentColors[2]);
+      }
+
+      _dateOffset = _walletListTotalYearly.length ~/ 8; 
+    }
   }
 
   Future<bool> _getWalletStatAllData() async {
@@ -449,27 +568,5 @@ class _StatsAllPageState extends State<StatsAllPage> {
         _walletStatAll = _origWalletStatAllReverse;
       }
     });
-  }
-
-  void _filterChartData() {
-    // clear wallet chart data
-    _walletLineChartData.clear();
-    _walletLineChartColors.clear();
-
-    // check which one we need to show?
-    if (_showTotal) {
-      _walletLineChartData.add(_walletListTotal);
-      _walletLineChartColors.add(accentColors[5]);
-    }
-
-    if (_showIncome) {
-      _walletLineChartData.add(_walletListIncome);
-      _walletLineChartColors.add(accentColors[0]);
-    }
-
-    if (_showExpense) {
-      _walletLineChartData.add(_walletListExpense);
-      _walletLineChartColors.add(accentColors[2]);
-    }
   }
 }
