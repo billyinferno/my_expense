@@ -5,6 +5,7 @@ import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
 enum PageName { summary, all, income, expense, transfer }
+enum SummaryType { name, category }
 
 class TransactionSearchPage extends StatefulWidget {
   const TransactionSearchPage({super.key});
@@ -15,6 +16,7 @@ class TransactionSearchPage extends StatefulWidget {
 
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
+  //TODO: to change API service to not using limit as we are not going perform lazy loading on the transaction search
   final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
 
   String _searchText = "";
@@ -41,16 +43,29 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   late List<TransactionListModel> _incomeSort;
   late List<TransactionListModel> _expenseSort;
   late List<TransactionListModel> _transferSort;
+
   final Map<String, List<TransactionListModel>> _summaryIncome = {};
+  final Map<String, List<TransactionListModel>> _summaryIncomeCategory = {};
   final Map<String, Map<String, TransactionListModel>> _subSummaryIncome = {};
+  final Map<String, Map<String, TransactionListModel>> _subSummaryIncomeCategory = {};
+  
   final Map<String, List<TransactionListModel>> _summaryExpense = {};
+  final Map<String, List<TransactionListModel>> _summaryExpenseCategory = {};
   final Map<String, Map<String, TransactionListModel>> _subSummaryExpense = {};
+  final Map<String, Map<String, TransactionListModel>> _subSummaryExpenseCategory = {};
+  
   final Map<String, List<TransactionListModel>> _summaryTransfer = {};
+  final Map<String, List<TransactionListModel>> _summaryTransferCategory = {};
   final Map<String, Map<String, TransactionListModel>> _subSummaryTransfer = {};
+  final Map<String, Map<String, TransactionListModel>> _subSummaryTransferCategory = {};
+
   late Map<String, double> _totalAmountIncome;
   late Map<String, double> _totalAmountExpense;
   final Map<String, double> _totalAmountTransfer = {};
-  final List<Widget> _summaryList = [];
+
+  late List<Widget> _summaryList;
+  final List<Widget> _summaryListName = [];
+  final List<Widget> _summaryListCategory = [];
 
   final Map<int, CategoryModel> _categorySelected = {};
   late Map<int, CategoryModel> _categoryExpenseList;
@@ -71,6 +86,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   late bool _sortType;
   late String _filterType;
+  late SummaryType _summaryType;
 
   @override
   void initState() {
@@ -79,9 +95,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // initialize variable
     _totalAmountIncome = {};
     _totalAmountExpense = {};
+    
+    _summaryList = [];
 
     _sortType = false; // descending
     _filterType = "D"; // date
+    _summaryType = SummaryType.name;
 
     _filterTransactionsSort = [];
     _incomeSort = [];
@@ -488,13 +507,49 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           },
         );
       case PageName.summary:
-        //TODO: to also add summary based on category not just item summary
-        return ListView.builder(
-          controller: _scrollControllerSummary,
-          itemCount: _summaryList.length,
-          itemBuilder: ((context, index) {
-            return _summaryList[index];
-          })
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: CupertinoSegmentedControl<SummaryType>(
+                  selectedColor: accentColors[6],
+                  // Provide horizontal padding around the children.
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  // This represents a currently selected segmented control.
+                  groupValue: _summaryType,
+                  // Callback that sets the selected segmented control.
+                  onValueChanged: (SummaryType value) {
+                    setState(() {
+                      _summaryType = value;
+                      _setSummaryList();
+                    });
+                  },
+                  children: const <SummaryType, Widget>{
+                    SummaryType.name: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text('Name'),
+                    ),
+                    SummaryType.category: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text('Category'),
+                    ),
+                  },
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollControllerSummary,
+                itemCount: _summaryList.length,
+                itemBuilder: ((context, index) {
+                  return _summaryList[index];
+                })
+              ),
+            ),
+          ],
         );
       case PageName.income:
         return ListViewWithHeader(
@@ -646,30 +701,42 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _transfer.clear();
 
     _summaryIncome.clear();
+    _summaryIncomeCategory.clear();
     _subSummaryIncome.clear();
+    _subSummaryIncomeCategory.clear();
     _totalAmountIncome.clear();
 
     _summaryExpense.clear();
+    _summaryExpenseCategory.clear();
     _subSummaryExpense.clear();
+    _subSummaryExpenseCategory.clear();
     _totalAmountExpense.clear();
 
     _summaryTransfer.clear();
+    _summaryTransferCategory.clear();
     _subSummaryTransfer.clear();
+    _subSummaryTransferCategory.clear();
     _totalAmountTransfer.clear();
 
     String summaryKey = "";
+    String summaryKeyCategory = "";
     String subSummaryKey = "";
+
     TransactionListModel tmpSubSummaryData;
 
     // now compute the summary data so we can showed it on the summary page
     // based on the income, and expense
     for (int i = 0; i < _filterTransactions.length; i++) {
       // generate the summary key
-      if (_filterTransactions[i].type == 'expense' ||
-          _filterTransactions[i].type == 'income') {
+      if (
+        _filterTransactions[i].type == 'expense' ||
+        _filterTransactions[i].type == 'income'
+      ) {
         summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : ''}_${_filterTransactions[i].name}_${_filterTransactions[i].wallet.currency}";
+        summaryKeyCategory = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].category!.name}_${_filterTransactions[i].wallet.currency}";
       } else {
         summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].wallet.name}_${_filterTransactions[i].wallet.currency}";
+        summaryKeyCategory = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].wallet.currency}_${_filterTransactions[i].walletTo!.currency}";
       }
 
       // check which transaction is being updated
@@ -680,6 +747,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             _summaryIncome[summaryKey] = [];
           }
           _summaryIncome[summaryKey]!.add(_filterTransactions[i]);
+
+          // check if summary key category exists or not?
+          if (!_summaryIncomeCategory.containsKey(summaryKeyCategory)) {
+            _summaryIncomeCategory[summaryKeyCategory] = [];
+          }
+          _summaryIncomeCategory[summaryKeyCategory]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
           if (!_totalAmountIncome.containsKey(_filterTransactions[i].wallet.currency)) {
@@ -698,6 +771,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           }
           _summaryExpense[summaryKey]!.add(_filterTransactions[i]);
 
+          // check if summary key category exists or not?
+          if (!_summaryExpenseCategory.containsKey(summaryKeyCategory)) {
+            _summaryExpenseCategory[summaryKeyCategory] = [];
+          }
+          _summaryExpenseCategory[summaryKeyCategory]!.add(_filterTransactions[i]);
+
           // check if total summary key for this ccy is exists or not?
           if (!_totalAmountExpense.containsKey(_filterTransactions[i].wallet.currency)) {
             _totalAmountExpense[_filterTransactions[i].wallet.currency] = 0;
@@ -714,6 +793,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             _summaryTransfer[summaryKey] = [];
           }
           _summaryTransfer[summaryKey]!.add(_filterTransactions[i]);
+
+          // check if summary key category exists or not?
+          if (!_summaryTransferCategory.containsKey(summaryKeyCategory)) {
+            _summaryTransferCategory[summaryKeyCategory] = [];
+          }
+          _summaryTransferCategory[summaryKeyCategory]!.add(_filterTransactions[i]);
 
           // check if total summary key for this ccy is exists or not?
           if (!_totalAmountTransfer.containsKey(_filterTransactions[i].wallet.currency)) {
@@ -740,35 +825,19 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _totalAmountExpense = Map.fromEntries(sortedEntriesExpense);
 
     // clear the summary list widget
-    _summaryList.clear();
+    _summaryListName.clear();
+    _summaryListCategory.clear();
 
     // check if we have expense or not?
     if (_summaryExpense.isNotEmpty) {  
-      // add the expense bar on the _summaryList
-      _summaryList.add(Container(
-        padding: const EdgeInsets.all(10),
-        color: secondaryDark,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Expense",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: accentColors[2],
-              ),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            ..._generateSubSummaryBox(
-              data: _totalAmountExpense,
-              color: accentColors[2]
-            ),
-          ],
-        ),
-      ));
+      // add the expense bar on the _summaryListName
+      _summaryListName.add(
+        _generateSummaryBox(
+          title: "Expense",
+          color: accentColors[2],
+          data: _totalAmountExpense
+        )
+      );
 
       // loop thru all the expense data
       _summaryExpense.forEach((key, value) {
@@ -859,43 +928,141 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             amount,
             1);
 
-        _summaryList.add(_createExpandableItem(
-          txn: txn,
-          startDate: startDate!,
-          endDate: endDate!,
-          count: count,
-          subTxn: (_subSummaryExpense[key] ?? {}),
-        ));
+        _summaryListName.add(
+          _createExpandableItem(
+            txn: txn,
+            startDate: startDate!,
+            endDate: endDate!,
+            count: count,
+            subTxn: (_subSummaryExpense[key] ?? {}),
+          )
+        );
+      });
+    }
+
+    // check if we have expense category or not?
+    if (_summaryExpenseCategory.isNotEmpty) {  
+      // add the expense bar on the _summaryList
+      _summaryListCategory.add(
+        _generateSummaryBox(
+          title: "Expense",
+          color: accentColors[2],
+          data: _totalAmountExpense
+        )
+      );
+
+      // loop thru all the expense data
+      _summaryExpenseCategory.forEach((key, value) {
+        // compute the amount
+        amount = 0;
+        startDate = null;
+        endDate = null;
+        count = 0;
+
+        // create the sub summary expense for this key
+        _subSummaryExpenseCategory[key] = {};
+
+        for (TransactionListModel data in value) {
+          if (startDate == null) {
+            startDate = data.date;
+          } else {
+            if (startDate!.isAfter(data.date)) {
+              startDate = data.date;
+            }
+          }
+
+          if (endDate == null) {
+            endDate = data.date;
+          } else {
+            if (endDate!.isBefore(data.date)) {
+              endDate = data.date;
+            }
+          }
+
+          amount += data.amount;
+          count++;
+
+          // add the transaction list on the sub summary list based on the
+          // month and year
+          subSummaryKey = Globals.dfyyyy.format(data.date);
+          
+          // check if subSummaryKey is exists or not?
+          if (!_subSummaryExpenseCategory[key]!.containsKey(subSummaryKey)) {
+            // if not exists create the 1st data
+            _subSummaryExpenseCategory[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.category!.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              data.amount,
+              data.exchangeRate
+            );
+          }
+          else {
+            // exists, get the previous data
+            tmpSubSummaryData = _subSummaryExpenseCategory[key]![subSummaryKey]!;
+            // and combine it with current data
+            _subSummaryExpenseCategory[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.category!.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              (data.amount + tmpSubSummaryData.amount),
+              data.exchangeRate
+            );
+          }
+        }
+
+        // create TransactionModel based on the value
+        TransactionListModel txn = TransactionListModel(
+            -1,
+            value[0].category!.name,
+            value[0].type,
+            DateTime.now(),
+            '',
+            value[0].category,
+            value[0].wallet,
+            null,
+            value[0].usersPermissionsUser,
+            true,
+            amount,
+            1);
+
+        _summaryListCategory.add(
+          _createExpandableItem(
+            txn: txn,
+            startDate: startDate!,
+            endDate: endDate!,
+            count: count,
+            subTxn: (_subSummaryExpenseCategory[key] ?? {}),
+            showCategory: false,
+          )
+        );
       });
     }
 
     // check if summary income is not empty
     if (_summaryIncome.isNotEmpty) {
-      // add the income bar on the _summaryList
-      _summaryList.add(Container(
-        padding: const EdgeInsets.all(10),
-        color: secondaryDark,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Income",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: accentColors[6],
-              ),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            ..._generateSubSummaryBox(
-              data: _totalAmountIncome,
-              color: accentColors[6]
-            ),
-          ],
-        ),
-      ));
+      // add the income bar on the _summaryListName
+      _summaryListName.add(
+        _generateSummaryBox(
+          title: "Income",
+          color: accentColors[6],
+          data: _totalAmountIncome
+        )
+      );
 
       _summaryIncome.forEach((key, value) {
         // compute the amount
@@ -985,43 +1152,140 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             amount,
             1);
 
-        _summaryList.add(_createExpandableItem(
-          txn: txn,
-          startDate: startDate!,
-          endDate: endDate!,
-          count: count,
-          subTxn: (_subSummaryIncome[key] ?? {}),
-        ));
+        _summaryListName.add(
+          _createExpandableItem(
+            txn: txn,
+            startDate: startDate!,
+            endDate: endDate!,
+            count: count,
+            subTxn: (_subSummaryIncome[key] ?? {}),
+          )
+        );
+      });
+    }
+
+    // check if summary income is not empty
+    if (_summaryIncomeCategory.isNotEmpty) {
+      // add the income bar on the _summaryListCategory
+      _summaryListCategory.add(
+        _generateSummaryBox(
+          title: "Income",
+          color: accentColors[6],
+          data: _totalAmountIncome
+        )
+      );
+
+      _summaryIncomeCategory.forEach((key, value) {
+        // compute the amount
+        amount = 0;
+        startDate = null;
+        endDate = null;
+        count = 0;
+
+        // generate subSummaryIncome for this key
+        _subSummaryIncomeCategory[key] = {};
+
+        for (TransactionListModel data in value) {
+          if (startDate == null) {
+            startDate = data.date;
+          } else {
+            if (startDate!.isAfter(data.date)) {
+              startDate = data.date;
+            }
+          }
+
+          if (endDate == null) {
+            endDate = data.date;
+          } else {
+            if (endDate!.isBefore(data.date)) {
+              endDate = data.date;
+            }
+          }
+
+          amount += data.amount;
+          count++;
+
+          // add the transaction list on the sub summary list based on the
+          // month and year
+          subSummaryKey = Globals.dfyyyy.format(data.date);
+          
+          // check if subSummaryKey is exists or not?
+          if (!_subSummaryIncomeCategory[key]!.containsKey(subSummaryKey)) {
+            // if not exists create the 1st data
+            _subSummaryIncomeCategory[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.category!.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              data.amount,
+              data.exchangeRate
+            );
+          }
+          else {
+            // exists, get the previous data
+            tmpSubSummaryData = _subSummaryIncomeCategory[key]![subSummaryKey]!;
+            // and combine it with current data
+            _subSummaryIncomeCategory[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              data.category!.name,
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              (data.amount + tmpSubSummaryData.amount),
+              data.exchangeRate
+            );
+          }
+        }
+
+        // create TransactionModel based on the value
+        TransactionListModel txn = TransactionListModel(
+            -1,
+            value[0].category!.name,
+            value[0].type,
+            DateTime.now(),
+            '',
+            value[0].category,
+            value[0].wallet,
+            null,
+            value[0].usersPermissionsUser,
+            true,
+            amount,
+            1);
+
+        _summaryListCategory.add(
+          _createExpandableItem(
+            txn: txn,
+            startDate: startDate!,
+            endDate: endDate!,
+            count: count,
+            subTxn: (_subSummaryIncomeCategory[key] ?? {}),
+            showCategory: false,
+          )
+        );
       });
     }
 
     // check if summary transfer is not empty
     if (_summaryTransfer.isNotEmpty) {
-      // add the transfer bar on the _summaryList
-      _summaryList.add(Container(
-        padding: const EdgeInsets.all(10),
-        color: secondaryDark,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Transfer",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: accentColors[4],
-              ),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            ..._generateSubSummaryBox(
-              data: _totalAmountTransfer,
-              color: accentColors[4]
-            ),
-          ],
-        ),
-      ));
+      // add the transfer bar on the _summaryListName
+      _summaryListName.add(
+        _generateSummaryBox(
+          title: "Transfer",
+          color: accentColors[4],
+          data: _totalAmountTransfer,
+        )
+      );
 
       _summaryTransfer.forEach((key, value) {
         // compute the amount
@@ -1111,15 +1375,163 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             amount,
             1);
 
-        _summaryList.add(_createExpandableItem(
-          txn: txn,
-          startDate: startDate!,
-          endDate: endDate!,
-          count: count,
-          subTxn: (_subSummaryTransfer[key] ?? {}),
-        ));
+        _summaryListName.add(
+          _createExpandableItem(
+            txn: txn,
+            startDate: startDate!,
+            endDate: endDate!,
+            count: count,
+            subTxn: (_subSummaryTransfer[key] ?? {}),
+          )
+        );
       });
     }
+
+    // check if summary transfer is not empty
+    if (_summaryTransferCategory.isNotEmpty) {
+      // add the transfer bar on the _summaryListCategory
+      _summaryListCategory.add(
+        _generateSummaryBox(
+          title: "Transfer",
+          color: accentColors[4],
+          data: _totalAmountTransfer,
+        )
+      );
+
+      _summaryTransferCategory.forEach((key, value) {
+        // compute the amount
+        amount = 0;
+        startDate = null;
+        endDate = null;
+        count = 0;
+
+        // initialize sub summary transfer for this key
+        _subSummaryTransferCategory[key] = {};
+
+        for (TransactionListModel data in value) {
+          if (startDate == null) {
+            startDate = data.date;
+          } else {
+            if (startDate!.isAfter(data.date)) {
+              startDate = data.date;
+            }
+          }
+
+          if (endDate == null) {
+            endDate = data.date;
+          } else {
+            if (endDate!.isBefore(data.date)) {
+              endDate = data.date;
+            }
+          }
+
+          amount += data.amount;
+          count++;
+
+          // add the transaction list on the sub summary list based on the
+          // month and year
+          subSummaryKey = Globals.dfyyyy.format(data.date);
+          
+          // check if subSummaryKey is exists or not?
+          if (!_subSummaryTransferCategory[key]!.containsKey(subSummaryKey)) {
+            // if not exists create the 1st data
+            _subSummaryTransferCategory[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              "${data.wallet.symbol} to ${data.walletTo!.symbol}",
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              data.amount,
+              data.exchangeRate
+            );
+          }
+          else {
+            // exists, get the previous data
+            tmpSubSummaryData = _subSummaryTransferCategory[key]![subSummaryKey]!;
+            // and combine it with current data
+            _subSummaryTransferCategory[key]![subSummaryKey] = TransactionListModel(
+              -1,
+              "${data.wallet.symbol} to ${data.walletTo!.symbol}",
+              data.type,
+              DateTime(data.date.year, data.date.month, 1),
+              data.description,
+              data.category,
+              data.wallet,
+              data.walletTo,
+              data.usersPermissionsUser,
+              data.cleared,
+              (data.amount + tmpSubSummaryData.amount),
+              data.exchangeRate
+            );
+          }
+        }
+
+        // create TransactionModel based on the value
+        TransactionListModel txn = TransactionListModel(
+            -1,
+            "${value[0].wallet.symbol} to ${value[0].walletTo!.symbol}",
+            value[0].type,
+            DateTime.now(),
+            '',
+            value[0].category,
+            value[0].wallet,
+            null,
+            value[0].usersPermissionsUser,
+            true,
+            amount,
+            1);
+
+        _summaryListCategory.add(
+          _createExpandableItem(
+            txn: txn,
+            startDate: startDate!,
+            endDate: endDate!,
+            count: count,
+            subTxn: (_subSummaryTransferCategory[key] ?? {}),
+            showCategory: false,
+          )
+        );
+      });
+    }
+
+    // set initial summary list
+    _setSummaryList();
+  }
+
+  Widget _generateSummaryBox({
+    required String title,
+    required Color color,
+    required Map<String, double> data,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      color: secondaryDark,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(
+            height: 5,
+          ),
+          ..._generateSubSummaryBox(
+            data: data,
+            color: color
+          ),
+        ],
+      ),
+    );
   }
 
   List<Widget> _generateSubSummaryBox(
@@ -1167,6 +1579,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     required DateTime endDate,
     required int count,
     required Map<String, TransactionListModel> subTxn,
+    bool showCategory = true,
   }) {
     return Theme(
       data: Globals.themeData.copyWith(
@@ -1174,21 +1587,34 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       ),
       child: ListTileTheme(
         contentPadding: const EdgeInsets.all(0),
-        child: ExpansionTile(
-          tilePadding: const EdgeInsets.all(0),
-          childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
-          backgroundColor: primaryBackground,
-          collapsedBackgroundColor: primaryBackground,
-          iconColor: primaryLight,
-          collapsedIconColor: primaryLight,
-          title: _createSummaryItem(
-            txn: txn,
-            startDate: startDate,
-            endDate: endDate,
-            count: count,
-            needBorder: false,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: primaryLight,
+                width: 1.0,
+              )
+            ),
           ),
-          children: _createExpandableChilds(subTxn: subTxn),
+          child: ExpansionTile(
+            tilePadding: const EdgeInsets.all(0),
+            childrenPadding: const EdgeInsets.fromLTRB(0, 0, 0, 5),
+            backgroundColor: primaryBackground,
+            collapsedBackgroundColor: primaryBackground,
+            iconColor: primaryLight,
+            collapsedIconColor: primaryLight,
+            title: _createSummaryItem(
+              txn: txn,
+              startDate: startDate,
+              endDate: endDate,
+              count: count,
+              showCategory: showCategory,
+            ),
+            children: _createExpandableChilds(
+              subTxn: subTxn,
+              showCategory: showCategory,
+            ),
+          ),
         ),
       ),
     );
@@ -1196,6 +1622,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   List<Widget> _createExpandableChilds({
     required Map<String, TransactionListModel> subTxn,
+    bool showCategory = true,
   }) {
     List<Widget> ret = [];
 
@@ -1205,59 +1632,20 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       ret.add(
         // create container
         Container(
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: primaryBackground,
-                width: 1.0
-              )
-            ),
-          ),
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              _categoryIcon(
-                name: (txn.category != null ? txn.category!.name : ''),
-                type: txn.type
-              ),
-              const SizedBox(
-                width: 10,
-              ),
+              const SizedBox(width: 50),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      txn.name,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      key,
-                      style: const TextStyle(
-                        fontSize: 10,
-                      ),
-                    ),
-                    (
-                      txn.category == null ?
-                      const SizedBox.shrink() :
-                      Text(
-                        (txn.category != null ? txn.category!.name : ''),
-                        style: const TextStyle(
-                          fontSize: 10,
-                        ),
-                      )
-                    ),
-                    const SizedBox(height: 5,),
-                  ],
+                child: Text(
+                  key,
                 ),
               ),
-              const SizedBox(
-                width: 10,
-              ),
+              const SizedBox(width: 10,),
               _getAmount(txn),
+              const SizedBox(width: 35,)
             ],
           ),
         )
@@ -1272,18 +1660,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     required DateTime startDate,
     required DateTime endDate,
     required int count,
-    bool needBorder = true,
+    bool showCategory = true,
   }) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: primaryLight,
-            width: (needBorder ? 1.0 : 0.0)
-          )
-        ),
-      ),
+      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -1310,14 +1690,17 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     fontSize: 10,
                   ),
                 ),
-                (txn.category == null
-                    ? const SizedBox.shrink()
-                    : Text(
-                        (txn.category != null ? txn.category!.name : ''),
-                        style: const TextStyle(
-                          fontSize: 10,
-                        ),
-                      )),
+                Visibility(
+                  visible: showCategory,
+                  child: (txn.category == null
+                      ? const SizedBox.shrink()
+                      : Text(
+                          (txn.category != null ? txn.category!.name : ''),
+                          style: const TextStyle(
+                            fontSize: 10,
+                          ),
+                        )),
+                ),
                 const SizedBox(
                   height: 5,
                 ),
@@ -1525,7 +1908,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   color: textColor2,
                   fontFamily: '--apple-system'
                 ),
-                suffixIcon: const Icon(Ionicons.arrow_forward_circle),
+                suffixIcon: const Icon(Ionicons.close),
                 onSubmitted: ((_) async {
                   await _submitSearch().then((_) {
                     if (mounted) {
@@ -1537,16 +1920,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     }
                   });
                 }),
-                onSuffixTap: (() async {
-                  await _submitSearch().then((_) {
-                    if (mounted) {
-                      // remove the focus from the text
-                      FocusScopeNode currentFocusSuffix = FocusScope.of(context);
-                      if (!currentFocusSuffix.hasPrimaryFocus) {
-                        currentFocusSuffix.unfocus();
-                      }
-                    }
-                  });
+                onSuffixTap: (() {
+                  // clear the text fields
+                  _searchController.clear();
                 }),
               ),
             ),
@@ -1832,6 +2208,16 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             width: 20,
             size: 15
           ),
+          deleteIcon: Icon(
+            Ionicons.close,
+            size: 15,
+          ),
+          onDeleted: () {
+            // remove this chip from the _categorySelected
+            setState(() {
+              _categorySelected.remove(key);
+            });
+          },
           label: Text(value.name),
           backgroundColor: (
             value.type == 'expense' ?
@@ -1891,25 +2277,53 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       _transferSort = _transferSort.reversed.toList();
     }
   }
+
+  void _setSummaryList() {
+    // select which summary list we want to show
+    switch(_summaryType) {
+      case SummaryType.name:
+        _summaryList = _summaryListName;
+        break;
+      case SummaryType.category:
+        _summaryList = _summaryListCategory;
+        break;
+    }
+  }
 }
 
 class TransactionSearchCategory extends StatefulWidget {
   final List<Widget> categoryExpense;
   final List<Widget> categoryIncome;
-  const TransactionSearchCategory(
-      {super.key, required this.categoryExpense, required this.categoryIncome});
+  const TransactionSearchCategory({
+    super.key,
+    required this.categoryExpense,
+    required this.categoryIncome
+  });
 
   @override
-  State<TransactionSearchCategory> createState() =>
-      _TransactionSearchCategoryState();
+  State<TransactionSearchCategory> createState() => _TransactionSearchCategoryState();
 }
 
 class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
-  PageName _resultCategoryName = PageName.expense;
+  final ScrollController _controller = ScrollController();
+  late PageName _resultCategoryName;
+
   final Map<PageName, Color> _resultCategoryColor = {
     PageName.expense: accentColors[2],
     PageName.income: accentColors[6],
   };
+
+  @override
+  void initState() {  
+    super.initState();
+    _resultCategoryName = PageName.expense;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1947,6 +2361,7 @@ class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
         ),
         Expanded(
           child: GridView.count(
+            controller: _controller,
             crossAxisCount: 4,
             children: (
               _resultCategoryName == PageName.expense ?
