@@ -14,6 +14,10 @@ class StatsAllPage extends StatefulWidget {
 
 class _StatsAllPageState extends State<StatsAllPage> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
+  final Map<String, TypeSlideItem> _typeSlideItem = {
+    "M": TypeSlideItem(color: accentColors[2], text: "Monthly"),
+    "Y": TypeSlideItem(color: accentColors[0], text: "Yearly"),
+  };
 
   final Map<String, double> _walletListIncomeMonthly = {};
   final Map<String, double> _walletListExpenseMonthly = {};
@@ -25,8 +29,11 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
   late Future<bool> _getData;
   late WalletStatAllModel _walletStatAll;
-  late WalletStatAllModel _origWalletStatAll;
-  late WalletStatAllModel _origWalletStatAllReverse;
+  late WalletStatAllModel _origWalletStatAllMonthly;
+  late WalletStatAllModel _origWalletStatAllReverseMonthly;
+  late WalletStatAllModel _origWalletStatAllYearly;
+  late WalletStatAllModel _origWalletStatAllReverseYearly;
+  late double _maxAmount;
   late double _maxAmountMonthly;
   late double _maxAmountYearly;
   late double _totalIncome;
@@ -63,6 +70,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
     _totalExpense = 0;
     _countExpense = 0;
     _dateOffset = 0;
+    _maxAmount = 0;
+    _maxAmountMonthly = 0;
+    _maxAmountYearly = 0;
 
     // default the min and max date for the multiline chart data
     _walletDateRange = {};
@@ -192,36 +202,48 @@ class _StatsAllPageState extends State<StatsAllPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          const SizedBox(height: 5,),
           Container(
-            padding: const EdgeInsets.all(10),
-            child: Center(
-              child: CupertinoSegmentedControl<String>(
-                selectedColor: accentColors[6],
-                // Provide horizontal padding around the children.
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                // This represents a currently selected segmented control.
-                groupValue: _graphType,
-                // Callback that sets the selected segmented control.
-                onValueChanged: (String value) {
-                  setState(() {
-                    _graphType = value;
-                    _setGraphData();
-                  });
-                },
-                children: const <String, Widget>{
-                  "M": Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text('Monthly'),
-                  ),
-                  "Y": Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text('Yearly'),
-                  ),
-                },
-              ),
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
+            child: TypeSlide(
+              onChange: (value) {
+                setState(() {
+                  _graphType = value;
+                  _setGraphData();
+                });
+              },
+              items: _typeSlideItem,
+              initialItem: _graphType,
             ),
           ),
+          // Container(
+          //   padding: const EdgeInsets.all(10),
+          //   child: Center(
+          //     child: CupertinoSegmentedControl<String>(
+          //       selectedColor: accentColors[6],
+          //       // Provide horizontal padding around the children.
+          //       padding: const EdgeInsets.symmetric(horizontal: 12),
+          //       // This represents a currently selected segmented control.
+          //       groupValue: _graphType,
+          //       // Callback that sets the selected segmented control.
+          //       onValueChanged: (String value) {
+          //         setState(() {
+          //           _graphType = value;
+          //           _setGraphData();
+          //         });
+          //       },
+          //       children: const <String, Widget>{
+          //         "M": Padding(
+          //           padding: EdgeInsets.symmetric(horizontal: 20),
+          //           child: Text('Monthly'),
+          //         ),
+          //         "Y": Padding(
+          //           padding: EdgeInsets.symmetric(horizontal: 20),
+          //           child: Text('Yearly'),
+          //         ),
+          //       },
+          //     ),
+          //   ),
+          // ),
           MultiLineChart(
             data: _walletLineChartData,
             color: _walletLineChartColors,
@@ -313,7 +335,6 @@ class _StatsAllPageState extends State<StatsAllPage> {
               ),
             ],
           ),
-          //TODO: add filter to change the duration of the chart
           SizedBox(
             width: double.infinity,
             child: Row(
@@ -326,14 +347,13 @@ class _StatsAllPageState extends State<StatsAllPage> {
                   value: Globals.fCCY.format(_totalIncome),
                   count: _countIncome,
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
+                const SizedBox(width: 10,),
                 SummaryBox(
-                    color: accentColors[2],
-                    text: "Expense",
-                    value: Globals.fCCY.format(_totalExpense),
-                    count: _countExpense),
+                  color: accentColors[2],
+                  text: "Expense",
+                  value: Globals.fCCY.format(_totalExpense),
+                  count: _countExpense
+                ),
               ],
             ),
           ),
@@ -343,14 +363,13 @@ class _StatsAllPageState extends State<StatsAllPage> {
           Expanded(
             child: ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
-              //TODO: also add monthly and yearly data based on graph selection above
               itemCount: _walletStatAll.data.length,
               itemBuilder: ((context, index) {
                 return BarStat(
                   income: _walletStatAll.data[index].income,
                   expense: _walletStatAll.data[index].expense,
                   balance: _walletStatAll.data[index].balance,
-                  maxAmount: _maxAmountMonthly,
+                  maxAmount: _maxAmount,
                   date: _walletStatAll.data[index].date
                 );
               }),
@@ -392,7 +411,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
 
     String yearlyKey = "";
     double yearlyAmount = 0;
-    for (Datum data in _origWalletStatAll.data) {
+    for (Datum data in _origWalletStatAllMonthly.data) {
       // generate the wallet list income, expense, and total monthly
       _walletListIncomeMonthly[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
       _walletListExpenseMonthly[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
@@ -477,6 +496,16 @@ class _StatsAllPageState extends State<StatsAllPage> {
       }
 
       _dateOffset = _walletListTotalMonthly.length ~/ 8;
+
+      // check whether this is ascending or descending
+      if (_sortAscending) {
+        _walletStatAll = _origWalletStatAllMonthly;
+      }
+      else {
+        _walletStatAll = _origWalletStatAllReverseMonthly;
+      }
+
+      _maxAmount = _maxAmountMonthly;
     }
     else {
       if (_showTotal) {
@@ -494,7 +523,17 @@ class _StatsAllPageState extends State<StatsAllPage> {
         _walletLineChartColors.add(accentColors[2]);
       }
 
-      _dateOffset = _walletListTotalYearly.length ~/ 8; 
+      _dateOffset = _walletListTotalYearly.length ~/ 8;
+
+      // check whether this is ascending or descending
+      if (_sortAscending) {
+        _walletStatAll = _origWalletStatAllYearly;
+      }
+      else {
+        _walletStatAll = _origWalletStatAllReverseYearly;
+      }
+
+      _maxAmount = _maxAmountYearly;
     }
   }
 
@@ -503,31 +542,69 @@ class _StatsAllPageState extends State<StatsAllPage> {
       // perform the get company detail information here
       await _walletHTTP.getAllStat(ccy: _ccy).then((resp) {
         // copy the response to company detail data
-        _origWalletStatAll = resp[0];
-        _origWalletStatAllReverse = WalletStatAllModel(
+        _origWalletStatAllMonthly = resp[0];
+        _origWalletStatAllReverseMonthly = WalletStatAllModel(
           ccy: resp[0].ccy,
           symbol: resp[0].symbol,
           data: resp[0].data.reversed.toList(),
         );
 
-        // check whether this is ascending or descending
-        if (_sortAscending) {
-          _walletStatAll = _origWalletStatAll;
-        }
-        else {
-          _walletStatAll = _origWalletStatAllReverse;
+        // generate the yearly data, we can do this by loop thru the data
+        // and create new Datum list
+        Datum? newData;
+        Map<String, Datum> yearlyData = {};
+        String key;
+        for(Datum data in _origWalletStatAllMonthly.data) {
+          key = Globals.dfyyyy.formatLocal(data.date);
+          // check if key exists in yearly data or not?
+          if (yearlyData.containsKey(key)) {
+            newData = yearlyData[key];
+            newData = Datum(
+              date: data.date,
+              balance: (data.balance ?? 0),
+              diff: (data.diff ?? 0),
+              expense: (newData?.expense ?? 0) + (data.expense ?? 0),
+              income: (newData?.income ?? 0) + (data.income ?? 0),
+            );
+          }
+          else {
+            newData = data;
+          }
+
+          // put newData to the map
+          yearlyData[key] = newData;
         }
 
-        if (_origWalletStatAll.data.isNotEmpty) {
+        // once map is generated, we can convert the map and put it to list
+        // of Datum
+        List<Datum> yearlyList = [];
+        yearlyData.forEach((key, value) {
+          yearlyList.add(value);
+        },);
+
+        // once that finished, we can create the _origWalletStatYearly data
+        _origWalletStatAllYearly = WalletStatAllModel(
+          ccy: resp[0].ccy,
+          symbol: resp[0].symbol,
+          data: yearlyList,
+        );
+
+        _origWalletStatAllReverseYearly = WalletStatAllModel(
+          ccy: resp[0].ccy,
+          symbol: resp[0].symbol,
+          data: yearlyList.reversed.toList(),
+        );
+
+        if (_origWalletStatAllMonthly.data.isNotEmpty) {
           _minDate = DateTime(
-            _origWalletStatAll.data[0].date.year,
-            _origWalletStatAll.data[0].date.month,
+            _origWalletStatAllMonthly.data[0].date.year,
+            _origWalletStatAllMonthly.data[0].date.month,
             1
           );
           
           _maxDate = DateTime(
-            _origWalletStatAll.data[_origWalletStatAll.data.length - 1].date.year,
-            _origWalletStatAll.data[_origWalletStatAll.data.length - 1].date.month,
+            _origWalletStatAllMonthly.data[_origWalletStatAllMonthly.data.length - 1].date.year,
+            _origWalletStatAllMonthly.data[_origWalletStatAllMonthly.data.length - 1].date.month,
             1
           );
 
@@ -563,9 +640,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
   void _sortWalletStat() {
     setState(() {
       if (_sortAscending) {
-        _walletStatAll = _origWalletStatAll;
+        _walletStatAll = _origWalletStatAllMonthly;
       } else {
-        _walletStatAll = _origWalletStatAllReverse;
+        _walletStatAll = _origWalletStatAllReverseMonthly;
       }
     });
   }
