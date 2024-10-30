@@ -122,7 +122,7 @@ class _TypeSlideState extends State<TypeSlide> {
       Color iconColor = widget.items[key]!.iconColor;
       Color textColor = widget.items[key]!.textColor;
 
-      if (key == _type) {
+      if (key.toLowerCase() == _type.toLowerCase()) {
         iconColor = widget.items[key]!.iconColorActive;
         textColor = widget.items[key]!.textColorActive;
       }
@@ -141,8 +141,8 @@ class _TypeSlideState extends State<TypeSlide> {
               setState(() {
                 _currentContainerColor = widget.items[key]!.color;
                 _currentContainerPositioned = position;
-                _type = key.toLowerCase();
-                widget.onChange(key.toLowerCase());
+                _type = key;
+                widget.onChange(key);
               });
             }
           },
