@@ -168,6 +168,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
+          //TODO: to add monthly and yearly selection
           const SizedBox(height: 10,),
           MultiLineChart(
             data: _walletLineChartData,
