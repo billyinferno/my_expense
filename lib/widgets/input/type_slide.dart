@@ -84,6 +84,7 @@ class _TypeSlideState<T extends Object> extends State<TypeSlide<T>>
     _type = (widget.initialItem ?? widget.items.keys.elementAt(0));
 
     // ensure widget width is at least 40
+    // TODO: to dynamically calculate the widget width, and use it on the tab
     assert(widget.width >= 40);
     
     // initialize the default container position and color
