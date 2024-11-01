@@ -15,8 +15,8 @@ class StatsAllPage extends StatefulWidget {
 class _StatsAllPageState extends State<StatsAllPage> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final Map<String, TypeSlideItem> _typeSlideItem = {
-    "M": TypeSlideItem(color: accentColors[2], text: "Monthly"),
-    "Y": TypeSlideItem(color: accentColors[0], text: "Yearly"),
+    "m": TypeSlideItem(color: accentColors[2], text: "Monthly"),
+    "y": TypeSlideItem(color: accentColors[0], text: "Yearly"),
   };
 
   final Map<String, double> _walletListIncomeMonthly = {};
@@ -89,7 +89,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
     _showExpense = true;
 
     // default graph type to monthly
-    _graphType = "M";
+    _graphType = "m";
 
     // get the data from API
     _getData = _getWalletStatAllData();
@@ -204,8 +204,8 @@ class _StatsAllPageState extends State<StatsAllPage> {
         children: <Widget>[
           Container(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
-            child: TypeSlide(
-              onChange: (value) {
+            child: TypeSlide<String>(
+              onValueChanged: (value) {
                 setState(() {
                   _graphType = value;
                   _setGraphData();
@@ -215,35 +215,6 @@ class _StatsAllPageState extends State<StatsAllPage> {
               initialItem: _graphType,
             ),
           ),
-          // Container(
-          //   padding: const EdgeInsets.all(10),
-          //   child: Center(
-          //     child: CupertinoSegmentedControl<String>(
-          //       selectedColor: accentColors[6],
-          //       // Provide horizontal padding around the children.
-          //       padding: const EdgeInsets.symmetric(horizontal: 12),
-          //       // This represents a currently selected segmented control.
-          //       groupValue: _graphType,
-          //       // Callback that sets the selected segmented control.
-          //       onValueChanged: (String value) {
-          //         setState(() {
-          //           _graphType = value;
-          //           _setGraphData();
-          //         });
-          //       },
-          //       children: const <String, Widget>{
-          //         "M": Padding(
-          //           padding: EdgeInsets.symmetric(horizontal: 20),
-          //           child: Text('Monthly'),
-          //         ),
-          //         "Y": Padding(
-          //           padding: EdgeInsets.symmetric(horizontal: 20),
-          //           child: Text('Yearly'),
-          //         ),
-          //       },
-          //     ),
-          //   ),
-          // ),
           MultiLineChart(
             data: _walletLineChartData,
             color: _walletLineChartColors,
@@ -370,7 +341,13 @@ class _StatsAllPageState extends State<StatsAllPage> {
                   expense: _walletStatAll.data[index].expense,
                   balance: _walletStatAll.data[index].balance,
                   maxAmount: _maxAmount,
-                  date: _walletStatAll.data[index].date
+                  date: _walletStatAll.data[index].date,
+                  dateFormat: (
+                    _graphType == "m" ? Globals.dfyyyyMM : Globals.dfyyyy
+                  ),
+                  showIncome: _showIncome,
+                  showExpense: _showExpense,
+                  showBalance: _showTotal,
                 );
               }),
             ),
@@ -478,7 +455,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
     _walletLineChartColors.clear();
 
     // select the graph type
-    if (_graphType == "M") {
+    if (_graphType == "m") {
       // set the wallet list data to the _walletList data
       if (_showTotal) {
         _walletLineChartData.add(_walletListTotalMonthly);

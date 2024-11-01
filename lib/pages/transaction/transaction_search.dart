@@ -19,6 +19,17 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   //TODO: to change API service to not using limit as we are not going perform lazy loading on the transaction search
   final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
 
+  final Map<SummaryType, TypeSlideItem> _summaryItems = <SummaryType, TypeSlideItem> {
+    SummaryType.name: TypeSlideItem(
+      color: accentColors[6],
+      text: "Name",
+    ),
+    SummaryType.category: TypeSlideItem(
+      color: accentColors[6],
+      text: "Category",
+    ),
+  };
+
   String _searchText = "";
   String _categoryId = "";
   String _type = "name";
@@ -513,31 +524,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           children: <Widget>[
             Container(
               padding: const EdgeInsets.all(10),
-              child: Center(
-                child: CupertinoSegmentedControl<SummaryType>(
-                  selectedColor: accentColors[6],
-                  // Provide horizontal padding around the children.
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  // This represents a currently selected segmented control.
-                  groupValue: _summaryType,
-                  // Callback that sets the selected segmented control.
-                  onValueChanged: (SummaryType value) {
-                    setState(() {
-                      _summaryType = value;
-                      _setSummaryList();
-                    });
-                  },
-                  children: const <SummaryType, Widget>{
-                    SummaryType.name: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Text('Name'),
-                    ),
-                    SummaryType.category: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Text('Category'),
-                    ),
-                  },
-                ),
+              child: TypeSlide<SummaryType>(
+                onValueChanged: (value) {
+                  setState(() {
+                    _summaryType = value;
+                    _setSummaryList();
+                  });
+                },
+                items: _summaryItems,
               ),
             ),
             Expanded(

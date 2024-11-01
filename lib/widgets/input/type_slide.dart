@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -25,45 +26,62 @@ class TypeSlideItem {
   });
 }
 
-class TypeSlide extends StatefulWidget {
-  final Function(String) onChange;
-  final Map<String, TypeSlideItem> items;
+class TypeSlide<T extends Object> extends StatefulWidget {
+  final ValueChanged<T> onValueChanged;
+  final Map<T, TypeSlideItem> items;
   final double height;
   final double width;
   final bool editable;
-  final String initialItem;
+  final T? initialItem;
   const TypeSlide({
     super.key,
-    required this.onChange,
+    required this.onValueChanged,
     required this.items,
     this.height = 30,
     this.width = 100,
     this.editable = true,
-    required this.initialItem,
+    this.initialItem,
   });
 
   @override
-  State<TypeSlide> createState() => _TypeSlideState();
+  State<TypeSlide<T>> createState() => _TypeSlideState();
 }
 
-class _TypeSlideState extends State<TypeSlide> {
+class _TypeSlideState<T extends Object> extends State<TypeSlide<T>>
+  with TickerProviderStateMixin<TypeSlide<T>> {
   // animation variable
   late double _currentContainerPositioned;
   late Color _currentContainerColor;
   final _animationDuration = const Duration(milliseconds: 150);
   late double _containerWidth;
-  late String _type;
+  late T _type;
 
   @override
   void initState() {
     super.initState();
 
     // ensure items is not empty
-    assert(widget.items.isNotEmpty);
+    assert(
+      widget.items.isNotEmpty,
+      "TypeSlide items shouldn't be empty"
+    );
+
+    assert(
+      widget.items.length >= 2,
+      "Minimum items should be 2"
+    );
 
     // get type slide type and ensure that the initial item is exists
-    assert(widget.items.containsKey(widget.initialItem));
-    _type = widget.initialItem;
+    if (widget.initialItem != null) {
+      assert(
+        widget.items.containsKey(widget.initialItem),
+        "initialItem should be one of the key in items map"
+      );
+    }
+
+    // get the initial item, whether it's set by user or default to the first
+    // key on the items map.
+    _type = (widget.initialItem ?? widget.items.keys.elementAt(0));
 
     // ensure widget width is at least 40
     assert(widget.width >= 40);
@@ -118,11 +136,11 @@ class _TypeSlideState extends State<TypeSlide> {
     List<Widget> tabs = [];
     double index = 0;
 
-    widget.items.forEach((key, color) {
+    for(final T key in widget.items.keys) {
       Color iconColor = widget.items[key]!.iconColor;
       Color textColor = widget.items[key]!.textColor;
 
-      if (key.toLowerCase() == _type.toLowerCase()) {
+      if (key == _type) {
         iconColor = widget.items[key]!.iconColorActive;
         textColor = widget.items[key]!.textColorActive;
       }
@@ -135,52 +153,61 @@ class _TypeSlideState extends State<TypeSlide> {
 
       double position = index * widget.width;
       Widget tab = Expanded(
-        child: GestureDetector(
-          onTap: () {
-            if(widget.editable) {
-              setState(() {
-                _currentContainerColor = widget.items[key]!.color;
-                _currentContainerPositioned = position;
-                _type = key;
-                widget.onChange(key);
-              });
-            }
-          },
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-            color: Colors.transparent,
-            height: widget.height,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Visibility(
-                  visible: widget.items[key]!.icon != null,
-                  child: Icon(
-                    widget.items[key]!.icon,
-                    size: 20,
-                    color: iconColor,
+        child: MouseRegion(
+          cursor: (kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if(widget.editable) {
+                if (_type != key) {
+                  setState(() {
+                    _currentContainerColor = widget.items[key]!.color;
+                    _currentContainerPositioned = position;
+                    _onTap(key);
+                    _type = key;
+                  });
+                }
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+              color: Colors.transparent,
+              height: widget.height,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Visibility(
+                    visible: (widget.items[key]!.icon != null),
+                    child: Icon(
+                      widget.items[key]!.icon,
+                      size: 20,
+                      color: iconColor,
+                    ),
                   ),
-                ),
-                Visibility(
-                  visible: widget.items[key]!.icon != null && widget.items[key]!.text != null,
-                  child: const SizedBox(width: 10,),
-                ),
-                Visibility(
-                  visible: widget.items[key]!.text != null,
-                  child: Expanded(
-                    child: Center(
-                      child: Text(
-                        (widget.items[key]!.text ?? ''),
-                        style: TextStyle(
-                          color: textColor,
+                  Visibility(
+                    visible: (
+                      widget.items[key]!.icon != null &&
+                      widget.items[key]!.text != null
+                    ),
+                    child: const SizedBox(width: 10,),
+                  ),
+                  Visibility(
+                    visible: (widget.items[key]!.text != null),
+                    child: Expanded(
+                      child: Center(
+                        child: Text(
+                          (widget.items[key]!.text ?? ''),
+                          style: TextStyle(
+                            color: textColor,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -188,7 +215,7 @@ class _TypeSlideState extends State<TypeSlide> {
 
       tabs.add(tab);
       index = index + 1;
-    });
+    }
 
     return tabs;
   }
@@ -196,14 +223,20 @@ class _TypeSlideState extends State<TypeSlide> {
   void _getPositionedAndColor() {
     // check in the map whether we got this type or not?
     // check this key is number what on map list
-    String key;
+    T key;
     for(int i=0; i<widget.items.keys.length; i++) {
       key = widget.items.keys.elementAt(i);
-      if (key.toLowerCase() == _type.toLowerCase()) {
+      if (key == _type) {
         _currentContainerPositioned = (widget.width * i);
         _currentContainerColor = widget.items[key]!.color;
         break;
       }
+    }
+  }
+
+  void _onTap(T currentKey) {
+    if (currentKey != _type) {
+      widget.onValueChanged(currentKey);
     }
   }
 }

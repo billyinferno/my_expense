@@ -175,9 +175,9 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         const SizedBox(
           height: 10,
         ),
-        TypeSlide(
+        TypeSlide<String>(
           initialItem: _currentType,
-          onChange: ((selected) {
+          onValueChanged: ((selected) {
             setState(() {
               _currentType = selected.toLowerCase();
             });
@@ -231,7 +231,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                   scale: 0.6,
                   child: CupertinoSwitch(
                     value: _showAll,
-                    activeTrackColor: accentColors[6],
+                    activeTrackColor: accentColors[0],
                     onChanged: (value) {
                       setState(() {
                         _showAll = value;
@@ -564,7 +564,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                   scale: 0.6,
                   child: CupertinoSwitch(
                     value: _showAll,
-                    activeTrackColor: accentColors[6],
+                    activeTrackColor: accentColors[0],
                     onChanged: (value) {
                       setState(() {
                         _showAll = value;

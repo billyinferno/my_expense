@@ -74,8 +74,9 @@ class _HomeStatsState extends State<HomeStats> {
     _currentCurrencyId = (_userMe.defaultBudgetCurrency ?? -1);
 
     // initialize the from and to variable
-    _from = DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
-    _to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1)).toLocal();
+    DateTime currentDate = DateTime.now().toLocal();
+    _from = DateTime(currentDate.year, currentDate.month, 1).toLocal();
+    _to = DateTime(currentDate.year, currentDate.month + 1, 1).subtract(const Duration(days: 1)).toLocal();
     _fromString = Globals.dfyyyyMMdd.formatLocal(_from);
     _toString = Globals.dfyyyyMMdd.formatLocal(_to);
     
@@ -327,8 +328,8 @@ class _HomeStatsState extends State<HomeStats> {
               Container(
                 padding: const EdgeInsets.all(10),
                 child: Center(
-                  child: TypeSlide(
-                    onChange: ((value) {
+                  child: TypeSlide<String>(
+                    onValueChanged: ((String value) {
                       setState(() {
                         _resultPageName = value;
                       });
@@ -732,9 +733,10 @@ class _HomeStatsState extends State<HomeStats> {
     }
   }
 
-  Future<bool> _fetchData({bool? isForce, bool? showDialog}) async {
-    bool currentForce = (isForce ?? true);
-    bool isShowDialog = (showDialog ?? false);
+  Future<bool> _fetchData({
+    bool isForce = true,
+    bool showDialog = false
+  }) async {
     List<BudgetModel> currentBudget = [];
     double maxBudget = 0;
     String currentDateString = Globals.dfyyyyMMdd.formatLocal(
@@ -748,7 +750,7 @@ class _HomeStatsState extends State<HomeStats> {
     // check if the currencies is not empty
     if (_currencies.isNotEmpty) {
       // check if we need to showed loading screen
-      if (isShowDialog) {
+      if (showDialog) {
         LoadingScreen.instance().show(context: context);
       }
 
@@ -760,15 +762,18 @@ class _HomeStatsState extends State<HomeStats> {
 
       // if currency is not empty, it means that we can calculate the worth
       // by calling the API and fetch income expense for each currency.
-      await _fetchWorth(_to, currentForce).then((_) async {
+      await _fetchWorth(_to, isForce).then((_) async {
         // loop thru all the currency in the currencies
         for(CurrencyModel ccy in _currencies) {
           // fetch the stats information
           await Future.wait([
-            _fetchIncomeExpense(_from, _to, ccy, currentForce),
-            _fetchTopTransaction('expense', ccy.id, currentForce),
-            _fetchTopTransaction('income', ccy.id, currentForce),
+            _fetchIncomeExpense(_from, _to, ccy, isForce),
+            _fetchTopTransaction('expense', ccy.id, isForce),
+            _fetchTopTransaction('income', ccy.id, isForce),
           ]).then((_) {
+            // show success fetching
+            Log.success(message: "📈 Refresh statisctic for CCY: ${ccy.name}");
+            
             // try to get the budget data for this currencies
             // we can use the from to get the budget date
             currentBudget = (BudgetSharedPreferences.getBudget(
@@ -800,13 +805,13 @@ class _HomeStatsState extends State<HomeStats> {
         );
 
         // check the loader dialog
-        if (isShowDialog && mounted) {
+        if (showDialog && mounted) {
           Navigator.pop(context);
         }
         throw Exception("Error when fetch statistic data");
       }).whenComplete(() {
         // remove the loading dialog if we showed it
-        if (isShowDialog) {
+        if (showDialog) {
           LoadingScreen.instance().hide();
         }
       },);

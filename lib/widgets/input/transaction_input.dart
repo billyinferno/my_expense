@@ -422,10 +422,10 @@ class _TransactionInputState extends State<TransactionInput> {
                   ),
                 ),
                 const SizedBox(height: 10,),
-                TypeSlide(
+                TypeSlide<String>(
                   initialItem: _currentType,
                   editable: (widget.type == TransactionInputType.add ? true : false),
-                  onChange: ((selected) {
+                  onValueChanged: ((selected) {
                     setState(() {
                       _currentType = selected.toLowerCase();
 
@@ -1282,9 +1282,9 @@ class _TransactionInputState extends State<TransactionInput> {
             const SizedBox(width: 10,),
             Expanded(child: Text("${_currentRepeat.substring(0,1).toUpperCase()}${_currentRepeat.substring(1).toLowerCase()}")),
             const SizedBox(width: 10,),
-            TypeSlide(
+            TypeSlide<String>(
               width: 40,
-              onChange: ((value) {
+              onValueChanged: ((value) {
                 setState(() {                
                   _currentRepeat = value;
                 });

@@ -383,8 +383,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            TypeSlide(
-              onChange: ((selected) {
+            TypeSlide<String>(
+              onValueChanged: ((selected) {
                 setState(() {
                   _currentType = selected;
                 });
