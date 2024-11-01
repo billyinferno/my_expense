@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class BarStat extends StatelessWidget {
@@ -7,6 +8,10 @@ class BarStat extends StatelessWidget {
   final double? balance;
   final double maxAmount;
   final DateTime date;
+  final DateFormat? dateFormat;
+  final bool showExpense;
+  final bool showIncome;
+  final bool showBalance;
   const BarStat({
     super.key,
     this.income,
@@ -14,6 +19,10 @@ class BarStat extends StatelessWidget {
     this.balance,
     required this.maxAmount,
     required this.date,
+    this.dateFormat,
+    this.showExpense = true,
+    this.showIncome = true,
+    this.showBalance = true,
   });
 
   @override
@@ -25,23 +34,23 @@ class BarStat extends StatelessWidget {
       indicator = accentColors[2];
     }
 
+    DateFormat df = (dateFormat ?? Globals.dfyyyyMM);
+
     return Container(
       width: double.infinity,
-      height: 45,
       margin: const EdgeInsets.fromLTRB(0, 0, 0, 5),
       decoration: BoxDecoration(
         color: primaryLight,
         borderRadius: BorderRadius.circular(5),
       ),
-      child: LayoutBuilder(builder: (context, constraints) {
-        return Row(
+      child: IntrinsicHeight(
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             // indicator
             Container(
               width: 10,
-              height: constraints.maxHeight,
               decoration: BoxDecoration(
                 color: indicator,
                 borderRadius: const BorderRadius.only(
@@ -55,45 +64,55 @@ class BarStat extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
               color: secondaryBackground,
               width: 80,
-              height: constraints.maxHeight,
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  Globals.dfyyyyMM.formatLocal(date),
+                  df.formatLocal(date),
                 ),
               ),
             ),
             // bar chart
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Bar(
-                    amount: income!,
-                    maxAmount: maxAmount,
-                    text: Globals.fCCY.format(income!),
-                    color: accentColors[0]
-                  ),
-                  Bar(
-                    amount: expense!,
-                    maxAmount: maxAmount,
-                    text: Globals.fCCY.format(expense!),
-                    color: accentColors[2]
-                  ),
-                  Bar(
-                    amount: balance!,
-                    maxAmount: maxAmount,
-                    text: Globals.fCCY.format(balance!),
-                    color: accentColors[4]
-                  ),
-                ],
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Visibility(
+                      visible: showIncome,
+                      child: Bar(
+                        amount: (income ?? 0),
+                        maxAmount: maxAmount,
+                        text: Globals.fCCY.format(income ?? 0),
+                        color: accentColors[0]
+                      ),
+                    ),
+                    Visibility(
+                      visible: showExpense,
+                      child: Bar(
+                        amount: (expense ?? 0),
+                        maxAmount: maxAmount,
+                        text: Globals.fCCY.format(expense ?? 0),
+                        color: accentColors[2]
+                      ),
+                    ),
+                    Visibility(
+                      visible: showBalance,
+                      child: Bar(
+                        amount: (balance ?? 0),
+                        maxAmount: maxAmount,
+                        text: Globals.fCCY.format(balance ?? 0),
+                        color: accentColors[4]
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(width: 5,),
           ],
-        );
-      },),
+        ),
+      ),
     );
   }
 }
