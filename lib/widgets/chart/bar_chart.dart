@@ -128,14 +128,14 @@ class BarChart extends StatelessWidget {
       incomeLength = 0;
     }
     else {
-      incomeLength = (((income/maxIncome) * 1000) ~/ 4);
+      incomeLength = ((income/maxIncome) * 100).toInt();
     }
 
     if(maxExpense <= 0) {
       expenseLength = 0;
     }
     else {
-      expenseLength = (((expense/maxExpense) * 1000) ~/ 4);
+      expenseLength = ((expense/maxExpense) * 100).toInt();
     }
 
     // check if we got amount, but the income or expense length just too small
@@ -147,8 +147,8 @@ class BarChart extends StatelessWidget {
     
     // clamp income length to 250 if it's exceeded
     isIncomeExceeded = false;
-    if (incomeLength > 250) {
-      incomeLength = 250;
+    if (incomeLength > 100) {
+      incomeLength = 100;
       isIncomeExceeded = true;
     }
 
@@ -159,65 +159,55 @@ class BarChart extends StatelessWidget {
 
     // clamp expense length to 250 if it's exceeded
     isExpenseExceeded = false;
-    if (expenseLength > 250) {
-      expenseLength = 250;
+    if (expenseLength > 100) {
+      expenseLength = 100;
       isExpenseExceeded = true;
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            SizedBox(
-              width: 45,
-              child: Center(
-                child: Text(
-                  dateText,
-                  style: const TextStyle(
-                    color: textColor2,
-                    fontSize: 10,
-                  ),
+    return Container(
+      margin: const EdgeInsets.fromLTRB(0, 0, 0, 5),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          SizedBox(
+            width: 45,
+            child: Center(
+              child: Text(
+                dateText,
+                style: const TextStyle(
+                  color: textColor2,
+                  fontSize: 10,
                 ),
               ),
             ),
-            const SizedBox(width: 5,),
-            Expanded(
+          ),
+          const SizedBox(width: 5,),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: primaryLight,
+                borderRadius: BorderRadius.circular(15),
+              ),
               child: Stack(
+                alignment: Alignment.center,
                 children: <Widget>[
-                  Container(
-                    height: 20,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: primaryLight,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
                       Expanded(
-                        flex: (250 - incomeLength),
-                        child: Container(
-                          height: 20,
-                          color: Colors.transparent,
-                        ),
+                        flex: (100 - incomeLength),
+                        child: SizedBox(),
                       ),
                       Expanded(
                         flex: incomeLength,
                         child: Container(
-                          height: 20,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              begin: Alignment.topRight,
-                              end: Alignment.bottomLeft,
                               colors: [
-                                accentColors[6],
                                 (isIncomeExceeded ? darkAccentColors[6] : accentColors[6]),
+                                accentColors[6],
                               ],
                             ),
                             borderRadius: const BorderRadius.only(
@@ -225,19 +215,23 @@ class BarChart extends StatelessWidget {
                               bottomLeft: Radius.circular(20)
                             ),
                           ),
+                          child: Text(
+                            "",
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: textColor2,
+                            ),
+                          ),
                         ),
                       ),
                       Expanded(
                         flex: expenseLength,
                         child: Container(
-                          height: 20,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              begin: Alignment.topRight,
-                              end: Alignment.bottomLeft,
                               colors: [
-                                (isExpenseExceeded ? darkAccentColors[2] : accentColors[2]),
                                 accentColors[2],
+                                (isExpenseExceeded ? darkAccentColors[2] : accentColors[2])
                               ],
                             ),
                             borderRadius: const BorderRadius.only(
@@ -245,46 +239,55 @@ class BarChart extends StatelessWidget {
                               bottomRight: Radius.circular(20)
                             ),
                           ),
+                          child: Text(
+                            "",
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: textColor2,
+                            ),
+                          ),
                         ),
                       ),
                       Expanded(
-                        flex: (250 - expenseLength),
-                        child: Container(
-                          height: 20,
-                          color: Colors.transparent,
-                        ),
+                        flex: (100 - expenseLength),
+                        child: SizedBox(),
                       ),
                     ],
                   ),
-                  Positioned(
-                    top: 2,
-                    left: 5,
-                    child: Text(
-                      Globals.fCCY.format(income),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: textColor2,
-                      ),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(
+                      10,
+                      0,
+                      10,
+                      0
                     ),
-                  ),
-                  Positioned(
-                    top: 2,
-                    right: 5,
-                    child: Text(
-                      Globals.fCCY.format(expense),
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: textColor2,
-                      ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Text(
+                          Globals.fCCY.format(income),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: textColor2,
+                          ),
+                        ),
+                        Text(
+                          Globals.fCCY.format(expense),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            color: textColor2,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 5,),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
