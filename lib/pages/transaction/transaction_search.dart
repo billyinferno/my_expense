@@ -2080,25 +2080,29 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   void _showCategorySelectionDialog() {
     showModalBottomSheet<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return MyBottomSheet(
-            context: context,
-            title: "Category",
-            screenRatio: 0.75,
-            child: TransactionSearchCategory(
-              categoryExpense: _categoryExpenseIcon,
-              categoryIncome: _categoryIncomeIcon,
-            ),
-          );
-        });
+      context: context,
+      builder: (BuildContext context) {
+        return MyBottomSheet(
+          context: context,
+          title: "Category",
+          screenRatio: 0.75,
+          //TODO: to change the method of selecting category so we can indicate which category already selected and not yet selected
+          child: TransactionSearchCategory(
+            categoryExpense: _categoryExpenseIcon,
+            categoryIncome: _categoryIncomeIcon,
+          ),
+        );
+      }
+    );
   }
 
   void _generateIconCategory() {
+    _categoryExpenseIcon.clear();
     _categoryExpenseList.forEach((key, value) {
       _categoryExpenseIcon.add(_iconCategory(value));
     });
 
+    _categoryIncomeIcon.clear();
     _categoryIncomeList.forEach((key, value) {
       _categoryIncomeIcon.add(_iconCategory(value));
     });
@@ -2123,13 +2127,18 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         // check if category still less than 10
         if (_categorySelected.length < 10) {
           setState(() {
+            // generate again the icon
+            _generateIconCategory();
             _categorySelected[category.id] = category;
           });
           Navigator.pop(context);
         } else {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-              createSnackBar(message: "Maximum selected category is 10"));
+            createSnackBar(
+              message: "Maximum selected category is 10"
+            )
+          );
         }
       },
       child: Column(
@@ -2300,12 +2309,17 @@ class TransactionSearchCategory extends StatefulWidget {
 
 class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
   final ScrollController _controller = ScrollController();
-  late PageName _resultCategoryName;
-
-  final Map<PageName, Color> _resultCategoryColor = {
-    PageName.expense: accentColors[2],
-    PageName.income: accentColors[6],
+    final Map<PageName, TypeSlideItem> _categorySelectionItems = <PageName, TypeSlideItem> {
+    PageName.expense: TypeSlideItem(
+      color: accentColors[2],
+      text: 'Expense',
+    ),
+    PageName.income: TypeSlideItem(
+      color: accentColors[6],
+      text: 'Income',
+    ),
   };
+  late PageName _resultCategoryName;
 
   @override
   void initState() {  
@@ -2327,30 +2341,13 @@ class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
       children: <Widget>[
         Container(
           padding: const EdgeInsets.all(10),
-          child: Center(
-            child: CupertinoSegmentedControl<PageName>(
-              selectedColor: (_resultCategoryColor[_resultCategoryName] ?? accentColors[9]),
-              // Provide horizontal padding around the children.
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              // This represents a currently selected segmented control.
-              groupValue: _resultCategoryName,
-              // Callback that sets the selected segmented control.
-              onValueChanged: (PageName value) {
-                setState(() {
-                  _resultCategoryName = value;
-                });
-              },
-              children: const <PageName, Widget>{
-                PageName.expense: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text('Expense'),
-                ),
-                PageName.income: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text('Income'),
-                ),
-              },
-            ),
+          child: TypeSlide<PageName>(
+            onValueChanged: (value) {
+              setState(() {
+                _resultCategoryName = value;
+              });
+            },
+            items: _categorySelectionItems,
           ),
         ),
         Expanded(
