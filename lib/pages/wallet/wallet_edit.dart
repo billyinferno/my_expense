@@ -429,6 +429,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
                       const Expanded(child: Text("Use For Stats")),
                       CupertinoSwitch(
                         value: _currentUseForStats,
+                        activeTrackColor: accentColors[0],
                         onChanged: (value) {
                           setState(() {
                             _currentUseForStats = value;
@@ -454,6 +455,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
                       const Expanded(child: Text("Enabled")),
                       CupertinoSwitch(
                         value: _currentEnabled,
+                        activeTrackColor: accentColors[0],
                         onChanged: (value) {
                           setState(() {
                             _currentEnabled = value;
