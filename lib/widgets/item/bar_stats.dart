@@ -3,8 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:my_expense/_index.g.dart';
 
 class BarStat extends StatelessWidget {
-  final double? income;
-  final double? expense;
+  final double income;
+  final double expense;
   final double? balance;
   final double maxAmount;
   final DateTime date;
@@ -14,8 +14,8 @@ class BarStat extends StatelessWidget {
   final bool showBalance;
   const BarStat({
     super.key,
-    this.income,
-    this.expense,
+    this.income = 0,
+    this.expense = 0,
     this.balance,
     required this.maxAmount,
     required this.date,
@@ -28,9 +28,9 @@ class BarStat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color indicator = Colors.white;
-    if ((income ?? 0) > (expense ?? 0)) {
+    if (income > expense) {
       indicator = accentColors[0];
-    } else if ((income ?? 0) < (expense ?? 0)) {
+    } else if (income < expense) {
       indicator = accentColors[2];
     }
 
@@ -64,11 +64,24 @@ class BarStat extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
               color: secondaryBackground,
               width: 80,
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  df.formatLocal(date),
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    df.formatLocal(date),
+                    style: TextStyle(
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    Globals.fCCY.format((income - expense).makePositive()),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: indicator,
+                    ),
+                  ),
+                ],
               ),
             ),
             // bar chart
@@ -82,18 +95,18 @@ class BarStat extends StatelessWidget {
                     Visibility(
                       visible: showIncome,
                       child: Bar(
-                        amount: (income ?? 0),
+                        amount: income,
                         maxAmount: maxAmount,
-                        text: Globals.fCCY.format(income ?? 0),
+                        text: Globals.fCCY.format(income),
                         color: accentColors[0]
                       ),
                     ),
                     Visibility(
                       visible: showExpense,
                       child: Bar(
-                        amount: (expense ?? 0),
+                        amount: expense,
                         maxAmount: maxAmount,
-                        text: Globals.fCCY.format(expense ?? 0),
+                        text: Globals.fCCY.format(expense),
                         color: accentColors[2]
                       ),
                     ),

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
+enum WalletDataType {
+  monthly, yearly
+}
+
 class WalletStatPage extends StatefulWidget {
   final Object? wallet;
   const WalletStatPage({super.key, required this.wallet});
@@ -12,21 +16,43 @@ class WalletStatPage extends StatefulWidget {
 
 class _WalletStatPageState extends State<WalletStatPage> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
+  final Map<WalletDataType, TypeSlideItem> _dataItems = {
+    WalletDataType.monthly: TypeSlideItem(
+      color: accentColors[2],
+      text: "Monthly",
+    ),
+    WalletDataType.yearly: TypeSlideItem(
+      color: accentColors[6],
+      text: "Yearly",
+    ),
+  };
+
+  final List<Color> _chartColors = [accentColors[5], accentColors[0], accentColors[2]];
+
   bool _sortAscending = true;
   late WalletModel _wallet;
   late Future<bool> _getData;
   late List<WalletStatModel> _walletStat;
-  late List<WalletStatModel> _origWalletStat;
+  late List<WalletStatModel> _origWalletStatMonthly;
+  late List<WalletStatModel> _origWalletStatYearly;
+
   late List<Map<String, double>> _walletLineChartData;
+  late List<Map<String, double>> _walletLineChartDataMonthly;
+  late List<Map<String, double>> _walletLineChartDataYearly;
+
   late DateTime _minDate;
   late DateTime _maxDate;
   late Map<DateTime, bool> _walletDateRange;
   late int _dateOffset;
   late double _maxAmount;
+  late double _maxAmountMonthly;
+  late double _maxAmountYearly;
   late double _totalIncome;
   late int _countIncome;
   late double _totalExpense;
   late int _countExpense;
+
+  late WalletDataType _dataType;
 
   @override
   void initState() {
@@ -37,10 +63,14 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
     // init the wallet list into empty list
     _walletStat = [];
-    _origWalletStat = [];
+    _origWalletStatMonthly = [];
+    _origWalletStatYearly = [];
 
     // set the wallet line data into empty array
     _walletLineChartData = [];
+    _walletLineChartDataMonthly = [];
+    _walletLineChartDataYearly = [];
+
     _dateOffset = 0;
 
     // set the min and max date as 1 day before of max date which is today
@@ -51,6 +81,9 @@ class _WalletStatPageState extends State<WalletStatPage> {
     _countIncome = 0;
     _totalExpense = 0;
     _countExpense = 0;
+
+    // init the graph type data
+    _dataType = WalletDataType.monthly;
 
     // get the data from API
     _getData = _getWalletStatData();
@@ -70,9 +103,11 @@ class _WalletStatPageState extends State<WalletStatPage> {
         actions: <Widget>[
           InkWell(
             onTap: (() {
-              // set the sorting to inverse
-              _sortAscending = !_sortAscending;
-              _sortWalletStat();
+              setState(() {                
+                // set the sorting to inverse
+                _sortAscending = !_sortAscending;
+                _sortWalletStat();
+              });
             }),
             child: SizedBox(
               width: 50,
@@ -168,12 +203,22 @@ class _WalletStatPageState extends State<WalletStatPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          //TODO: to add monthly and yearly selection
+          const SizedBox(height: 10,),
+          TypeSlide<WalletDataType>(
+            onValueChanged: (value) {
+              setState(() {
+                _dataType = value;
+                _dataSelection();
+              });
+            },
+            items: _dataItems,
+            initialItem: WalletDataType.monthly,
+          ),
           const SizedBox(height: 10,),
           MultiLineChart(
             data: _walletLineChartData,
-            color: [accentColors[5], accentColors[0], accentColors[2]],
-            legend: const ["Total", "Income", "Expense"],
+            color: _chartColors,
+            legend: const ["Net Worth", "Income", "Expense"],
             height: 200,
             dateOffset: _dateOffset,
           ),
@@ -205,96 +250,16 @@ class _WalletStatPageState extends State<WalletStatPage> {
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: _walletStat.length,
               itemBuilder: ((context, index) {
-                Color indicator = Colors.white;
-                if (_walletStat[index].income! > _walletStat[index].expense!) {
-                  indicator = accentColors[0];
-                }
-                else if (_walletStat[index].income! < _walletStat[index].expense!) {
-                  indicator = accentColors[2];
-                }
-
-                return Container(
-                  width: double.infinity,
-                  height: 50,
-                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 5),
-                  decoration: BoxDecoration(
-                    color: primaryLight,
-                    borderRadius: BorderRadius.circular(5),
+                return BarStat(
+                  income: (_walletStat[index].income ?? 0),
+                  expense: (_walletStat[index].expense ?? 0),
+                  balance: 0,
+                  maxAmount: _maxAmount,
+                  date: _walletStat[index].date,
+                  dateFormat: (
+                    _dataType == WalletDataType.monthly ? Globals.dfyyyyMM : Globals.dfyyyy
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      // indicator
-                      Container(
-                        width: 10,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: indicator,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(5),
-                            bottomLeft: Radius.circular(5),
-                          )
-                        ),
-                      ),
-                      // date,
-                      Container(
-                        color: secondaryBackground,
-                        width: 70,
-                        padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              Globals.dfyyyyMM.formatLocal(_walletStat[index].date),
-                              style: const TextStyle(
-                                fontSize: 11,
-                              ),
-                            ),
-                            Text(
-                              ((_walletStat[index].income ?? 0) - (_walletStat[index].expense ?? 0)).formatCurrency(
-                                checkThousand: true,
-                                showDecimal: true,
-                                shorten: true,
-                                decimalNum: 2,
-                              ),
-                              style: TextStyle(
-                                color: indicator,
-                                fontSize: 10,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // bar chart
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Bar(
-                              amount: _walletStat[index].income!,
-                              maxAmount: _maxAmount,
-                              text: Globals.fCCY.format(
-                                _walletStat[index].income!
-                              ),
-                              color: accentColors[0]
-                            ),
-                            Bar(
-                              amount: _walletStat[index].expense!,
-                              maxAmount: _maxAmount,
-                              text: Globals.fCCY.format(
-                                _walletStat[index].expense!
-                              ),
-                              color: accentColors[2]
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 5,),
-                    ],
-                  ),
+                  showBalance: false,
                 );
               }),
             ),
@@ -305,26 +270,75 @@ class _WalletStatPageState extends State<WalletStatPage> {
   }
 
   void _getStatData() {
-    Map<String, double> walletListIncome = {};
-    Map<String, double> walletListExpense = {};
-    Map<String, double> walletListTotal = {};
+    Map<String, WalletStatModel> walletStatYearly = {};
+
+    Map<String, double> walletListIncomeMonthly = {};
+    Map<String, double> walletListExpenseMonthly = {};
+    Map<String, double> walletListTotalMonthly = {};
+
+    Map<String, double> walletListIncomeYearly = {};
+    Map<String, double> walletListExpenseYearly = {};
+    Map<String, double> walletListTotalYearly = {};
 
     double total = _wallet.startBalance;
     
     // loop thru _walletStat and get the maximum data
-    _maxAmount = double.infinity * -1;
+    _maxAmountMonthly = double.negativeInfinity;
+    _maxAmountYearly = double.negativeInfinity;
 
     _walletDateRange.forEach((key, value) {
-      walletListIncome[Globals.dfMMyy.formatLocal(key)] = 0;
-      walletListExpense[Globals.dfMMyy.formatLocal(key)] = 0;
-      walletListTotal[Globals.dfMMyy.formatLocal(key)] = 0;
+      // initialize monthly data
+      walletListIncomeMonthly[Globals.dfMMyy.formatLocal(key)] = 0;
+      walletListExpenseMonthly[Globals.dfMMyy.formatLocal(key)] = 0;
+      walletListTotalMonthly[Globals.dfMMyy.formatLocal(key)] = 0;
+
+      // initialize yearly data
+      walletListIncomeYearly[Globals.dfyyyy.formatLocal(key)] = 0;
+      walletListExpenseYearly[Globals.dfyyyy.formatLocal(key)] = 0;
+      walletListTotalYearly[Globals.dfyyyy.formatLocal(key)] = 0;
+
+      // initialize walletStatYearly
+      walletStatYearly[Globals.dfyyyy.formatLocal(key)] = WalletStatModel(
+        date: DateTime(key.year, 12, 31),
+        expense: 0,
+        income: 0,
+      );
     });
 
+    String key;
+    WalletStatModel? prevWalletStat;
     for (WalletStatModel data in _walletStat) {
       // generate the wallet list income, expense, and total
-      walletListIncome[Globals.dfMMyy.formatLocal(data.date)] = (data.income ?? 0);
-      walletListExpense[Globals.dfMMyy.formatLocal(data.date)] = (data.expense ?? 0);
-      
+      // monthly data
+      key = Globals.dfMMyy.formatLocal(data.date);
+      walletListIncomeMonthly[key] = (data.income ?? 0);
+      walletListExpenseMonthly[key] = (data.expense ?? 0);
+
+      total += (data.income ?? 0) - (data.expense ?? 0);
+      walletListTotalMonthly[key] = total;
+
+      // yearly data
+      key = Globals.dfyyyy.formatLocal(data.date);
+      walletListIncomeYearly[key] = (walletListIncomeYearly[key] ?? 0) + (data.income ?? 0);
+      walletListExpenseYearly[key] = (walletListExpenseYearly[key] ?? 0) + (data.expense ?? 0);
+      walletListTotalYearly[key] = total;
+
+      // check for max amount yearly
+      if ((walletListIncomeYearly[key] ?? 0) > _maxAmountYearly) {
+        _maxAmountYearly = (walletListIncomeYearly[key] ?? 0);
+      }
+      if ((walletListExpenseYearly[key] ?? 0) > _maxAmountYearly) {
+        _maxAmountYearly = (walletListExpenseYearly[key] ?? 0);
+      }
+
+      // generate yearly wallet stat model
+      prevWalletStat = walletStatYearly[key];
+      walletStatYearly[key] = WalletStatModel(
+        date: prevWalletStat!.date,
+        expense: (prevWalletStat.expense! + (data.expense ?? 0)),
+        income: (prevWalletStat.income! + (data.income ?? 0)),
+      );
+
       _totalIncome += data.income!;
       _totalExpense += data.expense!;
 
@@ -335,27 +349,58 @@ class _WalletStatPageState extends State<WalletStatPage> {
         _countExpense += 1;
       }
 
-      if (data.income! > _maxAmount) {
-        _maxAmount = data.income!;
+      if (data.income! > _maxAmountMonthly) {
+        _maxAmountMonthly = data.income!;
       }
-      if (data.expense! > _maxAmount) {
-        _maxAmount = data.expense!;
+      if (data.expense! > _maxAmountMonthly) {
+        _maxAmountMonthly = data.expense!;
       }
     }
 
-    // loop thru _walletDataRange again to calculate the total
-    _walletDateRange.forEach((key, value) {
-      total += (walletListIncome[Globals.dfMMyy.formatLocal(key)] ?? 0) - (walletListExpense[Globals.dfMMyy.formatLocal(key)] ?? 0);
-      walletListTotal[Globals.dfMMyy.formatLocal(key)] = total;
-    });
-
-    _dateOffset = walletListTotal.length ~/ 8;
-
     // set the wallet list data to the _walletList data
-    _walletLineChartData.clear();
-    _walletLineChartData.add(walletListTotal);
-    _walletLineChartData.add(walletListIncome);
-    _walletLineChartData.add(walletListExpense);
+    // monthly
+    _walletLineChartDataMonthly.clear();
+    _walletLineChartDataMonthly.add(walletListTotalMonthly);
+    _walletLineChartDataMonthly.add(walletListIncomeMonthly);
+    _walletLineChartDataMonthly.add(walletListExpenseMonthly);
+
+    // yearly
+    _walletLineChartDataYearly.clear();
+    _walletLineChartDataYearly.add(walletListTotalYearly);
+    _walletLineChartDataYearly.add(walletListIncomeYearly);
+    _walletLineChartDataYearly.add(walletListExpenseYearly);
+
+    // generate the wallet stat yearly
+    _origWalletStatYearly.clear();
+    walletStatYearly.forEach((key, value) {
+      _origWalletStatYearly.add(value);
+    },);
+
+    // select the data we want to display
+    _dataSelection();
+  }
+
+  void _dataSelection() {
+    if (_dataType == WalletDataType.monthly) {
+      _walletLineChartData = _walletLineChartDataMonthly;
+      _maxAmount = _maxAmountMonthly;
+    }
+    else {
+      _walletLineChartData = _walletLineChartDataYearly;
+      _maxAmount = _maxAmountYearly;
+    }
+
+    // calculate date offset
+    _dateOffset = 1;
+    if (_walletLineChartData[0].isNotEmpty) {
+      _dateOffset = _walletLineChartData[0].length ~/ 8;
+    }
+    if (_dateOffset <= 0) {
+      _dateOffset = 1;
+    }
+
+    // get the wallet stat
+    _sortWalletStat();
   }
 
   Future<bool> _getWalletStatData() async {
@@ -364,12 +409,12 @@ class _WalletStatPageState extends State<WalletStatPage> {
       await _walletHTTP.getStat(id: _wallet.id).then((resp) {
         // copy the response to company detail data
         _walletStat = resp;
-        _origWalletStat.addAll(resp);
+        _origWalletStatMonthly = resp.toList();
 
         // get the min date, where it should be the array 0 of the _origWalletStat
-        if (_origWalletStat.isNotEmpty) {
-          _minDate = DateTime(_origWalletStat[0].date.year, _origWalletStat[0].date.month, 1);
-          _maxDate = DateTime(_origWalletStat[_origWalletStat.length - 1].date.year, _origWalletStat[_origWalletStat.length - 1].date.month, 1);
+        if (_origWalletStatMonthly.isNotEmpty) {
+          _minDate = DateTime(_origWalletStatMonthly[0].date.year, _origWalletStatMonthly[0].date.month, 1);
+          _maxDate = DateTime(_origWalletStatMonthly[_origWalletStatMonthly.length - 1].date.year, _origWalletStatMonthly[_origWalletStatMonthly.length - 1].date.month, 1);
 
           // generate the list of date beased on _min and _max date
           DateTime startDate = _minDate;
@@ -402,15 +447,22 @@ class _WalletStatPageState extends State<WalletStatPage> {
   }
 
   void _sortWalletStat() {
-    setState(() 
-    {
-      _walletStat.clear();
-      if (_sortAscending) {
-        _walletStat.addAll(_origWalletStat.toList());
+    _walletStat.clear();
+    if (_sortAscending) {
+      if (_dataType == WalletDataType.monthly) {
+        _walletStat.addAll(_origWalletStatMonthly.toList());
       }
       else {
-        _walletStat.addAll(_origWalletStat.reversed.toList());
+        _walletStat.addAll(_origWalletStatYearly.toList());
       }
-    });
+    }
+    else {
+      if (_dataType == WalletDataType.monthly) {
+        _walletStat.addAll(_origWalletStatMonthly.reversed.toList());
+      }
+      else {
+        _walletStat.addAll(_origWalletStatYearly.reversed.toList());
+      }
+    }
   }
 }

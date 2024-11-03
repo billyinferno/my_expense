@@ -337,8 +337,8 @@ class _StatsAllPageState extends State<StatsAllPage> {
               itemCount: _walletStatAll.data.length,
               itemBuilder: ((context, index) {
                 return BarStat(
-                  income: _walletStatAll.data[index].income,
-                  expense: _walletStatAll.data[index].expense,
+                  income: (_walletStatAll.data[index].income ?? 0),
+                  expense: (_walletStatAll.data[index].expense ?? 0),
                   balance: _walletStatAll.data[index].balance,
                   maxAmount: _maxAmount,
                   date: _walletStatAll.data[index].date,
