@@ -12,6 +12,7 @@ class BarStat extends StatelessWidget {
   final bool showExpense;
   final bool showIncome;
   final bool showBalance;
+  final bool showDiff;
   const BarStat({
     super.key,
     this.income = 0,
@@ -23,6 +24,7 @@ class BarStat extends StatelessWidget {
     this.showExpense = true,
     this.showIncome = true,
     this.showBalance = true,
+    this.showDiff = true,
   });
 
   @override
@@ -74,11 +76,19 @@ class BarStat extends StatelessWidget {
                       fontSize: 12,
                     ),
                   ),
-                  Text(
-                    Globals.fCCY.format((income - expense).makePositive()),
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: indicator,
+                  Visibility(
+                    visible: showDiff,
+                    child: Text(
+                      (income - expense).makePositive().formatCurrency(
+                        checkThousand: false,
+                        decimalNum: 2,
+                        shorten: true,
+                        showDecimal: true,
+                      ),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: indicator,
+                      ),
                     ),
                   ),
                 ],
