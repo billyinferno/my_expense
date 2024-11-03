@@ -381,6 +381,21 @@ class _HomeListState extends State<HomeList> {
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
         extentRatio: 0.20,
+        dismissible: DismissiblePane(
+          onDismissed: () async {
+            // if dismessed then delete the transaction
+            await _deleteTransaction(txnDeleted: txn);
+          },
+          confirmDismiss: () async {
+            return await ShowMyDialog(
+              dialogTitle: "Delete Item",
+              dialogText: "Do you want to delete ${txn.name}?",
+              confirmText: "Delete",
+              confirmColor: accentColors[2],
+              cancelText: "Cancel")
+            .show(context) ?? false;
+          },
+        ),
         children: <Widget>[
           SlideButton(
             icon: Ionicons.trash,
