@@ -103,14 +103,14 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
               size: 15,
             )
           ),
-          IconButton(
-            onPressed: (() {
+          SortIcon(
+            asc: _sortAsc,
+            onPress: (() {
               setState(() {
                 _sortAsc = !_sortAsc;
                 _filterData();
               });
             }),
-            icon: SortIcon(asc: _sortAsc)
           ),
         ],
       ),

@@ -134,14 +134,14 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
               size: 15,
             )
           ),
-          IconButton(
-            onPressed: (() {
+          SortIcon(
+            asc: _sortType,
+            onPress: (() {
               setState(() {
                 _sortType = !_sortType;
                 _sortTransactions();
               });
             }),
-            icon: SortIcon(asc: _sortType),
           ),
         ],
       ),

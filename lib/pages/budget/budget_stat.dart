@@ -65,7 +65,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
     _averageMonthlyDailyAmount = 0;
     _averageYearlyAmount = 0;
     _averageYearlyDailyAmount = 0;
-    _sortAscending = true;
+    _sortAscending = false;
     _showAll = false;
 
     // get the budget stat data from backend
@@ -92,48 +92,15 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           }),
         ),
         actions: <Widget>[
-          InkWell(
-            onTap: (() async {
-              // reversed the monthly and yearly ydata
+          SortIcon(
+            asc: _sortAscending,
+            onPress: (() {
               setState(() {
                 _budgetMonthly = _budgetMonthly.reversed.toList();
                 _budgetYearly = _budgetYearly.reversed.toList();
                 _sortAscending = !_sortAscending;
               });
             }),
-            child: SizedBox(
-              width: 50,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    (_sortAscending ? Ionicons.arrow_up : Ionicons.arrow_down),
-                    color: textColor,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        (_sortAscending ? "A" : "Z"),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: textColor,
-                        ),
-                      ),
-                      Text(
-                        (_sortAscending ? "Z" : "A"),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: textColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
           ),
           const SizedBox(
             width: 5,
@@ -218,38 +185,41 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           min: 0,
           addBottomPadd: false,
         ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(
-                height: 15,
-                width: 30,
-                child: Transform.scale(
-                  scale: 0.6,
-                  child: CupertinoSwitch(
-                    value: _showAll,
-                    activeTrackColor: accentColors[0],
-                    onChanged: (value) {
-                      setState(() {
-                        _showAll = value;
-                        _generateBudgetStatData();
-                      });
-                    },
+        Visibility(
+          visible: (_budgetStat.monthlyAll.isNotEmpty && _budgetStat.yearlyAll.isNotEmpty),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                SizedBox(
+                  height: 15,
+                  width: 30,
+                  child: Transform.scale(
+                    scale: 0.6,
+                    child: CupertinoSwitch(
+                      value: _showAll,
+                      activeTrackColor: accentColors[0],
+                      onChanged: (value) {
+                        setState(() {
+                          _showAll = value;
+                          _generateBudgetStatData();
+                        });
+                      },
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10,),
-              Text(
-                "Show expense not in budget",
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 10,
+                const SizedBox(width: 10,),
+                Text(
+                  "Show expense not in budget",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 10,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 10,),
@@ -551,38 +521,41 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
           min: 0,
           addBottomPadd: false,
         ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(
-                height: 15,
-                width: 30,
-                child: Transform.scale(
-                  scale: 0.6,
-                  child: CupertinoSwitch(
-                    value: _showAll,
-                    activeTrackColor: accentColors[0],
-                    onChanged: (value) {
-                      setState(() {
-                        _showAll = value;
-                        _generateBudgetStatData();
-                      });
-                    },
+        Visibility(
+          visible: (_budgetStat.monthlyAll.isNotEmpty && _budgetStat.yearlyAll.isNotEmpty),
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                SizedBox(
+                  height: 15,
+                  width: 30,
+                  child: Transform.scale(
+                    scale: 0.6,
+                    child: CupertinoSwitch(
+                      value: _showAll,
+                      activeTrackColor: accentColors[0],
+                      onChanged: (value) {
+                        setState(() {
+                          _showAll = value;
+                          _generateBudgetStatData();
+                        });
+                      },
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 10,),
-              Text(
-                "Show expense not in budget",
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 10,
+                const SizedBox(width: 10,),
+                Text(
+                  "Show expense not in budget",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 10,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 10,),
