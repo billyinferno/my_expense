@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:ionicons/ionicons.dart';
@@ -206,28 +208,21 @@ class _HomeListState extends State<HomeList> {
               child: Container(
                 padding: const EdgeInsets.all(10),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      (_currentFocusedDay.isSameDate(date: DateTime.now())
-                        ? "Today"
-                        : Globals.dfddMMMMyyyy.formatLocal(_currentFocusedDay)
+                      (
+                        _currentFocusedDay.isSameDate(date: DateTime.now()) ?
+                        "Today" :
+                        Globals.dfddMMMMyyyy.formatLocal(_currentFocusedDay)
                       ),
                       style: const TextStyle(
                         fontSize: 12,
                       ),
                     ),
-                    Expanded(
-                      child: Container(
-                        color: Colors.transparent,
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: _getTotalIncomeExpense(
-                            transactionData: homeProvider.transactionList
-                          ),
-                        ),
-                      ),
+                    _getTotalIncomeExpense(
+                      transactionData: homeProvider.transactionList
                     ),
                   ],
                 ),
@@ -754,46 +749,92 @@ class _HomeListState extends State<HomeList> {
   Widget _getTotalIncomeExpense({
     required List<TransactionListModel> transactionData
   }) {
-    String totalIncomeExpense = "";
-    String currencySymbol = "";
-    double totalAmount = 0;
-    Color textColor = textColor2;
+    List<Widget> children = [];
+    final SplayTreeMap <int, Tuple<String, double>> totalAmount = SplayTreeMap<int, Tuple<String, double>>();
+    Tuple<String, double> currentData;
+    double currentAmount;
 
-    if (_userMe.defaultBudgetCurrency != null) {
-      if (transactionData.isNotEmpty) {
-        // compute the total amount
-        for (TransactionListModel txn in transactionData) {
-          // if current wallet currency same as the default budget currectr
-          if (txn.wallet.currencyId == _userMe.defaultBudgetCurrency) {
-            // check the transaction type
-            if (txn.type == "expense") {
-              totalAmount -= txn.amount;
-            } else if (txn.type == "income") {
-              totalAmount += txn.amount;
-            }
+    // loop thru transaction data to calculate each income expense amount
+    if (transactionData.isNotEmpty) {
+      // compute the total amount
+      for (TransactionListModel txn in transactionData) {
+        // ensure we only process expense and income transaction only
+        if (txn.type == 'expense' || txn.type == 'income') {
+          // get current amount from the total amount map
+          currentData = (totalAmount[txn.wallet.currencyId] ?? Tuple<String, double>(item1: txn.wallet.symbol, item2: 0));
+          currentAmount = currentData.item2;
 
-            // set the current currency symbol
-            currencySymbol = txn.wallet.symbol;
+          // check the transaction type
+          if (txn.type == "expense") {
+            currentAmount -= txn.amount;
+          } else if (txn.type == "income") {
+            currentAmount += txn.amount;
+          }
+
+          // stored the current amount to total amount map
+          totalAmount[txn.wallet.currencyId] = Tuple<String, double>(
+            item1: txn.wallet.symbol,
+            item2: currentAmount,
+          );
+        }
+      }
+
+      // ensure total amount is not empty before we processing to create the
+      // widget for flip flap text
+      if (totalAmount.isNotEmpty) {
+        // check if we got default budget currency or not?
+        if (_userMe.defaultBudgetCurrency != null) {
+          // if got then we put this as the first widget list
+          if (totalAmount.containsKey(_userMe.defaultBudgetCurrency)) {
+            // get the data
+            currentData = totalAmount[_userMe.defaultBudgetCurrency]!;
+            
+            // generate the widget here
+            children.add(_incomeExpenseText(
+              currency: currentData.item1,
+              amount: currentData.item2,
+            ));
+
+            // remove the data from total amount map
+            totalAmount.remove(_userMe.defaultBudgetCurrency);
           }
         }
 
-        // format the amount
-        totalIncomeExpense = "$currencySymbol ${Globals.fCCY.format(totalAmount)}";
-
-        // get the color
-        if (totalAmount < 0) {
-          textColor = accentColors[2];
-        } else if (totalAmount > 0) {
-          textColor = accentColors[6];
-        }
+        // loop thru the total amount map
+        totalAmount.forEach((key, data) {
+          // generate the widget here
+          children.add(_incomeExpenseText(
+            currency: data.item1,
+            amount: data.item2,
+          ));
+        },);
       }
     }
 
+    return FlipFlapText(
+      children: children,
+    );
+  }
+
+  Widget _incomeExpenseText({
+    required String currency,
+    required double amount
+  }) {
+    Color color = textColor;
+    String text = "$currency ${Globals.fCCY.format(amount)}";
+
+    // get the color
+    if (amount < 0) {
+      color = accentColors[2];
+    } else if (amount > 0) {
+      color = accentColors[6];
+    }
+
     return Text(
-      totalIncomeExpense,
+      text,
       style: TextStyle(
         fontSize: 12,
-        color: textColor,
+        color: color,
       )
     );
   }

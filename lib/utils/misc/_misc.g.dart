@@ -5,4 +5,5 @@ export './list_equals.dart';
 export './my_callback.dart';
 export './show_dialog.dart';
 export './snack_bar.dart';
+export './tuple.dart';
 export './wallet_transaction_class_helper.dart';
