@@ -1,6 +1,7 @@
 export './bar_stats.dart';
 export './budget_transaction_item.dart';
 export './card_face_item.dart';
+export './category_item.dart';
 export './category_list_item.dart';
 export './expand_animation.dart';
 export './list_view_with_header.dart';

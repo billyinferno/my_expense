@@ -16,8 +16,18 @@ class TransactionSearchPage extends StatefulWidget {
 
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
+
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollControllerAll = ScrollController();
+  final ScrollController _scrollControllerSummary = ScrollController();
+  final ScrollController _scrollControllerIncome = ScrollController();
+  final ScrollController _scrollControllerExpense = ScrollController();
+  final ScrollController _scrollControllerTransfer = ScrollController();
+  final ScrollController _walletController = ScrollController();
+
   //TODO: to change API service to not using limit as we are not going perform lazy loading on the transaction search
   final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
+  final ScrollController _categoryController = ScrollController();
 
   final Map<SummaryType, TypeSlideItem> _summaryItems = <SummaryType, TypeSlideItem> {
     SummaryType.name: TypeSlideItem(
@@ -30,13 +40,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     ),
   };
 
-  String _searchText = "";
-  String _categoryId = "";
-  String _type = "name";
-  int _start = 0; // start from 0 page
-
-  int _resultPage = 1;
-  PageName _resultPageName = PageName.all;
   final Map<PageName, Color> _resultPageColor = {
     PageName.summary: accentColors[1],
     PageName.all: accentColors[3],
@@ -45,11 +48,23 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     PageName.transfer: accentColors[4],
   };
 
-  List<TransactionListModel> _transactions = [];
+  String _searchText = "";
+  String _categoryId = "";
+  String _type = "name";
+  int _start = 0; // start from 0 page
+
+  int _resultPage = 1;
+  PageName _resultPageName = PageName.all;
+
+  late List<Widget> _expenseCategory;
+  late List<Widget> _incomeCategory;
+
+  final List<TransactionListModel> _transactions = [];
   final List<TransactionListModel> _filterTransactions = [];
   final List<TransactionListModel> _income = [];
   final List<TransactionListModel> _expense = [];
   final List<TransactionListModel> _transfer = [];
+
   late List<TransactionListModel> _filterTransactionsSort;
   late List<TransactionListModel> _incomeSort;
   late List<TransactionListModel> _expenseSort;
@@ -70,9 +85,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final Map<String, Map<String, TransactionListModel>> _subSummaryTransfer = {};
   final Map<String, Map<String, TransactionListModel>> _subSummaryTransferCategory = {};
 
+  final Map<String, double> _totalAmountTransfer = {};
   late Map<String, double> _totalAmountIncome;
   late Map<String, double> _totalAmountExpense;
-  final Map<String, double> _totalAmountTransfer = {};
 
   late List<Widget> _summaryList;
   final List<Widget> _summaryListName = [];
@@ -81,19 +96,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final Map<int, CategoryModel> _categorySelected = {};
   late Map<int, CategoryModel> _categoryExpenseList;
   late Map<int, CategoryModel> _categoryIncomeList;
-  final List<Widget> _categoryExpenseIcon = [];
-  final List<Widget> _categoryIncomeIcon = [];
 
   late List<WalletModel> _walletList;
   final Map<int, bool> _selectedWalletList = {};
-
-  final TextEditingController _searchController = TextEditingController();
-  final ScrollController _scrollControllerAll = ScrollController();
-  final ScrollController _scrollControllerSummary = ScrollController();
-  final ScrollController _scrollControllerIncome = ScrollController();
-  final ScrollController _scrollControllerExpense = ScrollController();
-  final ScrollController _scrollControllerTransfer = ScrollController();
-  final ScrollController _walletController = ScrollController();
 
   late bool _sortType;
   late String _filterType;
@@ -123,7 +128,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _categoryIncomeList = CategorySharedPreferences.getCategory(type: 'income');
 
     // generate the icon list widget for both expense and income
-    _generateIconCategory();
+    _expenseCategory = _generateExpenseIncomeCategoryWidget(data: _categoryExpenseList);
+    _incomeCategory = _generateExpenseIncomeCategoryWidget(data: _categoryIncomeList);
 
     // get the wallet list, show the disabled also incase we have transaction
     // that the wallet already disabled as it still being showed in the search
@@ -140,6 +146,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _scrollControllerExpense.dispose();
     _scrollControllerTransfer.dispose();
     _walletController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -1855,7 +1862,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // initialize all the value
     _start = 0; // always start from 0
     _transactions.clear();
-    _transactions = [];
 
     // try to find the transaction
     await _findTransaction(
@@ -2086,108 +2092,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           context: context,
           title: "Category",
           screenRatio: 0.75,
-          //TODO: to change the method of selecting category so we can indicate which category already selected and not yet selected
-          child: TransactionSearchCategory(
-            categoryExpense: _categoryExpenseIcon,
-            categoryIncome: _categoryIncomeIcon,
+          child: CategoryModalSelector(
+            expense: _expenseCategory,
+            income: _incomeCategory
           ),
         );
       }
-    );
-  }
-
-  void _generateIconCategory() {
-    _categoryExpenseIcon.clear();
-    _categoryExpenseList.forEach((key, value) {
-      _categoryExpenseIcon.add(_iconCategory(value));
-    });
-
-    _categoryIncomeIcon.clear();
-    _categoryIncomeList.forEach((key, value) {
-      _categoryIncomeIcon.add(_iconCategory(value));
-    });
-  }
-
-  Widget _iconCategory(CategoryModel category) {
-    // check if this is expense or income
-    Color iconColor;
-    Icon icon;
-
-    if (category.type.toLowerCase() == "expense") {
-      iconColor = IconColorList.getExpenseColor(category.name.toLowerCase());
-      icon = IconColorList.getExpenseIcon(category.name.toLowerCase());
-    } else {
-      iconColor = IconColorList.getIncomeColor(category.name.toLowerCase());
-      icon = IconColorList.getIncomeIcon(category.name.toLowerCase());
-    }
-
-    return GestureDetector(
-      onTap: () {
-        //print("Select category");
-        // check if category still less than 10
-        if (_categorySelected.length < 10) {
-          setState(() {
-            // generate again the icon
-            _generateIconCategory();
-            _categorySelected[category.id] = category;
-          });
-          Navigator.pop(context);
-        } else {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            createSnackBar(
-              message: "Maximum selected category is 10"
-            )
-          );
-        }
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Center(
-            child: Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: iconColor,
-                  border: Border.all(
-                    color: (
-                      _categorySelected.containsKey(category.id) ?
-                      accentColors[4] :
-                      Colors.transparent
-                    ),
-                    width: 2.0,
-                    style: BorderStyle.solid,
-                  )),
-              child: icon,
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Center(
-                  child: Text(
-                    category.name,
-                    style: const TextStyle(
-                      fontSize: 10,
-                      color: textColor,
-                    ),
-                    softWrap: true,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -2195,18 +2105,24 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     List<Widget> result = [];
 
     // loop thru the category selected
-    _categorySelected.forEach((key, value) {
+    _categorySelected.forEach((key, category) {
       result.add(InkWell(
         onTap: (() {
           // remove this chip from the _categorySelected
           setState(() {
             _categorySelected.remove(key);
+            if (category.type == 'expense') {
+              _expenseCategory = _generateExpenseIncomeCategoryWidget(data: _categoryExpenseList);
+            }
+            else {
+              _incomeCategory = _generateExpenseIncomeCategoryWidget(data: _categoryIncomeList);
+            }
           });
         }),
         child: Chip(
           avatar: _categoryIcon(
-            type: value.type,
-            name: value.name,
+            type: category.type,
+            name: category.name,
             height: 20,
             width: 20,
             size: 15
@@ -2219,13 +2135,19 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             // remove this chip from the _categorySelected
             setState(() {
               _categorySelected.remove(key);
+              if (category.type == 'expense') {
+                _expenseCategory = _generateExpenseIncomeCategoryWidget(data: _categoryExpenseList);
+              }
+              else {
+                _incomeCategory = _generateExpenseIncomeCategoryWidget(data: _categoryIncomeList);
+              }
             });
           },
-          label: Text(value.name),
+          label: Text(category.name),
           backgroundColor: (
-            value.type == 'expense' ?
-            IconColorList.getExpenseColor(value.name) :
-            IconColorList.getIncomeColor(value.name)
+            category.type == 'expense' ?
+            IconColorList.getExpenseColor(category.name) :
+            IconColorList.getIncomeColor(category.name)
           ),
           padding: const EdgeInsets.symmetric(
             vertical: 5,
@@ -2236,6 +2158,51 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     });
 
     return result;
+  }
+
+  List<Widget> _generateExpenseIncomeCategoryWidget({
+    required Map<int, CategoryModel> data
+  }) {
+    List<Widget> categories = [];
+
+    // loop thru data to generate the widget
+    data.forEach((key, category) {
+      categories.add(
+        GestureDetector(
+          onTap: () {
+            // check if user already selected 10 categories or not?
+            if (_categorySelected.length < 10) {
+              setState(() {
+                _categorySelected[category.id] = category;
+                // check whether this is expense or income
+                if (category.type == 'expense') {
+                  _expenseCategory = _generateExpenseIncomeCategoryWidget(data: _categoryExpenseList);
+                }
+                else {
+                  _incomeCategory = _generateExpenseIncomeCategoryWidget(data: _categoryIncomeList);
+                }
+              });
+              Navigator.pop(context);
+            }
+            else {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                createSnackBar(
+                  message: "Maximum selected category is 10"
+                )
+              );
+            }
+          },
+          child: CategoryItem(
+            category: category,
+            isSelected: (_categorySelected.containsKey(category.id)),
+            showText: true,
+          ),
+        )
+      );
+    },);
+
+    return categories;
   }
 
   void _generateSortedList() {
@@ -2291,77 +2258,5 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         _summaryList = _summaryListCategory;
         break;
     }
-  }
-}
-
-class TransactionSearchCategory extends StatefulWidget {
-  final List<Widget> categoryExpense;
-  final List<Widget> categoryIncome;
-  const TransactionSearchCategory({
-    super.key,
-    required this.categoryExpense,
-    required this.categoryIncome
-  });
-
-  @override
-  State<TransactionSearchCategory> createState() => _TransactionSearchCategoryState();
-}
-
-class _TransactionSearchCategoryState extends State<TransactionSearchCategory> {
-  final ScrollController _controller = ScrollController();
-    final Map<PageName, TypeSlideItem> _categorySelectionItems = <PageName, TypeSlideItem> {
-    PageName.expense: TypeSlideItem(
-      color: accentColors[2],
-      text: 'Expense',
-    ),
-    PageName.income: TypeSlideItem(
-      color: accentColors[6],
-      text: 'Income',
-    ),
-  };
-  late PageName _resultCategoryName;
-
-  @override
-  void initState() {  
-    super.initState();
-    _resultCategoryName = PageName.expense;
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        Container(
-          padding: const EdgeInsets.all(10),
-          child: TypeSlide<PageName>(
-            onValueChanged: (value) {
-              setState(() {
-                _resultCategoryName = value;
-              });
-            },
-            items: _categorySelectionItems,
-          ),
-        ),
-        Expanded(
-          child: GridView.count(
-            controller: _controller,
-            crossAxisCount: 4,
-            children: (
-              _resultCategoryName == PageName.expense ?
-              widget.categoryExpense :
-              widget.categoryIncome
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

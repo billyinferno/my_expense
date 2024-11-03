@@ -1,4 +1,5 @@
 export './bar_button.dart';
+export './category_modal_selector.dart';
 export './my_selector.dart';
 export './my_switch.dart';
 export './pin_pad.dart';
