@@ -192,38 +192,46 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         ),
         Visibility(
           visible: (_budgetStat.monthlyAll.isNotEmpty && _budgetStat.yearlyAll.isNotEmpty),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                SizedBox(
-                  height: 15,
-                  width: 30,
-                  child: Transform.scale(
-                    scale: 0.6,
-                    child: CupertinoSwitch(
-                      value: _showAll,
-                      activeTrackColor: accentColors[0],
-                      onChanged: (value) {
-                        setState(() {
-                          _showAll = value;
-                          _generateBudgetStatData();
-                        });
-                      },
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _showAll = !_showAll;
+                _generateBudgetStatData();
+              });
+            },
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(
+                    height: 15,
+                    width: 30,
+                    child: Transform.scale(
+                      scale: 0.6,
+                      child: CupertinoSwitch(
+                        value: _showAll,
+                        activeTrackColor: accentColors[0],
+                        onChanged: (value) {
+                          setState(() {
+                            _showAll = value;
+                            _generateBudgetStatData();
+                          });
+                        },
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10,),
-                Text(
-                  "Show expense not in budget",
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: 10,
+                  const SizedBox(width: 10,),
+                  Text(
+                    "Show expense not in budget",
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 10,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
