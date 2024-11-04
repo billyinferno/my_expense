@@ -26,56 +26,122 @@ class Bar extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      child: Stack(
-        children: <Widget>[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Flexible(
-                child: FractionallySizedBox(
-                  alignment: FractionalOffset.centerLeft,
-                  widthFactor: ((amount < 0 ? 0 : amount) / maxAmount),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(100),
-                        bottomRight: Radius.circular(100),
+      child: IntrinsicHeight(
+        child: Stack(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Flexible(
+                  child: FractionallySizedBox(
+                    alignment: FractionalOffset.centerLeft,
+                    widthFactor: 0.8,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                      decoration: BoxDecoration(
+                        color: color.darken(amount: 0.5),
+                        borderRadius: BorderRadius.circular(100)
                       ),
-                      gradient: LinearGradient(
-                        colors: [
-                          color,
-                          color.darken(amount: darkenValue),
-                        ]
-                      ),
-                    ),
-                    child: Text(
-                      " ",
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.transparent
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    color,
+                                    color.darken(amount: darkenValue),
+                                  ]
+                                ),
+                                borderRadius: BorderRadius.circular(100)
+                              ),
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Container(
+                                      margin: const EdgeInsets.fromLTRB(4, 2, 4, 10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withAlpha(50),
+                                        borderRadius: BorderRadius.circular(100)
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: textColor,
+                )
+              ],
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: textColor,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+      // child: Stack(
+      //   children: <Widget>[
+      //     Row(
+      //       crossAxisAlignment: CrossAxisAlignment.center,
+      //       mainAxisAlignment: MainAxisAlignment.start,
+      //       children: <Widget>[
+      //         Flexible(
+      //           child: FractionallySizedBox(
+      //             alignment: FractionalOffset.centerLeft,
+      //             widthFactor: ((amount < 0 ? 0 : amount) / maxAmount),
+      //             child: Container(
+      //               decoration: BoxDecoration(
+      //                 borderRadius: const BorderRadius.only(
+      //                   topRight: Radius.circular(100),
+      //                   bottomRight: Radius.circular(100),
+      //                 ),
+      //                 gradient: LinearGradient(
+      //                   colors: [
+      //                     color,
+      //                     color.darken(amount: darkenValue),
+      //                   ]
+      //                 ),
+      //               ),
+      //               child: Text(
+      //                 " ",
+      //                 style: TextStyle(
+      //                   fontSize: 10,
+      //                   color: Colors.transparent
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //     Align(
+      //       alignment: Alignment.centerRight,
+      //       child: Container(
+      //         padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
+      //         child: Text(
+      //           text,
+      //           style: const TextStyle(
+      //             fontSize: 10,
+      //             color: textColor,
+      //           ),
+      //         ),
+      //       ),
+      //     ),
+      //   ],
+      // ),
     );
   }
 }
