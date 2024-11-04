@@ -204,15 +204,20 @@ class _StatsAllPageState extends State<StatsAllPage> {
         children: <Widget>[
           Container(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
-            child: TypeSlide<String>(
-              onValueChanged: (value) {
-                setState(() {
-                  _graphType = value;
-                  _setGraphData();
-                });
-              },
-              items: _typeSlideItem,
-              initialItem: _graphType,
+            child: Center(
+              child: SizedBox(
+                width: (100 * _typeSlideItem.length).toDouble(),
+                child: TypeSlide<String>(
+                  onValueChanged: (value) {
+                    setState(() {
+                      _graphType = value;
+                      _setGraphData();
+                    });
+                  },
+                  items: _typeSlideItem,
+                  initialItem: _graphType,
+                ),
+              ),
             ),
           ),
           MultiLineChart(

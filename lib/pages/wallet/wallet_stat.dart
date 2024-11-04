@@ -204,15 +204,20 @@ class _WalletStatPageState extends State<WalletStatPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           const SizedBox(height: 10,),
-          TypeSlide<WalletDataType>(
-            onValueChanged: (value) {
-              setState(() {
-                _dataType = value;
-                _dataSelection();
-              });
-            },
-            items: _dataItems,
-            initialItem: WalletDataType.monthly,
+          Center(
+            child: SizedBox(
+              width: (100 * _dataItems.length).toDouble(),
+              child: TypeSlide<WalletDataType>(
+                onValueChanged: (value) {
+                  setState(() {
+                    _dataType = value;
+                    _dataSelection();
+                  });
+                },
+                items: _dataItems,
+                initialItem: WalletDataType.monthly,
+              ),
+            ),
           ),
           const SizedBox(height: 10,),
           MultiLineChart(

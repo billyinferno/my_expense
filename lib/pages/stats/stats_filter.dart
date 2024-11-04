@@ -383,14 +383,17 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            TypeSlide<String>(
-              onValueChanged: ((selected) {
-                setState(() {
-                  _currentType = selected;
-                });
-              }),
-              initialItem: 'month',
-              items: _typeSlideItem,
+            SizedBox(
+              width: (100 * _typeSlideItem.length).toDouble(),
+              child: TypeSlide<String>(
+                onValueChanged: ((selected) {
+                  setState(() {
+                    _currentType = selected;
+                  });
+                }),
+                initialItem: 'month',
+                items: _typeSlideItem,
+              ),
             ),
             const SizedBox(height: 10,),
             Expanded(

@@ -328,14 +328,17 @@ class _HomeStatsState extends State<HomeStats> {
               Container(
                 padding: const EdgeInsets.all(10),
                 child: Center(
-                  child: TypeSlide<String>(
-                    onValueChanged: ((String value) {
-                      setState(() {
-                        _resultPageName = value;
-                      });
-                    }),
-                    items: _resultPageItem,
-                    initialItem: _resultPageName,
+                  child: SizedBox(
+                    width: (100 * _resultPageItem.length).toDouble(),
+                    child: TypeSlide<String>(
+                      onValueChanged: ((String value) {
+                        setState(() {
+                          _resultPageName = value;
+                        });
+                      }),
+                      items: _resultPageItem,
+                      initialItem: _resultPageName,
+                    ),
                   ),
                 ),
               ),

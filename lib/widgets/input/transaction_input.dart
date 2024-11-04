@@ -422,31 +422,36 @@ class _TransactionInputState extends State<TransactionInput> {
                   ),
                 ),
                 const SizedBox(height: 10,),
-                TypeSlide<String>(
-                  initialItem: _currentType,
-                  editable: (widget.type == TransactionInputType.add ? true : false),
-                  onValueChanged: ((selected) {
-                    setState(() {
-                      _currentType = selected.toLowerCase();
-
-                      // if type is transfer, change the name into "From Wallet"
-                      // instead of wallet only
-                      if (_currentType == 'transfer') {
-                        _getUserFromWalletInfo(
-                          walletId: _currentWalletFromID,
-                          name: "From Wallet"
-                        );
-                      }
-                      else {
-                        _getUserFromWalletInfo(
-                          walletId: _currentWalletFromID,
-                          name: "Wallet"
-                        );
-                      }
-                      _getCurrentCategoryIconAndColor();
-                    });
-                  }),
-                  items: _txnTypeSlideItem,
+                Center(
+                  child: SizedBox(
+                    width: (100 * _txnTypeSlideItem.length).toDouble(),
+                    child: TypeSlide<String>(
+                      initialItem: _currentType,
+                      editable: (widget.type == TransactionInputType.add ? true : false),
+                      onValueChanged: ((selected) {
+                        setState(() {
+                          _currentType = selected.toLowerCase();
+                    
+                          // if type is transfer, change the name into "From Wallet"
+                          // instead of wallet only
+                          if (_currentType == 'transfer') {
+                            _getUserFromWalletInfo(
+                              walletId: _currentWalletFromID,
+                              name: "From Wallet"
+                            );
+                          }
+                          else {
+                            _getUserFromWalletInfo(
+                              walletId: _currentWalletFromID,
+                              name: "Wallet"
+                            );
+                          }
+                          _getCurrentCategoryIconAndColor();
+                        });
+                      }),
+                      items: _txnTypeSlideItem,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20,),
                 _buildInput(),
@@ -1273,7 +1278,7 @@ class _TransactionInputState extends State<TransactionInput> {
           border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
         ),
         child: Row(
-          children: [
+          children: <Widget>[
             const Icon(
               Ionicons.repeat,
               size: 20,
@@ -1282,16 +1287,18 @@ class _TransactionInputState extends State<TransactionInput> {
             const SizedBox(width: 10,),
             Expanded(child: Text("${_currentRepeat.substring(0,1).toUpperCase()}${_currentRepeat.substring(1).toLowerCase()}")),
             const SizedBox(width: 10,),
-            TypeSlide<String>(
-              width: 40,
-              onValueChanged: ((value) {
-                setState(() {                
-                  _currentRepeat = value;
-                });
-              }),
-              items: _txnSingleRepeatItem,
-              initialItem: "single",
-              editable: (widget.type == TransactionInputType.add ? true : false),
+            SizedBox(
+              width: 80,
+              child: TypeSlide<String>(
+                onValueChanged: ((value) {
+                  setState(() {                
+                    _currentRepeat = value;
+                  });
+                }),
+                items: _txnSingleRepeatItem,
+                initialItem: "single",
+                editable: (widget.type == TransactionInputType.add ? true : false),
+              ),
             )
           ],
         ),

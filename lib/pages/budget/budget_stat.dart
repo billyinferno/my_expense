@@ -142,14 +142,19 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         const SizedBox(
           height: 10,
         ),
-        TypeSlide<String>(
-          initialItem: _currentType,
-          onValueChanged: ((selected) {
-            setState(() {
-              _currentType = selected.toLowerCase();
-            });
-          }),
-          items: _typeSlideItem,
+        Center(
+          child: SizedBox(
+            width: (100 * _typeSlideItem.length).toDouble(),
+            child: TypeSlide<String>(
+              initialItem: _currentType,
+              onValueChanged: ((selected) {
+                setState(() {
+                  _currentType = selected.toLowerCase();
+                });
+              }),
+              items: _typeSlideItem,
+            ),
+          ),
         ),
         const SizedBox(
           height: 5,

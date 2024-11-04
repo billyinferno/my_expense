@@ -531,14 +531,19 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           children: <Widget>[
             Container(
               padding: const EdgeInsets.all(10),
-              child: TypeSlide<SummaryType>(
-                onValueChanged: (value) {
-                  setState(() {
-                    _summaryType = value;
-                    _setSummaryList();
-                  });
-                },
-                items: _summaryItems,
+              child: Center(
+                child: SizedBox(
+                  width: (100 * _summaryItems.length).toDouble(),
+                  child: TypeSlide<SummaryType>(
+                    onValueChanged: (value) {
+                      setState(() {
+                        _summaryType = value;
+                        _setSummaryList();
+                      });
+                    },
+                    items: _summaryItems,
+                  ),
+                ),
               ),
             ),
             Expanded(

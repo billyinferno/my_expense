@@ -51,13 +51,18 @@ class _CategoryModalSelectorState extends State<CategoryModalSelector> {
       children: <Widget>[
         Container(
           padding: const EdgeInsets.all(10),
-          child: TypeSlide<PageName>(
-            onValueChanged: (value) {
-              setState(() {
-                _resultCategoryName = value;
-              });
-            },
-            items: _categorySelectionItems,
+          child: Center(
+            child: SizedBox(
+              width: (100 * _categorySelectionItems.length).toDouble(),
+              child: TypeSlide<PageName>(
+                onValueChanged: (value) {
+                  setState(() {
+                    _resultCategoryName = value;
+                  });
+                },
+                items: _categorySelectionItems,
+              ),
+            ),
           ),
         ),
         Expanded(
