@@ -137,48 +137,15 @@ class _StatsAllPageState extends State<StatsAllPage> {
                 }),
               ),
               actions: <Widget>[
-                InkWell(
-                  onTap: (() {
+                SortIcon(
+                  asc: _sortAscending,
+                  onPress: () {
                     // set the sorting to inverse
                     _sortAscending = !_sortAscending;
                     _sortWalletStat();
-                  }),
-                  child: SizedBox(
-                    width: 50,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          (_sortAscending
-                              ? Ionicons.arrow_up
-                              : Ionicons.arrow_down),
-                          color: textColor,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              (_sortAscending ? "A" : "Z"),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: textColor,
-                              ),
-                            ),
-                            Text(
-                              (_sortAscending ? "Z" : "A"),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: textColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+                  },
                 ),
+                const SizedBox(width: 10,),
               ],
             ),
             body: MySafeArea(
