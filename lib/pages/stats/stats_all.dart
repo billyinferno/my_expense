@@ -196,152 +196,153 @@ class _StatsAllPageState extends State<StatsAllPage> {
   }
 
   Widget _generateBarChart() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
-            child: Center(
-              child: SizedBox(
-                width: (100 * _typeSlideItem.length).toDouble(),
-                child: TypeSlide<String>(
-                  onValueChanged: (value) {
-                    setState(() {
-                      _graphType = value;
-                      _setGraphData();
-                    });
-                  },
-                  items: _typeSlideItem,
-                  initialItem: _graphType,
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
+          child: Center(
+            child: SizedBox(
+              width: (100 * _typeSlideItem.length).toDouble(),
+              child: TypeSlide<String>(
+                onValueChanged: (value) {
+                  setState(() {
+                    _graphType = value;
+                    _setGraphData();
+                  });
+                },
+                items: _typeSlideItem,
+                initialItem: _graphType,
               ),
             ),
           ),
-          MultiLineChart(
-            data: _walletLineChartData,
-            color: _walletLineChartColors,
-            height: 200,
-            dateOffset: _dateOffset,
-            addBottomPadd: false,
-          ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        ),
+        MultiLineChart(
+          data: _walletLineChartData,
+          color: _walletLineChartColors,
+          height: 200,
+          dateOffset: _dateOffset,
+          addBottomPadd: false,
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Transform.scale(
+                  scale: 0.7,
+                  child: CupertinoSwitch(
+                    value: _showTotal,
+                    activeTrackColor: accentColors[5],
+                    onChanged: ((value) {
+                      setState(() {
+                        _showTotal = value;
+                        _setGraphData();
+                      });
+                    }),
+                  ),
+                ),
+                Text(
+                  "Net Worth",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 12,
+                  ),
+                )
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Transform.scale(
+                  scale: 0.7,
+                  child: CupertinoSwitch(
+                    value: _showIncome,
+                    activeTrackColor: accentColors[0],
+                    onChanged: ((value) {
+                      setState(() {
+                        _showIncome = value;
+                        _setGraphData();
+                      });
+                    }),
+                  ),
+                ),
+                Text(
+                  "Income",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 12,
+                  ),
+                )
+              ],
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Transform.scale(
+                  scale: 0.7,
+                  child: CupertinoSwitch(
+                    value: _showExpense,
+                    activeTrackColor: accentColors[2],
+                    onChanged: ((value) {
+                      setState(() {
+                        _showExpense = value;
+                        _setGraphData();
+                      });
+                    }),
+                  ),
+                ),
+                Text(
+                  "Expense",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 12,
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          width: double.infinity,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Transform.scale(
-                    scale: 0.7,
-                    child: CupertinoSwitch(
-                      value: _showTotal,
-                      activeTrackColor: accentColors[5],
-                      onChanged: ((value) {
-                        setState(() {
-                          _showTotal = value;
-                          _setGraphData();
-                        });
-                      }),
-                    ),
-                  ),
-                  Text(
-                    "Net Worth",
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 12,
-                    ),
-                  )
-                ],
+              SummaryBox(
+                color: accentColors[0],
+                text: "Income",
+                value: Globals.fCCY.format(_totalIncome),
+                count: _countIncome,
               ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Transform.scale(
-                    scale: 0.7,
-                    child: CupertinoSwitch(
-                      value: _showIncome,
-                      activeTrackColor: accentColors[0],
-                      onChanged: ((value) {
-                        setState(() {
-                          _showIncome = value;
-                          _setGraphData();
-                        });
-                      }),
-                    ),
-                  ),
-                  Text(
-                    "Income",
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 12,
-                    ),
-                  )
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Transform.scale(
-                    scale: 0.7,
-                    child: CupertinoSwitch(
-                      value: _showExpense,
-                      activeTrackColor: accentColors[2],
-                      onChanged: ((value) {
-                        setState(() {
-                          _showExpense = value;
-                          _setGraphData();
-                        });
-                      }),
-                    ),
-                  ),
-                  Text(
-                    "Expense",
-                    style: TextStyle(
-                      color: textColor,
-                      fontSize: 12,
-                    ),
-                  )
-                ],
+              const SizedBox(width: 10,),
+              SummaryBox(
+                color: accentColors[2],
+                text: "Expense",
+                value: Globals.fCCY.format(_totalExpense),
+                count: _countExpense
               ),
             ],
           ),
-          SizedBox(
-            width: double.infinity,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                SummaryBox(
-                  color: accentColors[0],
-                  text: "Income",
-                  value: Globals.fCCY.format(_totalIncome),
-                  count: _countIncome,
-                ),
-                const SizedBox(width: 10,),
-                SummaryBox(
-                  color: accentColors[2],
-                  text: "Expense",
-                  value: Globals.fCCY.format(_totalExpense),
-                  count: _countExpense
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Expanded(
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: _walletStatAll.data.length,
-              itemBuilder: ((context, index) {
-                return BarStat(
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+        Expanded(
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: _walletStatAll.data.length,
+            itemBuilder: ((context, index) {
+              return Container(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: BarStat(
                   income: (_walletStatAll.data[index].income ?? 0),
                   expense: (_walletStatAll.data[index].expense ?? 0),
                   balance: _walletStatAll.data[index].balance,
@@ -353,12 +354,12 @@ class _StatsAllPageState extends State<StatsAllPage> {
                   showIncome: _showIncome,
                   showExpense: _showExpense,
                   showBalance: _showTotal,
-                );
-              }),
-            ),
+                ),
+              );
+            }),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

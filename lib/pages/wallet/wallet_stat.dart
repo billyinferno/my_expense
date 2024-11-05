@@ -197,65 +197,66 @@ class _WalletStatPageState extends State<WalletStatPage> {
   }
 
   Widget _generateBarChart() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          const SizedBox(height: 10,),
-          Center(
-            child: SizedBox(
-              width: (100 * _dataItems.length).toDouble(),
-              child: TypeSlide<WalletDataType>(
-                onValueChanged: (value) {
-                  setState(() {
-                    _dataType = value;
-                    _dataSelection();
-                  });
-                },
-                items: _dataItems,
-                initialItem: WalletDataType.monthly,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        const SizedBox(height: 10,),
+        Center(
+          child: SizedBox(
+            width: (100 * _dataItems.length).toDouble(),
+            child: TypeSlide<WalletDataType>(
+              onValueChanged: (value) {
+                setState(() {
+                  _dataType = value;
+                  _dataSelection();
+                });
+              },
+              items: _dataItems,
+              initialItem: WalletDataType.monthly,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10,),
+        MultiLineChart(
+          data: _walletLineChartData,
+          color: _chartColors,
+          legend: const ["Net Worth", "Income", "Expense"],
+          height: 200,
+          dateOffset: _dateOffset,
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+          width: double.infinity,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              SummaryBox(
+                color: accentColors[0],
+                text: "Income",
+                value: Globals.fCCY.format(_totalIncome),
+                count: _countIncome,
               ),
-            ),
+              const SizedBox(width: 10,),
+              SummaryBox(
+                color: accentColors[2],
+                text: "Expense",
+                value: Globals.fCCY.format(_totalExpense),
+                count: _countExpense
+              ),
+            ],
           ),
-          const SizedBox(height: 10,),
-          MultiLineChart(
-            data: _walletLineChartData,
-            color: _chartColors,
-            legend: const ["Net Worth", "Income", "Expense"],
-            height: 200,
-            dateOffset: _dateOffset,
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                SummaryBox(
-                  color: accentColors[0],
-                  text: "Income",
-                  value: Globals.fCCY.format(_totalIncome),
-                  count: _countIncome,
-                ),
-                const SizedBox(width: 10,),
-                SummaryBox(
-                  color: accentColors[2],
-                  text: "Expense",
-                  value: Globals.fCCY.format(_totalExpense),
-                  count: _countExpense
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10,),
-          Expanded(
-            child: ListView.builder(
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: _walletStat.length,
-              itemBuilder: ((context, index) {
-                return BarStat(
+        ),
+        const SizedBox(height: 10,),
+        Expanded(
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: _walletStat.length,
+            itemBuilder: ((context, index) {
+              return Container(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: BarStat(
                   income: (_walletStat[index].income ?? 0),
                   expense: (_walletStat[index].expense ?? 0),
                   balance: 0,
@@ -265,12 +266,12 @@ class _WalletStatPageState extends State<WalletStatPage> {
                     _dataType == WalletDataType.monthly ? Globals.dfyyyyMM : Globals.dfyyyy
                   ),
                   showBalance: false,
-                );
-              }),
-            ),
+                ),
+              );
+            }),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
