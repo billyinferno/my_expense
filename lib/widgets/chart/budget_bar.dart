@@ -101,37 +101,23 @@ class BudgetBar extends StatelessWidget {
               const SizedBox(
                 height: 2,
               ),
-              SizedBox(
+              Container(
                 height: 20,
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: <Widget>[
-                    Container(
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: secondaryBackground,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: ClipRRect(
-                        clipBehavior: Clip.hardEdge,
-                        borderRadius: BorderRadius.circular(20),
-                        child: OverflowBox(
-                          alignment: Alignment.centerLeft,
-                          child: FractionallySizedBox(
-                            widthFactor: ((budgetUsed / budgetTotal) <= 1 ? (budgetUsed / budgetTotal) : 1),
-                            child: Container(
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: (barColor ?? _getBarColor()),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(left: 10),
+                decoration: BoxDecoration(
+                  color: secondaryBackground,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: ClipRRect(
+                  clipBehavior: Clip.hardEdge,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Bar(
+                    amount: budgetUsed,
+                    maxAmount: budgetTotal,
+                    color: (barColor ?? _getBarColor()),
+                    darken: false,
+                    shadingAlpha: 25,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                       child: Text(
                         "$symbol ${Globals.fCCY.format(budgetUsed)} of $symbol ${Globals.fCCY.format(budgetTotal)}",
                         style: const TextStyle(
@@ -140,7 +126,7 @@ class BudgetBar extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],

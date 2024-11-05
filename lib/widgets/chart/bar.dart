@@ -4,41 +4,62 @@ import 'package:my_expense/_index.g.dart';
 class Bar extends StatelessWidget {
   final double amount;
   final double maxAmount;
-  final String text;
+  final Widget child;
   final Color color;
+  final bool darken;
+  final int shadingAlpha;
   const Bar({
     super.key,
     required this.amount,
     required this.maxAmount,
-    required this.text,
-    required this.color
+    required this.child,
+    required this.color,
+    this.darken = true,
+    this.shadingAlpha = 45,
   });
 
   @override
   Widget build(BuildContext context) {
     double darkenValue = (amount/maxAmount) - 0.7;
-    if (darkenValue < 0) {
+    if (darken) {
+      if (darkenValue < 0) {
+        darkenValue = 0;
+      }
+      if (darkenValue > 0.5) {
+        darkenValue = 0.5;
+      }
+    }
+    else {
+      // if no need darken then default the darken value into 0
       darkenValue = 0;
     }
-    if (darkenValue > 0.7) {
-      darkenValue = 0.7;
+    
+    double widthFactor = ((amount < 0 ? 0 : amount) / maxAmount);
+    if (widthFactor > 1) {
+      widthFactor = 1;
     }
 
     return SizedBox(
       width: double.infinity,
       child: IntrinsicHeight(
         child: Stack(
+          alignment: Alignment.centerLeft,
           children: <Widget>[
             Row(
               children: <Widget>[
                 Flexible(
                   child: FractionallySizedBox(
                     alignment: FractionalOffset.centerLeft,
-                    widthFactor: 0.8,
+                    widthFactor: widthFactor,
                     child: Container(
                       padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
                       decoration: BoxDecoration(
-                        color: color.darken(amount: 0.5),
+                        gradient: LinearGradient(
+                          colors: [
+                            color.darken(amount: 0.15),
+                            color.darken(amount: darkenValue + 0.15),
+                          ]
+                        ),
                         borderRadius: BorderRadius.circular(100)
                       ),
                       child: Row(
@@ -58,9 +79,9 @@ class Bar extends StatelessWidget {
                                 children: <Widget>[
                                   Expanded(
                                     child: Container(
-                                      margin: const EdgeInsets.fromLTRB(4, 2, 4, 10),
+                                      margin: const EdgeInsets.fromLTRB(4, 2, 4, 8),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withAlpha(50),
+                                        color: Colors.white.withAlpha(shadingAlpha),
                                         borderRadius: BorderRadius.circular(100)
                                       ),
                                     ),
@@ -76,72 +97,13 @@ class Bar extends StatelessWidget {
                 )
               ],
             ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-                child: Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    color: textColor,
-                  ),
-                ),
-              ),
+            Container(
+              padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
+              child: child,
             ),
           ],
         ),
       ),
-      // child: Stack(
-      //   children: <Widget>[
-      //     Row(
-      //       crossAxisAlignment: CrossAxisAlignment.center,
-      //       mainAxisAlignment: MainAxisAlignment.start,
-      //       children: <Widget>[
-      //         Flexible(
-      //           child: FractionallySizedBox(
-      //             alignment: FractionalOffset.centerLeft,
-      //             widthFactor: ((amount < 0 ? 0 : amount) / maxAmount),
-      //             child: Container(
-      //               decoration: BoxDecoration(
-      //                 borderRadius: const BorderRadius.only(
-      //                   topRight: Radius.circular(100),
-      //                   bottomRight: Radius.circular(100),
-      //                 ),
-      //                 gradient: LinearGradient(
-      //                   colors: [
-      //                     color,
-      //                     color.darken(amount: darkenValue),
-      //                   ]
-      //                 ),
-      //               ),
-      //               child: Text(
-      //                 " ",
-      //                 style: TextStyle(
-      //                   fontSize: 10,
-      //                   color: Colors.transparent
-      //                 ),
-      //               ),
-      //             ),
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //     Align(
-      //       alignment: Alignment.centerRight,
-      //       child: Container(
-      //         padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-      //         child: Text(
-      //           text,
-      //           style: const TextStyle(
-      //             fontSize: 10,
-      //             color: textColor,
-      //           ),
-      //         ),
-      //       ),
-      //     ),
-      //   ],
-      // ),
     );
   }
 }

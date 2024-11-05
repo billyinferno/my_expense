@@ -107,8 +107,17 @@ class BarStat extends StatelessWidget {
                       child: Bar(
                         amount: income,
                         maxAmount: maxAmount,
-                        text: Globals.fCCY.format(income),
-                        color: accentColors[0]
+                        color: accentColors[0],
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            Globals.fCCY.format(income),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: textColor,
+                            ),
+                          ),
+                        )
                       ),
                     ),
                     Visibility(
@@ -116,8 +125,17 @@ class BarStat extends StatelessWidget {
                       child: Bar(
                         amount: expense,
                         maxAmount: maxAmount,
-                        text: Globals.fCCY.format(expense),
-                        color: accentColors[2]
+                        color: accentColors[2],
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            Globals.fCCY.format(expense),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: textColor,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     Visibility(
@@ -125,8 +143,17 @@ class BarStat extends StatelessWidget {
                       child: Bar(
                         amount: (balance ?? 0),
                         maxAmount: maxAmount,
-                        text: Globals.fCCY.format(balance ?? 0),
-                        color: accentColors[4]
+                        color: accentColors[4],
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            Globals.fCCY.format(balance ?? 0),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: textColor,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
