@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
-import 'package:my_expense/widgets/page/common_loading_page.dart';
 
 class StatsAllPage extends StatefulWidget {
   final Object? ccy;

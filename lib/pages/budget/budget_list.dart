@@ -330,6 +330,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
               _budgetAmount = budgetArgs.budgetAmount;
 
               // show edit budget form
+              //TODO: to fix the edit budget as this is very bad since the text controller will be covered by numeric input
               _showEditBudget(budgetArgs: budgetArgs, index: index);
             }),
             onEdit: ((index) {
