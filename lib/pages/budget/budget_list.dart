@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:my_expense/widgets/page/common_loading_page.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -88,77 +87,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
         ),
         actions: <Widget>[
           IconButton(
-            onPressed: () async {
-              await _updateBudgetList().then((_) {
-                if (context.mounted) {
-                  // this is success, we can going back from this page
-                  Navigator.pop(context);
-                }
-              }).onError((error, stackTrace) async {
-                // print the error
-                Log.error(
-                  message: "Error while updating budget list",
-                  error: error,
-                  stackTrace: stackTrace,
-                );
-
-                if (context.mounted) {
-                  // show dialog of error
-                  await ShowMyDialog(
-                    cancelEnabled: false,
-                    confirmText: "OK",
-                    dialogTitle: "Error Update Budget",
-                    dialogText: "Error while updating budget list.")
-                  .show(context);
-                }
-              });
-            },
-            icon: const Icon(
-              Ionicons.save,
-              color: textColor,
-            ),
-          ),
-        ],
-      ),
-      body: FutureBuilder(
-        future: _getData,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Center(child: Text("Error when get budget list"),);
-          }
-          else if (snapshot.hasData) {
-            return MySafeArea(
-              child: _budgetListView()
-            );
-          }
-          else {
-            return CommonLoadingPage(
-              isNeedScaffold: false,
-            );
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _budgetListView() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        _budgetCurrencySelector(
-          ccy: (_budgetList?.currency),
-          totalAmount: _totalAmount,
-        ),
-        Expanded(
-          child: _generateListItem(),
-        ),
-        Container(
-          padding: const EdgeInsets.all(10),
-          child: MaterialButton(
-            height: 40,
-            minWidth: double.infinity,
-            onPressed: (() {
+            onPressed: () {
               showModalBottomSheet<void>(
                 context: context,
                 builder: (BuildContext context) {
@@ -225,9 +154,114 @@ class _BudgetListPageState extends State<BudgetListPage> {
                   );
                 }
               );
+            },
+            icon: Icon(
+              Ionicons.add,
+              color: textColor,
+            )
+          ),
+          IconButton(
+            onPressed: () async {
+              await _updateBudgetList().then((_) {
+                if (context.mounted) {
+                  // this is success, we can going back from this page
+                  Navigator.pop(context);
+                }
+              }).onError((error, stackTrace) async {
+                // print the error
+                Log.error(
+                  message: "Error while updating budget list",
+                  error: error,
+                  stackTrace: stackTrace,
+                );
+
+                if (context.mounted) {
+                  // show dialog of error
+                  await ShowMyDialog(
+                    cancelEnabled: false,
+                    confirmText: "OK",
+                    dialogTitle: "Error Update Budget",
+                    dialogText: "Error while updating budget list.")
+                  .show(context);
+                }
+              });
+            },
+            icon: const Icon(
+              Ionicons.save,
+              color: textColor,
+            ),
+          ),
+          const SizedBox(width: 10,),
+        ],
+      ),
+      body: FutureBuilder(
+        future: _getData,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return CommonErrorPage(
+              errorText: "Error when get budget list",
+              isNeedScaffold: false,
+            );
+          }
+          else if (snapshot.hasData) {
+            return MySafeArea(
+              child: _budgetListView()
+            );
+          }
+          else {
+            return CommonLoadingPage(
+              isNeedScaffold: false,
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _budgetListView() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        _budgetCurrencySelector(
+          ccy: (_budgetList?.currency),
+          totalAmount: _totalAmount,
+        ),
+        Expanded(
+          child: _generateListItem(),
+        ),
+        Container(
+          padding: const EdgeInsets.all(10),
+          child: MaterialButton(
+            height: 40,
+            minWidth: double.infinity,
+            onPressed: (() async {
+              await _updateBudgetList().then((_) {
+                if (mounted) {
+                  // this is success, we can going back from this page
+                  Navigator.pop(context);
+                }
+              }).onError((error, stackTrace) async {
+                // print the error
+                Log.error(
+                  message: "Error while updating budget list",
+                  error: error,
+                  stackTrace: stackTrace,
+                );
+
+                if (mounted) {
+                  // show dialog of error
+                  await ShowMyDialog(
+                    cancelEnabled: false,
+                    confirmText: "OK",
+                    dialogTitle: "Error Update Budget",
+                    dialogText: "Error while updating budget list.")
+                  .show(context);
+                }
+              });
             }),
-            color: accentColors[5],
-            child: const Text("Add New Category"),
+            color: accentColors[6],
+            child: const Text("Save Budget List"),
           ),
         ),
       ],

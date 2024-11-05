@@ -111,16 +111,18 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         future: _getData,
         builder: ((context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(
-              child: Text("Error when get budget stat data"),
+            return CommonErrorPage(
+              isNeedScaffold: false,
+              errorText: "Error when get budget stat data",
             );
           } else if (snapshot.hasData) {
             return MySafeArea(
               child: _generatePage()
             );
           } else {
-            return const Center(
-              child: Text("Loading budget stat data"),
+            return CommonLoadingPage(
+              isNeedScaffold: false,
+              loadingText: "Loading budget stat data",
             );
           }
         }),

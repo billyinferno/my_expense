@@ -104,7 +104,10 @@ class _HomeBudgetState extends State<HomeBudget> {
         builder: ((context, snapshot) {
           if (snapshot.hasError) {
             // got error when loading the budget data
-            return const Center(child: Text("Error when loading budget"),);
+            return CommonErrorPage(
+              isNeedScaffold: false,
+              errorText: "Error when loading budget",
+            );
           }
           else if (snapshot.hasData) {
             // build the budget page

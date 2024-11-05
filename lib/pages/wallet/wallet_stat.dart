@@ -122,22 +122,9 @@ class _WalletStatPageState extends State<WalletStatPage> {
       future: _getData,
       builder: ((context, snapshot) {
         if (snapshot.hasError) {
-          return const Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Center(
-                child: Icon(
-                  Ionicons.warning,
-                  color: Colors.red,
-                  size: 25,
-                ),
-              ),
-              SizedBox(height: 5,),
-              Center(
-                child: Text("Unable to load data from API"),
-              )
-            ],
+          return CommonErrorPage(
+            isNeedScaffold: false,
+            errorText: "Unable to load data from API",
           );
         }
         else if (snapshot.hasData) {
@@ -146,18 +133,9 @@ class _WalletStatPageState extends State<WalletStatPage> {
           );
         }
         else {
-          return const Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                child: SizedBox(
-                  child: Center(
-                    child: Text("Load wallet data..."),
-                  ),
-                ),
-              )
-            ],
+          return CommonLoadingPage(
+            isNeedScaffold: false,
+            loadingText: "Load wallet data...",
           );
         }
       }),

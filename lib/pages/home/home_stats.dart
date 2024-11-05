@@ -147,7 +147,10 @@ class _HomeStatsState extends State<HomeStats> {
         future: _getStat,
         builder: ((context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text("Error when fetching statistic"),);
+            return CommonErrorPage(
+              isNeedScaffold: false,
+              errorText: "Error when fetching statistic",
+            );
           }
           else if (snapshot.hasData) {
             return _generateBody();

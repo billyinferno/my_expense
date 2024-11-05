@@ -67,8 +67,9 @@ class _HomeWalletState extends State<HomeWallet> {
         builder: ((context, snapshot) {
           if (snapshot.hasError) {
             // got error when fetching the wallet data
-            return const Center(
-              child: Text("Error when loading wallet data"),
+            return CommonErrorPage(
+              isNeedScaffold: false,
+              errorText: "Error when loading wallet data",
             );
           } else if (snapshot.hasData) {
             // generate the main view

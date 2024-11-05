@@ -233,8 +233,9 @@ class _HomeListState extends State<HomeList> {
                 future: _getData,
                 builder: ((context, snapshot) {
                   if (snapshot.hasError) {
-                    return const Center(
-                      child: Text("Error when get transaction list"),
+                    return CommonErrorPage(
+                      isNeedScaffold: false,
+                      errorText: "Error when get transaction list",
                     );
                   } else if (snapshot.hasData) {
                     return _generateView(

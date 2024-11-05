@@ -105,26 +105,9 @@ class _StatsAllPageState extends State<StatsAllPage> {
       future: _getData,
       builder: ((context, snapshot) {
         if (snapshot.hasError) {
-          return const Scaffold(
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Center(
-                  child: Icon(
-                    Ionicons.warning,
-                    color: Colors.red,
-                    size: 25,
-                  ),
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                Center(
-                  child: Text("Unable to load data from API"),
-                )
-              ],
-            ),
+          return CommonErrorPage(
+            isNeedScaffold: true,
+            errorText: "Unable to load data from API",
           );
         } else if (snapshot.hasData) {
           return Scaffold(

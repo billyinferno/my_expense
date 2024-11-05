@@ -191,7 +191,10 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
           ); 
         }
         else if (snapshot.hasError) {
-          return const Center(child: Text("Error when get statistic information"),);
+          return CommonErrorPage(
+            isNeedScaffold: false,
+            errorText: "Error when get statistic information",
+          );
         }
         else {
           return CommonLoadingPage(

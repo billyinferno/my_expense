@@ -103,8 +103,9 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
           );
         }
         else if (snapshot.hasError) {
-          return const Center(
-            child: Text("Error when fetch budget transaction"),
+          return CommonErrorPage(
+            isNeedScaffold: false,
+            errorText: "Error when fetch budget transaction",
           );
         }
         else {
