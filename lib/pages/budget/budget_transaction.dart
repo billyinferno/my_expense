@@ -23,14 +23,19 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   double _budgetAmount = 0.0;
   int _currencyId = -1;
   bool _sortAscending = true;
-  final Map<DateTime, WalletTransactionExpenseIncome> _totalDate = {};
-  final List<WalletTransactionList> _list = [];
-  List<TransactionListModel> _transactions = [];
+  late List<WalletTransactionList> _list;
+  late List<WalletTransactionList> _listAscending;
+  late List<WalletTransactionList> _listDescending;
   late Future<bool> _getData;
 
   @override
   void initState() {
     super.initState();
+
+    // initialize the list
+    _list = [];
+    _listAscending = [];
+    _listDescending = [];
 
     // convert the parameter being sent from main
     BudgetTransactionArgs args = widget.arguments as BudgetTransactionArgs;
@@ -65,45 +70,22 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
           }),
         ),
         actions: <Widget>[
-          InkWell(
-            onTap: (() async {
-              // set the sorting to inverse
-              _sortAscending = !_sortAscending;
-              await setTransactions(_transactions);
-            }),
-            child: SizedBox(
-              width: 50,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    (_sortAscending ? Ionicons.arrow_up : Ionicons.arrow_down),
-                    color: textColor,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        (_sortAscending ? "A" : "Z"),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: textColor,
-                        ),
-                      ),
-                      Text(
-                        (_sortAscending ? "Z" : "A"),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: textColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          SortIcon(
+            asc: _sortAscending,
+            onPress: () async {
+              setState(() {                
+                // set the sorting to inverse what ever current sorting now
+                _sortAscending = !_sortAscending;
+                
+                // check which list we need to put
+                if (_sortAscending) {
+                  _list = _listAscending;
+                }
+                else {
+                  _list = _listDescending;
+                }
+              });
+            },
           ),
         ],
       ),
@@ -204,75 +186,75 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     );
   }
 
-  Future<void> setTransactions(List<TransactionListModel> transactions) async {
+  List<WalletTransactionList> _generateTransactionList({required List<TransactionListModel> transactions}) {
+    List<WalletTransactionList> ret = [];
+    
+    final Map<DateTime, WalletTransactionExpenseIncome> totalDate = {};
+    DateTime currDate;
+    WalletTransactionExpenseIncome walletExpenseIncome;
+    bool isLoop = false;
+    int idx = 0;
+
+    for (TransactionListModel txn in transactions) {
+      if (txn.type == "expense") {
+        currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
+        if (totalDate.containsKey(currDate)) {
+          walletExpenseIncome = totalDate[currDate]!;
+        }
+        else {
+          walletExpenseIncome = WalletTransactionExpenseIncome();
+          walletExpenseIncome.date = currDate;
+        }
+
+        // add the expense amount
+        walletExpenseIncome.expense += (txn.amount * -1);
+
+        // add this walletExpenseIcon to the totalDate
+        totalDate[currDate] = walletExpenseIncome;
+      }
+    }
+
+    // after this we generate the WalletTransactionList
+    // loop thru the totalDate
+    totalDate.forEach((key, value) {
+      // add the header for this
+      WalletTransactionList header = WalletTransactionList();
+      header.type = WalletListType.header;
+      header.data = value;
+      ret.add(header);
+
+      // loop thru the transactions that have the same date and add this to the list
+      isLoop = true;
+      while(idx < transactions.length && isLoop) {
+        if (transactions[idx].date.isSameDate(date: key)
+        ) {
+          // add to the transaction list
+          WalletTransactionList data = WalletTransactionList();
+          data.type = WalletListType.item;
+          data.data = transactions[idx];
+          ret.add(data);
+          
+          // next transactions
+          idx = idx + 1;
+        }
+        else {
+          // already different date
+          isLoop = false;
+        }
+      }
+    },);
+
+    return ret;
+  }
+
+  Future<void> _setTransactions(List<TransactionListModel> transactions) async {
     setState(() {
-      DateTime currDate;
-      WalletTransactionExpenseIncome walletExpenseIncome;
-      bool isLoop = false;
-      int idx = 0;
-      List<TransactionListModel> txnList = [];
+      // generate the list
+      _listAscending = _generateTransactionList(transactions: transactions);
+      _listDescending = _generateTransactionList(transactions: transactions.reversed.toList());
 
-      // copy the transaction to _transactions, and check what kind of sort we want to do?
-      if (_sortAscending) {
-        txnList = transactions.toList();
-      }
-      else {
-        txnList = transactions.reversed.toList();
-      }
-
-      // clear the _totalDate before loop
-      _totalDate.clear();
-      for (TransactionListModel txn in txnList) {
-        if (txn.type == "expense") {
-          currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
-          if (_totalDate.containsKey(currDate)) {
-            walletExpenseIncome = _totalDate[currDate]!;
-          }
-          else {
-            walletExpenseIncome = WalletTransactionExpenseIncome();
-            walletExpenseIncome.date = currDate;
-          }
-
-          // add the expense amount
-          walletExpenseIncome.expense += (txn.amount * -1);
-
-          // add this walletExpenseIcon to the _totalDate
-          _totalDate[currDate] = walletExpenseIncome;
-        }
-      }
-
-      // clear before we loop the total date we have
-      _list.clear();
-
-      // after this we generate the WalletTransactionList
-      // loop thru the _totalDate
-      _totalDate.forEach((key, value) {
-        // add the header for this
-        WalletTransactionList header = WalletTransactionList();
-        header.type = WalletListType.header;
-        header.data = value;
-        _list.add(header);
-
-        // loop thru the transactions that have the same date and add this to the list
-        isLoop = true;
-        while(idx < txnList.length && isLoop) {
-          if (txnList[idx].date.isSameDate(date: key)
-          ) {
-            // add to the transaction list
-            WalletTransactionList data = WalletTransactionList();
-            data.type = WalletListType.item;
-            data.data = txnList[idx];
-            _list.add(data);
-            
-            // next transactions
-            idx = idx + 1;
-          }
-          else {
-            // already different date
-            isLoop = false;
-          }
-        }
-      },);
+      // set _list to ascending one
+      _list = _listAscending;
     });
   }
   Future<bool> _fetchBudget([bool? force]) async {
@@ -285,8 +267,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
       currencyId: _currencyId,
       force: isForce
     ).then((value) async {
-      await setTransactions(value.reversed.toList());
-      _transactions = value.reversed.toList();
+      await _setTransactions(value.reversed.toList());
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error when _fetchBudget",
@@ -295,7 +276,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
       );
 
       // assume there are no data
-      setTransactions([]);
+      _setTransactions([]);
       throw Exception('Error when loading budget');
     });
 

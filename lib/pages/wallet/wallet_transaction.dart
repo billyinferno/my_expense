@@ -27,8 +27,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   late DateTime _walletMinDate;
   late DateTime _walletMaxDAte;
 
-  final Map<DateTime, WalletTransactionExpenseIncome> _totalDate = {};
-  final List<WalletTransactionList> _list = [];
+  late List<WalletTransactionList> _list;
+  late List<WalletTransactionList> _listAscending;
+  late List<WalletTransactionList> _listDescending;
 
   DateTime _currentDate = DateTime.now();
   double _expenseAmount = 0.0;
@@ -44,6 +45,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
     // init the wallet
     _wallet = widget.wallet as WalletModel;
+
+    // init the list
+    _list = [];
+    _listAscending = [];
+    _listDescending = [];
 
     // init min and max date
     _walletMinDate = DateTime(
@@ -83,45 +89,14 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           }),
         ),
         actions: <Widget>[
-          InkWell(
-            onTap: (() async {
-              // set the sorting to inverse
-              _sortAscending = !_sortAscending;
-              await _setTransactions(_transactions);
-            }),
-            child: SizedBox(
-              width: 50,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    (_sortAscending ? Ionicons.arrow_up : Ionicons.arrow_down),
-                    color: textColor,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        (_sortAscending ? "A" : "Z"),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: textColor,
-                        ),
-                      ),
-                      Text(
-                        (_sortAscending ? "Z" : "A"),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: textColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          SortIcon(
+            asc: _sortAscending,
+            onPress: () {
+              setState(() {
+                _sortAscending = !_sortAscending;
+                _setSortTransaction();
+              });
+            },
           ),
         ],
       ),
@@ -157,99 +132,107 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     );
   }
 
-  Future<void> _setTransactions(List<TransactionListModel> transactions) async {
-    setState(() {
-      double income = 0.0;
-      double expense = 0.0;
+  List<WalletTransactionList> _generateList({
+    required List<TransactionListModel> transactions
+  }) {
+    final List<WalletTransactionList> ret = [];
+    final Map<DateTime, WalletTransactionExpenseIncome> totalDate = {};
 
-      DateTime currDate;
-      WalletTransactionExpenseIncome walletExpenseIncome;
+    double income = 0.0;
+    double expense = 0.0;
+    bool isLoop = false;
+    int idx = 0;
 
-      List<TransactionListModel> txnList = [];
+    DateTime currDate;
+    WalletTransactionExpenseIncome walletExpenseIncome;
 
-      // copy the transaction to _transactions, and check what kind of sort we want to do?
-      if (_sortAscending) {
-        txnList = transactions.toList();
+    for (TransactionListModel txn in transactions) {
+      currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
+      if (totalDate.containsKey(currDate)) {
+        walletExpenseIncome = totalDate[currDate]!;
       }
       else {
-        txnList = transactions.reversed.toList();
+        walletExpenseIncome = WalletTransactionExpenseIncome();
+        walletExpenseIncome.date = currDate;
       }
 
-      // clear the _totalDate before loop
-      _totalDate.clear();
-      for (TransactionListModel txn in txnList) {
-        currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
-        if (_totalDate.containsKey(currDate)) {
-          walletExpenseIncome = _totalDate[currDate]!;
-        }
-        else {
-          walletExpenseIncome = WalletTransactionExpenseIncome();
-          walletExpenseIncome.date = currDate;
-        }
-
-        if(txn.type == "income") {
-          income += txn.amount;
-          walletExpenseIncome.income += txn.amount;
-        }
-        if(txn.type == "expense") {
+      if(txn.type == "income") {
+        income += txn.amount;
+        walletExpenseIncome.income += txn.amount;
+      }
+      if(txn.type == "expense") {
+        expense += (txn.amount * -1);
+        walletExpenseIncome.expense += (txn.amount * -1);
+      }
+      if(txn.type == "transfer") {
+        // check whether it's from or to
+        if(_wallet.id == txn.wallet.id) {
           expense += (txn.amount * -1);
           walletExpenseIncome.expense += (txn.amount * -1);
         }
-        if(txn.type == "transfer") {
-          // check whether it's from or to
-          if(_wallet.id == txn.wallet.id) {
-            expense += (txn.amount * -1);
-            walletExpenseIncome.expense += (txn.amount * -1);
-          }
-          if(txn.walletTo != null) {
-            if(_wallet.id == txn.walletTo!.id) {
-              income += txn.amount * txn.exchangeRate;
-              walletExpenseIncome.income += txn.amount * txn.exchangeRate;
-            }
+        if(txn.walletTo != null) {
+          if(_wallet.id == txn.walletTo!.id) {
+            income += txn.amount * txn.exchangeRate;
+            walletExpenseIncome.income += txn.amount * txn.exchangeRate;
           }
         }
-
-        // add this walletExpenseIcon to the _totalDate
-        _totalDate[currDate] = walletExpenseIncome;
       }
 
-      // after this we generate the WalletTransactionList
-      bool isLoop = false;
-      int idx = 0;
-      
-      // clear before we loop the total date we have
-      _list.clear();
+      // add this walletExpenseIcon to the totalDate
+      totalDate[currDate] = walletExpenseIncome;
+    }
 
-      // loop thru the _totalDate
-      _totalDate.forEach((key, value) {
-        // add the header for this
-        WalletTransactionList header = WalletTransactionList();
-        header.type = WalletListType.header;
-        header.data = value;
-        _list.add(header);
+    // after this we generate the WalletTransactionList
+    // loop thru the totalDate
+    totalDate.forEach((key, value) {
+      // add the header for this
+      WalletTransactionList header = WalletTransactionList();
+      header.type = WalletListType.header;
+      header.data = value;
+      ret.add(header);
 
-        // loop thru the transactions that have the same date and add this to the list
-        isLoop = true;
-        while(idx < txnList.length && isLoop) {
-          if (txnList[idx].date.isSameDate(date: key)) {
-            // add to the transaction list
-            WalletTransactionList data = WalletTransactionList();
-            data.type = WalletListType.item;
-            data.data = txnList[idx];
-            _list.add(data);
-            
-            // next transactions
-            idx = idx + 1;
-          }
-          else {
-            // already different date
-            isLoop = false;
-          }
+      // loop thru the transactions that have the same date and add this to the list
+      isLoop = true;
+      while(idx < transactions.length && isLoop) {
+        if (transactions[idx].date.isSameDate(date: key)) {
+          // add to the transaction list
+          WalletTransactionList data = WalletTransactionList();
+          data.type = WalletListType.item;
+          data.data = transactions[idx];
+          ret.add(data);
+          
+          // next transactions
+          idx = idx + 1;
         }
-      },);
-      
-      _incomeAmount = income;
-      _expenseAmount = expense;
+        else {
+          // already different date
+          isLoop = false;
+        }
+      }
+    },);
+    
+    _incomeAmount = income;
+    _expenseAmount = expense;
+    return ret;
+  }
+
+  void _setSortTransaction() {
+    if (_sortAscending) {
+      _list = _listAscending;
+    }
+    else {
+      _list = _listDescending;
+    }
+  }
+
+  Future<void> _setTransactions(List<TransactionListModel> transactions) async {
+    setState(() {
+      // generate the list that we can showed in the page
+      _listAscending = _generateList(transactions: transactions);
+      _listDescending = _generateList(transactions: transactions.reversed.toList());
+
+      // get the sort to knew which one we will showed
+      _setSortTransaction();
     });
   }
 
