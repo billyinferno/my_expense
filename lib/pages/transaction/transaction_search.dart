@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:provider/provider.dart';
 
 enum PageName { summary, all, income, expense, transfer }
 enum SummaryType { name, category }
@@ -16,6 +17,8 @@ class TransactionSearchPage extends StatefulWidget {
 
 class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
+  final WalletHTTPService _walletHTTP = WalletHTTPService();
+  final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
 
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollControllerAll = ScrollController();
@@ -516,12 +519,18 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         return ListViewWithHeader(
           controller: _scrollControllerAll,
           data: _filterTransactionsSort,
-          canEdit: true,
           headerType: _filterType,
           showHeader: (_filterType != 'A'),
-          editFunction: (txn) {
+          onEdit: (txn) {
             // show the transaction edit screen
             _showTransactionEditScreen(txn);
+          },
+          onDelete: (txn) async {
+            Log.info(message: "Delete (${txn.id}) ${txn.name}");
+
+            // remove the transaction from the transaction list and group
+            // again the transaction.
+            await _deleteTransactionData(txn: txn);
           },
         );
       case PageName.summary:
@@ -561,7 +570,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         return ListViewWithHeader(
           controller: _scrollControllerIncome,
           data: _incomeSort,
-          canEdit: false,
           headerType: _filterType,
           showHeader: (_filterType != 'A'),
         );
@@ -569,14 +577,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         return ListViewWithHeader(
           controller: _scrollControllerExpense,
           data: _expenseSort,
-          canEdit: false,
           headerType: _filterType,
         );
       case PageName.transfer:
         return ListViewWithHeader(
           controller: _scrollControllerTransfer,
           data: _transferSort,
-          canEdit: false,
           headerType: _filterType,
           showHeader: (_filterType != 'A'),
         );
@@ -671,19 +677,20 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   Future<void> _showTransactionEditScreen(TransactionListModel txn) async {
     // go to the transaction edit for this txn
-    await Navigator.pushNamed(context, '/transaction/edit', arguments: txn)
-        .then((result) async {
+    await Navigator.pushNamed(
+      context,
+      '/transaction/edit',
+      arguments: txn
+    ).then(<TransactionListModel>(result) async {
       // check if we got return
       if (result != null) {
         // set state to rebuild the widget
         setState(() {
-          // convert result to transaction list mode
-          TransactionListModel txnUpdate = result as TransactionListModel;
           // update the current transaction list based on the updated transaction
           for (int i = 0; i < _filterTransactions.length; i++) {
             // check which transaction is being updated
-            if (_filterTransactions[i].id == txnUpdate.id) {
-              _filterTransactions[i] = txnUpdate;
+            if (_filterTransactions[i].id == result.id) {
+              _filterTransactions[i] = result;
               break;
             }
           }
@@ -2262,6 +2269,265 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       case SummaryType.category:
         _summaryList = _summaryListCategory;
         break;
+    }
+  }
+
+  Future<void> _deleteTransactionData({required TransactionListModel txn}) async {
+    // show the loading function
+    LoadingScreen.instance().show(context: context);
+    
+    // call delete API function
+    await _transactionHttp.deleteTransaction(txn: txn).then((_) async {
+      // if delete success, delete the transaction from the transaction list
+      int txnLocation = -1;
+      String txnDate = Globals.dfyyyyMMdd.formatLocal(txn.date);
+      for (int i=0; i<_transactions.length; i++) {
+        // check if the txn ID is the same or not?
+        if (_transactions[i].id == txn.id) {
+          txnLocation = i;
+          break;
+        }
+      }
+
+      // check and ensure that txnLocation is >= 0
+      if (txnLocation >= 0) {
+        // remove from _transactions list
+        _transactions.removeAt(txnLocation);
+
+        // then we can call the filter and group transaction again
+        _filterTheTransaction();
+        _groupTransactions();
+      }
+
+      // now try to check if we have this data on the shared preferences or not?
+      List<TransactionListModel> txnListModel = TransactionSharedPreferences.getTransaction(txnDate) ?? [];
+      if (txnListModel.isNotEmpty) {
+        // loop thru the txnListModel to see which transaction is being delete
+        // initialize back the txnLocation
+        txnLocation = -1;
+
+        // loop thru txnListModel
+        for(int i=0; i<txnListModel.length; i++) {
+          // check if the txn ID is the same or not?
+          if (txnListModel[i].id == txn.id) {
+            txnLocation = i;
+            break;
+          }
+        }
+
+        // check txnLocation, whether this is more than or equal to 0
+        if (txnLocation >= 0) {
+          txnListModel.removeAt(txnLocation);
+
+          // stored the new txnListModel to the shared preferences
+          await TransactionSharedPreferences.setTransaction(date: txnDate, txn: txnListModel);
+        }
+      }
+
+      // then check whether current transaction is also showed in the home list
+      // or not? if being showed, then need to notify provider to refresh the
+      // home list
+      DateTime currentTxnListDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now().toLocal());
+      if (txn.date.isSameDate(date: currentTxnListDate)) {
+        // refresh also the home list
+        if (mounted) {
+          // pop the transaction from the provider
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).popTransactionList(transaction: txn);
+        }
+      }
+
+      // once all finished we can update the information
+      await _updateInformation(txn: txn);
+    }).onError((error, stackTrace) {
+      Log.error(
+        message: "Error when delete",
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    });
+
+    // setState to rebuild the widget
+    setState(() {
+    });
+  }
+
+  Future<void> _updateInformation({
+    required TransactionListModel txn
+  }) async {
+    String refreshDay = Globals.dfyyyyMMdd.formatLocal(
+      DateTime(
+        txn.date.toLocal().year,
+        txn.date.toLocal().month,
+        1
+      )
+    );
+
+    DateTime from;
+    DateTime to;
+    String fromString;
+    String toString;
+
+    // get the stat date
+    (from, to) = TransactionSharedPreferences.getStatDate();
+
+    // format the from and to string
+    fromString = Globals.dfyyyyMMdd.formatLocal(from);
+    toString = Globals.dfyyyyMMdd.formatLocal(to);
+
+    // delete the transaction from wallet transaction
+    await TransactionSharedPreferences.deleteTransactionWallet(
+      walletId: txn.wallet.id,
+      date: refreshDay,
+      txn: txn
+    );
+
+    if (txn.walletTo != null) {
+      await TransactionSharedPreferences.deleteTransactionWallet(
+        walletId: txn.walletTo!.id,
+        date: refreshDay,
+        txn: txn
+      );
+    }
+
+    // delete the transaction from budget
+    await WalletSharedPreferences.deleteWalletWorth(txn: txn);
+
+    List<WalletModel> wallets = [];
+    List<BudgetModel> budgets = [];
+    await Future.wait([
+      _walletHTTP.fetchWallets(
+        showDisabled: true,
+        force: true,
+      ).then((resp) {
+        wallets = resp;
+      }),
+      _budgetHTTP.fetchBudgetDate(
+        currencyID: txn.wallet.currencyId,
+        date: refreshDay
+      ).then((resp) {
+        budgets = resp;
+      }),
+    ]).then((_) {
+      // update the wallets
+      if (mounted) {
+        Provider.of<HomeProvider>(
+          context,
+          listen: false
+        ).setWalletList(wallets: wallets);
+      }
+
+      // store the budgets list
+      if (txn.type == "expense") {
+        // now loops thru budget, and see if the current category fits or not?
+        for (int i = 0; i < budgets.length; i++) {
+          if (txn.category!.id == budgets[i].category.id) {
+            // as this is expense, subtract total transaction and the amount
+            BudgetModel newBudget = BudgetModel(
+              id: budgets[i].id,
+              category: budgets[i].category,
+              totalTransaction: (budgets[i].totalTransaction - 1),
+              amount: budgets[i].amount,
+              used: budgets[i].used - txn.amount,
+              status: budgets[i].status,
+              currency: budgets[i].currency
+            );
+
+            budgets[i] = newBudget;
+            // break from for loop
+            break;
+          }
+        }
+        // now we can set the shared preferences of budget
+        BudgetSharedPreferences.setBudget(
+          ccyId: txn.wallet.currencyId,
+          date: refreshDay,
+          budgets: budgets
+        );
+
+        // only set the provider if only the current budget date is the same as the refresh day
+        String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
+        if (currentBudgetDate == refreshDay && mounted) {
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setBudgetList(budgets: budgets);
+        }
+      }
+    }).onError((error, stackTrace) {
+      Log.error(
+        message: "Error on update information",
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw Exception(error.toString());
+    });
+
+    // check if the txn date is within the from and to of the stat date
+    if (
+      txn.date.isWithin(from: from, to: to) &&
+      (txn.type == "expense" || txn.type == "income")
+    ) {
+      // fetch the income expense
+      await _transactionHttp.fetchIncomeExpense(
+        ccyId: txn.wallet.currencyId,
+        from: from,
+        to: to,
+        force: true,
+      ).then((result) {
+        if (mounted) {
+          // put on the provider and notify the listener
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setIncomeExpense(
+            ccyId: txn.wallet.currencyId,
+            data: result
+          );
+        }
+      }).onError((error, stackTrace) {
+        Log.error(
+          message: "Error on fetch income expense",
+          error: error,
+          stackTrace: stackTrace,
+        );
+        throw Exception(error.toString());
+      });
+
+      // fetch the top transaction
+      await _transactionHttp.fetchTransactionTop(
+        type: txn.type,
+        ccy: txn.wallet.currencyId,
+        from: fromString,
+        to: toString,
+        force: true
+      ).then((transactionTop) {
+        if (mounted) {
+          // set the provide for this
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setTopTransaction(
+            ccy: txn.wallet.currencyId,
+            type: txn.type,
+            data: transactionTop
+          );
+        }
+      }).onError(
+        (error, stackTrace) {
+          Log.error(
+            message: "Error on fetch top transaction",
+            error: error,
+            stackTrace: stackTrace,
+          );
+          throw Exception(error.toString());
+        },
+      );
     }
   }
 }

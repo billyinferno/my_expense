@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 
 class ListViewWithHeader extends StatelessWidget {
   final ScrollController? controller;
   final List<TransactionListModel> data;
-  final bool canEdit;
-  final Function(TransactionListModel)? editFunction;
+  final Function(TransactionListModel)? onEdit;
+  final Function(TransactionListModel)? onDelete;
   final bool showHeader;
   final String headerType;
   const ListViewWithHeader({
     super.key,
     this.controller,
     required this.data,
-    this.canEdit = false,
-    this.editFunction,
+    this.onEdit,
+    this.onDelete,
     this.showHeader = true,
     this.headerType = 'D',
   });
@@ -25,7 +26,7 @@ class ListViewWithHeader extends StatelessWidget {
       return const Center(child: Text("No data"));
     }
     else {
-      final List<Widget> wigdetList = _generateChildWidget();
+      final List<Widget> wigdetList = _generateChildWidget(context);
 
       return ListView.builder(
         controller: controller,
@@ -37,7 +38,7 @@ class ListViewWithHeader extends StatelessWidget {
     }
   }
 
-  List<Widget> _generateChildWidget() {
+  List<Widget> _generateChildWidget(BuildContext context) {
     final List<Widget> widgetList = [];
     
     // data is not empty, loop thru data
@@ -128,7 +129,9 @@ class ListViewWithHeader extends StatelessWidget {
       widgetList.add(
         _createItem(
           txn: data[i],
-          canEdit: canEdit,
+          canEdit: (onEdit != null),
+          canDelete: (onDelete != null),
+          context: context,
         )
       );
     }
@@ -163,19 +166,74 @@ class ListViewWithHeader extends StatelessWidget {
 
   Widget _createItem({
     required TransactionListModel txn,
-    bool canEdit = false
+    bool canEdit = false,
+    bool canDelete = false,
+    required BuildContext context,
   }) {
     return InkWell(
       onTap: (() {
         if (canEdit) {
           // ensure edit function is not null
-          if (editFunction != null) {
+          if (onEdit != null) {
             // call the edit function
-            editFunction!(txn);
+            onEdit!(txn);
           }
         }
       }),
-      child: _createItemType(txn)
+      child: Slidable(
+        key: Key("${txn.id}_${txn.wallet.id}_${txn.type}"),
+        endActionPane: (canDelete ? ActionPane(
+          motion: const DrawerMotion(),
+          extentRatio: 0.2,
+          dismissible: DismissiblePane(
+            onDismissed: () async {
+              // check if the onDelete function is not null or not?
+              if (onDelete != null) {
+                // call the onDelete function
+                onDelete!(txn);
+              }
+            },
+            confirmDismiss: () async {
+              return await ShowMyDialog(
+                dialogTitle: "Delete Item",
+                dialogText: "Do you want to delete ${txn.name}?",
+                confirmText: "Delete",
+                confirmColor: accentColors[2],
+                cancelText: "Cancel")
+              .show(context) ?? false;
+            },
+          ),
+          children: <Widget>[
+            SlideButton(
+              icon: Ionicons.trash,
+              iconColor: textColor,
+              bgColor: accentColors[2],
+              text: 'Delete',
+              onTap: () {
+                // check if we can delete the transaction or not?
+                late Future<bool?> result = ShowMyDialog(
+                  dialogTitle: "Delete Item",
+                  dialogText: "Do you want to delete ${txn.name}?",
+                  confirmText: "Delete",
+                  confirmColor: accentColors[2],
+                  cancelText: "Cancel")
+                .show(context);
+
+                // check the result of the dialog box
+                result.then((value) {
+                  if (value == true) {
+                    // check if the onDelete function is not null
+                    if (onDelete != null) {
+                      onDelete!(txn);
+                    }
+                  }
+                });
+              },
+            ),
+          ],
+        ) : null),
+        child: _createItemType(txn)
+      ),
     );
   }
 
