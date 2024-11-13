@@ -378,7 +378,7 @@ class _HomeListState extends State<HomeList> {
         extentRatio: 0.20,
         dismissible: DismissiblePane(
           onDismissed: () async {
-            // if dismessed then delete the transaction
+            // if dismissed then delete the transaction
             await _deleteTransaction(txnDeleted: txn);
           },
           confirmDismiss: () async {
