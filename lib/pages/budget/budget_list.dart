@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
@@ -14,12 +13,10 @@ class BudgetListPage extends StatefulWidget {
 
 class _BudgetListPageState extends State<BudgetListPage> {
   final BudgetHTTPService _budgetHttp = BudgetHTTPService();
-  final TextEditingController _amountController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ScrollController _scrollControllerAddCategory = ScrollController();
 
   late BudgetListModel? _budgetList;
-  late double? _budgetAmount;
   late Future<bool> _getData;
 
   int _currencyID = -1;
@@ -33,7 +30,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
     // initialize value
     _budgetList = null;
-    _budgetAmount = 0;
 
     // get the currency ID being sent from the home budget page
     _currencyID = widget.currencyId as int;
@@ -49,7 +45,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
   void dispose() {
     _scrollController.dispose();
     _scrollControllerAddCategory.dispose();
-    _amountController.dispose();
 
     super.dispose();
   }
@@ -324,22 +319,43 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 }
               });
             }),
-            onTap: ((index) {
-              // set the amount controller with the current budget
-              _amountController.text = Globals.fCCY2.format(budgetArgs.budgetAmount);
-              _budgetAmount = budgetArgs.budgetAmount;
-
+            onTap: ((index) async {
               // show edit budget form
-              //TODO: to fix the edit budget as this is very bad since the text controller will be covered by numeric input
-              _showEditBudget(budgetArgs: budgetArgs, index: index);
+              await Navigator.pushNamed(
+                context,
+                '/budget/list/edit',
+                arguments: budgetArgs
+              ).then(<BudgetDetailArgs>(result) {
+                if (result != null) {
+                  // set the is data change into true
+                  _isDataChanged = true;
+
+                  // we got the budget, now we can change the budget
+                  _changeBudget(
+                    budgetArgs: result,
+                    index: index
+                  );
+                }
+              });
             }),
-            onEdit: ((index) {
-              // set the amount controller with the current budget
-              _amountController.text = Globals.fCCY2.format(budgetArgs.budgetAmount);
-              _budgetAmount = budgetArgs.budgetAmount;
-
+            onEdit: ((index) async {
               // show edit budget form
-              _showEditBudget(budgetArgs: budgetArgs, index: index);
+              await Navigator.pushNamed(
+                context,
+                '/budget/list/edit',
+                arguments: budgetArgs
+              ).then(<BudgetDetailArgs>(result) {
+                if (result != null) {
+                  // set the is data change into true
+                  _isDataChanged = true;
+
+                  // we got the budget, now we can change the budget
+                  _changeBudget(
+                    budgetArgs: result,
+                    index: index
+                  );
+                }
+              });
             }),
           );
         },
@@ -647,163 +663,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
     }
   }
 
-  Future<void> _showEditBudget({
-    required BudgetDetailArgs budgetArgs,
-    required int index
-  }) {
-    return showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return MyBottomSheet(
-          context: context,
-          title: "Edit ${budgetArgs.categoryName}".toUpperCase(),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            height: 300,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                const SizedBox(height: 10,),
-                SizedBox(
-                  width: double.infinity,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      const Text("Amount"),
-                      const SizedBox(width: 10,),
-                      Expanded(
-                        child: TextField(
-                          controller: _amountController,
-                          showCursor: true,
-                          textAlign: TextAlign.right,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          decoration: const InputDecoration(
-                            hintText: "0.00",
-                            hintStyle: TextStyle(
-                              color: primaryLight
-                            ),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: primaryLight,
-                                width: 1.0,
-                                style: BorderStyle.solid,
-                              ),
-                            ),
-                            contentPadding: EdgeInsets.zero,
-                            isCollapsed: true,
-                          ),
-                          style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(12),
-                            DecimalTextInputFormatter(
-                              decimalRange: 3
-                            ),
-                          ],
-                          onChanged: ((value) {
-                            if (value.isNotEmpty) {
-                              _budgetAmount = (double.tryParse(value) ?? budgetArgs.budgetAmount);
-                            }
-                          }),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 30,),
-                SizedBox(
-                  width: double.infinity,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: (() {
-                            // don't care with data changes, if user press
-                            // cancel then just pop.
-                            Navigator.pop(context);
-                          }),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                            ),
-                            child: const Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                Icon(
-                                  Ionicons.close,
-                                  size: 15,
-                                ),
-                                SizedBox(width: 10,),
-                                Expanded(
-                                  child: Center(
-                                    child: Text("Cancel")
-                                  )
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 20,),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: (() {
-                            if (_budgetAmount != null) {
-                              _isDataChanged = true;
-                              
-                              // change budget
-                              _changeBudget(
-                                budgetArgs: budgetArgs,
-                                index: index
-                              );
-                        
-                              // remove the dialog
-                              Navigator.pop(context);
-                            }
-                          }),
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: const BoxDecoration(
-                              color: Colors.green,
-                            ),
-                            child: const Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: <Widget>[
-                                Icon(
-                                  Ionicons.checkbox,
-                                  size: 15,
-                                ),
-                                SizedBox(width: 10,),
-                                Expanded(
-                                  child: Center(
-                                    child: Text("Save")
-                                  )
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          )
-        );
-      },
-    );
-  }
-
   void _changeBudget({
     required BudgetDetailArgs budgetArgs,
     required int index
@@ -816,7 +675,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
           id: _budgetList!.budgets[i].id,
           category: _budgetList!.budgets[i].category,
           totalTransaction: _budgetList!.budgets[i].totalTransaction,
-          amount: (_budgetAmount ?? budgetArgs.budgetAmount),
+          amount: budgetArgs.budgetAmount,
           used: _budgetList!.budgets[i].used,
           status: "in",
           currency: _budgetList!.budgets[i].currency,

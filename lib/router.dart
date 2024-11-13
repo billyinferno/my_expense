@@ -101,6 +101,14 @@ class _RouterPageState extends State<RouterPage> {
                   )
                 );
               }
+            case '/budget/list/edit':
+              {
+                return createAnimationRoute(
+                  page: BudgetInput(
+                    budget: settings.arguments,
+                  )
+                );
+              }
             case '/budget/transaction':
               {
                 return createAnimationRoute(
