@@ -45,6 +45,16 @@ class CategoryListItem extends StatelessWidget {
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
           extentRatio: 0.4,
+          dismissible: onDelete == null ? null : DismissiblePane(onDismissed: () async {
+            if (onDelete != null) {
+              onDelete!();
+            }
+          },
+          confirmDismiss: () async {
+            // show dialog first
+            return await _showConfirmDialog(context) ?? false;
+            
+          },),
           children: <Widget>[
             SlideButton(
               icon: Ionicons.pencil,
@@ -62,9 +72,14 @@ class CategoryListItem extends StatelessWidget {
               iconColor: textColor,
               bgColor: accentColors[2],
               text: 'Delete',
-              onTap: () {
+              onTap: () async {
                 if (onDelete != null) {
-                  onDelete!();
+                  // show dialog first
+                  await _showConfirmDialog(context).then((value) {
+                    if (value ?? false) {
+                      onDelete!();
+                    }
+                  });
                 }
               },
             ),
@@ -110,5 +125,17 @@ class CategoryListItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<bool?> _showConfirmDialog(BuildContext context) {
+    late Future<bool?> result = ShowMyDialog(
+      dialogTitle: "Delete Budget",
+      dialogText: "Do you want to delete $categoryName?",
+      confirmText: "Delete",
+      confirmColor: accentColors[2],
+      cancelText: "Cancel")
+    .show(context);
+
+    return (result);
   }
 }

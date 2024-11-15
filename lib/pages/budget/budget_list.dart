@@ -296,28 +296,15 @@ class _BudgetListPageState extends State<BudgetListPage> {
             currencyId: budget.currency.id,
             currencySymbol: budget.currency.symbol,
             budgetAmount: budget.amount,
-            onDelete: (() {
-              late Future<bool?> result = ShowMyDialog(
-                dialogTitle: "Delete Budget",
-                dialogText: "Do you want to delete ${budget.category.name}?",
-                confirmText: "Delete",
-                confirmColor: accentColors[2],
-                cancelText: "Cancel")
-              .show(context);
+            onDelete: (() async {
+              await _deleteBudgetList(budget.id, budget.currency.id);
 
-              // check the result of the dialog box
-              result.then((value) async {
-                if (value == true) {
-                  await _deleteBudgetList(budget.id, budget.currency.id);
-
-                  if (mounted) {
-                    // show snack bar
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      createSnackBar(message: 'Delete of ${budget.category.name} success'),
-                    );
-                  }
-                }
-              });
+              if (mounted) {
+                // show snack bar
+                ScaffoldMessenger.of(context).showSnackBar(
+                  createSnackBar(message: 'Delete of ${budget.category.name} success'),
+                );
+              }
             }),
             onTap: ((index) async {
               // show edit budget form
@@ -466,7 +453,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
             element.id == budget.id &&
             element.currency.id == budget.currency.id
           );
-
         }
 
         // store and update budget list so we can align the current budget list
