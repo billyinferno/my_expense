@@ -14,13 +14,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   final ScrollController _scrollController = ScrollController();
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   
-  DateTime _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
-  int _categoryId = -1;
-  String _categoryName = "";
-  String _categorySymbol = "";
-  double _budgetUsed = 0.0;
-  double _budgetAmount = 0.0;
-  int _currencyId = -1;
+  late BudgetTransactionArgs _budgetArgs;
   bool _sortAscending = true;
   late List<WalletTransactionList> _list;
   late List<WalletTransactionList> _listAscending;
@@ -37,14 +31,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     _listDescending = [];
 
     // convert the parameter being sent from main
-    BudgetTransactionArgs args = widget.arguments as BudgetTransactionArgs;
-    _selectedDate = args.selectedDate;
-    _categoryId = args.categoryid;
-    _categoryName = args.categoryName;
-    _categorySymbol = args.currencySymbol;
-    _budgetUsed = args.budgetUsed;
-    _budgetAmount = args.budgetAmount;
-    _currencyId = args.currencyId;
+    _budgetArgs = widget.arguments as BudgetTransactionArgs;
 
     // get data from server
     _getData = _fetchBudget(true);
@@ -60,7 +47,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text(_categoryName)),
+        title: Center(child: Text(_budgetArgs.categoryName)),
         leading: IconButton(
           icon: const Icon(Ionicons.close_outline, color: textColor),
           onPressed: (() {
@@ -69,6 +56,14 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
           }),
         ),
         actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/budget/stat', arguments: _budgetArgs);
+            },
+            icon: Icon(
+              Ionicons.analytics,
+            )
+          ),
           SortIcon(
             asc: _sortAscending,
             onPress: () async {
@@ -125,10 +120,10 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
           color: secondaryDark,
           padding: const EdgeInsets.all(10),
           child: BudgetBar(
-            title: _categoryName,
-            symbol: _categorySymbol,
-            budgetUsed: _budgetUsed,
-            budgetTotal: _budgetAmount,
+            title: _budgetArgs.categoryName,
+            symbol: _budgetArgs.currencySymbol,
+            budgetUsed: _budgetArgs.budgetUsed,
+            budgetTotal: _budgetArgs.budgetAmount,
           )
         ),
         Expanded(
@@ -171,7 +166,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                     itemDate: currTxn.date,
                     itemSymbol: currTxn.wallet.symbol,
                     itemAmount: currTxn.amount,
-                    categoryName: _categoryName,
+                    categoryName: _budgetArgs.categoryName,
                   );
                 }
                 else {
@@ -260,11 +255,11 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   Future<bool> _fetchBudget([bool? force]) async {
     bool isForce = (force ?? false);
 
-    String date = Globals.dfyyyyMMdd.formatLocal(_selectedDate);
+    String date = Globals.dfyyyyMMdd.formatLocal(_budgetArgs.selectedDate);
     await _transactionHttp.fetchTransactionBudget(
-      categoryId: _categoryId,
+      categoryId: _budgetArgs.categoryid,
       date: date,
-      currencyId: _currencyId,
+      currencyId: _budgetArgs.currencyId,
       force: isForce
     ).then((value) async {
       await _setTransactions(value.reversed.toList());

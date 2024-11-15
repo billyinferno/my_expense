@@ -88,6 +88,14 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           }),
         ),
         actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/wallet/stat', arguments: _wallet);
+            },
+            icon: Icon(
+              Ionicons.analytics
+            )
+          ),
           SortIcon(
             asc: _sortAscending,
             onPress: () {
