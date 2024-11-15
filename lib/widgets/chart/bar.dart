@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -20,7 +22,9 @@ class Bar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double darkenValue = (amount/maxAmount) - 0.7;
+    double currentMaxAmount = max<double>(maxAmount, 1);
+
+    double darkenValue = (amount/currentMaxAmount) - 0.7;
     if (darken) {
       if (darkenValue < 0) {
         darkenValue = 0;
@@ -34,7 +38,7 @@ class Bar extends StatelessWidget {
       darkenValue = 0;
     }
     
-    double widthFactor = ((amount < 0 ? 0 : amount) / maxAmount);
+    double widthFactor = ((amount < 0 ? 0 : amount) / currentMaxAmount);
     if (widthFactor > 1) {
       widthFactor = 1;
     }
