@@ -321,8 +321,8 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: (() async {
                           if (_formKey.currentState!.validate()) {
                             await _login(
-                              _usernameController.text,
-                              _passwordController.text
+                              username: _usernameController.text,
+                              password: _passwordController.text
                             );
                           }
                         }),
@@ -453,15 +453,13 @@ class _LoginPageState extends State<LoginPage> {
         res = false;
       });
 
-      // check if user
+      // check if user JWT token is still active or not?
       if (res) {
         // try to get the additional information
-        await _getAdditionalInfo().onError(
-          (error, stackTrace) {
-            // unable to get additional information
-            res = false;
-          },
-        );
+        await _getAdditionalInfo().onError((error, stackTrace) {
+          // unable to get additional information
+          res = false;
+        },);
       }
     } else {
       // no bearer token
@@ -500,7 +498,10 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  Future<void> _login(String username, String password) async {
+  Future<void> _login({
+    required String username,
+    required String password
+  }) async {
     // all good, showed the loading
     LoadingScreen.instance().show(context: context);
 
@@ -509,14 +510,12 @@ class _LoginPageState extends State<LoginPage> {
     await _userHTTP.login(
       identifier: username,
       password: password
-    ).then((loginModel) {
+    ).then((loginModel) async {
       // login success, now we can just store this on the shared preferences
-      _storeCredentials(loginModel);
-    }).whenComplete(
-      () {
+      await _storeCredentials(loginModel);
+    }).whenComplete(() {
         LoadingScreen.instance().hide();
-      },
-    ).onError<NetException>((error, stackTrace) {
+    },).onError<NetException>((error, stackTrace) {
       if (mounted) {
         // if rejected with -1 this means that this is client error
         if (error.code == -1) {
