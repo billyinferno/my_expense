@@ -845,15 +845,7 @@ class _TransactionInputState extends State<TransactionInput> {
                           title: "From Account",
                           selectedId: _currentWalletFromID,
                           disableID: _currentWalletToID,
-                          onTap: ((index) {
-                            setState(() {
-                              _currentWalletFromID = _walletList[index].id;
-                              _currentWalletFromName = _walletList[index].name;
-                              _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                              _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                            });
-                          }),
-                          onDoubleTap: (index) async {
+                          onTap: ((index) async {
                             // set the current wallet from and showed the account
                             // selection for the to account directly
                             setState(() {
@@ -877,6 +869,14 @@ class _TransactionInputState extends State<TransactionInput> {
                                 });
                               })
                             );
+                          }),
+                          onDoubleTap: (index) {
+                            setState(() {
+                              _currentWalletFromID = _walletList[index].id;
+                              _currentWalletFromName = _walletList[index].name;
+                              _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                              _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+                            });
                           }
                         );
                       }
@@ -1058,15 +1058,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     title: "From Account",
                     selectedId: _currentWalletFromID,
                     disableID: _currentWalletToID,
-                    onTap: ((index) {
-                      setState(() {
-                        _currentWalletFromID = _walletList[index].id;
-                        _currentWalletFromName = _walletList[index].name;
-                        _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                        _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                      });
-                    }),
-                    onDoubleTap: ((index) async {
+                    onTap: ((index) async {
                       // set the current wallet from and showed the account
                       // selection for the to account directly
                       setState(() {
@@ -1090,6 +1082,14 @@ class _TransactionInputState extends State<TransactionInput> {
                           });
                         })
                       );
+                    }),
+                    onDoubleTap: ((index) {
+                      setState(() {
+                        _currentWalletFromID = _walletList[index].id;
+                        _currentWalletFromName = _walletList[index].name;
+                        _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
+                        _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
+                      });
                     })
                   );
                 }
