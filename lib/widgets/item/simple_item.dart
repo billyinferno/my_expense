@@ -10,7 +10,6 @@ class SimpleItem extends StatelessWidget {
   final IconData? checkmarkIcon;
   final Color? checkmarkColor;
   final Function? onTap;
-  final Function? onDoubleTap;
   final bool? isDisabled;
   const SimpleItem({
     super.key,
@@ -21,7 +20,6 @@ class SimpleItem extends StatelessWidget {
     this.checkmarkIcon,
     this.checkmarkColor,
     this.onTap,
-    this.onDoubleTap,
     this.isDisabled,
   });
 
@@ -29,48 +27,41 @@ class SimpleItem extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isCurrentlyDisabled = (isDisabled ?? false);
 
-    return GestureDetector(
-      onDoubleTap: () {
-        if (!isCurrentlyDisabled && onDoubleTap != null) {
-          onDoubleTap!();
-        }
-      },
-      child: Container(
-        height: 60,
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-        ),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: ListTile(
-            leading: Container(
-              height: 40,
-              width: 40,
-              padding: const EdgeInsets.all(5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(40),
-                color: color,
-              ),
-              child: icon,
+    return Container(
+      height: 60,
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+      ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: ListTile(
+          leading: Container(
+            height: 40,
+            width: 40,
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(40),
+              color: color,
             ),
-            title: Text(title),
-            trailing: Visibility(
-              visible: (isSelected ?? false),
-              child: Icon(
-                (checkmarkIcon ?? Ionicons.checkmark_circle),
-                size: 20,
-                color: (checkmarkColor ?? accentColors[0]),
-              ),
-            ),
-            onTap: () {
-              // check if disabled or not?
-              if (!isCurrentlyDisabled) {
-                if (onTap != null) {
-                  onTap!();
-                }
-              }
-            },
+            child: icon,
           ),
+          title: Text(title),
+          trailing: Visibility(
+            visible: (isSelected ?? false),
+            child: Icon(
+              (checkmarkIcon ?? Ionicons.checkmark_circle),
+              size: 20,
+              color: (checkmarkColor ?? accentColors[0]),
+            ),
+          ),
+          onTap: () {
+            // check if disabled or not?
+            if (!isCurrentlyDisabled) {
+              if (onTap != null) {
+                onTap!();
+              }
+            }
+          },
         ),
       ),
     );

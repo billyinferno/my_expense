@@ -870,14 +870,6 @@ class _TransactionInputState extends State<TransactionInput> {
                               })
                             );
                           }),
-                          onDoubleTap: (index) {
-                            setState(() {
-                              _currentWalletFromID = _walletList[index].id;
-                              _currentWalletFromName = _walletList[index].name;
-                              _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                              _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                            });
-                          }
                         );
                       }
                       else {
@@ -941,7 +933,6 @@ class _TransactionInputState extends State<TransactionInput> {
     required int selectedId,
     int? disableID,
     required Function(int) onTap,
-    Function(int)? onDoubleTap,
   }) async {
     int currentDisableID = (disableID ?? -1);
     IconData? disableIcon;
@@ -980,21 +971,14 @@ class _TransactionInputState extends State<TransactionInput> {
                 checkmarkColor: disableColor,
                 isDisabled: isDisabled,
                 onTap: (() {
-                  onTap(index);
                   Navigator.pop(context);
+                  onTap(index);
                 }),
-                onDoubleTap: () {
-                  if (onDoubleTap != null) {
-                    Navigator.pop(context);
-                    onDoubleTap(index);
-                  }
-                },
                 icon: IconList.getIcon(_walletList[index].walletType.type.toLowerCase()),
               );
             },
           )
         );
-
       }
     );
   }
@@ -1083,14 +1067,6 @@ class _TransactionInputState extends State<TransactionInput> {
                         })
                       );
                     }),
-                    onDoubleTap: ((index) {
-                      setState(() {
-                        _currentWalletFromID = _walletList[index].id;
-                        _currentWalletFromName = _walletList[index].name;
-                        _currentWalletFromType = _walletList[index].walletType.type.toLowerCase();
-                        _currentWalletFromCCY = _walletList[index].currency.name.toLowerCase();
-                      });
-                    })
                   );
                 }
               },
