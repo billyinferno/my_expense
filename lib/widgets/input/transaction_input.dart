@@ -931,10 +931,9 @@ class _TransactionInputState extends State<TransactionInput> {
   Future<void> _showAccountSelection({
     required String title,
     required int selectedId,
-    int? disableID,
+    int disableID = -1,
     required Function(int) onTap,
   }) async {
-    int currentDisableID = (disableID ?? -1);
     IconData? disableIcon;
     Color? disableColor;
     bool isDisabled = false;
@@ -957,7 +956,7 @@ class _TransactionInputState extends State<TransactionInput> {
               // check if the ID is the same with disabled ID or not?
               // if same then we dilled the disabled icon, and checkmark color
               // with red, and disable the onTap
-              if (currentDisableID == _walletList[index].id) {
+              if (disableID == _walletList[index].id) {
                 disableIcon = Ionicons.alert_circle;
                 disableColor = accentColors[2];
                 isDisabled = true;
