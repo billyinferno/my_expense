@@ -26,7 +26,6 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="myExpense">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
-  <!--
   <link rel="apple-touch-startup-image" href="splash/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
   <link rel="apple-touch-startup-image" href="splash/launch-750x1294.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
   <link rel="apple-touch-startup-image" href="splash/launch-1242x2148.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
@@ -34,7 +33,6 @@
   <link rel="apple-touch-startup-image" href="splash/launch-1536x2048.png" media="(min-device-width: 768px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait)">
   <link rel="apple-touch-startup-image" href="splash/launch-1668x2224.png" media="(min-device-width: 834px) and (max-device-width: 834px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait)">
   <link rel="apple-touch-startup-image" href="splash/launch-2048x2732.png" media="(min-device-width: 1024px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) and (orientation: portrait)">
-  -->
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
@@ -43,10 +41,93 @@
 </head>
 <style type="text/css">
   body {
-      background-color: #263238;
+    background-color: #263238;
+    color: #fff;
   }
+  
+  .center-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+  }
+
+  .loader {
+    width: 64px;
+    height: 64px;
+    position: relative;
+    background-image:
+      linear-gradient(#66bb6a 16px, transparent 0) ,
+      linear-gradient(#8bc34a 16px, transparent 0) ,
+      linear-gradient(#8bc34a 16px, transparent 0) ,
+      linear-gradient(#66bb6a 16px, transparent 0);
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    background-position: left top , left bottom , right top , right bottom;
+    animation: rotate 1s linear infinite;
+  }
+
+  @keyframes rotate {
+    0% {
+      width: 64px;
+      height: 64px;
+      transform: rotate(0deg)
+    }
+    50% {
+      width: 30px;
+      height: 30px;
+      transform: rotate(180deg)
+    }
+    100% {
+      width: 64px;
+      height: 64px;
+      transform: rotate(360deg)
+    }
+  }
+
 </style>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <div class="center-screen">
+    <span class="loader"></span>
+    <div id="loader_text"></div>
+  </div>
+  <script>
+    // https://www.reddit.com/r/FlutterDev/comments/127cwz8/this_piece_of_code_can_dramatically_improve_your/
+    if (
+      navigator.userAgent.indexOf("Safari") !== -1 &&
+      navigator.userAgent.indexOf("Chrome") === -1
+    ) {
+      var originalGetContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function () {
+        var contextType = arguments[0];
+        if (contextType === "webgl2") {
+          return;
+        }
+        return originalGetContext.apply(
+          this,
+          [contextType].concat(Array.prototype.slice.call(arguments, 1)),
+        );
+      };
+    }
+
+    // load flutter script and config
+    {{flutter_js}}
+    {{flutter_build_config}}
+
+    // inject the loading text on the html
+    const loading = document.getElementById('loader_text');
+    document.body.appendChild(loading);
+    loading.textContent = "Loading Entrypoint...";
+    _flutter.loader.load({
+      onEntrypointLoaded: async function (engineInitializer) {
+        loading.textContent = "Initializing engine...";
+        const appRunner = await engineInitializer.initializeEngine();
+
+        loading.textContent = "Running app...";
+        await appRunner.runApp();
+      },
+    });
+  </script>
 </body>
 </html>
