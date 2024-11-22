@@ -233,18 +233,15 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
                     // go to stats transaction 
                     Navigator.pushNamed(context, '/stats/detail/transaction', arguments: statsTransactionArgs);
                   }),
-                  child: Container(
-                    color: Colors.transparent,
-                    child: BudgetBar(
-                      title: data[index].categoryName,
-                      symbol: ccy,
-                      budgetUsed: (data[index].amount < 0 ? (data[index].amount * (-1)) : data[index].amount),
-                      budgetTotal: (type == "expense" ? _maxExpense : _maxIncome),
-                      icon: (type == "expense" ? IconColorList.getExpenseIcon(data[index].categoryName) : IconColorList.getIncomeIcon(data[index].categoryName)),
-                      iconColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
-                      showLeftText: false,
-                      barColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
-                    ),
+                  child: BudgetBar(
+                    title: data[index].categoryName,
+                    symbol: ccy,
+                    budgetUsed: (data[index].amount < 0 ? (data[index].amount * (-1)) : data[index].amount),
+                    budgetTotal: (type == "expense" ? _maxExpense : _maxIncome),
+                    icon: (type == "expense" ? IconColorList.getExpenseIcon(data[index].categoryName) : IconColorList.getIncomeIcon(data[index].categoryName)),
+                    iconColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
+                    showLeftText: false,
+                    barColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
                   ),
                 ),
               ),
