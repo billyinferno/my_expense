@@ -6,27 +6,25 @@ class SimpleItem extends StatelessWidget {
   final Color color;
   final Widget icon;
   final String title;
-  final bool? isSelected;
-  final IconData? checkmarkIcon;
+  final bool isSelected;
+  final IconData checkmarkIcon;
   final Color? checkmarkColor;
   final Function? onTap;
-  final bool? isDisabled;
+  final bool isDisabled;
   const SimpleItem({
     super.key,
     required this.color,
     required this.icon,
     required this.title,
-    this.isSelected,
-    this.checkmarkIcon,
+    this.isSelected = false,
+    this.checkmarkIcon = Ionicons.checkmark_circle,
     this.checkmarkColor,
     this.onTap,
-    this.isDisabled,
+    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    bool isCurrentlyDisabled = (isDisabled ?? false);
-
     return Container(
       height: 60,
       decoration: const BoxDecoration(
@@ -47,16 +45,16 @@ class SimpleItem extends StatelessWidget {
           ),
           title: Text(title),
           trailing: Visibility(
-            visible: (isSelected ?? false),
+            visible: isSelected,
             child: Icon(
-              (checkmarkIcon ?? Ionicons.checkmark_circle),
+              checkmarkIcon,
               size: 20,
               color: (checkmarkColor ?? accentColors[0]),
             ),
           ),
           onTap: () {
             // check if disabled or not?
-            if (!isCurrentlyDisabled) {
+            if (!isDisabled) {
               if (onTap != null) {
                 onTap!();
               }

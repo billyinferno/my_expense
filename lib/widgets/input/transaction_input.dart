@@ -934,7 +934,7 @@ class _TransactionInputState extends State<TransactionInput> {
     int disableID = -1,
     required Function(int) onTap,
   }) async {
-    IconData? disableIcon;
+    IconData disableIcon;
     Color? disableColor;
     bool isDisabled = false;
     
@@ -950,7 +950,7 @@ class _TransactionInputState extends State<TransactionInput> {
             itemCount: _walletList.length,
             itemBuilder: (BuildContext context, int index) {
               isDisabled = false;
-              disableIcon = null;
+              disableIcon = Ionicons.checkmark_circle;
               disableColor = null;
 
               // check if the ID is the same with disabled ID or not?
