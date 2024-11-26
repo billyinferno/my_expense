@@ -215,10 +215,10 @@ packages:
     dependency: "direct main"
     description:
       name: hive_ce
-      sha256: "9a2bc9c36d26e5c442032de0d915ef10c65a655377c2708a68a72d1963bd8ae5"
+      sha256: "2d66fa89a3e33e6d95edcf6c75409cf8f6442ab46229c9baf423af479f532e99"
       url: "https://pub.dev"
     source: hosted
-    version: "2.8.0+1"
+    version: "2.8.0+2"
   hive_ce_flutter:
     dependency: "direct main"
     description:
@@ -383,10 +383,10 @@ packages:
     dependency: transitive
     description:
       name: path_provider_android
-      sha256: c464428172cb986b758c6d1724c603097febb8fb855aa265aeecc9280c294d4a
+      sha256: "8c4967f8b7cb46dc914e178daa29813d83ae502e0529d7b0478330616a691ef7"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.12"
+    version: "2.2.14"
   path_provider_foundation:
     dependency: transitive
     description:
