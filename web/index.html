@@ -56,12 +56,13 @@
   .loader{
       display: block;
       position: relative;
-      height: 12px;
+      height: 14px;
       width: 80%;
       border: 1px solid #4F5B62;
       border-radius: 10px;
       overflow: hidden;
     }
+
     .loader::after {
       content: '';
       width: 40%;
@@ -72,6 +73,10 @@
       left: 0;
       box-sizing: border-box;
       animation: animloader 2s linear infinite;
+    }
+
+    #loader_text {
+      font-size: 14px;
     }
     
     @keyframes animloader {
@@ -89,8 +94,9 @@
 </style>
 <body>
   <div class="center-screen">
-    <span class="loader"></span>
-    <div id="loader_text"></div>
+    <div class="loader">
+      <div id="loader_text">Loading</div>
+    </div>
   </div>
   <script>
     // https://www.reddit.com/r/FlutterDev/comments/127cwz8/this_piece_of_code_can_dramatically_improve_your/
