@@ -25,6 +25,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="myExpense">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
   <link rel="apple-touch-startup-image" href="splash/launch-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
   <link rel="apple-touch-startup-image" href="splash/launch-750x1294.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
@@ -123,7 +124,6 @@
 
     // inject the loading text on the html
     const loading = document.getElementById('loader_text');
-    document.body.appendChild(loading);
     loading.textContent = "Loading Entrypoint...";
     _flutter.loader.load({
       onEntrypointLoaded: async function (engineInitializer) {
