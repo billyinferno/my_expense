@@ -64,7 +64,7 @@
       display: block;
       position: relative;
       height: 14px;
-      width: 80%;
+      width: 100%;
       border: 1px solid #4F5B62;
       border-radius: 10px;
       overflow: hidden;
@@ -85,6 +85,11 @@
     #loader_text {
       font-size: 14px;
     }
+
+    .container {
+      display: block;
+      width: 80%;
+    }
     
     @keyframes animloader {
       0% {
@@ -101,8 +106,9 @@
 </style>
 <body>
   <div class="center-screen">
-    <div class="loader">
+    <div class="container">
       <div id="loader_text">Loading</div>
+      <div class="loader"></div>
     </div>
   </div>
   <script>
