@@ -19,5 +19,7 @@
         "titleBar.inactiveForeground": "#15202b99",
         "commandCenter.border": "#15202b99"
     },
-    "peacock.color": "#8bc34a"
+    "peacock.color": "#8bc34a",
+    "cmake.sourceDirectory": "E:/Project/my_expense/windows",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
