@@ -281,7 +281,9 @@ class _HomeListState extends State<HomeList> {
               surface: secondaryDark,
               onSurface: textColor2,
             ),
-            dialogBackgroundColor: secondaryBackground,
+            dialogTheme: DialogThemeData(
+              backgroundColor: secondaryBackground,
+            ),
           ),
           child: child!,
         );
