@@ -7,7 +7,16 @@ class BudgetTransactionItem extends StatelessWidget {
   final String itemSymbol;
   final double itemAmount;
   final String categoryName;
-  const BudgetTransactionItem({super.key, required this.itemName, required this.itemDate, required this.itemSymbol, required this.itemAmount, required this.categoryName});
+  final String description;
+  const BudgetTransactionItem({
+    super.key,
+    required this.itemName,
+    required this.itemDate,
+    required this.itemSymbol,
+    required this.itemAmount,
+    required this.categoryName,
+    this.description = '',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +52,18 @@ class BudgetTransactionItem extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 10,
                   ),
+                ),
+                Visibility(
+                  visible: (description.isNotEmpty),
+                  child: Text(
+                    description,
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      fontSize: 10,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  )
                 ),
               ],
             ),
