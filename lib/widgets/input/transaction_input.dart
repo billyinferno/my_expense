@@ -318,7 +318,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     
                     late Future<bool?> result = ShowMyDialog(
                         dialogTitle: "Future Date",
-                        dialogText: "Are you sure want to add a future date?",
+                        dialogText: "Are you sure want to ${widget.type == TransactionInputType.add ? "add" : "update"} a future date?",
                         confirmText: "Add",
                         confirmColor: accentColors[0],
                         cancelText: "Cancel"
