@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:provider/provider.dart';
 
 class BudgetTransactionPage extends StatefulWidget {
   final Object? arguments;
@@ -13,12 +14,14 @@ class BudgetTransactionPage extends StatefulWidget {
 class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   final ScrollController _scrollController = ScrollController();
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
+  final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
   
   late BudgetTransactionArgs _budgetArgs;
   bool _sortAscending = true;
   late List<WalletTransactionList> _list;
   late List<WalletTransactionList> _listAscending;
   late List<WalletTransactionList> _listDescending;
+  late bool _dataChange;
   late Future<bool> _getData;
 
   @override
@@ -32,6 +35,9 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
 
     // convert the parameter being sent from main
     _budgetArgs = widget.arguments as BudgetTransactionArgs;
+
+    // default data change to false
+    _dataChange = false;
 
     // get data from server
     _getData = _fetchBudget(true);
@@ -50,8 +56,26 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
         title: Center(child: Text(_budgetArgs.categoryName)),
         leading: IconButton(
           icon: const Icon(Ionicons.close_outline, color: textColor),
-          onPressed: (() {
+          onPressed: (() async {
             // check if got data changed already or not?
+            if (_dataChange) {
+              // get the new budget
+              await _budgetHTTP.fetchBudgetDate(
+                currencyID: _budgetArgs.currencyId,
+                date: Globals.dfyyyyMMdd.formatLocal(_budgetArgs.selectedDate),
+                force: true
+              ).then((data) {
+                if (context.mounted) {
+                  Provider.of<HomeProvider>(context, listen: false).setBudgetList(budgets: data);
+                }
+              }).onError((error, stackTrace) {
+                Log.error(
+                  message: "🚫 Error when fetching budget data",
+                  error: error,
+                  stackTrace: stackTrace,
+                );
+              },);
+            }
             Navigator.maybePop(context);
           }),
         ),
@@ -161,12 +185,82 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                 }
                 else if(_list[index].type == WalletListType.item) {
                   TransactionListModel currTxn = _list[index].data as TransactionListModel;
-                  return BudgetTransactionItem(
-                    itemName: currTxn.name,
-                    itemDate: currTxn.date,
-                    itemSymbol: currTxn.wallet.symbol,
-                    itemAmount: currTxn.amount,
-                    categoryName: _budgetArgs.categoryName,
+                  return GestureDetector(
+                    onTap: () async {
+                      await Navigator.pushNamed(
+                        context,
+                        '/transaction/edit',
+                        arguments: currTxn
+                      ).then((result) {
+                        if (result != null) {
+                          TransactionListModel txnResult = result as TransactionListModel;
+                          // check what we need to do for this new result
+                          // as we are in budget transaction then check if the
+                          // category still the same or not?
+                          if (currTxn.category!.id == txnResult.category!.id) {
+                            // same category we can just update both in the
+                            // list, listAscending and listDescending
+                            setState(() {                              
+                              _list[index].data = txnResult;
+
+                              // loop for list ascending
+                              TransactionListModel tmpTxn;
+                              for(int i=0; i<_listAscending.length; i++) {
+                                TransactionListModel tmpTxn = _listAscending[i].data as TransactionListModel;
+                                if (tmpTxn == txnResult.id) {
+                                  _listAscending[i].data = txnResult;
+                                  break;
+                                }
+                              }
+
+                              // loop for list descending
+                              for(int i=0; i<_listDescending.length; i++) {
+                                tmpTxn = _listDescending[i].data as TransactionListModel;
+                                if (tmpTxn.id == txnResult.id) {
+                                  _listDescending[i].data = txnResult;
+                                  break;
+                                }
+                              }
+                            });
+                          }
+                          else {
+                            // category is change, so remove this from list
+                            // list ascending and list descending.
+                            setState(() {                              
+                              _list.removeAt(index);
+
+                              TransactionListModel tmpTxn;
+
+                              // loop for list ascending
+                              for(int i=0; i<_listAscending.length; i++) {
+                                tmpTxn = _listAscending[i].data as TransactionListModel;
+                                if (tmpTxn.id == result.id) {
+                                  _listAscending.removeAt(i);
+                                  break;
+                                }
+                              }
+
+                              // loop for list descending
+                              for(int i=0; i<_listDescending.length; i++) {
+                                tmpTxn = _listDescending[i].data as TransactionListModel;
+                                if (tmpTxn.id == result.id) {
+                                  _listDescending.removeAt(i);
+                                  break;
+                                }
+                              }
+                            });
+                          }
+                        }
+                      });
+                    },
+                    child: BudgetTransactionItem(
+                      itemName: currTxn.name,
+                      itemDate: currTxn.date,
+                      itemSymbol: currTxn.wallet.symbol,
+                      itemAmount: currTxn.amount,
+                      categoryName: _budgetArgs.categoryName,
+                      description: currTxn.description,
+                    ),
                   );
                 }
                 else {
@@ -246,7 +340,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     setState(() {
       // generate the list
       _listAscending = _generateTransactionList(transactions: transactions);
-      _listDescending = _generateTransactionList(transactions: transactions.reversed.toList());
+      _listDescending = _listAscending.reversed.toList();
 
       // set _list to ascending one
       _list = _listAscending;
