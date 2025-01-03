@@ -18,6 +18,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
   
   late BudgetTransactionArgs _budgetArgs;
   bool _sortAscending = true;
+  late List<TransactionListModel> _transactionData;
   late List<WalletTransactionList> _list;
   late List<WalletTransactionList> _listAscending;
   late List<WalletTransactionList> _listDescending;
@@ -29,6 +30,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     super.initState();
 
     // initialize the list
+    _transactionData = [];
     _list = [];
     _listAscending = [];
     _listDescending = [];
@@ -56,27 +58,14 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
         title: Center(child: Text(_budgetArgs.categoryName)),
         leading: IconButton(
           icon: const Icon(Ionicons.close_outline, color: textColor),
-          onPressed: (() async {
+          onPressed: (() {
             // check if got data changed already or not?
             if (_dataChange) {
-              // get the new budget
-              await _budgetHTTP.fetchBudgetDate(
-                currencyID: _budgetArgs.currencyId,
-                date: Globals.dfyyyyMMdd.formatLocal(_budgetArgs.selectedDate),
-                force: true
-              ).then((data) {
-                if (context.mounted) {
-                  Provider.of<HomeProvider>(context, listen: false).setBudgetList(budgets: data);
-                }
-              }).onError((error, stackTrace) {
-                Log.error(
-                  message: "🚫 Error when fetching budget data",
-                  error: error,
-                  stackTrace: stackTrace,
-                );
-              },);
+              _fetchAllBudget();
             }
-            Navigator.maybePop(context);
+            else {
+              Navigator.maybePop(context);
+            }
           }),
         ),
         actions: <Widget>[
@@ -191,62 +180,64 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                         context,
                         '/transaction/edit',
                         arguments: currTxn
-                      ).then((result) {
+                      ).then(<TransactionListModel>(result) {
                         if (result != null) {
-                          TransactionListModel txnResult = result as TransactionListModel;
                           // check what we need to do for this new result
                           // as we are in budget transaction then check if the
                           // category still the same or not?
-                          if (currTxn.category!.id == txnResult.category!.id) {
-                            // same category we can just update both in the
-                            // list, listAscending and listDescending
-                            setState(() {                              
-                              _list[index].data = txnResult;
-
-                              // loop for list ascending
-                              TransactionListModel tmpTxn;
-                              for(int i=0; i<_listAscending.length; i++) {
-                                TransactionListModel tmpTxn = _listAscending[i].data as TransactionListModel;
-                                if (tmpTxn == txnResult.id) {
-                                  _listAscending[i].data = txnResult;
-                                  break;
-                                }
+                          if (currTxn.category!.id == result.category!.id) {
+                            // same category we can just update the transaction
+                            // data, and generate again the listAscending and
+                            // listDescending
+                            for(int i=0; i<_transactionData.length; i++) {
+                              if (_transactionData[i].id == result.id) {
+                                _transactionData[i] = result;
                               }
+                            }
 
-                              // loop for list descending
-                              for(int i=0; i<_listDescending.length; i++) {
-                                tmpTxn = _listDescending[i].data as TransactionListModel;
-                                if (tmpTxn.id == txnResult.id) {
-                                  _listDescending[i].data = txnResult;
-                                  break;
-                                }
+                            setState(() {
+                              // clear the list ascending and descending
+                              _listAscending.clear();
+                              _listDescending.clear();
+
+                              // generate the list
+                              _listAscending = _generateTransactionList(transactions: _transactionData);
+                              _listDescending = _listAscending.reversed.toList();
+
+                              // check whether currently it's sorted ascending
+                              // or descending
+                              if (_sortAscending) {
+                                _list = _listAscending;
+                              }
+                              else {
+                                _list = _listDescending;
                               }
                             });
                           }
                           else {
-                            // category is change, so remove this from list
-                            // list ascending and list descending.
-                            setState(() {                              
-                              _list.removeAt(index);
-
-                              TransactionListModel tmpTxn;
-
-                              // loop for list ascending
-                              for(int i=0; i<_listAscending.length; i++) {
-                                tmpTxn = _listAscending[i].data as TransactionListModel;
-                                if (tmpTxn.id == result.id) {
-                                  _listAscending.removeAt(i);
-                                  break;
-                                }
+                            for(int i=0; i<_transactionData.length; i++) {
+                              if (_transactionData[i].id == result.id) {
+                                _transactionData.removeAt(i);
+                                break;
                               }
+                            }
 
-                              // loop for list descending
-                              for(int i=0; i<_listDescending.length; i++) {
-                                tmpTxn = _listDescending[i].data as TransactionListModel;
-                                if (tmpTxn.id == result.id) {
-                                  _listDescending.removeAt(i);
-                                  break;
-                                }
+                            setState(() {
+                              // clear the list ascending and descending
+                              _listAscending.clear();
+                              _listDescending.clear();
+
+                              // generate the list
+                              _listAscending = _generateTransactionList(transactions: _transactionData);
+                              _listDescending = _listAscending.reversed.toList();
+
+                              // check whether currently it's sorted ascending
+                              // or descending
+                              if (_sortAscending) {
+                                _list = _listAscending;
+                              }
+                              else {
+                                _list = _listDescending;
                               }
                             });
                           }
@@ -346,9 +337,14 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
       _list = _listAscending;
     });
   }
+
   Future<bool> _fetchBudget([bool? force]) async {
     bool isForce = (force ?? false);
 
+    // clear the transaction data
+    _transactionData.clear();
+
+    // set the date we want to fetch
     String date = Globals.dfyyyyMMdd.formatLocal(_budgetArgs.selectedDate);
     await _transactionHttp.fetchTransactionBudget(
       categoryId: _budgetArgs.categoryid,
@@ -356,7 +352,8 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
       currencyId: _budgetArgs.currencyId,
       force: isForce
     ).then((value) async {
-      await _setTransactions(value.reversed.toList());
+      _transactionData = value.reversed.toList();
+      await _setTransactions(_transactionData);
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error when _fetchBudget",
@@ -370,5 +367,28 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
     });
 
     return true;
+  }
+
+  Future<void> _fetchAllBudget() async {
+    // get the new budget
+    await _budgetHTTP.fetchBudgetDate(
+      currencyID: _budgetArgs.currencyId,
+      date: Globals.dfyyyyMMdd.formatLocal(_budgetArgs.selectedDate),
+      force: true
+    ).then((data) {
+      if (mounted) {
+        Provider.of<HomeProvider>(context, listen: false).setBudgetList(budgets: data);
+      }
+    }).onError((error, stackTrace) {
+      Log.error(
+        message: "🚫 Error when fetching budget data",
+        error: error,
+        stackTrace: stackTrace,
+      );
+    },).whenComplete(() {
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    },);
   }
 }
