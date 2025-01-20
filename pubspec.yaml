@@ -51,7 +51,7 @@ dependencies:
   calendar_date_picker2: ^1.0.2
   flutter_simple_calculator: ^2.2.5
   auto_size_text: ^3.0.0
-  month_picker_dialog: ^5.0.0
+  month_picker_dialog: ^6.0.3
   logger: ^2.4.0
   flutter_launcher_icons: ^0.14.1
   hive_ce: ^2.5.0
