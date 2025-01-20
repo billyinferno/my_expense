@@ -64,7 +64,7 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
           firstDate: _minDate,
           lastDate: _maxDate,
           monthPickerDialogSettings: MonthPickerDialogSettings(
-            buttonsSettings: PickerButtonsSettings(
+            dateButtonsSettings: PickerDateButtonsSettings(
               unselectedMonthsTextColor: textColor2,
               selectedMonthTextColor: textColor,
               currentMonthTextColor: accentColors[0],
@@ -72,18 +72,40 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
               selectedYearTextColor: textColor,
               currentYearTextColor: accentColors[0],
             ),
-          ),
-          cancelWidget: Text(
-            "Cancel",
-            style: TextStyle(
-              color: textColor2,
-            ),
-          ),
-          confirmWidget: Text(
-            "Confirm",
-            style: TextStyle(
-              color: accentColors[6],
-            ),
+            actionBarSettings: PickerActionBarSettings(
+              cancelWidget: Container(
+                padding: const EdgeInsets.all(10),
+                margin: const EdgeInsets.only(
+                  bottom: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: accentColors[2],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  "Cancel",
+                  style: TextStyle(
+                    color: textColor2,
+                  ),
+                ),
+              ),
+              confirmWidget: Container(
+                padding: const EdgeInsets.all(10),
+                margin: const EdgeInsets.only(
+                  bottom: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: accentColors[7],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  "Confirm",
+                  style: TextStyle(
+                    color: textColor,
+                  ),
+                ),
+              ),
+            )
           ),
         ).then((newDate) async {
           if (newDate != null) {
