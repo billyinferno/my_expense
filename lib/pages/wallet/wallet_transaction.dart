@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final BudgetHTTPService _budgetHTTP = BudgetHTTPService();
 
+  final CarouselSliderController _carouselController = CarouselSliderController();
+  late CarouselOptions _carouselOptions;
+
   late Future<List<BudgetModel>> _futureBudgets;
   late Future<List<WalletModel>> _futureWallets;
   
@@ -29,6 +33,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   late List<WalletTransactionList> _list;
   late List<WalletTransactionList> _listAscending;
   late List<WalletTransactionList> _listDescending;
+  late List<WalletModel> _walletList;
 
   DateTime _currentDate = DateTime.now();
   double _expenseAmount = 0.0;
@@ -44,6 +49,31 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
 
     // init the wallet
     _wallet = widget.wallet as WalletModel;
+
+    // get wallet list from local data
+    _walletList = WalletSharedPreferences.getWallets(showDisabled: false);
+
+    // set the carousell controller to show the correct wallet as the initial
+    // item
+    for (int i=0; i < _walletList.length; i++) {
+      if (_walletList[i].id == _wallet.id) {
+        // set the carousel options
+        _carouselOptions = CarouselOptions(
+          aspectRatio: 250/150,
+          initialPage: i,
+          enableInfiniteScroll: false,
+          scrollDirection: Axis.horizontal,
+          onPageChanged: (index, reason) {
+            // set wallet with the current wallet
+            _wallet = _walletList[index];
+            
+            // fetch the new wallet data and transaction
+            _getData = _fetchNewData();
+          },
+        );
+        break;
+      }
+    }
 
     // init the list
     _list = [];
@@ -311,12 +341,13 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        const SizedBox(height: 10,),
-        CardFace(
-          wallet: _wallet,
-          minMaxDate: _walletMinMaxDate,
+        CarouselSlider(
+          carouselController: _carouselController,
+          options: _carouselOptions,
+          items: List<Widget>.generate(_walletList.length, (index) {
+            return CardFace(wallet: _walletList[index]);
+          }),
         ),
-        const SizedBox(height: 10,),
         MonthPrevNextCalendar(
           minDate: _walletMinDate,
           maxDate: _walletMaxDAte,
@@ -704,6 +735,19 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         fetchDate: _currentDate,
         force: true,
         showLoader: false,
+      ),
+      _fetchWalletMinMaxDate(),
+    ]);
+
+    return true;
+  }
+
+  Future<bool> _fetchNewData() async {
+    await Future.wait([
+      _fetchTransactionWallet(
+        fetchDate: _currentDate,
+        force: true,
+        showLoader: true,
       ),
       _fetchWalletMinMaxDate(),
     ]);

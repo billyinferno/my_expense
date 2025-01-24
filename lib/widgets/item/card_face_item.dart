@@ -30,30 +30,30 @@ class CardFace extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                SizedBox(
-                  height: 30,
-                  width: 30,
-                  child: IconList.getIcon(wallet.walletType.type),
-                ),
+                IconList.getIcon(wallet.walletType.type),
                 const SizedBox(width: 10,),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Text(wallet.name),
-                    Text(
-                      wallet.walletType.type,
-                      style: const TextStyle(
-                        fontSize: 10,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        wallet.name,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                      Text(
+                        wallet.walletType.type,
+                        style: const TextStyle(
+                          fontSize: 10,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            Expanded(child: Container(
-              color: Colors.transparent,
-            )),
+            Expanded(child: SizedBox()),
             Visibility(
               visible: (wallet.futureAmount != 0),
               child: Align(
@@ -63,6 +63,7 @@ class CardFace extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 10,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
@@ -74,35 +75,38 @@ class CardFace extends StatelessWidget {
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            Visibility(
-              visible: (minMaxDate != null),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  const SizedBox(height: 20,),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      _dateText(minMaxDate!.minDate),
-                      const Text(
-                        "•••",
-                        style: TextStyle(
-                          fontSize: 10,
-                        ),
-                      ),
-                      _dateText(minMaxDate!.maxDate),
-                    ],
-                  )
-                ],
-              )
-            ),
+            (minMaxDate == null ? const SizedBox.shrink() : _generateMinMaxDate()),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _generateMinMaxDate() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        const SizedBox(height: 20,),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            _dateText(minMaxDate!.minDate),
+            const Text(
+              "•••",
+              style: TextStyle(
+                fontSize: 10,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+            _dateText(minMaxDate!.maxDate),
+          ],
+        )
+      ],
     );
   }
 
@@ -116,6 +120,7 @@ class CardFace extends StatelessWidget {
         style: const TextStyle(
           fontSize: 10,
         ),
+        overflow: TextOverflow.ellipsis,
       );
     }
   }
