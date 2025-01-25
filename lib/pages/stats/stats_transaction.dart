@@ -13,13 +13,30 @@ class StatsTransactionPage extends StatefulWidget {
 class _StatsTransactionPageState extends State<StatsTransactionPage> {
   final _transactionHttp = TransactionHTTPService();
 
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _detailScrollController = ScrollController();
+  final ScrollController _summaryScrollController = ScrollController();
+
+  final Map<int, TypeSlideItem> _typeSlideItem = {
+    0: TypeSlideItem(
+      text: "Summary",
+      color: accentColors[4],
+    ),
+    1: TypeSlideItem(
+      text: "Detail",
+      color: accentColors[6],
+    ),
+  };
+
   late List<TransactionStatsDetailModel> _transactions;
   late List<TransactionStatsDetailModel> _transactionsSort;
+  late Map<String, List<TransactionListModel>> _transactionSummary;
+  late Map<String, Map<String, TransactionListModel>> _subTransactionSummary;
   late StatsTransactionArgs _args;
   late Future<bool> _getData;
   late String _filterType;
   late bool _sortType;
+  late int _currentPage;
+  late List<Widget> _summaryWidget;
 
   @override
   void initState() {
@@ -30,12 +47,25 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     // initialize all default value
     _transactions = [];
     _transactionsSort = [];
+    _transactionSummary = {};
+    _subTransactionSummary = {};
 
     _filterType = "D";
     _sortType = false;
 
+    // default to detail transaction page
+    _currentPage = 1;
+    _summaryWidget = [];
+
     // now try to fetch the transaction data
     _getData = _fetchStatsDetail();
+  }
+
+  @override
+  void dispose() {
+    _detailScrollController.dispose();
+    _summaryScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -174,16 +204,23 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
                     showLeftText: false,
                   ),
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    controller: _scrollController,
-                    itemCount: _transactionsSort.length,
-                    itemBuilder: (BuildContext ctx, int index) {
-                      TransactionStatsDetailModel txn = _transactionsSort[index];
-                      return _createItem(txn);
-                    },
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    width: 250,
+                    child: TypeSlide<int>(
+                      initialItem: _currentPage,
+                      onValueChanged: ((index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      }),
+                      items: _typeSlideItem
+                    ),
                   ),
+                ),
+                Expanded(
+                  child: _subPage(),
                 ),
               ],
             ),
@@ -202,6 +239,221 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
         }
       },
     );
+  }
+
+  Widget _subPage() {
+    if (_currentPage == 0) {
+      return ListView.builder(
+        controller: _summaryScrollController,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: _summaryWidget.length,
+        itemBuilder: (context, index) {
+          return _summaryWidget[index];
+        },
+      );
+    }
+    else {
+      return _detailPage();
+    }
+  }
+
+  Widget _detailHeader({required String name}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: secondaryDark,
+        border: Border(
+          bottom: BorderSide(
+            color: secondaryLight,
+            width: 1.0,
+            style: BorderStyle.solid,
+          )
+        )
+      ),
+      child: Text(name),
+    );
+  }
+
+  Widget _detailPage() {
+    // create the widget result list
+    List<Widget> detailTxn = [];
+
+    // helper variable
+    DateTime? prevDate;
+    String? prevName;
+
+    // generate the widget by loog the _transactionSort
+    for(int i=0; i<_transactionsSort.length; i++) {
+      if (_filterType != "A") {
+        // check whether this is sort based on date or name?
+        if (_filterType == "N") {
+          // filter is name
+          // check if previous name is null?
+          if (prevName == null) {
+            // create the header
+            detailTxn.add(_detailHeader(name: _transactionsSort[i].name));
+          }
+          else {
+            // check if the previous name is same as current name or not?
+            if (prevName != _transactionsSort[i].name.toLowerCase().trim()) {
+              // different name, create a new header
+              detailTxn.add(_detailHeader(name: _transactionsSort[i].name));
+            }
+          }
+
+          prevName = _transactionsSort[i].name.toLowerCase().trim();
+        }
+        else if (_filterType == "D") {
+          // filter is date
+          // check if previous date is null?
+          if (prevDate == null) {
+            // create the header
+            detailTxn.add(_detailHeader(name: Globals.dfddMMMMyyyy.format(_transactionsSort[i].date)));
+          }
+          else {
+            // check if previous date is not same as current date
+            if (prevDate != _transactionsSort[i].date) {
+              // different date, create a new header
+              detailTxn.add(_detailHeader(name: Globals.dfddMMMMyyyy.format(_transactionsSort[i].date)));
+            }
+          }
+
+          prevDate = _transactionsSort[i].date;
+        }
+      }
+
+      // create the transaction item
+      detailTxn.add(_createItem(_transactionsSort[i]));
+    }
+
+    return ListView.builder(
+      controller: _detailScrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: detailTxn.length,
+      itemBuilder: (BuildContext ctx, int index) {
+        return detailTxn[index];
+      },
+    );
+  }
+
+  List<Widget> _summaryItems() {
+    List<Widget> items = [];
+    DateTime? startDate;
+    DateTime? endDate;
+    double amount;
+    int count;
+    String subSummaryKey;
+    TransactionListModel tmpTransaction;
+    
+    // clear the sub transaction summary
+    _subTransactionSummary.clear();
+
+    // loop thru the summary transaction map
+    _transactionSummary.forEach((name, transactionList) {
+      // initialize the start date and amount
+      startDate = null;
+      endDate = null;
+      amount = 0;
+      count = 0;
+
+      // now create a new map for the sub transaction summary
+      _subTransactionSummary[name] = {};
+
+      // loop thru the transaction list for this name
+      for(int i=0; i<transactionList.length; i++) {
+        // check for the date
+        if (startDate == null) {
+          startDate = transactionList[i].date;
+        }
+        else {
+          if (transactionList[i].date.isBefore(startDate!)) {
+            startDate = transactionList[i].date;
+          }
+        }
+
+        if (endDate == null) {
+          endDate = transactionList[i].date;
+        }
+        else {
+          if (transactionList[i].date.isAfter(endDate!)) {
+            endDate = transactionList[i].date;
+          }
+        }
+
+        // get the key for this
+        subSummaryKey = Globals.dfyyyyMM.format(transactionList[i].date);
+
+        // check if we already have this key on the sub summary or not??
+        if (_subTransactionSummary[name]!.containsKey(subSummaryKey)) {
+          // already have previous transaction
+          // get the previous data
+          tmpTransaction = _subTransactionSummary[name]![subSummaryKey]!;
+
+          // and combine with the new data
+          _subTransactionSummary[name]![subSummaryKey] = TransactionListModel(
+            -1,
+            transactionList[i].name,
+            transactionList[i].type,
+            DateTime(transactionList[i].date.year, transactionList[i].date.month, 1),
+            transactionList[i].description,
+            transactionList[i].category,
+            transactionList[i].wallet,
+            transactionList[i].walletTo,
+            transactionList[i].usersPermissionsUser,
+            transactionList[i].cleared,
+            (transactionList[i].amount + tmpTransaction.amount),
+            transactionList[i].exchangeRate
+          );
+        }
+        else {
+          // not exists, create a new data
+          _subTransactionSummary[name]![subSummaryKey] = TransactionListModel(
+              -1,
+              transactionList[i].name,
+              transactionList[i].type,
+              DateTime(transactionList[i].date.year, transactionList[i].date.month, 1),
+              transactionList[i].description,
+              transactionList[i].category,
+              transactionList[i].wallet,
+              transactionList[i].walletTo,
+              transactionList[i].usersPermissionsUser,
+              transactionList[i].cleared,
+              transactionList[i].amount,
+              transactionList[i].exchangeRate
+            );
+        }
+
+        amount += transactionList[i].amount;
+        count++;
+      }
+
+      // create the summary
+      TransactionListModel txn = TransactionListModel(
+        -1,
+        transactionList[0].name,
+        transactionList[0].type,
+        DateTime.now(),
+        '',
+        transactionList[0].category,
+        transactionList[0].wallet,
+        null,
+        transactionList[0].usersPermissionsUser,
+        true,
+        amount,
+        1,
+      );
+
+      items.add(TransactionExpandableItem(
+        txn: txn,
+        startDate: startDate!,
+        endDate: endDate!,
+        count: count,
+        subTxn: (_subTransactionSummary[name] ?? {}),
+      ));
+    },);
+
+    return items;
   }
 
   Widget _createItem(TransactionStatsDetailModel txn) {
@@ -280,6 +532,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     ).then((result) {
       _transactions = result;
       _sortTransactions();
+      _summarizeTransaction();
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error on <_fetchStatsDetail>",
@@ -290,6 +543,57 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     });
 
     return true;
+  }
+
+  void _summarizeTransaction() {
+    String key;
+
+    // clear the current map first
+    _transactionSummary.clear();
+
+    // loop thru _transactions to create the map
+    for(int i=0; i<_transactions.length; i++) {
+      // get the key for the map
+      key = _transactions[i].name.trim().toLowerCase();
+
+      // check if current key is not exists? if not exists, then it means that
+      // we need to create a new list for this transaction.
+      if (!_transactionSummary.containsKey(key)) {
+        _transactionSummary[key] = [];
+      }
+
+      // create the transaction list model, as stat use different of model
+      // for the result.
+      _transactionSummary[key]!.add(TransactionListModel(
+        -1,
+        _transactions[i].name,
+        _transactions[i].type,
+        _transactions[i].date,
+        '',
+        CategoryTransactionModel(
+          _transactions[i].categoriesId,
+          _transactions[i].categoriesName
+        ),
+        WalletTransactionModel(
+          -1,
+          '',
+          -1,
+          _args.currency.name,
+          _args.currency.symbol
+        ),
+        null,
+        UserPermissionModel(-1, '', ''),
+        true,
+        _transactions[i].amount,
+        1,
+      ));
+    }
+
+    _transactionSummary = sortedMap(data: _transactionSummary);
+
+    // generate the summary widget, so we don't need to keep generate the
+    // widget during rebuilding
+    _summaryWidget = _summaryItems();
   }
 
   void _sortTransactions() {
