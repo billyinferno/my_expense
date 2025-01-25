@@ -308,6 +308,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
             }),
           ),
         ),
+        const SizedBox(height: 5,),
       ],
     );
   }

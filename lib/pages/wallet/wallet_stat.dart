@@ -217,6 +217,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
             }),
           ),
         ),
+        const SizedBox(height: 5,),
       ],
     );
   }
