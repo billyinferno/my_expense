@@ -51,7 +51,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     _wallet = widget.wallet as WalletModel;
 
     // get wallet list from local data
-    _walletList = WalletSharedPreferences.getWallets(showDisabled: false);
+    _walletList = WalletSharedPreferences.getWallets(showDisabled: true);
 
     // set the carousell controller to show the correct wallet as the initial
     // item
