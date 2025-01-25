@@ -370,17 +370,20 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       child: Container(
                         height: 35,
                         decoration: const BoxDecoration(
-                            color: secondaryDark,
-                            border: Border(
-                              top: BorderSide(
-                                  color: secondaryBackground,
-                                  width: 1.0,
-                                  style: BorderStyle.solid),
-                              bottom: BorderSide(
-                                  color: secondaryBackground,
-                                  width: 1.0,
-                                  style: BorderStyle.solid),
-                            )),
+                          color: secondaryDark,
+                          border: Border(
+                            top: BorderSide(
+                              color: secondaryBackground,
+                              width: 1.0,
+                              style: BorderStyle.solid,
+                            ),
+                            bottom: BorderSide(
+                              color: secondaryBackground,
+                              width: 1.0,
+                              style: BorderStyle.solid,
+                            ),
+                          ),
+                        ),
                         child: const Center(
                           child: Text("Monthly Amount"),
                         ),
@@ -390,14 +393,16 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       child: Container(
                         height: 35,
                         decoration: BoxDecoration(
-                            color: secondaryDark,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(10),
-                            ),
-                            border: Border.all(
-                                color: secondaryBackground,
-                                width: 1.0,
-                                style: BorderStyle.solid)),
+                          color: secondaryDark,
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(10),
+                          ),
+                          border: Border.all(
+                            color: secondaryBackground,
+                            width: 1.0,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
                         child: const Center(
                           child: Text("Average Daily"),
                         ),
@@ -408,97 +413,25 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                 Container(
                   height: 5,
                   decoration: const BoxDecoration(
-                      border: Border(
-                    left: BorderSide(
-                      color: secondaryBackground,
-                      width: 1.0,
-                      style: BorderStyle.solid,
+                    border: Border(
+                      left: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      right: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
                     ),
-                    right: BorderSide(
-                      color: secondaryBackground,
-                      width: 1.0,
-                      style: BorderStyle.solid,
-                    ),
-                  )),
+                  ),
                 ),
                 Expanded(
                   child: Container(
                     decoration: const BoxDecoration(
                       border: Border(
-                          left: BorderSide(
-                            color: secondaryBackground,
-                            width: 1.0,
-                            style: BorderStyle.solid,
-                          ),
-                          right: BorderSide(
-                            color: secondaryBackground,
-                            width: 1.0,
-                            style: BorderStyle.solid,
-                          )),
-                    ),
-                    child: ListView.builder(
-                        controller: _monthlyScroller,
-                        itemCount: _budgetMonthly.length,
-                        itemBuilder: ((context, index) {
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              SizedBox(
-                                width: 80,
-                                child: Center(
-                                    child: Text(_budgetMonthly[index].date)),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                  child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                          "${_budgetTransaction.currencySymbol} ${_budgetMonthly[index].totalAmount.formatCurrency(
-                                            checkThousand: false,
-                                            showDecimal: true,
-                                            shorten: true,
-                                            decimalNum: 2,
-                                          )}")),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                  child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                          "${_budgetTransaction.currencySymbol} ${_budgetMonthly[index].averageAmount.formatCurrency(
-                                            checkThousand: false,
-                                            showDecimal: true,
-                                            shorten: true,
-                                            decimalNum: 2,
-                                          )}")),
-                                ),
-                              ),
-                            ],
-                          );
-                        })),
-                  ),
-                ),
-                Container(
-                  height: 10,
-                  decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(
-                            10,
-                          )),
-                      border: Border(
                         left: BorderSide(
-                          color: secondaryBackground,
-                          width: 1.0,
-                          style: BorderStyle.solid,
-                        ),
-                        bottom: BorderSide(
                           color: secondaryBackground,
                           width: 1.0,
                           style: BorderStyle.solid,
@@ -508,7 +441,90 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                           width: 1.0,
                           style: BorderStyle.solid,
                         ),
-                      )),
+                      ),
+                    ),
+                    child: ListView.builder(
+                      controller: _monthlyScroller,
+                      itemCount: _budgetMonthly.length,
+                      itemBuilder: ((context, index) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(
+                              width: 80,
+                              child: Center(
+                                child: Text(
+                                  _budgetMonthly[index].date,
+                                )
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    "${_budgetTransaction.currencySymbol} ${_budgetMonthly[index].totalAmount.formatCurrency(
+                                      checkThousand: false,
+                                      showDecimal: true,
+                                      shorten: true,
+                                      decimalNum: 2,
+                                    )}",
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    "${_budgetTransaction.currencySymbol} ${_budgetMonthly[index].averageAmount.formatCurrency(
+                                      checkThousand: false,
+                                      showDecimal: true,
+                                      shorten: true,
+                                      decimalNum: 2,
+                                    )}",
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 10,
+                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(
+                        10,
+                      ),
+                    ),
+                    border: Border(
+                      left: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      bottom: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      right: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -599,12 +615,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 2,
                     ),
                     Text(
-                        "${_budgetTransaction.currencySymbol} ${_totalYearlyAmount.formatCurrency(
-                          checkThousand: false,
-                          showDecimal: true,
-                          shorten: true,
-                          decimalNum: 2,
-                        )}"),
+                      "${_budgetTransaction.currencySymbol} ${_totalYearlyAmount.formatCurrency(
+                        checkThousand: false,
+                        showDecimal: true,
+                        shorten: true,
+                        decimalNum: 2,
+                      )}",
+                    ),
                   ],
                 ),
               ),
@@ -627,12 +644,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 2,
                     ),
                     Text(
-                        "${_budgetTransaction.currencySymbol} ${_averageYearlyAmount.formatCurrency(
-                          checkThousand: false,
-                          showDecimal: true,
-                          shorten: true,
-                          decimalNum: 2,
-                        )}"),
+                      "${_budgetTransaction.currencySymbol} ${_averageYearlyAmount.formatCurrency(
+                        checkThousand: false,
+                        showDecimal: true,
+                        shorten: true,
+                        decimalNum: 2,
+                      )}",
+                    ),
                   ],
                 ),
               ),
@@ -655,12 +673,13 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 2,
                     ),
                     Text(
-                        "${_budgetTransaction.currencySymbol} ${_averageYearlyDailyAmount.formatCurrency(
-                          checkThousand: false,
-                          showDecimal: true,
-                          shorten: true,
-                          decimalNum: 2,
-                        )}"),
+                      "${_budgetTransaction.currencySymbol} ${_averageYearlyDailyAmount.formatCurrency(
+                        checkThousand: false,
+                        showDecimal: true,
+                        shorten: true,
+                        decimalNum: 2,
+                      )}",
+                    ),
                   ],
                 ),
               ),
@@ -689,14 +708,16 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       height: 35,
                       width: 80,
                       decoration: BoxDecoration(
-                          color: secondaryDark,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                          ),
-                          border: Border.all(
-                              color: secondaryBackground,
-                              width: 1.0,
-                              style: BorderStyle.solid)),
+                        color: secondaryDark,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                        ),
+                        border: Border.all(
+                          color: secondaryBackground,
+                          width: 1.0,
+                          style: BorderStyle.solid,
+                        ),
+                      ),
                       child: const Center(
                         child: Text("Date"),
                       ),
@@ -705,17 +726,20 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       child: Container(
                         height: 35,
                         decoration: const BoxDecoration(
-                            color: secondaryDark,
-                            border: Border(
-                              top: BorderSide(
-                                  color: secondaryBackground,
-                                  width: 1.0,
-                                  style: BorderStyle.solid),
-                              bottom: BorderSide(
-                                  color: secondaryBackground,
-                                  width: 1.0,
-                                  style: BorderStyle.solid),
-                            )),
+                          color: secondaryDark,
+                          border: Border(
+                            top: BorderSide(
+                              color: secondaryBackground,
+                              width: 1.0,
+                              style: BorderStyle.solid,
+                            ),
+                            bottom: BorderSide(
+                              color: secondaryBackground,
+                              width: 1.0,
+                              style: BorderStyle.solid,
+                            ),
+                          ),
+                        ),
                         child: const Center(
                           child: Text("Yearly Amount"),
                         ),
@@ -725,14 +749,16 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                       child: Container(
                         height: 35,
                         decoration: BoxDecoration(
-                            color: secondaryDark,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(10),
-                            ),
-                            border: Border.all(
-                                color: secondaryBackground,
-                                width: 1.0,
-                                style: BorderStyle.solid)),
+                          color: secondaryDark,
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(10),
+                          ),
+                          border: Border.all(
+                            color: secondaryBackground,
+                            width: 1.0,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
                         child: const Center(
                           child: Text("Average Daily"),
                         ),
@@ -743,97 +769,25 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                 Container(
                   height: 5,
                   decoration: const BoxDecoration(
-                      border: Border(
-                    left: BorderSide(
-                      color: secondaryBackground,
-                      width: 1.0,
-                      style: BorderStyle.solid,
+                    border: Border(
+                      left: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      right: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
                     ),
-                    right: BorderSide(
-                      color: secondaryBackground,
-                      width: 1.0,
-                      style: BorderStyle.solid,
-                    ),
-                  )),
+                  ),
                 ),
                 Expanded(
                   child: Container(
                     decoration: const BoxDecoration(
                       border: Border(
-                          left: BorderSide(
-                            color: secondaryBackground,
-                            width: 1.0,
-                            style: BorderStyle.solid,
-                          ),
-                          right: BorderSide(
-                            color: secondaryBackground,
-                            width: 1.0,
-                            style: BorderStyle.solid,
-                          )),
-                    ),
-                    child: ListView.builder(
-                        controller: _yearlyScroller,
-                        itemCount: _budgetYearly.length,
-                        itemBuilder: ((context, index) {
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              SizedBox(
-                                width: 80,
-                                child: Center(
-                                    child: Text(_budgetYearly[index].date)),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                  child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                          "${_budgetTransaction.currencySymbol} ${_budgetYearly[index].totalAmount.formatCurrency(
-                                            checkThousand: false,
-                                            showDecimal: true,
-                                            shorten: true,
-                                            decimalNum: 2,
-                                          )}")),
-                                ),
-                              ),
-                              Expanded(
-                                child: Container(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                  child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Text(
-                                          "${_budgetTransaction.currencySymbol} ${_budgetYearly[index].averageAmount.formatCurrency(
-                                            checkThousand: false,
-                                            showDecimal: true,
-                                            shorten: true,
-                                            decimalNum: 2,
-                                          )}")),
-                                ),
-                              ),
-                            ],
-                          );
-                        })),
-                  ),
-                ),
-                Container(
-                  height: 10,
-                  decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(10),
-                          bottomRight: Radius.circular(
-                            10,
-                          )),
-                      border: Border(
                         left: BorderSide(
-                          color: secondaryBackground,
-                          width: 1.0,
-                          style: BorderStyle.solid,
-                        ),
-                        bottom: BorderSide(
                           color: secondaryBackground,
                           width: 1.0,
                           style: BorderStyle.solid,
@@ -843,7 +797,88 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
                           width: 1.0,
                           style: BorderStyle.solid,
                         ),
-                      )),
+                      ),
+                    ),
+                    child: ListView.builder(
+                      controller: _yearlyScroller,
+                      itemCount: _budgetYearly.length,
+                      itemBuilder: ((context, index) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(
+                              width: 80,
+                              child: Center(
+                                child: Text(
+                                  _budgetYearly[index].date,
+                                )
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    "${_budgetTransaction.currencySymbol} ${_budgetYearly[index].totalAmount.formatCurrency(
+                                      checkThousand: false,
+                                      showDecimal: true,
+                                      shorten: true,
+                                      decimalNum: 2,
+                                    )}",
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    "${_budgetTransaction.currencySymbol} ${_budgetYearly[index].averageAmount.formatCurrency(
+                                      checkThousand: false,
+                                      showDecimal: true,
+                                      shorten: true,
+                                      decimalNum: 2,
+                                    )}",
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: 10,
+                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                  decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                    ),
+                    border: Border(
+                      left: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      bottom: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                      right: BorderSide(
+                        color: secondaryBackground,
+                        width: 1.0,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -858,8 +893,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       // check if this is to get all data or specificy category
       if (_budgetTransaction.categoryid < 0) {
         // this is get all the data
-        _budgetStat = await _transactionHttp
-            .fetchTransactionBudgetStatSummary(_budgetTransaction.currencyId);
+        _budgetStat = await _transactionHttp.fetchTransactionBudgetStatSummary(_budgetTransaction.currencyId);
       } else {
         // this will get specific category
         _budgetStat = await _transactionHttp.fetchTransactionBudgetStat(
