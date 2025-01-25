@@ -8,16 +8,21 @@ class IncomeExpenseModel {
     });
 
     factory IncomeExpenseModel.fromJson(Map<String, dynamic> json) {
+      DateTime currDate;
       Map<DateTime, double> expense = {};
       json["expense"].forEach((value) {
         IncomeExpense exp = IncomeExpense.fromJson(value);
-        expense[exp.date.toLocal()] = exp.amount;
+        currDate = exp.date.toLocal();
+        currDate = DateTime(currDate.year, currDate.month, currDate.day);
+        expense[DateTime(currDate.year, currDate.month, currDate.day)] = exp.amount;
       });
 
       Map<DateTime, double> income = {};
       json["income"].forEach((value) {
         IncomeExpense inc = IncomeExpense.fromJson(value);
-        income[inc.date.toLocal()] = inc.amount;
+        currDate = inc.date.toLocal();
+        currDate = DateTime(currDate.year, currDate.month, currDate.day);
+        income[DateTime(currDate.year, currDate.month, currDate.day)] = inc.amount;
       });
 
       return IncomeExpenseModel(expense: expense, income: income);
@@ -54,7 +59,7 @@ class IncomeExpense {
     final double amount;
 
     factory IncomeExpense.fromJson(Map<String, dynamic> json) => IncomeExpense(
-        date: DateTime.parse(json["date"]),
+        date: DateTime.parse(json["date"]).toLocal(),
         amount: json["amount"].toDouble(),
     );
 

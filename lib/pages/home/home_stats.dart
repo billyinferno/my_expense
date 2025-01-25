@@ -688,8 +688,8 @@ class _HomeStatsState extends State<HomeStats> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     BarChart(
-                      from: _from,
-                      to: _to,
+                      from: _from.toLocal(),
+                      to: _to.toLocal(),
                       data: (_getData(_incomeExpense[_currentCurrencyId])),
                       showed: true,
                       maxAmount: _currentMaxAmount,
