@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
@@ -30,13 +31,15 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
   late List<TransactionStatsDetailModel> _transactions;
   late List<TransactionStatsDetailModel> _transactionsSort;
   late Map<String, List<TransactionListModel>> _transactionSummary;
-  late Map<String, Map<String, TransactionListModel>> _subTransactionSummary;
   late StatsTransactionArgs _args;
   late Future<bool> _getData;
   late String _filterType;
   late bool _sortType;
   late int _currentPage;
   late List<Widget> _summaryWidget;
+  late List<Widget> _summaryWidgetMonth;
+  late List<Widget> _summaryWidgetYear;
+  late bool _showMonthSummary;
 
   @override
   void initState() {
@@ -48,7 +51,6 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     _transactions = [];
     _transactionsSort = [];
     _transactionSummary = {};
-    _subTransactionSummary = {};
 
     _filterType = "D";
     _sortType = false;
@@ -56,6 +58,9 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     // default to detail transaction page
     _currentPage = 1;
     _summaryWidget = [];
+    _summaryWidgetMonth = [];
+    _summaryWidgetYear = [];
+    _showMonthSummary = false;
 
     // now try to fetch the transaction data
     _getData = _fetchStatsDetail();
@@ -243,13 +248,83 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
 
   Widget _subPage() {
     if (_currentPage == 0) {
-      return ListView.builder(
-        controller: _summaryScrollController,
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: _summaryWidget.length,
-        itemBuilder: (context, index) {
-          return _summaryWidget[index];
-        },
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          GestureDetector(
+            onTap: (() {
+              setState(() {
+                _showMonthSummary = !_showMonthSummary;
+                if (_showMonthSummary) {
+                  _summaryWidget = _summaryWidgetMonth;
+                }
+                else {
+                  _summaryWidget = _summaryWidgetYear;
+                }
+              });
+            }),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: secondaryDark,
+                border: Border(
+                  bottom: BorderSide(
+                    color: secondaryLight,
+                    width: 1.0,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(
+                    height: 15,
+                    width: 30,
+                    child: Transform.scale(
+                      scale: 0.6,
+                      child: CupertinoSwitch(
+                        value: _showMonthSummary,
+                        activeTrackColor: accentColors[0],
+                        onChanged: (value) {
+                          setState(() {
+                            _showMonthSummary = value;
+                            if (_showMonthSummary) {
+                              _summaryWidget = _summaryWidgetMonth;
+                            }
+                            else {
+                              _summaryWidget = _summaryWidgetYear;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 11,),
+                  const Text(
+                    "Monthly Breakdown",
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: textColor,
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              controller: _summaryScrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: _summaryWidget.length,
+              itemBuilder: (context, index) {
+                return _summaryWidget[index];
+              },
+            ),
+          ),
+        ],
       );
     }
     else {
@@ -337,20 +412,22 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
     );
   }
 
-  List<Widget> _summaryItems() {
-    List<Widget> items = [];
+  List<Widget> _summaryItems({
+    required Map<String, List<TransactionListModel>> transactions,
+    required String keyType,
+  }) {
+    final Map<String, Map<String, TransactionListModel>> data = {};
+    final List<Widget> items = [];
+
     DateTime? startDate;
     DateTime? endDate;
     double amount;
     int count;
     String subSummaryKey;
     TransactionListModel tmpTransaction;
-    
-    // clear the sub transaction summary
-    _subTransactionSummary.clear();
 
     // loop thru the summary transaction map
-    _transactionSummary.forEach((name, transactionList) {
+    transactions.forEach((name, transactionList) {
       // initialize the start date and amount
       startDate = null;
       endDate = null;
@@ -358,7 +435,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
       count = 0;
 
       // now create a new map for the sub transaction summary
-      _subTransactionSummary[name] = {};
+      data[name] = {};
 
       // loop thru the transaction list for this name
       for(int i=0; i<transactionList.length; i++) {
@@ -382,16 +459,21 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
         }
 
         // get the key for this
-        subSummaryKey = Globals.dfyyyyMM.format(transactionList[i].date);
+        if (keyType == "M") {
+          subSummaryKey = Globals.dfyyyyMM.format(transactionList[i].date);
+        }
+        else {
+          subSummaryKey = transactionList[i].date.toLocal().year.toString();
+        }
 
         // check if we already have this key on the sub summary or not??
-        if (_subTransactionSummary[name]!.containsKey(subSummaryKey)) {
+        if (data[name]!.containsKey(subSummaryKey)) {
           // already have previous transaction
           // get the previous data
-          tmpTransaction = _subTransactionSummary[name]![subSummaryKey]!;
+          tmpTransaction = data[name]![subSummaryKey]!;
 
           // and combine with the new data
-          _subTransactionSummary[name]![subSummaryKey] = TransactionListModel(
+          data[name]![subSummaryKey] = TransactionListModel(
             -1,
             transactionList[i].name,
             transactionList[i].type,
@@ -408,7 +490,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
         }
         else {
           // not exists, create a new data
-          _subTransactionSummary[name]![subSummaryKey] = TransactionListModel(
+          data[name]![subSummaryKey] = TransactionListModel(
               -1,
               transactionList[i].name,
               transactionList[i].type,
@@ -449,7 +531,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
         startDate: startDate!,
         endDate: endDate!,
         count: count,
-        subTxn: (_subTransactionSummary[name] ?? {}),
+        subTxn: (data[name] ?? {}),
       ));
     },);
 
@@ -593,7 +675,18 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
 
     // generate the summary widget, so we don't need to keep generate the
     // widget during rebuilding
-    _summaryWidget = _summaryItems();
+    _summaryWidgetMonth = _summaryItems(
+      transactions: _transactionSummary,
+      keyType: "M",
+    );
+    
+    _summaryWidgetYear = _summaryItems(
+      transactions: _transactionSummary,
+      keyType: "Y",
+    );
+
+    // default the _summaryWidget to year
+    _summaryWidget = _summaryWidgetYear;
   }
 
   void _sortTransactions() {
