@@ -206,47 +206,39 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
       controller: controller,
       itemCount: data.length,
       itemBuilder: ((context, index) {
-        return Container(
-          padding: const EdgeInsets.all(10),
-          color: Colors.transparent,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                child: GestureDetector(
-                  onTap: (() {
-                    StatsTransactionArgs statsTransactionArgs = StatsTransactionArgs(
-                      type: type,
-                      categoryId: data[index].categoryId,
-                      categoryName: data[index].categoryName,
-                      currency: _stats.currency,
-                      walletId: _stats.wallet.id,
-                      fromDate: _stats.fromDate,
-                      toDate: _stats.toDate,
-                      amount: data[index].amount,
-                      total: (type == "expense" ? _maxExpense : _maxIncome),
-                      name: _stats.name,
-                      search: _stats.search,
-                    );
+        return GestureDetector(
+          onTap: (() {
+            StatsTransactionArgs statsTransactionArgs = StatsTransactionArgs(
+              type: type,
+              categoryId: data[index].categoryId,
+              categoryName: data[index].categoryName,
+              currency: _stats.currency,
+              walletId: _stats.wallet.id,
+              fromDate: _stats.fromDate,
+              toDate: _stats.toDate,
+              amount: data[index].amount,
+              total: (type == "expense" ? _maxExpense : _maxIncome),
+              name: _stats.name,
+              search: _stats.search,
+            );
 
-                    // go to stats transaction 
-                    Navigator.pushNamed(context, '/stats/detail/transaction', arguments: statsTransactionArgs);
-                  }),
-                  child: BudgetBar(
-                    title: data[index].categoryName,
-                    symbol: ccy,
-                    budgetUsed: (data[index].amount < 0 ? (data[index].amount * (-1)) : data[index].amount),
-                    budgetTotal: (type == "expense" ? _maxExpense : _maxIncome),
-                    icon: (type == "expense" ? IconColorList.getExpenseIcon(data[index].categoryName) : IconColorList.getIncomeIcon(data[index].categoryName)),
-                    iconColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
-                    showLeftText: false,
-                    barColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
-                  ),
-                ),
-              ),
-            ],
-          )
+            // go to stats transaction 
+            Navigator.pushNamed(context, '/stats/detail/transaction', arguments: statsTransactionArgs);
+          }),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            color: Colors.transparent,
+            child: BudgetBar(
+              title: data[index].categoryName,
+              symbol: ccy,
+              budgetUsed: (data[index].amount < 0 ? (data[index].amount * (-1)) : data[index].amount),
+              budgetTotal: (type == "expense" ? _maxExpense : _maxIncome),
+              icon: (type == "expense" ? IconColorList.getExpenseIcon(data[index].categoryName) : IconColorList.getIncomeIcon(data[index].categoryName)),
+              iconColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
+              showLeftText: false,
+              barColor: (type == "expense" ? IconColorList.getExpenseColor(data[index].categoryName) : IconColorList.getIncomeColor(data[index].categoryName)),
+            )
+          ),
         );
       }),
     );
@@ -435,7 +427,6 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  padding: const EdgeInsets.all(2),
                   width: 20,
                   height: 20,
                   decoration: BoxDecoration(
