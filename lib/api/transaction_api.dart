@@ -600,4 +600,48 @@ class TransactionHTTPService {
     TransactionSharedPreferences.setTransactionTop(date: from, type: type, txn: transactionModel);
     return transactionModel;
   }
+
+  Future<TransactionMaxIdModel> fetchMaxID({
+    required int id,
+  }) async {
+    // send the request to get the transaction
+    final String result = await NetUtils.get(
+      url: '${Globals.apiURL}transactions/maxid/$id',
+    ).onError((error, stackTrace) {
+      Log.error(
+        message: 'Error on fetchMaxID',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
+    });
+
+    // parse the result
+    Map<String, dynamic> jsonData = jsonDecode(result);
+    
+    // convert json to get the min and max date
+    TransactionMaxIdModel ret = TransactionMaxIdModel.fromJson(jsonData);
+    return ret;
+  }
+
+  Future<List<TransactionUnsyncDateModel>> fetchUnsyncDate({
+    required int id,
+  }) async {
+    // send the request to get the transaction
+    final String result = await NetUtils.get(
+      url: '${Globals.apiURL}transactions/unsync/$id',
+    ).onError((error, stackTrace) {
+      Log.error(
+        message: 'Error on fetchUnsyncDate',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
+    });
+
+    // parse the result and return the transaction list
+    List<dynamic> jsonData = jsonDecode(result);
+    List<TransactionUnsyncDateModel> transactionModel = jsonData.map((e) => TransactionUnsyncDateModel.fromJson(e)).toList();
+    return transactionModel;
+  }
 }

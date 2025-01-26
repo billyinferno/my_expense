@@ -388,7 +388,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         }
       }
 
-      // lastly check whether the date being used on the transaction
+      // check whether the date being used on the transaction
       // is more or lesser than the max and min date?
       DateTime minDate = TransactionSharedPreferences.getTransactionMinDate();
       DateTime maxDate = TransactionSharedPreferences.getTransactionMaxDate();
@@ -402,6 +402,12 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // transacion data date.
         TransactionSharedPreferences.setTransactionMaxDate(date: txnAdd.date);
       }
+
+      //TODO: to also stored the current ID as max ID as by right this is should be the new max ID
+      //to avoid any discrepancy we can also try to fetch the next max id to see whether it's
+      //the same as result ID or not, if same the we can just stored the result ID as max ID
+      //if not, then we will need to fetch the rest of the unsync transaction before we set
+      //result ID as max ID.
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error on update information",

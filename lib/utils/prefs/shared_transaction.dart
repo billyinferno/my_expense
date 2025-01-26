@@ -15,6 +15,7 @@ class TransactionSharedPreferences {
   static const _transactionTop = "trx_top";
   static const _transactionStatDateFrom = "trx_stat_date_from";
   static const _transactionStatDateTo = "trx_stat_date_to";
+  static const _transactionMaxID = "trx_max_id";
 
   static Future setTransaction({
     required String date,
@@ -37,6 +38,19 @@ class TransactionSharedPreferences {
     }
     else {
       return null;
+    }
+  }
+
+  static bool checkTransaction(String date) {
+    String key = "${_transactionKey}_$date";
+
+    List<String>? data = MyBox.getStringList(key: key);
+
+    if(data != null) {
+      return true;
+    }
+    else {
+      return false;
     }
   }
 
@@ -501,5 +515,25 @@ class TransactionSharedPreferences {
     }
     
     return (from, to);
+  }
+
+  static Future setMaxID({
+    required int id,
+  }) async {
+    await MyBox.putString(key: _transactionMaxID, value: "$id");
+  }
+
+  static int getMaxID() {
+    String? data = MyBox.getString(key: _transactionMaxID);
+
+    if(data != null) {
+      // try to convert  it to integer
+      int? maxID = int.tryParse(data);
+      return (maxID ?? -1);
+    }
+    else {
+      // default to -1 if no max ID being stored
+      return -1;
+    }
   }
 }

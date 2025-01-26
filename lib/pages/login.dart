@@ -31,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
   late String _type;
   late Color _typeColor;
   late bool _isObscure;
+  late int _maxID;
 
   String _bearerToken = "";
   bool _isTokenExpired = false;
@@ -58,6 +59,10 @@ class _LoginPageState extends State<LoginPage> {
 
     _isLogin = false;
     _isObscure = true;
+
+    // get current max ID
+    _maxID = TransactionSharedPreferences.getMaxID();
+
     _checkIsLogin = _checkLogin();
   }
 
@@ -391,6 +396,27 @@ class _LoginPageState extends State<LoginPage> {
       _pinHTTP.getPin(force: true).then((pin) {
         Log.success(message: "⏳ Fetch user PIN");
       }),
+      _transactionHTTP.fetchMaxID(id: _maxID).then((maxID) async {
+        // ensure maxID from remote is > 0
+        if (maxID.id > 0) {
+          // check ic stored max ID is -1, if so then just store the maxID
+          if (_maxID > 0) {
+            // stored max ID is not less than zero, compare it so we knew that
+            // whether the data in the local storage is sync with server or not?
+            if (_maxID < maxID.id) {
+              Log.info(message: "⏳ Data unsyc (Local MaxID $_maxID, Remote MaxID ${maxID.id}), sync data");
+              await _fetchAndSyncTransaction();
+            }
+          }
+
+          // set the current max ID to shared preferences
+          _maxID = maxID.id;
+          TransactionSharedPreferences.setMaxID(id: _maxID);
+        }
+        else {
+          Log.warning(message: "⚠️ Invalid Remote MaxID retrieved from server");
+        }
+      }),
     ]).then((_) {
       Log.success(message: "💯 Finished");
 
@@ -406,6 +432,34 @@ class _LoginPageState extends State<LoginPage> {
         stackTrace: stackTrace,
       );
     });
+  }
+
+  Future<void> _fetchAndSyncTransaction() async {
+    await _transactionHTTP.fetchUnsyncDate(id: _maxID).then((dateList) async {
+      // check if we have this transaction in our shared preferences or not?
+      // if got the we will need to refresh the transaction, if not we can just
+      // ignore, as we will fetch it when open the transaction date.
+      String txnDate;
+
+      for(int i=0; i<dateList.length; i++) {
+        txnDate = Globals.dfyyyyMMdd.formatLocal(dateList[i].date);
+        if (TransactionSharedPreferences.checkTransaction(txnDate)) {
+          Log.info(message: " ℹ️ Fetch for $txnDate");
+          // we have this transaction in cache, refresh the transaction
+          await _transactionHTTP.fetchTransaction(
+            date: txnDate,
+            force: true
+          ).then((result) {
+            // stored this to local storage
+            Log.success(message: " ℹ️ Fetch for $txnDate");
+            TransactionSharedPreferences.setTransaction(
+              date: txnDate,
+              txn: result,
+            );
+          },);
+        }
+      }
+    },);
   }
 
   Future<void> _fetchAllBudget() async {
