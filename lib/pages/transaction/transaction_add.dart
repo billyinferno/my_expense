@@ -402,12 +402,6 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
         // transacion data date.
         TransactionSharedPreferences.setTransactionMaxDate(date: txnAdd.date);
       }
-
-      //TODO: to also stored the current ID as max ID as by right this is should be the new max ID
-      //to avoid any discrepancy we can also try to fetch the next max id to see whether it's
-      //the same as result ID or not, if same the we can just stored the result ID as max ID
-      //if not, then we will need to fetch the rest of the unsync transaction before we set
-      //result ID as max ID.
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error on update information",
@@ -416,5 +410,22 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       );
       throw Exception(error.toString());
     });
+
+    // fetch the maxID from server to see what is current maxID on the server
+    int currentMaxId = txnAdd.id;
+    await _transactionHttp.fetchMaxID(id: txnAdd.id).then((maxID) {
+      // check if the ID is the same or not?
+      if (maxID.id != currentMaxId) {
+        // this is impossible, so just log warning message
+        Log.warning(message: "Server maxID (${maxID.id}) is different with Transaction Add ID ($currentMaxId)");
+        // force the maxID with the biggest one
+        if (maxID.id > currentMaxId) {
+          currentMaxId = maxID.id;
+        }
+      }
+    },).whenComplete(() {
+      // stored the max ID to the shared preferences.
+      TransactionSharedPreferences.setMaxID(id: currentMaxId);
+    },);
   }
 }

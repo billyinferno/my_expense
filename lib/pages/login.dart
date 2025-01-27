@@ -414,7 +414,7 @@ class _LoginPageState extends State<LoginPage> {
           TransactionSharedPreferences.setMaxID(id: _maxID);
         }
         else {
-          Log.warning(message: "⚠️ Invalid Remote MaxID retrieved from server");
+          Log.info(message: "⚠️ Invalid Remote MaxID retrieved from server");
         }
       }),
     ]).then((_) {
