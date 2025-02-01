@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "my_expense" "\0"
+            VALUE "CompanyName", "xyz.adimartha" "\0"
+            VALUE "FileDescription", "Manage your income and expense" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "my_expense" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "my_expense.exe" "\0"
-            VALUE "ProductName", "my_expense" "\0"
+            VALUE "InternalName", "myExpense" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 adimartha. All rights reserved." "\0"
+            VALUE "OriginalFilename", "myExpense.exe" "\0"
+            VALUE "ProductName", "myExpense" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

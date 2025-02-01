@@ -388,7 +388,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.myExpense.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/my_expense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/my_expense";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/myExpense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/my_expense";
 			};
 			name = Debug;
 		};
@@ -402,7 +402,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.myExpense.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/my_expense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/my_expense";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/myExpense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/my_expense";
 			};
 			name = Release;
 		};
@@ -416,7 +416,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.myExpense.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/my_expense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/my_expense";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/myExpense.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/my_expense";
 			};
 			name = Profile;
 		};
