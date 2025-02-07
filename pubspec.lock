@@ -252,10 +252,10 @@ packages:
     dependency: "direct main"
     description:
       name: hive_ce
-      sha256: "918d3379fafea06d501a161805965f04d0ff164aa3948daeb746b31ed936a51b"
+      sha256: ac66daee46ad46486a1ed12cf91e9d7479c875fb46889be8d2c96b557406647f
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.0"
+    version: "2.10.1"
   hive_ce_flutter:
     dependency: "direct main"
     description:
@@ -380,10 +380,10 @@ packages:
     dependency: transitive
     description:
       name: math_expressions
-      sha256: e32d803d758ace61cc6c4bdfed1226ff60a6a23646b35685670d28b5616139f8
+      sha256: "218dc65bed4726562bb31c53d8daa3cc824664b26fb72d77bc592757edf74ba0"
       url: "https://pub.dev"
     source: hosted
-    version: "2.6.0"
+    version: "2.7.0"
   meta:
     dependency: transitive
     description:
