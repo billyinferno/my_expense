@@ -111,8 +111,12 @@ class _TransactionInputState extends State<TransactionInput> {
   late String _currentWalletToCCY;
 
   late bool _currentClear;
-  late String _currentRepeat;
-  late String _repeatType;
+  late String _currentTransactionRepeatType;
+  late String _currentRepeatType;
+  late int _currentRepeat;
+  late int _currentTimes;
+  late List<double> _amountList;
+  late bool _fullAmount;
 
   late double _currentExchangeRate;
 
@@ -167,10 +171,10 @@ class _TransactionInputState extends State<TransactionInput> {
     _currentClear = true;
 
     // set repeat as single
-    _currentRepeat = 'single';
+    _currentTransactionRepeatType = 'single';
 
     // default repeat type as month
-    _repeatType = 'month';
+    _currentRepeatType = 'month';
 
     // initialize the filter list and get the last expense and income
     // transaction to build the auto complete
@@ -232,6 +236,10 @@ class _TransactionInputState extends State<TransactionInput> {
     // default the repeat and times
     _repeatController.text = "1";
     _timesController.text = "3";
+    _currentRepeat = 1;
+    _currentTimes = 3;
+    _amountList = [];
+    _fullAmount = false;
 
     // set default user from and to
     _getUserFromWalletInfo(walletId: _userMe.defaultWallet);
@@ -917,6 +925,9 @@ class _TransactionInputState extends State<TransactionInput> {
                     setState(() {
                       // set the current amount as previous current amount if value is null
                       _currentAmount = (value ?? _currentAmount);
+
+                      // generate the list amount
+                      _generateListAmount();
                     });
                   },
                 ),
@@ -1317,14 +1328,14 @@ class _TransactionInputState extends State<TransactionInput> {
               color: textColor,
             ),
             const SizedBox(width: 10,),
-            Expanded(child: Text("${_currentRepeat.substring(0,1).toUpperCase()}${_currentRepeat.substring(1).toLowerCase()}")),
+            Expanded(child: Text("${_currentTransactionRepeatType.substring(0,1).toUpperCase()}${_currentTransactionRepeatType.substring(1).toLowerCase()}")),
             const SizedBox(width: 10,),
             SizedBox(
               width: 80,
               child: TypeSlide<String>(
                 onValueChanged: ((value) {
                   setState(() {                
-                    _currentRepeat = value;
+                    _currentTransactionRepeatType = value;
                   });
                 }),
                 items: _txnSingleRepeatItem,
@@ -1339,98 +1350,345 @@ class _TransactionInputState extends State<TransactionInput> {
 
     ret.add(
       AnimationExpand(
-        expand: _currentRepeat == 'repeat',
-        child: SizedBox(
-          height: 50,
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Text("Every"),
-                const SizedBox(width: 10,),
-                Container(
-                  width: 50,
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: secondaryBackground,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: TextFormField(
-                    controller: _repeatController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                    cursorColor: primaryLight,
-                    decoration: const InputDecoration(
-                      hintText: "1",
-                      hintStyle: TextStyle(
-                        color: primaryLight,
-                      ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: EdgeInsets.zero,
-                      isCollapsed: true,
+        expand: _currentTransactionRepeatType == 'repeat',
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Text("Every"),
+                  const SizedBox(width: 10,),
+                  Container(
+                    width: 50,
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: secondaryBackground,
+                      borderRadius: BorderRadius.circular(25),
                     ),
-                    style: const TextStyle(
-                      fontSize: 15,
-                    ),
-                    textAlign: TextAlign.center,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(3),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10,),
-                MySelector(
-                  data: _repeatMap,
-                  initialKeys: "month",
-                  onChange: ((key) {
-                    _repeatType = key;
-                  }),
-                ),
-                const SizedBox(width: 10,),
-                Container(
-                  width: 50,
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: secondaryBackground,
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: TextFormField(
-                    controller: _timesController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: false),
-                    cursorColor: primaryLight,
-                    decoration: const InputDecoration(
-                      hintText: "1",
-                      hintStyle: TextStyle(
-                        color: primaryLight,
+                    child: TextFormField(
+                      controller: _repeatController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                      cursorColor: primaryLight,
+                      decoration: const InputDecoration(
+                        hintText: "2",
+                        hintStyle: TextStyle(
+                          color: primaryLight,
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        isCollapsed: true,
                       ),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
+                      style: const TextStyle(
+                        fontSize: 15,
                       ),
-                      contentPadding: EdgeInsets.zero,
-                      isCollapsed: true,
+                      textAlign: TextAlign.center,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(3),
+                      ],
+                      onChanged: ((value) {
+                        setState(() {                      
+                          // convert the current times
+                          _currentRepeat = (int.tryParse(value) ?? 0);
+                          _generateListAmount();
+                        });
+                      }),
                     ),
-                    style: const TextStyle(
-                      fontSize: 15,
-                    ),
-                    textAlign: TextAlign.center,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(3),
-                    ],
                   ),
-                ),
-                const SizedBox(width: 10,),
-                Text("times"),
-              ],
-            )
-          ),
+                  const SizedBox(width: 10,),
+                  MySelector(
+                    data: _repeatMap,
+                    initialKeys: "month",
+                    onChange: ((key) {
+                      setState(() {                        
+                        _currentRepeatType = key;
+                        _generateListAmount();
+                      });
+                    }),
+                  ),
+                  const SizedBox(width: 10,),
+                  Container(
+                    width: 50,
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: secondaryBackground,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: TextFormField(
+                      controller: _timesController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                      cursorColor: primaryLight,
+                      decoration: const InputDecoration(
+                        hintText: "1",
+                        hintStyle: TextStyle(
+                          color: primaryLight,
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: EdgeInsets.zero,
+                        isCollapsed: true,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 15,
+                      ),
+                      textAlign: TextAlign.center,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(3),
+                      ],
+                      onChanged: ((value) {
+                        setState(() {                      
+                          // convert the current times
+                          _currentTimes = (int.tryParse(value) ?? 0);
+                          _generateListAmount();
+                        });
+                      }),
+                    ),
+                  ),
+                  const SizedBox(width: 10,),
+                  Text("times"),
+                ],
+              ),
+              const SizedBox(height: 5,),
+              Row(
+                children: [
+                  const Expanded(child: Text("Same amount transaction")),
+                  CupertinoSwitch(
+                    value: _fullAmount,
+                    activeTrackColor: accentColors[0],
+                    inactiveTrackColor: primaryLight,
+                    onChanged: (_isDisabled ? null : (value) {
+                      setState(() {
+                        _fullAmount = value;
+                        _generateListAmount();
+                      });
+                    }),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5,),
+              _paymentList(),
+            ],
+          )
         ),
       )
     );
 
     return ret;
+  }
+
+  Widget _paymentList() {
+    if (_amountList.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    DateTime date = _currentDate;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(
+          color: secondaryLight,
+          width: 1.0,
+          style: BorderStyle.solid,
+        )
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: List<Widget>.generate(_amountList.length, (index) {
+          Border border;
+          if (index < (_amountList.length - 1)) {
+            border = Border(
+              bottom: BorderSide(
+                color: secondaryLight,
+                width: 1.0,
+                style: BorderStyle.solid,
+              )
+            );
+          }
+          else {
+            border = Border();
+          }
+
+          switch(_currentRepeatType) {
+            case "day":
+              date = _currentDate.add(Duration(days: (_currentRepeat * index)));
+              break;
+            case "week":
+              date = _currentDate.add(Duration(days: ((_currentRepeat * index) * 7)));
+              break;
+            case "month":
+              date = DateTime(
+                _currentDate.year,
+                _currentDate.month + index,
+                _currentDate.day
+              );
+              break;
+            case "year":
+              date = DateTime(
+                _currentDate.year + index,
+                _currentDate.month,
+                _currentDate.day
+              );
+              break;
+          }
+
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              border: border,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Expanded(
+                  flex: 1,
+                  child: Center(child: Text("${index + 1}")),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(Globals.dfddMMMyyyy.formatLocal(date)),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    _amountList[index].formatCurrency(shorten: false, decimalNum: 2),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+                const SizedBox(width: 10,),
+                GestureDetector(
+                  onTap: (() {
+                    if (index > 0) {
+                      _swapAmountList(index - 1, index);
+                    }
+                  }),
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    color: Colors.transparent,
+                    child: Center(
+                      child: Icon(
+                        Ionicons.caret_up,
+                        size: 15,
+                        color: secondaryLight,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 5,),
+                GestureDetector(
+                  onTap: (() {
+                    if (index < (_amountList.length - 1)) {
+                      _swapAmountList(index, index + 1);
+                    }
+                  }),
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    color: Colors.transparent,
+                    child: Center(
+                      child: Icon(
+                        Ionicons.caret_down,
+                        size: 15,
+                        color: secondaryLight,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },),
+      ),
+    );
+  }
+
+  void _swapAmountList(int a, int b) {
+    if (_amountList.isNotEmpty) {
+      if (_amountList.length >= a && (b < _amountList.length)) {
+        setState(() {
+          double tmp = _amountList[a];
+          _amountList[a] = _amountList[b];
+          _amountList[b] = tmp;
+          
+        });
+      }
+    }
+  }
+
+  void _generateListAmount() {
+    // ensure times more than 0
+    if (
+        _currentAmount > 0 &&
+        _currentTimes > 1 &&
+        _currentRepeat > 0
+      ) {
+      // clear the list amount
+      _amountList.clear();
+
+      // check if the full amount is true or not?
+      if (_fullAmount) {
+        _amountList = List<double>.generate(_currentTimes, (index) {
+          return _currentAmount;
+        },);
+      }
+      else {
+        // get the calculated amount
+        double paymentAmount = _currentAmount / _currentTimes;
+
+        // now format the amount to double digit only
+        String paymentAmountString = paymentAmount.toStringAsFixed(2);
+        // convertt back from string to double
+        try {
+          paymentAmount = double.parse(paymentAmountString);
+
+          // generate the list amount
+          _amountList = List<double>.generate(_currentTimes, (index) {
+            return paymentAmount;
+          },);
+
+          // now calculate if the total payment amount equal with the total amount
+          // we need to put
+          double totalPaymentAmount = paymentAmount * _currentTimes;
+
+          double addSubPayment = 0.01;
+          if (totalPaymentAmount > _currentAmount) {
+            addSubPayment = -0.01;
+          }
+
+          int i = 0;
+          while(_currentAmount != totalPaymentAmount && i < _amountList.length) {
+            // check if i is odd
+            if ((i % 2 == 1)) {
+              _amountList[i] = paymentAmount + addSubPayment;
+            }
+
+            // check current totalPaymentAmount
+            totalPaymentAmount = 0;
+            for (double amount in _amountList) {
+              totalPaymentAmount = totalPaymentAmount + amount;
+            }
+
+            // next i
+            i = i + 1;
+          }
+        }
+        catch(e) {
+          throw Exception("Error when convert the payment amount");
+        }
+      }
+    }
   }
 
   void _filterAutoComplete(String lookup) {
@@ -1591,9 +1849,6 @@ class _TransactionInputState extends State<TransactionInput> {
     DateTime txnDate = _currentDate;
     String description = _descriptionController.text.trim();
 
-    int times = 1;
-    int repeat = 1;
-
     // if this is expense or income, check for name and category
     if (_currentType == 'expense' || _currentType == 'income') {
       if (_nameController.text.trim().isEmpty) {
@@ -1615,26 +1870,12 @@ class _TransactionInputState extends State<TransactionInput> {
       }
 
       // check whether this is repeat transaction or not?
-      if (_currentRepeat == 'repeat') {
-        try {
-          times = int.parse(_timesController.text.trim());
-        }
-        catch (error) {
-          throw Exception('Invalid repeat times value');
-        }
-
-        if (times <= 1) {
+      if (_currentTransactionRepeatType == 'repeat') {
+        if (_currentTimes <= 1) {
           throw Exception('Repeat times should be more than 1');
         }
 
-        try {
-          repeat = int.parse(_repeatController.text.trim());
-        }
-        catch (error) {
-          throw Exception('Invalid repeat value');
-        }
-
-        if (repeat <= 0) {
+        if (_currentRepeat <= 0) {
           throw Exception('Repeat value should be more than 0');
         }
       }
@@ -1694,13 +1935,68 @@ class _TransactionInputState extends State<TransactionInput> {
       }
     }
 
-    // loop thru times
-    for(int i=0; i<times; i++) {
-      // if times more than 1, add description automatically
-      if (times > 1) {
-        description = '${_nameController.text.trim()} transaction ${i+1} of $times\n${_descriptionController.text.trim()}';
-      }
+    // check if we have single transaction or multiple transaction?
+    if (
+        _currentTransactionRepeatType == 'repeat' &&
+        _currentTimes > 1 &&
+        _currentRepeat > 0 &&
+        _currentType != 'transfer'
+      ) {
+      if (_currentTimes == _amountList.length) {
+        // loop thru times
+        for(int i=0; i<_currentTimes; i++) {
+          // if times more than 1, add description automatically
+          if (_currentTimes > 1) {
+            description = '${_nameController.text.trim()} transaction ${i+1} of $_currentTimes\n${_descriptionController.text.trim()}';
+          }
 
+          // generate the transaction model
+          ret.add(
+            TransactionModel(
+              _nameController.text.trim(),
+              _currentType,
+              category,
+              txnDate,
+              walletFrom,
+              _currentClear,
+              description,
+              usersPermissionsUser,
+              _amountList[i],
+              walletTo,
+              _currentExchangeRate
+            )
+          );
+
+          // generate the next date
+          switch(_currentRepeatType) {
+            case "day":
+              txnDate = txnDate.add(Duration(days: _currentRepeat));
+              break;
+            case "week":
+              txnDate = txnDate.add(Duration(days: (_currentRepeat * 7)));
+              break;
+            case "month":
+              txnDate = DateTime(
+                txnDate.year,
+                txnDate.month + 1,
+                txnDate.day
+              );
+              break;
+            case "year":
+              txnDate = DateTime(
+                txnDate.year + 1,
+                txnDate.month,
+                txnDate.day
+              );
+              break;
+          }
+        }
+      }
+      else {
+        throw Exception('Amount list is not yet generated');
+      }
+    }
+    else {
       // generate the transaction model
       ret.add(
         TransactionModel(
@@ -1717,32 +2013,6 @@ class _TransactionInputState extends State<TransactionInput> {
           _currentExchangeRate
         )
       );
-
-      // check if times is > 1, if more than 1 then calculate the next date
-      if (times > 1) {
-        switch(_repeatType) {
-          case "day":
-            txnDate = txnDate.add(Duration(days: repeat));
-            break;
-          case "week":
-            txnDate = txnDate.add(Duration(days: (repeat * 7)));
-            break;
-          case "month":
-            txnDate = DateTime(
-              txnDate.year,
-              txnDate.month + 1,
-              txnDate.day
-            );
-            break;
-          case "year":
-            txnDate = DateTime(
-              txnDate.year + 1,
-              txnDate.month,
-              txnDate.day
-            );
-            break;
-        }
-      }
     }
 
     return ret;
