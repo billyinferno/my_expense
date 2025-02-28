@@ -1628,64 +1628,67 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   void _generateListAmount() {
-    // ensure times more than 0
-    if (
-        _currentAmount > 0 &&
-        _currentTimes > 1 &&
-        _currentRepeat > 0
-      ) {
-      // clear the list amount
-      _amountList.clear();
+    // only do for transaction add
+    if (widget.type == TransactionInputType.add) {
+      // ensure times more than 0
+      if (
+          _currentAmount > 0 &&
+          _currentTimes > 1 &&
+          _currentRepeat > 0
+        ) {
+        // clear the list amount
+        _amountList.clear();
 
-      // check if the full amount is true or not?
-      if (_fullAmount) {
-        _amountList = List<double>.generate(_currentTimes, (index) {
-          return _currentAmount;
-        },);
-      }
-      else {
-        // get the calculated amount
-        double paymentAmount = _currentAmount / _currentTimes;
-
-        // now format the amount to double digit only
-        String paymentAmountString = paymentAmount.toStringAsFixed(2);
-        // convertt back from string to double
-        try {
-          paymentAmount = double.parse(paymentAmountString);
-
-          // generate the list amount
+        // check if the full amount is true or not?
+        if (_fullAmount) {
           _amountList = List<double>.generate(_currentTimes, (index) {
-            return paymentAmount;
+            return _currentAmount;
           },);
-
-          // now calculate if the total payment amount equal with the total amount
-          // we need to put
-          double totalPaymentAmount = paymentAmount * _currentTimes;
-
-          double addSubPayment = 0.01;
-          if (totalPaymentAmount > _currentAmount) {
-            addSubPayment = -0.01;
-          }
-
-          int i = 0;
-          while(_currentAmount != totalPaymentAmount && i < _amountList.length) {
-            // check if i is odd
-            if ((i % 2 == 1)) {
-              _amountList[i] = paymentAmount + addSubPayment;
-            }
-
-            // check current totalPaymentAmount
-            totalPaymentAmount = 0;
-            for (double amount in _amountList) {
-              totalPaymentAmount = totalPaymentAmount + amount;
-            }
-
-            // next i
-            i = i + 1;
-          }
         }
-        catch(e) {
-          throw Exception("Error when convert the payment amount");
+        else {
+          // get the calculated amount
+          double paymentAmount = _currentAmount / _currentTimes;
+
+          // now format the amount to double digit only
+          String paymentAmountString = paymentAmount.toStringAsFixed(2);
+          // convertt back from string to double
+          try {
+            paymentAmount = double.parse(paymentAmountString);
+
+            // generate the list amount
+            _amountList = List<double>.generate(_currentTimes, (index) {
+              return paymentAmount;
+            },);
+
+            // now calculate if the total payment amount equal with the total amount
+            // we need to put
+            double totalPaymentAmount = paymentAmount * _currentTimes;
+
+            double addSubPayment = 0.01;
+            if (totalPaymentAmount > _currentAmount) {
+              addSubPayment = -0.01;
+            }
+
+            int i = 0;
+            while(_currentAmount != totalPaymentAmount && i < _amountList.length) {
+              // check if i is odd
+              if ((i % 2 == 1)) {
+                _amountList[i] = paymentAmount + addSubPayment;
+              }
+
+              // check current totalPaymentAmount
+              totalPaymentAmount = 0;
+              for (double amount in _amountList) {
+                totalPaymentAmount = totalPaymentAmount + amount;
+              }
+
+              // next i
+              i = i + 1;
+            }
+          }
+          catch(e) {
+            throw Exception("Error when convert the payment amount");
+          }
         }
       }
     }
