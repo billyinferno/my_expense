@@ -201,6 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       const Text("Username"),
                       const SizedBox(
@@ -209,6 +210,9 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         controller: _usernameController,
                         focusNode: _usernameFocus,
+                        textAlignVertical: TextAlignVertical.center,
+                        cursorColor: primaryBackground,
+                        cursorErrorColor: accentColors[2],
                         validator: ((val) {
                           if (val!.isNotEmpty) {
                             return null;
@@ -221,8 +225,6 @@ class _LoginPageState extends State<LoginPage> {
                             FocusScope.of(context).requestFocus(_usernameFocus);
                           });
                         }),
-                        cursorColor: primaryBackground,
-                        cursorErrorColor: accentColors[2],
                         decoration: InputDecoration(
                           hintText: "username",
                           hintStyle: TextStyle(
