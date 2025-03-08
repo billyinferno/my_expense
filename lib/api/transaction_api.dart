@@ -386,7 +386,7 @@ class TransactionHTTPService {
     required int limit,
     required int start
   }) async {
-    String url = '${Globals.apiURL}transactions/search/type/$type';
+    String url = '${Globals.apiURL}transactions/search/v2/type/$type';
     
     // check the type, if both then add both name and category, if name then only name, if category then only category
     if (type == "name" || type == "both") {
