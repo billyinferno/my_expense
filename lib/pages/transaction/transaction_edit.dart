@@ -65,7 +65,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     );
   }
 
-  Future<void> _saveTransaction(TransactionModel? txn) async {
+  Future<void> _saveTransaction(TransactionModel txn) async {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
@@ -73,7 +73,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     // are any changes on the date of the transaction. If there are changes
     // then it means we need to manipulate 2 shared preferences instead of one.
     await _transactionHttp.updateTransaction(
-      txn: txn!,
+      txn: txn,
       prevTxn: _paramsData
     ).then((txnUpdate) async {
       // update necessary information after we add the transaction

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:my_expense/_index.g.dart';
 
 class TransactionListModel {
@@ -75,6 +77,9 @@ class TransactionListModel {
     "exchange_rate": exchangeRate,
   };
 }
+
+List<TransactionListModel> multiTransactionListModelFromJson(String str) => List<TransactionListModel>.from(json.decode(str).map((x) => TransactionListModel.fromJson(x)));
+String createMultiTransactionModel(List<TransactionModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class CategoryTransactionModel {
   final int id;

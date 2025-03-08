@@ -84,7 +84,6 @@ class TransactionHTTPService {
 
   Future<TransactionListModel> addTransaction({
     required TransactionModel txn,
-    required DateTime selectedDate
   }) async {
     String date = Globals.dfyyyyMMdd.formatLocal(txn.date);
 
@@ -122,6 +121,51 @@ class TransactionHTTPService {
 
     // return from the proc
     return txnAdd;
+  }
+
+  Future<List<TransactionListModel>> addMultiTransaction({
+    required List<TransactionModel> txn,
+  }) async {
+    // send the request to add the transaction
+    final String result = await NetUtils.postString(
+      url: '${Globals.apiURL}transactions/adds',
+      body: createMultiTransactionModel(txn)
+    ).onError((error, stackTrace) {
+      Log.error(
+        message: 'Error on addTransaction',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
+    });
+
+    // fetch the added data and put it into TransactionListModel
+    List<TransactionListModel> txnAdds = multiTransactionListModelFromJson(result);
+
+    // loop thru txnAdds to get all the transaction we added
+    String date;
+    List<TransactionListModel>? txnListShared;
+    for(int i=0; i<txnAdds.length; i++) {
+      // get the date for current transaction
+      date = Globals.dfyyyyMMdd.formatLocal(txn[i].date);
+
+      // now we get the information of the transaction we add, we can directly
+      // get the data from the sharedPreferences, add the new one and then
+      // store back to the sharedPreferences
+      txnListShared = (TransactionSharedPreferences.getTransaction(date) ?? []);
+
+      // add the new transaction that we add
+      txnListShared.add(txnAdds[i]);
+
+      // and set back this shared preferences
+      await TransactionSharedPreferences.setTransaction(
+        date: date,
+        txn: txnListShared
+      );
+    }
+
+    // return from the proc
+    return txnAdds;
   }
 
   Future<List<TransactionListModel>> fetchTransaction({

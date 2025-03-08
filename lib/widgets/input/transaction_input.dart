@@ -311,7 +311,7 @@ class _TransactionInputState extends State<TransactionInput> {
                 // call parent save, all the handler on the async call should be
                 // coming from the parent instead here.
                 try {
-                  List<TransactionModel?> gen = [];
+                  List<TransactionModel> gen = [];
 
                   // default isOkay to false
                   bool isOkay = false;
@@ -356,8 +356,8 @@ class _TransactionInputState extends State<TransactionInput> {
                     // they want to save all transaction or not?
                     isOkay = false;
 
-                    DateTime firstDate = gen[0]!.date;
-                    DateTime lastDate = gen[gen.length-1]!.date;
+                    DateTime firstDate = gen[0].date;
+                    DateTime lastDate = gen[gen.length-1].date;
 
                     if (context.mounted) {                        
                       late Future<bool?> result = ShowMyDialog(
@@ -1841,8 +1841,8 @@ class _TransactionInputState extends State<TransactionInput> {
     }
   }
 
-  List<TransactionModel?> _generateTransaction() {
-    List<TransactionModel?> ret = [];
+  List<TransactionModel> _generateTransaction() {
+    List<TransactionModel> ret = [];
     
     double? currentAmount;
     WalletCategoryTransactionModel? category;
