@@ -233,6 +233,99 @@ class NetUtils {
     }
   }
 
+  static Future postString({
+    required String url,
+    Map<String, dynamic>? params,
+    required String body,
+    bool? requiredJWT
+  }) async {
+    // check the JWT requirement
+    bool isRequiredJWT = (requiredJWT ?? true);
+    
+    // default the headers value as empty
+    Map<String, String> headers = {};
+
+    // check if we need JWT on the request or not?
+    if (isRequiredJWT) {
+      // check if bearer token is null? if null then get from UserSharedPreferences
+      bearerToken ??= UserSharedPreferences.getJWT();
+
+      // check to ensure it's not empty
+      if (bearerToken == null) {
+        throw const NetException(
+          code: 403,
+          type: NetType.initialize,
+          message: "Bearer token empty"
+        );
+      }
+
+      // set the headers with bearer token
+      headers = {
+        HttpHeaders.authorizationHeader: "Bearer $bearerToken",
+        'Content-Type': 'application/json',
+      };
+    }
+    else {
+      // set the headers with content type only
+      headers = {
+        'Content-Type': 'application/json',
+      };
+    }
+
+    // generate the additional params
+    var uri = Uri.parse(url);
+    if (params != null) {
+      uri = uri.replace(queryParameters: params);
+    }
+
+    // bearer token is not empty, we can perform call to the API
+    try {
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: body
+      ).timeout(
+        Duration(seconds: Globals.apiTimeOut),
+        onTimeout: () {
+          throw NetException(
+            code: 504,
+            type: NetType.post,
+            message: 'Gateway Timeout for $url'
+          );
+        },
+      ).onError((error, _) {
+        throw NetException(
+          code: -2,
+          type: NetType.post,
+          message: '[Exception] ${error.toString()}');
+      },);
+
+      // check the response we got from http
+      if (response.statusCode == 200) {
+        return response.body;
+      }
+
+      // status code is not 200, means we got error
+      throw NetException(
+        code: response.statusCode,
+        type: NetType.post,
+        message: response.reasonPhrase ?? '',
+        body: response.body,
+      );
+    }
+    on http.ClientException catch (error) {
+      throw NetException(
+        code: -1,
+        type: NetType.post,
+        message: '[ClientException] ${error.message}',
+      );
+    }
+    catch (error) {
+      // common error
+      rethrow;
+    }
+  }
+
   /// delete
   /// This is to sending DELETE request to the API Server
   /// Parameter needed for this are:

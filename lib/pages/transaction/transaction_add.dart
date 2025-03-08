@@ -55,20 +55,75 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     );
   }
 
-  Future<void> _saveTransaction(List<TransactionModel?> transactions) async {
+  Future<void> _saveTransaction(List<TransactionModel> transactions) async {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
-    for(TransactionModel? txn in transactions) {
+    if (transactions.length > 1) {
+      // multi transaction we add in batch
+      await _transactionHttp.addMultiTransaction(
+        txn: transactions,
+      ).then((results) async {
+        for(TransactionListModel result in results) {
+          // update necessary information after we add the transaction
+          await _updateInformation(result).then((_) {
+            // get the transaction edit date
+            String date = Globals.dfyyyyMMdd.formatLocal(result.date);
+
+            // get the transaction list from this date
+            List<TransactionListModel> txnListShared =
+              (TransactionSharedPreferences.getTransaction(date) ?? []);
+
+            // for transaction that actually add on the different date, we cannot notify the home list
+            // to show this transaction, because currently we are in a different date between the transaction
+            // being add and the date being selected on the home list
+            if (
+              result.date.isSameDate(date: _selectedDate) &&
+              mounted
+            ) {
+              Provider.of<HomeProvider>(
+                context,
+                listen: false
+              ).setTransactionList(transactions: txnListShared);
+            }
+          }).onError((error, stackTrace) async {
+            // remove the loading screen
+            LoadingScreen.instance().hide();
+
+            // print the error
+            Log.error(
+              message: "Error when refresh transaction after save",
+              error: error,
+              stackTrace: stackTrace,
+            );
+
+            throw Exception("Error when refresh information.");
+          });
+        }
+      }).onError((error, stackTrace) async {
+        // remove the loading screen
+        LoadingScreen.instance().hide();
+        
+        // print the error
+        Log.error(
+          message: "Error when add transaction",
+          error: error,
+          stackTrace: stackTrace,
+        );
+
+        throw Exception("Error when add transaction.");
+      });
+    }
+    else {
+      // single transaction only
       // now we can try to send updated data to the backend
       await _transactionHttp.addTransaction(
-        txn: txn!,
-        selectedDate: _selectedDate
+        txn: transactions[0],
       ).then((result) async {
         // update necessary information after we add the transaction
         await _updateInformation(result).then((_) {
           // get the transaction edit date
-          String date = Globals.dfyyyyMMdd.formatLocal(txn.date);
+          String date = Globals.dfyyyyMMdd.formatLocal(result.date);
 
           // get the transaction list from this date
           List<TransactionListModel> txnListShared =
@@ -78,7 +133,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           // to show this transaction, because currently we are in a different date between the transaction
           // being add and the date being selected on the home list
           if (
-            txn.date.isSameDate(date: _selectedDate) &&
+            transactions[0].date.isSameDate(date: _selectedDate) &&
             mounted
           ) {
             Provider.of<HomeProvider>(
@@ -87,6 +142,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
             ).setTransactionList(transactions: txnListShared);
           }
         }).onError((error, stackTrace) async {
+          // remove the loading screen
+          LoadingScreen.instance().hide();
+          
           // print the error
           Log.error(
             message: "Error when refresh transaction after save",
@@ -97,6 +155,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           throw Exception("Error when refresh information.");
         });
       }).onError((error, stackTrace) async {
+        // remove the loading screen
+        LoadingScreen.instance().hide();
+        
         // print the error
         Log.error(
           message: "Error when add transaction",
