@@ -1024,6 +1024,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       });
     }
 
+    //TODO: sort summary list name and summary list category based on name and category ID
+
     // check if summary income is not empty
     if (_summaryIncome.isNotEmpty) {
       // add the income bar on the _summaryListName
