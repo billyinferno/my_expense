@@ -383,8 +383,6 @@ class TransactionHTTPService {
     required String type,
     required String name,
     required String category,
-    required int limit,
-    required int start
   }) async {
     String url = '${Globals.apiURL}transactions/search/v2/type/$type';
     
@@ -398,7 +396,7 @@ class TransactionHTTPService {
 
     // send the request to find transaction
     final String result = await NetUtils.get(
-      url: '$url?_limit=$limit&_start=$start',
+      url: url,
     ).onError((error, stackTrace) {
       Log.error(
         message: 'Error on findTransaction',

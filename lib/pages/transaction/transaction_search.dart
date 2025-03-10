@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -28,8 +30,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final ScrollController _scrollControllerTransfer = ScrollController();
   final ScrollController _walletController = ScrollController();
 
-  //TODO: to change API service to not using limit as we are not going perform lazy loading on the transaction search
-  final int _limit = 99999; // make it to 99999 (just fetch everything, IO is not a concern)
   final ScrollController _categoryController = ScrollController();
 
   final Map<SummaryType, TypeSlideItem> _summaryItems = <SummaryType, TypeSlideItem> {
@@ -54,7 +54,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   String _searchText = "";
   String _categoryId = "";
   String _type = "name";
-  int _start = 0; // start from 0 page
 
   int _resultPage = 1;
   PageName _resultPageName = PageName.all;
@@ -73,20 +72,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   late List<TransactionListModel> _expenseSort;
   late List<TransactionListModel> _transferSort;
 
-  final Map<String, List<TransactionListModel>> _summaryIncome = {};
-  final Map<String, List<TransactionListModel>> _summaryIncomeCategory = {};
-  final Map<String, Map<String, TransactionListModel>> _subSummaryIncome = {};
-  final Map<String, Map<String, TransactionListModel>> _subSummaryIncomeCategory = {};
+  final SplayTreeMap<String, List<TransactionListModel>> _summaryIncome = SplayTreeMap<String, List<TransactionListModel>>();
+  final SplayTreeMap<String, List<TransactionListModel>> _summaryIncomeCategory = SplayTreeMap<String, List<TransactionListModel>>();
   
-  final Map<String, List<TransactionListModel>> _summaryExpense = {};
-  final Map<String, List<TransactionListModel>> _summaryExpenseCategory = {};
-  final Map<String, Map<String, TransactionListModel>> _subSummaryExpense = {};
-  final Map<String, Map<String, TransactionListModel>> _subSummaryExpenseCategory = {};
+  final SplayTreeMap<String, List<TransactionListModel>> _summaryExpense = SplayTreeMap<String, List<TransactionListModel>>();
+  final SplayTreeMap<String, List<TransactionListModel>> _summaryExpenseCategory = SplayTreeMap<String, List<TransactionListModel>>();
   
-  final Map<String, List<TransactionListModel>> _summaryTransfer = {};
-  final Map<String, List<TransactionListModel>> _summaryTransferCategory = {};
-  final Map<String, Map<String, TransactionListModel>> _subSummaryTransfer = {};
-  final Map<String, Map<String, TransactionListModel>> _subSummaryTransferCategory = {};
+  final SplayTreeMap<String, List<TransactionListModel>> _summaryTransfer = SplayTreeMap<String, List<TransactionListModel>>();
+  final SplayTreeMap<String, List<TransactionListModel>> _summaryTransferCategory = SplayTreeMap<String, List<TransactionListModel>>();
 
   final Map<String, double> _totalAmountTransfer = {};
   late Map<String, double> _totalAmountIncome;
@@ -660,11 +653,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   void _groupTransactions() {
-    double amount;
-    DateTime? startDate;
-    DateTime? endDate;
-    int count;
-
     // clear all the income, expense, and transfer
     _income.clear();
     _expense.clear();
@@ -672,27 +660,18 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     _summaryIncome.clear();
     _summaryIncomeCategory.clear();
-    _subSummaryIncome.clear();
-    _subSummaryIncomeCategory.clear();
     _totalAmountIncome.clear();
 
     _summaryExpense.clear();
     _summaryExpenseCategory.clear();
-    _subSummaryExpense.clear();
-    _subSummaryExpenseCategory.clear();
     _totalAmountExpense.clear();
 
     _summaryTransfer.clear();
     _summaryTransferCategory.clear();
-    _subSummaryTransfer.clear();
-    _subSummaryTransferCategory.clear();
     _totalAmountTransfer.clear();
 
     String summaryKey = "";
     String summaryKeyCategory = "";
-    String subSummaryKey = "";
-
-    TransactionListModel tmpSubSummaryData;
 
     // now compute the summary data so we can showed it on the summary page
     // based on the income, and expense
@@ -702,11 +681,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         _filterTransactions[i].type == 'expense' ||
         _filterTransactions[i].type == 'income'
       ) {
-        summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : ''}_${_filterTransactions[i].name}_${_filterTransactions[i].wallet.currency}";
-        summaryKeyCategory = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].category!.name}_${_filterTransactions[i].wallet.currency}";
+        summaryKey = "${_filterTransactions[i].wallet.currency}_${_filterTransactions[i].category != null ? _filterTransactions[i].category!.name : ''}_${_filterTransactions[i].name}_${_filterTransactions[i].type.toLowerCase()}";
+        summaryKeyCategory = "${_filterTransactions[i].wallet.currency}_${_filterTransactions[i].category!.name}_${_filterTransactions[i].type.toLowerCase()}";
       } else {
-        summaryKey = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].wallet.name}_${_filterTransactions[i].wallet.currency}";
-        summaryKeyCategory = "${_filterTransactions[i].type.toLowerCase()}_${_filterTransactions[i].wallet.currency}_${_filterTransactions[i].walletTo!.currency}";
+        summaryKey = "${_filterTransactions[i].wallet.currency}_${_filterTransactions[i].walletTo!.currency}_${_filterTransactions[i].wallet.name}_${_filterTransactions[i].type.toLowerCase()}";
+        summaryKeyCategory = "${_filterTransactions[i].wallet.currency}_${_filterTransactions[i].walletTo!.currency}_${_filterTransactions[i].type.toLowerCase()}";
       }
 
       // check which transaction is being updated
@@ -799,727 +778,653 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _summaryListCategory.clear();
 
     // check if we have expense or not?
-    if (_summaryExpense.isNotEmpty) {  
+    if (_summaryExpense.isNotEmpty) {
       // add the expense bar on the _summaryListName
-      _summaryListName.add(
-        _generateSummaryBox(
-          title: "Expense",
-          color: accentColors[2],
-          data: _totalAmountExpense
-        )
+      _generateSummaryBox(
+        title: "Expense",
+        color: accentColors[2],
+        data: _totalAmountExpense,
+        listItem: _summaryExpense,
+        widget: _summaryListName,
+        page: PageName.expense,
+        summaryType: SummaryType.name,
       );
-
-      // loop thru all the expense data
-      _summaryExpense.forEach((key, value) {
-        // compute the amount
-        amount = 0;
-        startDate = null;
-        endDate = null;
-        count = 0;
-
-        // create the sub summary expense for this key
-        _subSummaryExpense[key] = {};
-
-        for (TransactionListModel data in value) {
-          if (startDate == null) {
-            startDate = data.date;
-          } else {
-            if (startDate!.isAfter(data.date)) {
-              startDate = data.date;
-            }
-          }
-
-          if (endDate == null) {
-            endDate = data.date;
-          } else {
-            if (endDate!.isBefore(data.date)) {
-              endDate = data.date;
-            }
-          }
-
-          amount += data.amount;
-          count++;
-
-          // add the transaction list on the sub summary list based on the
-          // month and year
-          subSummaryKey = Globals.dfyyyy.format(data.date);
-          
-          // check if subSummaryKey is exists or not?
-          if (!_subSummaryExpense[key]!.containsKey(subSummaryKey)) {
-            // if not exists create the 1st data
-            _subSummaryExpense[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              data.amount,
-              data.exchangeRate
-            );
-          }
-          else {
-            // exists, get the previous data
-            tmpSubSummaryData = _subSummaryExpense[key]![subSummaryKey]!;
-            // and combine it with current data
-            _subSummaryExpense[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              (data.amount + tmpSubSummaryData.amount),
-              data.exchangeRate
-            );
-          }
-        }
-
-        // create TransactionModel based on the value
-        TransactionListModel txn = TransactionListModel(
-          -1,
-          value[0].name,
-          value[0].type,
-          DateTime.now(),
-          '',
-          value[0].category,
-          value[0].wallet,
-          null,
-          value[0].usersPermissionsUser,
-          true,
-          amount,
-          1,
-        );
-
-        _summaryListName.add(
-          TransactionExpandableItem(
-            txn: txn,
-            startDate: startDate!,
-            endDate: endDate!,
-            count: count,
-            subTxn: (_subSummaryExpense[key] ?? {}),
-          )
-        );
-      });
     }
 
     // check if we have expense category or not?
     if (_summaryExpenseCategory.isNotEmpty) {  
       // add the expense bar on the _summaryList
-      _summaryListCategory.add(
-        _generateSummaryBox(
-          title: "Expense",
-          color: accentColors[2],
-          data: _totalAmountExpense
-        )
+      _generateSummaryBox(
+        title: "Expense",
+        color: accentColors[2],
+        data: _totalAmountExpense,
+        listItem: _summaryExpenseCategory,
+        widget: _summaryListCategory,
+        page: PageName.expense,
+        summaryType: SummaryType.category,
       );
 
       // loop thru all the expense data
-      _summaryExpenseCategory.forEach((key, value) {
-        // compute the amount
-        amount = 0;
-        startDate = null;
-        endDate = null;
-        count = 0;
+      // _summaryExpenseCategory.forEach((key, value) {
+      //   // compute the amount
+      //   amount = 0;
+      //   startDate = null;
+      //   endDate = null;
+      //   count = 0;
 
-        // create the sub summary expense for this key
-        _subSummaryExpenseCategory[key] = {};
+      //   // create the sub summary expense for this key
+      //   _subSummaryExpenseCategory[key] = {};
 
-        for (TransactionListModel data in value) {
-          if (startDate == null) {
-            startDate = data.date;
-          } else {
-            if (startDate!.isAfter(data.date)) {
-              startDate = data.date;
-            }
-          }
+      //   for (TransactionListModel data in value) {
+      //     if (startDate == null) {
+      //       startDate = data.date;
+      //     } else {
+      //       if (startDate!.isAfter(data.date)) {
+      //         startDate = data.date;
+      //       }
+      //     }
 
-          if (endDate == null) {
-            endDate = data.date;
-          } else {
-            if (endDate!.isBefore(data.date)) {
-              endDate = data.date;
-            }
-          }
+      //     if (endDate == null) {
+      //       endDate = data.date;
+      //     } else {
+      //       if (endDate!.isBefore(data.date)) {
+      //         endDate = data.date;
+      //       }
+      //     }
 
-          amount += data.amount;
-          count++;
+      //     amount += data.amount;
+      //     count++;
 
-          // add the transaction list on the sub summary list based on the
-          // month and year
-          subSummaryKey = Globals.dfyyyy.format(data.date);
+      //     // add the transaction list on the sub summary list based on the
+      //     // month and year
+      //     subSummaryKey = Globals.dfyyyy.format(data.date);
           
-          // check if subSummaryKey is exists or not?
-          if (!_subSummaryExpenseCategory[key]!.containsKey(subSummaryKey)) {
-            // if not exists create the 1st data
-            _subSummaryExpenseCategory[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.category!.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              data.amount,
-              data.exchangeRate
-            );
-          }
-          else {
-            // exists, get the previous data
-            tmpSubSummaryData = _subSummaryExpenseCategory[key]![subSummaryKey]!;
-            // and combine it with current data
-            _subSummaryExpenseCategory[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.category!.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              (data.amount + tmpSubSummaryData.amount),
-              data.exchangeRate
-            );
-          }
-        }
+      //     // check if subSummaryKey is exists or not?
+      //     if (!_subSummaryExpenseCategory[key]!.containsKey(subSummaryKey)) {
+      //       // if not exists create the 1st data
+      //       _subSummaryExpenseCategory[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         data.category!.name,
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         data.amount,
+      //         data.exchangeRate
+      //       );
+      //     }
+      //     else {
+      //       // exists, get the previous data
+      //       tmpSubSummaryData = _subSummaryExpenseCategory[key]![subSummaryKey]!;
+      //       // and combine it with current data
+      //       _subSummaryExpenseCategory[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         data.category!.name,
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         (data.amount + tmpSubSummaryData.amount),
+      //         data.exchangeRate
+      //       );
+      //     }
+      //   }
 
-        // create TransactionModel based on the value
-        TransactionListModel txn = TransactionListModel(
-            -1,
-            value[0].category!.name,
-            value[0].type,
-            DateTime.now(),
-            '',
-            value[0].category,
-            value[0].wallet,
-            null,
-            value[0].usersPermissionsUser,
-            true,
-            amount,
-            1);
+      //   // create TransactionModel based on the value
+      //   TransactionListModel txn = TransactionListModel(
+      //       -1,
+      //       value[0].category!.name,
+      //       value[0].type,
+      //       DateTime.now(),
+      //       '',
+      //       value[0].category,
+      //       value[0].wallet,
+      //       null,
+      //       value[0].usersPermissionsUser,
+      //       true,
+      //       amount,
+      //       1);
 
-        _summaryListCategory.add(
-          TransactionExpandableItem(
-            txn: txn,
-            startDate: startDate!,
-            endDate: endDate!,
-            count: count,
-            subTxn: (_subSummaryExpenseCategory[key] ?? {}),
-            showCategory: false,
-          )
-        );
-      });
+      //   _summaryListCategory.add(
+      //     TransactionExpandableItem(
+      //       txn: txn,
+      //       startDate: startDate!,
+      //       endDate: endDate!,
+      //       count: count,
+      //       subTxn: (_subSummaryExpenseCategory[key] ?? {}),
+      //       showCategory: false,
+      //     )
+      //   );
+      // });
     }
-
-    //TODO: sort summary list name and summary list category based on name and category ID
 
     // check if summary income is not empty
     if (_summaryIncome.isNotEmpty) {
       // add the income bar on the _summaryListName
-      _summaryListName.add(
-        _generateSummaryBox(
-          title: "Income",
-          color: accentColors[6],
-          data: _totalAmountIncome
-        )
+      _generateSummaryBox(
+        title: "Income",
+        color: accentColors[6],
+        data: _totalAmountIncome,
+        listItem: _summaryIncome,
+        widget: _summaryListName,
+        page: PageName.income,
+        summaryType: SummaryType.name,
       );
 
-      _summaryIncome.forEach((key, value) {
-        // compute the amount
-        amount = 0;
-        startDate = null;
-        endDate = null;
-        count = 0;
+      // _summaryIncome.forEach((key, value) {
+      //   // compute the amount
+      //   amount = 0;
+      //   startDate = null;
+      //   endDate = null;
+      //   count = 0;
 
-        // generate subSummaryIncome for this key
-        _subSummaryIncome[key] = {};
+      //   // generate subSummaryIncome for this key
+      //   _subSummaryIncome[key] = {};
 
-        for (TransactionListModel data in value) {
-          if (startDate == null) {
-            startDate = data.date;
-          } else {
-            if (startDate!.isAfter(data.date)) {
-              startDate = data.date;
-            }
-          }
+      //   for (TransactionListModel data in value) {
+      //     if (startDate == null) {
+      //       startDate = data.date;
+      //     } else {
+      //       if (startDate!.isAfter(data.date)) {
+      //         startDate = data.date;
+      //       }
+      //     }
 
-          if (endDate == null) {
-            endDate = data.date;
-          } else {
-            if (endDate!.isBefore(data.date)) {
-              endDate = data.date;
-            }
-          }
+      //     if (endDate == null) {
+      //       endDate = data.date;
+      //     } else {
+      //       if (endDate!.isBefore(data.date)) {
+      //         endDate = data.date;
+      //       }
+      //     }
 
-          amount += data.amount;
-          count++;
+      //     amount += data.amount;
+      //     count++;
 
-          // add the transaction list on the sub summary list based on the
-          // month and year
-          subSummaryKey = Globals.dfyyyy.format(data.date);
+      //     // add the transaction list on the sub summary list based on the
+      //     // month and year
+      //     subSummaryKey = Globals.dfyyyy.format(data.date);
           
-          // check if subSummaryKey is exists or not?
-          if (!_subSummaryIncome[key]!.containsKey(subSummaryKey)) {
-            // if not exists create the 1st data
-            _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              data.amount,
-              data.exchangeRate
-            );
-          }
-          else {
-            // exists, get the previous data
-            tmpSubSummaryData = _subSummaryIncome[key]![subSummaryKey]!;
-            // and combine it with current data
-            _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              (data.amount + tmpSubSummaryData.amount),
-              data.exchangeRate
-            );
-          }
-        }
+      //     // check if subSummaryKey is exists or not?
+      //     if (!_subSummaryIncome[key]!.containsKey(subSummaryKey)) {
+      //       // if not exists create the 1st data
+      //       _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         data.name,
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         data.amount,
+      //         data.exchangeRate
+      //       );
+      //     }
+      //     else {
+      //       // exists, get the previous data
+      //       tmpSubSummaryData = _subSummaryIncome[key]![subSummaryKey]!;
+      //       // and combine it with current data
+      //       _subSummaryIncome[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         data.name,
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         (data.amount + tmpSubSummaryData.amount),
+      //         data.exchangeRate
+      //       );
+      //     }
+      //   }
 
-        // create TransactionModel based on the value
-        TransactionListModel txn = TransactionListModel(
-            -1,
-            value[0].name,
-            value[0].type,
-            DateTime.now(),
-            '',
-            value[0].category,
-            value[0].wallet,
-            null,
-            value[0].usersPermissionsUser,
-            true,
-            amount,
-            1);
+      //   // create TransactionModel based on the value
+      //   TransactionListModel txn = TransactionListModel(
+      //       -1,
+      //       value[0].name,
+      //       value[0].type,
+      //       DateTime.now(),
+      //       '',
+      //       value[0].category,
+      //       value[0].wallet,
+      //       null,
+      //       value[0].usersPermissionsUser,
+      //       true,
+      //       amount,
+      //       1);
 
-        _summaryListName.add(
-          TransactionExpandableItem(
-            txn: txn,
-            startDate: startDate!,
-            endDate: endDate!,
-            count: count,
-            subTxn: (_subSummaryIncome[key] ?? {}),
-          )
-        );
-      });
+      //   _summaryListName.add(
+      //     TransactionExpandableItem(
+      //       txn: txn,
+      //       startDate: startDate!,
+      //       endDate: endDate!,
+      //       count: count,
+      //       subTxn: (_subSummaryIncome[key] ?? {}),
+      //     )
+      //   );
+      // });
     }
 
     // check if summary income is not empty
     if (_summaryIncomeCategory.isNotEmpty) {
       // add the income bar on the _summaryListCategory
-      _summaryListCategory.add(
-        _generateSummaryBox(
-          title: "Income",
-          color: accentColors[6],
-          data: _totalAmountIncome
-        )
+      _generateSummaryBox(
+        title: "Income",
+        color: accentColors[6],
+        data: _totalAmountIncome,
+        listItem: _summaryIncomeCategory,
+        widget: _summaryListCategory,
+        page: PageName.income,
+        summaryType: SummaryType.category,
       );
 
-      _summaryIncomeCategory.forEach((key, value) {
-        // compute the amount
-        amount = 0;
-        startDate = null;
-        endDate = null;
-        count = 0;
+      // _summaryIncomeCategory.forEach((key, value) {
+      //   // compute the amount
+      //   amount = 0;
+      //   startDate = null;
+      //   endDate = null;
+      //   count = 0;
 
-        // generate subSummaryIncome for this key
-        _subSummaryIncomeCategory[key] = {};
+      //   // generate subSummaryIncome for this key
+      //   _subSummaryIncomeCategory[key] = {};
 
-        for (TransactionListModel data in value) {
-          if (startDate == null) {
-            startDate = data.date;
-          } else {
-            if (startDate!.isAfter(data.date)) {
-              startDate = data.date;
-            }
-          }
+      //   for (TransactionListModel data in value) {
+      //     if (startDate == null) {
+      //       startDate = data.date;
+      //     } else {
+      //       if (startDate!.isAfter(data.date)) {
+      //         startDate = data.date;
+      //       }
+      //     }
 
-          if (endDate == null) {
-            endDate = data.date;
-          } else {
-            if (endDate!.isBefore(data.date)) {
-              endDate = data.date;
-            }
-          }
+      //     if (endDate == null) {
+      //       endDate = data.date;
+      //     } else {
+      //       if (endDate!.isBefore(data.date)) {
+      //         endDate = data.date;
+      //       }
+      //     }
 
-          amount += data.amount;
-          count++;
+      //     amount += data.amount;
+      //     count++;
 
-          // add the transaction list on the sub summary list based on the
-          // month and year
-          subSummaryKey = Globals.dfyyyy.format(data.date);
+      //     // add the transaction list on the sub summary list based on the
+      //     // month and year
+      //     subSummaryKey = Globals.dfyyyy.format(data.date);
           
-          // check if subSummaryKey is exists or not?
-          if (!_subSummaryIncomeCategory[key]!.containsKey(subSummaryKey)) {
-            // if not exists create the 1st data
-            _subSummaryIncomeCategory[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.category!.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              data.amount,
-              data.exchangeRate
-            );
-          }
-          else {
-            // exists, get the previous data
-            tmpSubSummaryData = _subSummaryIncomeCategory[key]![subSummaryKey]!;
-            // and combine it with current data
-            _subSummaryIncomeCategory[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.category!.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              (data.amount + tmpSubSummaryData.amount),
-              data.exchangeRate
-            );
-          }
-        }
+      //     // check if subSummaryKey is exists or not?
+      //     if (!_subSummaryIncomeCategory[key]!.containsKey(subSummaryKey)) {
+      //       // if not exists create the 1st data
+      //       _subSummaryIncomeCategory[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         data.category!.name,
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         data.amount,
+      //         data.exchangeRate
+      //       );
+      //     }
+      //     else {
+      //       // exists, get the previous data
+      //       tmpSubSummaryData = _subSummaryIncomeCategory[key]![subSummaryKey]!;
+      //       // and combine it with current data
+      //       _subSummaryIncomeCategory[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         data.category!.name,
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         (data.amount + tmpSubSummaryData.amount),
+      //         data.exchangeRate
+      //       );
+      //     }
+      //   }
 
-        // create TransactionModel based on the value
-        TransactionListModel txn = TransactionListModel(
-            -1,
-            value[0].category!.name,
-            value[0].type,
-            DateTime.now(),
-            '',
-            value[0].category,
-            value[0].wallet,
-            null,
-            value[0].usersPermissionsUser,
-            true,
-            amount,
-            1);
+      //   // create TransactionModel based on the value
+      //   TransactionListModel txn = TransactionListModel(
+      //       -1,
+      //       value[0].category!.name,
+      //       value[0].type,
+      //       DateTime.now(),
+      //       '',
+      //       value[0].category,
+      //       value[0].wallet,
+      //       null,
+      //       value[0].usersPermissionsUser,
+      //       true,
+      //       amount,
+      //       1);
 
-        _summaryListCategory.add(
-          TransactionExpandableItem(
-            txn: txn,
-            startDate: startDate!,
-            endDate: endDate!,
-            count: count,
-            subTxn: (_subSummaryIncomeCategory[key] ?? {}),
-            showCategory: false,
-          )
-        );
-      });
+      //   _summaryListCategory.add(
+      //     TransactionExpandableItem(
+      //       txn: txn,
+      //       startDate: startDate!,
+      //       endDate: endDate!,
+      //       count: count,
+      //       subTxn: (_subSummaryIncomeCategory[key] ?? {}),
+      //       showCategory: false,
+      //     )
+      //   );
+      // });
     }
 
     // check if summary transfer is not empty
     if (_summaryTransfer.isNotEmpty) {
       // add the transfer bar on the _summaryListName
-      _summaryListName.add(
-        _generateSummaryBox(
-          title: "Transfer",
-          color: accentColors[4],
-          data: _totalAmountTransfer,
-        )
+      _generateSummaryBox(
+        title: "Transfer",
+        color: accentColors[4],
+        data: _totalAmountTransfer,
+        listItem: _summaryTransfer,
+        widget: _summaryListName,
+        page: PageName.transfer,
+        summaryType: SummaryType.name,
       );
 
-      _summaryTransfer.forEach((key, value) {
-        // compute the amount
-        amount = 0;
-        startDate = null;
-        endDate = null;
-        count = 0;
+      // _summaryTransfer.forEach((key, value) {
+      //   // compute the amount
+      //   amount = 0;
+      //   startDate = null;
+      //   endDate = null;
+      //   count = 0;
 
-        // initialize sub summary transfer for this key
-        _subSummaryTransfer[key] = {};
+      //   // initialize sub summary transfer for this key
+      //   _subSummaryTransfer[key] = {};
 
-        for (TransactionListModel data in value) {
-          if (startDate == null) {
-            startDate = data.date;
-          } else {
-            if (startDate!.isAfter(data.date)) {
-              startDate = data.date;
-            }
-          }
+      //   for (TransactionListModel data in value) {
+      //     if (startDate == null) {
+      //       startDate = data.date;
+      //     } else {
+      //       if (startDate!.isAfter(data.date)) {
+      //         startDate = data.date;
+      //       }
+      //     }
 
-          if (endDate == null) {
-            endDate = data.date;
-          } else {
-            if (endDate!.isBefore(data.date)) {
-              endDate = data.date;
-            }
-          }
+      //     if (endDate == null) {
+      //       endDate = data.date;
+      //     } else {
+      //       if (endDate!.isBefore(data.date)) {
+      //         endDate = data.date;
+      //       }
+      //     }
 
-          amount += data.amount;
-          count++;
+      //     amount += data.amount;
+      //     count++;
 
-          // add the transaction list on the sub summary list based on the
-          // month and year
-          subSummaryKey = Globals.dfyyyy.format(data.date);
+      //     // add the transaction list on the sub summary list based on the
+      //     // month and year
+      //     subSummaryKey = Globals.dfyyyy.format(data.date);
           
-          // check if subSummaryKey is exists or not?
-          if (!_subSummaryTransfer[key]!.containsKey(subSummaryKey)) {
-            // if not exists create the 1st data
-            _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              data.amount,
-              data.exchangeRate
-            );
-          }
-          else {
-            // exists, get the previous data
-            tmpSubSummaryData = _subSummaryTransfer[key]![subSummaryKey]!;
-            // and combine it with current data
-            _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              data.name,
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              (data.amount + tmpSubSummaryData.amount),
-              data.exchangeRate
-            );
-          }
-        }
+      //     // check if subSummaryKey is exists or not?
+      //     if (!_subSummaryTransfer[key]!.containsKey(subSummaryKey)) {
+      //       // if not exists create the 1st data
+      //       _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         data.name,
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         data.amount,
+      //         data.exchangeRate
+      //       );
+      //     }
+      //     else {
+      //       // exists, get the previous data
+      //       tmpSubSummaryData = _subSummaryTransfer[key]![subSummaryKey]!;
+      //       // and combine it with current data
+      //       _subSummaryTransfer[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         data.name,
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         (data.amount + tmpSubSummaryData.amount),
+      //         data.exchangeRate
+      //       );
+      //     }
+      //   }
 
-        // create TransactionModel based on the value
-        TransactionListModel txn = TransactionListModel(
-            -1,
-            value[0].wallet.name,
-            value[0].type,
-            DateTime.now(),
-            '',
-            value[0].category,
-            value[0].wallet,
-            null,
-            value[0].usersPermissionsUser,
-            true,
-            amount,
-            1);
+      //   // create TransactionModel based on the value
+      //   TransactionListModel txn = TransactionListModel(
+      //       -1,
+      //       value[0].wallet.name,
+      //       value[0].type,
+      //       DateTime.now(),
+      //       '',
+      //       value[0].category,
+      //       value[0].wallet,
+      //       null,
+      //       value[0].usersPermissionsUser,
+      //       true,
+      //       amount,
+      //       1);
 
-        _summaryListName.add(
-          TransactionExpandableItem(
-            txn: txn,
-            startDate: startDate!,
-            endDate: endDate!,
-            count: count,
-            subTxn: (_subSummaryTransfer[key] ?? {}),
-          )
-        );
-      });
+      //   _summaryListName.add(
+      //     TransactionExpandableItem(
+      //       txn: txn,
+      //       startDate: startDate!,
+      //       endDate: endDate!,
+      //       count: count,
+      //       subTxn: (_subSummaryTransfer[key] ?? {}),
+      //     )
+      //   );
+      // });
     }
 
     // check if summary transfer is not empty
     if (_summaryTransferCategory.isNotEmpty) {
       // add the transfer bar on the _summaryListCategory
-      _summaryListCategory.add(
-        _generateSummaryBox(
-          title: "Transfer",
-          color: accentColors[4],
-          data: _totalAmountTransfer,
-        )
+      _generateSummaryBox(
+        title: "Transfer",
+        color: accentColors[4],
+        data: _totalAmountTransfer,
+        listItem: _summaryTransferCategory,
+        widget: _summaryListCategory,
+        page: PageName.transfer,
+        summaryType: SummaryType.category,
       );
 
-      _summaryTransferCategory.forEach((key, value) {
-        // compute the amount
-        amount = 0;
-        startDate = null;
-        endDate = null;
-        count = 0;
+      // _summaryTransferCategory.forEach((key, value) {
+      //   // compute the amount
+      //   amount = 0;
+      //   startDate = null;
+      //   endDate = null;
+      //   count = 0;
 
-        // initialize sub summary transfer for this key
-        _subSummaryTransferCategory[key] = {};
+      //   // initialize sub summary transfer for this key
+      //   _subSummaryTransferCategory[key] = {};
 
-        for (TransactionListModel data in value) {
-          if (startDate == null) {
-            startDate = data.date;
-          } else {
-            if (startDate!.isAfter(data.date)) {
-              startDate = data.date;
-            }
-          }
+      //   for (TransactionListModel data in value) {
+      //     if (startDate == null) {
+      //       startDate = data.date;
+      //     } else {
+      //       if (startDate!.isAfter(data.date)) {
+      //         startDate = data.date;
+      //       }
+      //     }
 
-          if (endDate == null) {
-            endDate = data.date;
-          } else {
-            if (endDate!.isBefore(data.date)) {
-              endDate = data.date;
-            }
-          }
+      //     if (endDate == null) {
+      //       endDate = data.date;
+      //     } else {
+      //       if (endDate!.isBefore(data.date)) {
+      //         endDate = data.date;
+      //       }
+      //     }
 
-          amount += data.amount;
-          count++;
+      //     amount += data.amount;
+      //     count++;
 
-          // add the transaction list on the sub summary list based on the
-          // month and year
-          subSummaryKey = Globals.dfyyyy.format(data.date);
+      //     // add the transaction list on the sub summary list based on the
+      //     // month and year
+      //     subSummaryKey = Globals.dfyyyy.format(data.date);
           
-          // check if subSummaryKey is exists or not?
-          if (!_subSummaryTransferCategory[key]!.containsKey(subSummaryKey)) {
-            // if not exists create the 1st data
-            _subSummaryTransferCategory[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              "${data.wallet.symbol} to ${data.walletTo!.symbol}",
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              data.amount,
-              data.exchangeRate
-            );
-          }
-          else {
-            // exists, get the previous data
-            tmpSubSummaryData = _subSummaryTransferCategory[key]![subSummaryKey]!;
-            // and combine it with current data
-            _subSummaryTransferCategory[key]![subSummaryKey] = TransactionListModel(
-              -1,
-              "${data.wallet.symbol} to ${data.walletTo!.symbol}",
-              data.type,
-              DateTime(data.date.year, data.date.month, 1),
-              data.description,
-              data.category,
-              data.wallet,
-              data.walletTo,
-              data.usersPermissionsUser,
-              data.cleared,
-              (data.amount + tmpSubSummaryData.amount),
-              data.exchangeRate
-            );
-          }
-        }
+      //     // check if subSummaryKey is exists or not?
+      //     if (!_subSummaryTransferCategory[key]!.containsKey(subSummaryKey)) {
+      //       // if not exists create the 1st data
+      //       _subSummaryTransferCategory[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         "${data.wallet.symbol} to ${data.walletTo!.symbol}",
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         data.amount,
+      //         data.exchangeRate
+      //       );
+      //     }
+      //     else {
+      //       // exists, get the previous data
+      //       tmpSubSummaryData = _subSummaryTransferCategory[key]![subSummaryKey]!;
+      //       // and combine it with current data
+      //       _subSummaryTransferCategory[key]![subSummaryKey] = TransactionListModel(
+      //         -1,
+      //         "${data.wallet.symbol} to ${data.walletTo!.symbol}",
+      //         data.type,
+      //         DateTime(data.date.year, data.date.month, 1),
+      //         data.description,
+      //         data.category,
+      //         data.wallet,
+      //         data.walletTo,
+      //         data.usersPermissionsUser,
+      //         data.cleared,
+      //         (data.amount + tmpSubSummaryData.amount),
+      //         data.exchangeRate
+      //       );
+      //     }
+      //   }
 
-        // create TransactionModel based on the value
-        TransactionListModel txn = TransactionListModel(
-            -1,
-            "${value[0].wallet.symbol} to ${value[0].walletTo!.symbol}",
-            value[0].type,
-            DateTime.now(),
-            '',
-            value[0].category,
-            value[0].wallet,
-            null,
-            value[0].usersPermissionsUser,
-            true,
-            amount,
-            1);
+      //   // create TransactionModel based on the value
+      //   TransactionListModel txn = TransactionListModel(
+      //       -1,
+      //       "${value[0].wallet.symbol} to ${value[0].walletTo!.symbol}",
+      //       value[0].type,
+      //       DateTime.now(),
+      //       '',
+      //       value[0].category,
+      //       value[0].wallet,
+      //       null,
+      //       value[0].usersPermissionsUser,
+      //       true,
+      //       amount,
+      //       1);
 
-        _summaryListCategory.add(
-          TransactionExpandableItem(
-            txn: txn,
-            startDate: startDate!,
-            endDate: endDate!,
-            count: count,
-            subTxn: (_subSummaryTransferCategory[key] ?? {}),
-            showCategory: false,
-          )
-        );
-      });
+      //   _summaryListCategory.add(
+      //     TransactionExpandableItem(
+      //       txn: txn,
+      //       startDate: startDate!,
+      //       endDate: endDate!,
+      //       count: count,
+      //       subTxn: (_subSummaryTransferCategory[key] ?? {}),
+      //       showCategory: false,
+      //     )
+      //   );
+      // });
     }
 
     // set initial summary list
     _setSummaryList();
   }
 
-  Widget _generateSummaryBox({
+  void _generateSummaryBox({
     required String title,
     required Color color,
     required Map<String, double> data,
+    required Map<String, List<TransactionListModel>> listItem,
+    required List<Widget> widget,
+    required PageName page,
+    required SummaryType summaryType,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      color: secondaryDark,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          ..._generateSubSummaryBox(
-            data: data,
-            color: color
-          ),
-        ],
-      ),
+    _generateSubSummaryBox(
+      title: title,
+      data: data,
+      color: color,
+      listItem: listItem,
+      page: page,
+      summaryType: summaryType,
+      widget: widget,
     );
   }
 
-  List<Widget> _generateSubSummaryBox(
-      {required Map<String, double> data, required Color color}) {
-    List<Widget> ret = <Widget>[];
+  void _generateSubSummaryBox({
+    required String title,
+    required Map<String, double> data,
+    required Color color,
+    required Map<String, List<TransactionListModel>> listItem,
+    required List<Widget> widget,
+    required PageName page,
+    required SummaryType summaryType,
+  }) {
+    final Map<String, Map<String, TransactionListModel>> subSummary = {};
+    double amount;
+    DateTime? startDate;
+    DateTime? endDate;
+    int count;
+    String subSummaryKey = "";
+    TransactionListModel tmpSubSummaryData;
 
-    data.forEach((key, value) {
-      ret.add(SizedBox(
-        width: double.infinity,
+    // add the title
+    widget.add(Container(
+      padding: const EdgeInsets.all(10),
+      color: secondaryDark,
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      ),
+    ));
+
+    // loop thru all the currency we have for this summary list item data
+    data.forEach((currencySymbol, value) {
+      widget.add(Container(
+        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+        color: primaryDark,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Text(
-              "Total $key",
+              "Total $currencySymbol",
               style: TextStyle(
                 color: color,
               ),
@@ -1541,22 +1446,183 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           ],
         ),
       ));
-    });
 
-    return ret;
+      // add for the list item for summary data
+      // clear subSummary
+      subSummary.clear();
+
+      // loop thru all the list item data
+      listItem.forEach((key, value) {
+        // get the current currency symbol
+        List<String> keyCheck = key.split('_');
+        
+        // check if the currencySymbol is the same as the key
+        debugPrint("${keyCheck[0]} = $currencySymbol");
+        if (keyCheck[0].toLowerCase() == currencySymbol.toLowerCase()) {
+          // initialize the data
+          amount = 0;
+          startDate = null;
+          endDate = null;
+          count = 0;
+
+          // create the sub summary expense for this key
+          subSummary[key] = {};
+
+          for (TransactionListModel data in value) {
+            if (startDate == null) {
+              startDate = data.date;
+            } else {
+              if (startDate!.isAfter(data.date)) {
+                startDate = data.date;
+              }
+            }
+
+            if (endDate == null) {
+              endDate = data.date;
+            } else {
+              if (endDate!.isBefore(data.date)) {
+                endDate = data.date;
+              }
+            }
+
+            amount += data.amount;
+            count++;
+
+            // add the transaction list on the sub summary list based on the
+            // month and year
+            subSummaryKey = Globals.dfyyyy.format(data.date);
+            
+            // check if subSummaryKey is exists or not?
+            if (!subSummary[key]!.containsKey(subSummaryKey)) {
+              // if not exists create the 1st data
+              subSummary[key]![subSummaryKey] = TransactionListModel(
+                -1,
+                data.name,
+                data.type,
+                DateTime(data.date.year, data.date.month, 1),
+                data.description,
+                data.category,
+                data.wallet,
+                data.walletTo,
+                data.usersPermissionsUser,
+                data.cleared,
+                data.amount,
+                data.exchangeRate
+              );
+            }
+            else {
+              // exists, get the previous data
+              tmpSubSummaryData = subSummary[key]![subSummaryKey]!;
+              // and combine it with current data
+              subSummary[key]![subSummaryKey] = TransactionListModel(
+                -1,
+                data.name,
+                data.type,
+                DateTime(data.date.year, data.date.month, 1),
+                data.description,
+                data.category,
+                data.wallet,
+                data.walletTo,
+                data.usersPermissionsUser,
+                data.cleared,
+                (data.amount + tmpSubSummaryData.amount),
+                data.exchangeRate
+              );
+            }
+          }
+
+          // create TransactionModel based on the value
+          TransactionListModel txn;
+          if (page == PageName.expense || page == PageName.income) {
+            if (summaryType == SummaryType.name) {
+              txn = TransactionListModel(
+                -1,
+                value[0].name,
+                value[0].type,
+                DateTime.now(),
+                '',
+                value[0].category,
+                value[0].wallet,
+                null,
+                value[0].usersPermissionsUser,
+                true,
+                amount,
+                1,
+              );
+            }
+            else {
+              txn = TransactionListModel(
+                -1,
+                value[0].category!.name,
+                value[0].type,
+                DateTime.now(),
+                '',
+                value[0].category,
+                value[0].wallet,
+                null,
+                value[0].usersPermissionsUser,
+                true,
+                amount,
+                1,
+              );
+            }
+          }
+          else {
+            if (summaryType == SummaryType.name) {
+              txn = TransactionListModel(
+                -1,
+                value[0].wallet.name,
+                value[0].type,
+                DateTime.now(),
+                '',
+                value[0].category,
+                value[0].wallet,
+                null,
+                value[0].usersPermissionsUser,
+                true,
+                amount,
+                1,
+              );
+            }
+            else {
+              txn = TransactionListModel(
+                -1,
+                "${value[0].wallet.name} to ${value[0].walletTo!.name}",
+                value[0].type,
+                DateTime.now(),
+                '',
+                value[0].category,
+                value[0].wallet,
+                null,
+                value[0].usersPermissionsUser,
+                true,
+                amount,
+                1,
+              );
+            }
+          }
+
+          widget.add(
+            TransactionExpandableItem(
+              txn: txn,
+              startDate: startDate!,
+              endDate: endDate!,
+              count: count,
+              subTxn: (subSummary[key] ?? {}),
+              showCategory: (summaryType != SummaryType.category),
+            )
+          );
+        }
+      });
+    });
   }
 
   void _setTransactions({
     required List<TransactionListModel> transactions,
-    required int limit,
-    required int start}
-  ) {
+  }) {
     setState(() {
       _transactions.clear();
       _transactions.addAll(transactions);
-
-      // set also the start for the next transaction we need to fetch
-      _start = start + limit;
 
       // filter the transaction
       _filterTheTransaction();
@@ -1598,20 +1664,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     required String searchText,
     required String categoryId,
     required String type,
-    required int limit,
-    required int start
   }) async {
     await _transactionHttp.findTransaction(
       type: type,
       name: searchText,
       category: categoryId,
-      limit: limit,
-      start: start
     ).then((results) {
       _setTransactions(
         transactions: results,
-        limit: limit,
-        start: start
       );
     });
   }
@@ -1683,7 +1743,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     LoadingScreen.instance().show(context: context);
 
     // initialize all the value
-    _start = 0; // always start from 0
     _transactions.clear();
 
     // try to find the transaction
@@ -1691,8 +1750,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       searchText: _searchText,
       categoryId: _categoryId,
       type: _type,
-      limit: _limit,
-      start: _start,
     ).onError((error, stackTrace) {
       Log.error(
         message: "Error when searching transaction",
