@@ -520,7 +520,6 @@ class _HomeWalletState extends State<HomeWallet> {
           _walletsFilterSummary[key]![wallet.currency.name] = 
             wallet.startBalance +
             wallet.changeBalance +
-            wallet.futureAmount +
             currentValue;
         }
       }
