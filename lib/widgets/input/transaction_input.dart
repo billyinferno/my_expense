@@ -122,6 +122,7 @@ class _TransactionInputState extends State<TransactionInput> {
   late double _currentExchangeRate;
 
   late double _currentAmount;
+  late double _conversionAmount;
 
   late List<LastTransactionModel> _filterList;
   late List<LastTransactionModel> _lastExpense;
@@ -159,8 +160,10 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // get the default current amount
     _currentAmount = 0;
+    _conversionAmount = 0;
     if (widget.currentTransaction != null) {
       _currentAmount = widget.currentTransaction!.amount;
+      _conversionAmount = widget.currentTransaction!.amount * widget.currentTransaction!.exchangeRate;
     }
 
     // check the type by checkiung if we send current transaction or not?
@@ -531,8 +534,37 @@ class _TransactionInputState extends State<TransactionInput> {
                                 LengthLimitingTextInputFormatter(12),
                                 DecimalTextInputFormatter(decimalRange: 11),
                               ],
+                              onChanged: (value) {
+                                setState(() {
+                                  _currentExchangeRate = (double.tryParse(value) ?? 1);
+                                  _conversionAmount = _currentAmount * _currentExchangeRate;
+                                });
+                              },
                             ),
                           ),
+                          const SizedBox(width: 10,),
+                          //TODO: to check API to get current exchange rate
+                          // InkWell(
+                          //   onTap: () async {
+                          //     debugPrint("Get current exchange rate");
+                          //   },
+                          //   child: Container(
+                          //     width: 35,
+                          //     height: 35,
+                          //     decoration: BoxDecoration(
+                          //       color: accentColors[6],
+                          //       borderRadius: BorderRadius.circular(35),
+                          //     ),
+                          //     child: Center(
+                          //       child: Icon(
+                          //         Ionicons.refresh,
+                          //         color: textColor,
+                          //         size: 20,
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
+                          // const SizedBox(width: 10,),
                         ],
                       ),
                     ),
@@ -692,6 +724,121 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   Widget _buildInput() {
+    if (_currentType == 'transfer') {
+      return _buildInputTransfer();
+    }
+    else {
+      return _buildInputExpenseIncome();
+    }
+  }
+
+  Widget _buildInputTransfer() {
+    bool isShowConversionAmount = false;
+
+    // check if we have transfer to account
+    if (
+      (_currentWalletFromID > 0 && _currentWalletToID > 0) &&
+      (_currentWalletFromCCY != _currentWalletToCCY)
+    ) {
+      isShowConversionAmount = true;
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(50),
+            color: _currentCategoryColor,
+          ),
+          child: _currentCategoryIcon,
+        ),
+        const SizedBox(width: 10,),
+        Expanded(
+          flex: 5,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              const Text(
+                "Transfer",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5,),
+            ],
+          ),
+        ),
+        const SizedBox(width: 5,),
+        Expanded(
+          flex: 4,
+          child: GestureDetector(
+            onTap: (() async {
+              if (!_isDisabled) {
+                await _showCalculator();
+      
+                // check if both the current exchange rate and current amount
+                // is not zero
+                if (_currentAmount > 0 && _currentExchangeRate > 0) {
+                  // calculate the conversion amount
+                  setState(() {
+                    _conversionAmount = _currentAmount * _currentExchangeRate;
+                  });
+                }
+              }
+            }),
+            onDoubleTap: () async {
+              if (!_isDisabled) {
+                if (_currentAmount > 0) {
+                  await _showCalculator(currentAmount: false);
+        
+                  // check if both the current exchange rate and current amount
+                  // is not zero
+                  if (_currentAmount > 0 && _conversionAmount > 0) {
+                    // calculate the conversion amount
+                    setState(() {
+                      _currentExchangeRate = _conversionAmount / _currentAmount;
+                      _exchangeController.text = Globals.fCCY2.format(_currentExchangeRate);
+                    });
+                  }
+                }
+              }
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                AutoSizeText(
+                  (isShowConversionAmount ? "${_currentWalletFromCCY.toUpperCase()} ${Globals.fCCY.format(_currentAmount)}" : Globals.fCCY.format(_currentAmount)),
+                  style: const TextStyle(
+                    fontSize: 25,
+                    color: textColor,
+                  ),
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                ),
+                (isShowConversionAmount ? AutoSizeText(
+                  (isShowConversionAmount ? "${_currentWalletToCCY.toUpperCase()} ${Globals.fCCY.format(_conversionAmount)}" : Globals.fCCY.format(_conversionAmount)),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: secondaryLight,
+                  ),
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                ) : const SizedBox.shrink()),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInputExpenseIncome() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -699,33 +846,29 @@ class _TransactionInputState extends State<TransactionInput> {
         GestureDetector(
           onTap: () {
             if (!_isDisabled) {
-              // only show the modal bottom sheet if this is not transfer
-              if (_currentType != 'transfer')
-              {
-                // show the modal bottom sheet
-                showModalBottomSheet(
-                  context: context,
-                  builder: (BuildContext context) {
-                    String title = "";
-                    if (_currentType == 'income') {
-                      title = "Income Category";
-                    }
-                    else {
-                      title = "Expense Category";
-                    }
-
-                    return MyBottomSheet(
-                      context: context,
-                      title: title,
-                      screenRatio: 0.75,
-                      child:  GridView.count(
-                        crossAxisCount: 4,
-                        children: _generateIconCategory(),
-                      ),
-                    );
+              // show the modal bottom sheet
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  String title = "";
+                  if (_currentType == 'income') {
+                    title = "Income Category";
                   }
-                );
-              }
+                  else {
+                    title = "Expense Category";
+                  }
+
+                  return MyBottomSheet(
+                    context: context,
+                    title: title,
+                    screenRatio: 0.75,
+                    child:  GridView.count(
+                      crossAxisCount: 4,
+                      children: _generateIconCategory(),
+                    ),
+                  );
+                }
+              );
             }
           },
           child: Container(
@@ -745,58 +888,43 @@ class _TransactionInputState extends State<TransactionInput> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Visibility(
-                visible: (_currentType != 'transfer'),
-                child: TextFormField(
-                  controller: _nameController,
-                  focusNode: _nameFocus,
-                  enabled: (!_isDisabled),
-                  enableSuggestions: false,
-                  cursorColor: textColor.withValues(alpha: 0.6),
-                  keyboardType: TextInputType.name,
-                  decoration: const InputDecoration(
-                    hintText: "Item name",
-                    hintStyle: TextStyle(
-                      color: primaryLight,
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                    isCollapsed: true,
+              TextFormField(
+                controller: _nameController,
+                focusNode: _nameFocus,
+                enabled: (!_isDisabled),
+                enableSuggestions: false,
+                cursorColor: textColor.withValues(alpha: 0.6),
+                keyboardType: TextInputType.name,
+                decoration: const InputDecoration(
+                  hintText: "Item name",
+                  hintStyle: TextStyle(
+                    color: primaryLight,
                   ),
-                  onChanged: ((lookup) {
-                    // generate the auto complete
-                    _filterAutoComplete(lookup);
-                  }),
-                  onTap: (() {
-                    _filterAutoComplete(_nameController.text);
-                  }),
-                  onFieldSubmitted: ((value) async {
-                    // ensure that the value got some length, before we focus
-                    // on the amount controller
-                    if(value.trim().isNotEmpty) {
-                      // show the calculator
-                      await _showCalculator();
-                    }
-                  }),
-                  textInputAction: TextInputAction.done,
-                ),
-              ),
-              Visibility(
-                visible: (_currentType == 'transfer'),
-                child: const Text(
-                  "Transfer",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
                   ),
+                  contentPadding: EdgeInsets.zero,
+                  isCollapsed: true,
                 ),
+                onChanged: ((lookup) {
+                  // generate the auto complete
+                  _filterAutoComplete(lookup);
+                }),
+                onTap: (() {
+                  _filterAutoComplete(_nameController.text);
+                }),
+                onFieldSubmitted: ((value) async {
+                  // ensure that the value got some length, before we focus
+                  // on the amount controller
+                  if(value.trim().isNotEmpty) {
+                    // show the calculator
+                    await _showCalculator();
+                  }
+                }),
+                textInputAction: TextInputAction.done,
               ),
               const SizedBox(height: 5,),
-              Visibility(
-                visible: (_currentType != 'transfer'),
-                child: Text(_currentCategoryName)
-              ),
+              Text(_currentCategoryName),
             ],
           ),
         ),
@@ -824,7 +952,7 @@ class _TransactionInputState extends State<TransactionInput> {
     );
   }
 
-  Future<void> _showCalculator() async {
+  Future<void> _showCalculator({bool currentAmount = true}) async {
     // check if name has focus or not?
     if (_nameFocus.hasFocus) {
       // unfocus from name text field
@@ -923,7 +1051,7 @@ class _TransactionInputState extends State<TransactionInput> {
               ),
               Expanded(
                 child: SimpleCalculator(
-                  value: _currentAmount,
+                  value: (currentAmount ? _currentAmount : _conversionAmount),
                   hideExpression: false,
                   hideSurroundingBorder: true,
                   autofocus: true,
@@ -934,8 +1062,14 @@ class _TransactionInputState extends State<TransactionInput> {
                   numberFormat: Globals.fCCYnf,
                   onChanged: (key, value, expression) {
                     setState(() {
-                      // set the current amount as previous current amount if value is null
-                      _currentAmount = (value ?? _currentAmount);
+                      if (currentAmount) {
+                        // set the current amount as previous current amount if value is null
+                        _currentAmount = (value ?? _currentAmount);
+                      }
+                      else {
+                        // it means that this is for the conversion amount
+                        _conversionAmount = (value ?? _conversionAmount);
+                      }
 
                       // generate the list amount
                       _generateListAmount();
