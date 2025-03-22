@@ -42,6 +42,7 @@ class _ScrollableTabState extends State<ScrollableTab> {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
+      margin: EdgeInsets.fromLTRB(0, 0, widget.rightPadding, 0),
       decoration: BoxDecoration(
         border: Border( 
           right: BorderSide(
@@ -107,7 +108,6 @@ class _ScrollableTabState extends State<ScrollableTab> {
               ),
             ),
           ),
-          (widget.rightPadding > 0 ? SizedBox(width: widget.rightPadding,) : const SizedBox.shrink()),
         ],
       ),
     );
