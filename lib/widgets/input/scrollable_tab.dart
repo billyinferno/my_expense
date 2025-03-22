@@ -8,6 +8,8 @@ class ScrollableTab extends StatefulWidget {
   final Function(String) onTap;
   final Color backgroundColor;
   final Color borderColor;
+  final double leftPadding;
+  final double rightPadding;
   const ScrollableTab({
     super.key,
     this.controller,
@@ -15,6 +17,8 @@ class ScrollableTab extends StatefulWidget {
     required this.onTap,
     this.backgroundColor = primaryBackground,
     this.borderColor = primaryLight,
+    this.leftPadding = 0,
+    this.rightPadding = 0,
   });
 
   @override
@@ -73,7 +77,7 @@ class _ScrollableTabState extends State<ScrollableTab> {
             }),
             child: Container(
               height: 38,
-              padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
+              padding: EdgeInsets.fromLTRB(widget.leftPadding, 10, 10, 10),
               decoration: BoxDecoration(
                 color: widget.backgroundColor,
                 border: Border(
@@ -102,7 +106,8 @@ class _ScrollableTabState extends State<ScrollableTab> {
                 children: _generateWalletTab(),
               ),
             ),
-          )
+          ),
+          (widget.rightPadding > 0 ? SizedBox(width: widget.rightPadding,) : const SizedBox.shrink()),
         ],
       ),
     );
