@@ -1104,6 +1104,7 @@ class _TransactionInputState extends State<TransactionInput> {
           selectedID: selectedId,
           onTap: onTap,
           disableID: disableID,
+          screenRatio: 0.50,
           onTabSelected: ((tab) {
             _tabSelected = tab;
           }),

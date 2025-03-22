@@ -68,6 +68,8 @@ class _AccountSelectorState extends State<AccountSelector> {
             data: widget.accountMap,
             borderColor: secondaryBackground,
             backgroundColor: secondaryDark,
+            leftPadding: 10,
+            rightPadding: 10,
             onTap: ((tab) {
               setState(() {
                 _tabSelected = tab;
