@@ -47,7 +47,7 @@ dependencies:
   flutter_slidable: ^4.0.0
   smooth_page_indicator: ^1.1.0
   badges: ^3.1.2
-  calendar_date_picker2: ^1.0.2
+  calendar_date_picker2: ^2.0.0
   flutter_simple_calculator: ^2.2.5
   auto_size_text: ^3.0.0
   month_picker_dialog: ^6.0.3
