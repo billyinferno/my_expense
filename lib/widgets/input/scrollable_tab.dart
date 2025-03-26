@@ -10,6 +10,7 @@ class ScrollableTab extends StatefulWidget {
   final Color borderColor;
   final double leftPadding;
   final double rightPadding;
+  final bool showIcon;
   const ScrollableTab({
     super.key,
     this.controller,
@@ -19,6 +20,7 @@ class ScrollableTab extends StatefulWidget {
     this.borderColor = primaryLight,
     this.leftPadding = 0,
     this.rightPadding = 0,
+    this.showIcon = false,
   });
 
   @override
@@ -130,7 +132,9 @@ class _ScrollableTabState extends State<ScrollableTab> {
             padding: const EdgeInsets.all(10),
             margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
             decoration: BoxDecoration(
-              color: (_tabSelected == key ? IconList.getDarkColor(key.toLowerCase()) : Colors.transparent),
+              color: (
+                _tabSelected == key ? IconList.getDarkColor(key.toLowerCase()) : Colors.transparent
+              ),
               border: Border.all(
                 color: widget.borderColor,
                 width: 1.0,
@@ -138,11 +142,32 @@ class _ScrollableTabState extends State<ScrollableTab> {
               ),
               borderRadius: BorderRadius.circular(38),
             ),
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 12,
-              ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                (
+                  widget.showIcon ?
+                  Container(
+                    padding: const EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
+                      color: _tabSelected == key ? Colors.transparent : IconList.getDarkColor(key.toLowerCase())
+                    ),
+                    child: Center(child: IconList.getIcon(key, size: 10)),
+                  ) :
+                  const SizedBox.shrink()
+                ),
+                (
+                  widget.showIcon ? const SizedBox(width: 5,) : const SizedBox.shrink()
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

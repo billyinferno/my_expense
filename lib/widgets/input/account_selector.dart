@@ -70,6 +70,7 @@ class _AccountSelectorState extends State<AccountSelector> {
             backgroundColor: secondaryDark,
             leftPadding: 10,
             rightPadding: 10,
+            showIcon: true,
             onTap: ((tab) {
               setState(() {
                 _tabSelected = tab;

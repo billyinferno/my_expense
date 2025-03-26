@@ -5,6 +5,7 @@ import 'package:my_expense/_index.g.dart';
 class IconList {
   static Icon getIcon(String name, {double size = 20, Color color = Colors.white}) {
     switch(name.toLowerCase()) {
+      case "all": { return Icon(FontAwesomeIcons.asterisk, color: color, size: size,); }
       case "wallet": { return Icon(FontAwesomeIcons.wallet, color: color, size: size,); }
       case "asset": { return Icon(FontAwesomeIcons.fileInvoiceDollar, color: color, size: size); }
       case "cash": { return Icon(FontAwesomeIcons.moneyBill1, color: color, size: size); }
@@ -14,7 +15,7 @@ class IconList {
       case "investment": { return Icon(FontAwesomeIcons.chartArea, color: color, size: size); }
       case "loan": { return Icon(FontAwesomeIcons.handHoldingDollar, color: color, size: size); }
       case "savings": { return Icon(FontAwesomeIcons.piggyBank, color: color, size: size); }
-      case "other": { return Icon(FontAwesomeIcons.wallet, color: color, size: size); }
+      case "other": { return Icon(FontAwesomeIcons.coins, color: color, size: size); }
       default: { return Icon(FontAwesomeIcons.question, color: color, size: size); }
     }
   }

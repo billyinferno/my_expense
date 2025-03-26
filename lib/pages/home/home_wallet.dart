@@ -114,6 +114,7 @@ class _HomeWalletState extends State<HomeWallet> {
                     data: _accountMap,
                     borderColor: secondaryBackground,
                     backgroundColor: secondaryDark,
+                    showIcon: true,
                     onTap: ((tab) {
                       setState(() {
                         _tabSelected = tab;
