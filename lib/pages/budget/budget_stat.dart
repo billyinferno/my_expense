@@ -936,7 +936,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         DateTime.now().year,
         DateTime.now().month + 1,
         1
-      );
+      ).toLocal();
 
       // put on different list so we can manipulate it as this is not final one
       if (_showAll) {
@@ -956,7 +956,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       
       while (lastDate.isBefore(nextDate)) {
         _monthlyDateRange[Globals.dfMMyy.formatLocal(lastDate)] = 0;
-        lastDate = DateTime(lastDate.year, lastDate.month + 1, 1);
+        lastDate = DateTime(lastDate.year, lastDate.month + 1, 1).toLocal();
       }
 
       if (_monthlyDateRange.length > 12) {
@@ -969,7 +969,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
         DateTime.now().year + 1,
         12,
         1
-      );
+      ).toLocal();
       
       lastDate = DateTime.parse(
         "${_budgetYearly[_budgetYearly.length - 1].date}-12-01"
@@ -978,7 +978,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       _yearlyDateRange.clear();
       while (lastDate.isBefore(nextDate)) {
         _yearlyDateRange[Globals.dfyyyy.formatLocal(lastDate)] = 0;
-        lastDate = DateTime(lastDate.year + 1, 12, 1);
+        lastDate = DateTime(lastDate.year + 1, 12, 1).toLocal();
       }
       
       if (_yearlyDateRange.length > 12) {

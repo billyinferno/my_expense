@@ -238,14 +238,14 @@ class _ScrollDatePickerState extends State<ScrollDatePicker> {
             children: List<Widget>.generate(12, (int index) {
               if ((index + 1) == _currentMonth) {
                 return Text(
-                  Globals.dfMMMM.format(DateTime(_currentDate.year, (index+1), 1)),
+                  Globals.dfMMMM.formatLocal(DateTime(_currentDate.year, (index+1), 1)),
                   style: TextStyle(
                     color: widget.selectedColor
                   ),
                 );
               }
               else {
-                return Text(Globals.dfMMMM.format(DateTime(_currentDate.year, (index+1), 1)));
+                return Text(Globals.dfMMMM.formatLocal(DateTime(_currentDate.year, (index+1), 1)));
               }
             }),
           ),

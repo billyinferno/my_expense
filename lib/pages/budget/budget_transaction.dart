@@ -277,7 +277,12 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
 
     for (TransactionListModel txn in transactions) {
       if (txn.type == "expense") {
-        currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
+        currDate = DateTime(
+          txn.date.toLocal().year,
+          txn.date.toLocal().month,
+          txn.date.toLocal().day
+        ).toLocal();
+        
         if (totalDate.containsKey(currDate)) {
           walletExpenseIncome = totalDate[currDate]!;
         }

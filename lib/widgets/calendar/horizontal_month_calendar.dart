@@ -121,13 +121,6 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
     return total;
   }
 
-  bool _isSameDate(DateTime a, DateTime b) {
-    if(a.year == b.year && a.month == b.month) {
-      return true;
-    }
-    return false;
-  }
-
   Widget _dateItem(DateTime dt) {
     return Expanded(
       child: GestureDetector(
@@ -146,7 +139,7 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
                 child: Text(
                   Globals.dfMMMyyyy.formatLocal(dt),
                   style: TextStyle(
-                    color: (_isSameDate(dt, DateTime.now()) ? (_isSameDate(dt, widget.selectedDate) ? textColor : accentColors[1]) : textColor),
+                    color: (dt.isSameDate(date: DateTime.now()) ? (dt.isSameDate(date: widget.selectedDate) ? textColor : accentColors[1]) : textColor),
                   ),
                 ),
               ),
@@ -155,7 +148,7 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
                 margin: const EdgeInsets.only(left: 10, right: 10),
                 height: 5,
                 decoration: BoxDecoration(
-                  color: (_isSameDate(dt, widget.selectedDate) ? selectedPrimary : Colors.transparent),
+                  color: (dt.isSameDate(date: widget.selectedDate) ? selectedPrimary : Colors.transparent),
                   borderRadius: BorderRadius.circular(5),
                 ),
               ),

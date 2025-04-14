@@ -22,9 +22,9 @@ class HomeList extends StatefulWidget {
 }
 
 class _HomeListState extends State<HomeList> {
-  final DateTime _firstDay = DateTime(2010, 1, 1);
-  final DateTime _lastDay = DateTime(DateTime.now().year + 1, 12, 31);
-  DateTime _currentFocusedDay = DateTime.now();
+  final DateTime _firstDay = DateTime(2010, 1, 1).toLocal();
+  final DateTime _lastDay = DateTime(DateTime.now().year + 1, 12, 31).toLocal();
+  DateTime _currentFocusedDay = DateTime.now().toLocal();
 
   String _appTitleMonth = "";
   String _appTitleYear = "";
@@ -79,7 +79,7 @@ class _HomeListState extends State<HomeList> {
             _setFocusedDay(
               DateTime(DateTime.now().year,
               DateTime.now().month,
-              DateTime.now().day)
+              DateTime.now().day).toLocal()
             );
 
             // get the data
@@ -291,7 +291,7 @@ class _HomeListState extends State<HomeList> {
     ).then((newDate) {
       if (newDate != null) {
         _setFocusedDay(DateTime(newDate.toLocal().year, newDate.toLocal().month,
-            newDate.toLocal().day));
+            newDate.toLocal().day)..toLocal());
         _getData = _refreshTransaction(
           refreshDay: _currentFocusedDay,
           showLoading: true,
@@ -583,7 +583,7 @@ class _HomeListState extends State<HomeList> {
         txnInfo.date.toLocal().year,
         txnInfo.date.toLocal().month,
         1
-      )
+      ).toLocal()
     );
 
     DateTime from;

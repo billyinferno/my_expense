@@ -252,7 +252,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
       // initialize walletStatYearly
       walletStatYearly[Globals.dfyyyy.formatLocal(key)] = WalletStatModel(
-        date: DateTime(key.year, 12, 31),
+        date: DateTime(key.year, 12, 31).toLocal(),
         expense: 0,
         income: 0,
       );
@@ -366,17 +366,26 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
         // get the min date, where it should be the array 0 of the _origWalletStat
         if (_origWalletStatMonthly.isNotEmpty) {
-          _minDate = DateTime(_origWalletStatMonthly[0].date.year, _origWalletStatMonthly[0].date.month, 1);
-          _maxDate = DateTime(_origWalletStatMonthly[_origWalletStatMonthly.length - 1].date.year, _origWalletStatMonthly[_origWalletStatMonthly.length - 1].date.month, 1);
+          _minDate = DateTime(
+            _origWalletStatMonthly[0].date.year,
+            _origWalletStatMonthly[0].date.month,
+            1
+          ).toLocal();
+
+          _maxDate = DateTime(
+            _origWalletStatMonthly[_origWalletStatMonthly.length - 1].date.year,
+            _origWalletStatMonthly[_origWalletStatMonthly.length - 1].date.month,
+            1
+          ).toLocal();
 
           // generate the list of date beased on _min and _max date
           DateTime startDate = _minDate;
-          while (startDate.isBefore(_maxDate)) {
+          while (startDate.toLocal().isBefore(_maxDate.toLocal())) {
             // add the start date in the wallet date range
             _walletDateRange[startDate] = true;
 
             // add next month
-            startDate = DateTime(startDate.year, startDate.month + 1, 1);
+            startDate = DateTime(startDate.year, startDate.month + 1, 1).toLocal();
           }
 
           // add the _maxDate here as _maxDate will be skipped above

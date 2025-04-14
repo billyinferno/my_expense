@@ -193,7 +193,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
     Future<List<WalletModel>> futureWallets;
     Future<List<WorthModel>> futureNetWorth;
 
-    String refreshDay = Globals.dfyyyyMMdd.format(
+    String refreshDay = Globals.dfyyyyMMdd.formatLocal(
       DateTime(
         txnUpdate.date.year,
         txnUpdate.date.month,
@@ -201,7 +201,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       ).toLocal()
     );
 
-    String prevDay = Globals.dfyyyyMMdd.format(
+    String prevDay = Globals.dfyyyyMMdd.formatLocal(
       DateTime(
         _paramsData.date.year,
         _paramsData.date.month,
@@ -377,7 +377,7 @@ class _TransactionEditPageState extends State<TransactionEditPage> {
       });
 
       futureNetWorth.then((worth) {
-        String dateTo = Globals.dfyyyyMMdd.format(DateTime(
+        String dateTo = Globals.dfyyyyMMdd.formatLocal(DateTime(
           txnUpdate.date.toLocal().year,
           txnUpdate.date.toLocal().month + 1,
           1

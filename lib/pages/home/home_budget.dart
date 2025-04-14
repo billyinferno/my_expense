@@ -44,11 +44,11 @@ class _HomeBudgetState extends State<HomeBudget> {
     DateTime userMaxDate = TransactionSharedPreferences.getTransactionMaxDate();
 
     // convert the date to the first day of the min and max transaction date
-    _firstDay = DateTime(userMinDate.year, userMinDate.month, 1);
-    _lastDay = DateTime(userMaxDate.year, userMaxDate.month, 1);
+    _firstDay = DateTime(userMinDate.year, userMinDate.month, 1).toLocal();
+    _lastDay = DateTime(userMaxDate.year, userMaxDate.month, 1).toLocal();
 
     // default selected date to today's date
-    _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    _selectedDate = DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
 
     // now check which currencies is being used by the user
     if(_currencies.isNotEmpty) {

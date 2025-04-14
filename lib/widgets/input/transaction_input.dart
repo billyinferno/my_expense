@@ -376,7 +376,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     if (context.mounted) {                        
                       late Future<bool?> result = ShowMyDialog(
                           dialogTitle: "Repeat Transaction",
-                          dialogText: "This will automatically add ${gen.length} transactions from ${Globals.dfddMMyyyy.format(firstDate)} until ${Globals.dfddMMyyyy.format(lastDate)}?",
+                          dialogText: "This will automatically add ${gen.length} transactions from ${Globals.dfddMMyyyy.formatLocal(firstDate)} until ${Globals.dfddMMyyyy.formatLocal(lastDate)}?",
                           confirmText: "Add",
                           confirmColor: accentColors[0],
                           cancelText: "Cancel"

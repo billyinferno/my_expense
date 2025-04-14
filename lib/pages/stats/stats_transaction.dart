@@ -384,13 +384,13 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
           // check if previous date is null?
           if (prevDate == null) {
             // create the header
-            detailTxn.add(_detailHeader(name: Globals.dfddMMMMyyyy.format(_transactionsSort[i].date)));
+            detailTxn.add(_detailHeader(name: Globals.dfddMMMMyyyy.formatLocal(_transactionsSort[i].date)));
           }
           else {
             // check if previous date is not same as current date
             if (prevDate != _transactionsSort[i].date) {
               // different date, create a new header
-              detailTxn.add(_detailHeader(name: Globals.dfddMMMMyyyy.format(_transactionsSort[i].date)));
+              detailTxn.add(_detailHeader(name: Globals.dfddMMMMyyyy.formatLocal(_transactionsSort[i].date)));
             }
           }
 
@@ -460,7 +460,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
 
         // get the key for this
         if (keyType == "M") {
-          subSummaryKey = Globals.dfyyyyMM.format(transactionList[i].date);
+          subSummaryKey = Globals.dfyyyyMM.formatLocal(transactionList[i].date);
         }
         else {
           subSummaryKey = transactionList[i].date.toLocal().year.toString();
@@ -477,7 +477,11 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
             -1,
             transactionList[i].name,
             transactionList[i].type,
-            DateTime(transactionList[i].date.year, transactionList[i].date.month, 1),
+            DateTime(
+              transactionList[i].date.year,
+              transactionList[i].date.month,
+              1
+            ).toLocal(),
             transactionList[i].description,
             transactionList[i].category,
             transactionList[i].wallet,
@@ -494,7 +498,11 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
               -1,
               transactionList[i].name,
               transactionList[i].type,
-              DateTime(transactionList[i].date.year, transactionList[i].date.month, 1),
+              DateTime(
+                transactionList[i].date.year,
+                transactionList[i].date.month,
+                1
+              ).toLocal(),
               transactionList[i].description,
               transactionList[i].category,
               transactionList[i].wallet,
@@ -515,7 +523,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
         -1,
         transactionList[0].name,
         transactionList[0].type,
-        DateTime.now(),
+        DateTime.now().toLocal(),
         '',
         transactionList[0].category,
         transactionList[0].wallet,

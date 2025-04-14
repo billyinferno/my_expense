@@ -130,10 +130,10 @@ class TransactionSharedPreferences {
 
     if(data != null) {
       DateTime date = DateTime.parse(data);
-      return date;
+      return date.toLocal();
     }
     else {
-      return DateTime(DateTime.now().year, DateTime.now().month, 1);
+      return DateTime(DateTime.now().year, DateTime.now().month, 1).toLocal();
     }
   }
 
@@ -149,14 +149,14 @@ class TransactionSharedPreferences {
 
     if(data != null) {
       DateTime date = DateTime.parse(data);
-      return date;
+      return date.toLocal();
     }
     else {
       return DateTime(
         DateTime.now().year,
         DateTime.now().month + 1,
         1
-      ).subtract(const Duration(days: 1));
+      ).subtract(const Duration(days: 1)).toLocal();
     }
   }
 
@@ -504,8 +504,17 @@ class TransactionSharedPreferences {
     String? dateFrom = MyBox.getString(key: _transactionStatDateFrom);
     String? dateTo = MyBox.getString(key: _transactionStatDateFrom);
 
-    DateTime from = DateTime(DateTime.now().year, DateTime.now().month, 1);
-    DateTime to = DateTime(DateTime.now().year, DateTime.now().month + 1, 1).subtract(const Duration(days: 1));
+    DateTime from = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      1
+    );
+    
+    DateTime to = DateTime(
+      DateTime.now().year,
+      DateTime.now().month + 1,
+      1
+    ).subtract(const Duration(days: 1));
 
     if (dateFrom != null) {
       from = DateTime.parse(dateFrom);
@@ -514,7 +523,7 @@ class TransactionSharedPreferences {
       to = DateTime.parse(dateTo);
     }
     
-    return (from, to);
+    return (from.toLocal(), to.toLocal());
   }
 
   static Future setMaxID({

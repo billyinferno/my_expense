@@ -533,13 +533,13 @@ class _StatsAllPageState extends State<StatsAllPage> {
             _origWalletStatAllMonthly.data[0].date.year,
             _origWalletStatAllMonthly.data[0].date.month,
             1
-          );
+          ).toLocal();
           
           _maxDate = DateTime(
             _origWalletStatAllMonthly.data[_origWalletStatAllMonthly.data.length - 1].date.year,
             _origWalletStatAllMonthly.data[_origWalletStatAllMonthly.data.length - 1].date.month,
             1
-          );
+          ).toLocal();
 
           // generate the list of date beased on _min and _max date
           DateTime startDate = _minDate;
@@ -548,7 +548,7 @@ class _StatsAllPageState extends State<StatsAllPage> {
             _walletDateRange[startDate] = true;
 
             // add next month
-            startDate = DateTime(startDate.year, startDate.month + 1, 1);
+            startDate = DateTime(startDate.year, startDate.month + 1, 1).toLocal();
           }
 
           // add the _maxDate here as _maxDate will be skipped above

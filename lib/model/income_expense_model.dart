@@ -13,16 +13,16 @@ class IncomeExpenseModel {
       json["expense"].forEach((value) {
         IncomeExpense exp = IncomeExpense.fromJson(value);
         currDate = exp.date.toLocal();
-        currDate = DateTime(currDate.year, currDate.month, currDate.day);
-        expense[DateTime(currDate.year, currDate.month, currDate.day)] = exp.amount;
+        currDate = DateTime(currDate.year, currDate.month, currDate.day).toLocal();
+        expense[DateTime(currDate.year, currDate.month, currDate.day).toLocal()] = exp.amount;
       });
 
       Map<DateTime, double> income = {};
       json["income"].forEach((value) {
         IncomeExpense inc = IncomeExpense.fromJson(value);
         currDate = inc.date.toLocal();
-        currDate = DateTime(currDate.year, currDate.month, currDate.day);
-        income[DateTime(currDate.year, currDate.month, currDate.day)] = inc.amount;
+        currDate = DateTime(currDate.year, currDate.month, currDate.day).toLocal();
+        income[DateTime(currDate.year, currDate.month, currDate.day).toLocal()] = inc.amount;
       });
 
       return IncomeExpenseModel(expense: expense, income: income);

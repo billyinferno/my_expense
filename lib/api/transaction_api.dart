@@ -544,12 +544,12 @@ class TransactionHTTPService {
           DateTime.now().year,
           DateTime.now().month,
           1
-        ),
+        ).toLocal(),
       );
     }
     else {
       TransactionSharedPreferences.setTransactionMinDate(
-        date: DateTime.parse(jsonData["min"])
+        date: DateTime.parse(jsonData["min"]).toLocal()
       );
     }
     
@@ -559,12 +559,12 @@ class TransactionHTTPService {
           DateTime.now().year,
           DateTime.now().month + 1,
           1
-        ).subtract(const Duration(days: 1))
+        ).subtract(const Duration(days: 1)).toLocal()
       );
     }
     else {
       TransactionSharedPreferences.setTransactionMaxDate(
-        date: DateTime.parse(jsonData["max"])
+        date: DateTime.parse(jsonData["max"]).toLocal()
       );
     }
   }

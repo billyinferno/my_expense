@@ -115,7 +115,7 @@ class ListViewWithHeader extends StatelessWidget {
                 prevDate = data[i].date;
                 widgetList.add(
                   _header(
-                    text: Globals.dfddMMMMyyyy.format(prevDate),
+                    text: Globals.dfddMMMMyyyy.formatLocal(prevDate),
                   )
                 );
               }

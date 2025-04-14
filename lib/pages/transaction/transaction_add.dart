@@ -182,7 +182,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     Future<List<BudgetModel>> futureBudgets;
     Future<List<WalletModel>> futureWallets;
     List<BudgetModel> budgets = [];
-    String refreshDay = Globals.dfyyyyMMdd.format(
+    String refreshDay = Globals.dfyyyyMMdd.formatLocal(
       DateTime(
         txnAdd.date.toLocal().year,
         txnAdd.date.toLocal().month,
@@ -287,7 +287,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
     // add the transaction to the statisctics
     await WalletSharedPreferences.addWalletWorth(txn: txnAdd).then((_) {
-      String dateTo = Globals.dfyyyyMMdd.format(
+      String dateTo = Globals.dfyyyyMMdd.formatLocal(
         DateTime(
           txnAdd.date.toLocal().year,
           txnAdd.date.toLocal().month + 1,
@@ -317,7 +317,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       // otherwise we can ignore, as we will not display the statistics on the home stats screen.
       if (txnAdd.date.year == DateTime.now().year &&
           txnAdd.date.month == DateTime.now().month) {
-        String dateFrom = Globals.dfyyyyMMdd.format(
+        String dateFrom = Globals.dfyyyyMMdd.formatLocal(
           DateTime(
             txnAdd.date.toLocal().year,
             txnAdd.date.toLocal().month,
@@ -325,7 +325,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
           )
         );
 
-        String dateTo = Globals.dfyyyyMMdd.format(
+        String dateTo = Globals.dfyyyyMMdd.formatLocal(
           DateTime(
             txnAdd.date.toLocal().year,
             txnAdd.date.toLocal().month + 1,

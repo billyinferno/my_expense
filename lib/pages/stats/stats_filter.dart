@@ -127,7 +127,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
     _maxDate = TransactionSharedPreferences.getTransactionMaxDate();
 
     // set the minimum date as the 1 day of the minimum transaction date
-    _minDate = DateTime(_minDate.year, 1, 1);
+    _minDate = DateTime(_minDate.year, 1, 1).toLocal();
 
     // compare the max date with the DateTime.Now(), which one is lesser?
     // if _maxDate is lesser, then change the _maxDate with current date
@@ -135,19 +135,19 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       // change the maxDate
       _maxDate = DateTime(
         DateTime.now().toLocal().year + 1, 1, 1
-      ).subtract(const Duration(days: 1));
+      ).subtract(const Duration(days: 1)).toLocal();
     }
 
     _currentFromDate = DateTime(
       DateTime.now().toLocal().year,
       DateTime.now().toLocal().month,
       1
-    );
+    ).toLocal();
     _currentToDate = DateTime(
       DateTime.now().toLocal().year,
       DateTime.now().toLocal().month + 1,
       1
-    ).subtract(const Duration(days: 1));
+    ).subtract(const Duration(days: 1)).toLocal();
 
     _selectedDateTime = [];
   }
@@ -413,18 +413,18 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       // set the _currentToDate as the last day of the month
       _currentFromDate = DateTime(
         _currentToDate.toLocal().year, _currentToDate.toLocal().month, 1
-      );
+      ).toLocal();
       _currentToDate = DateTime(
         _currentToDate.toLocal().year,_currentToDate.toLocal().month + 1, 1
-      ).subtract(const Duration(days: 1));
+      ).subtract(const Duration(days: 1)).toLocal();
       
       return _generateMonthCalendar();
     } else if (_currentType == "year") {
       // set the _currentToDate as the last day of the year
-      _currentFromDate = DateTime(_currentToDate.toLocal().year, 1, 1);
+      _currentFromDate = DateTime(_currentToDate.toLocal().year, 1, 1).toLocal();
       _currentToDate = DateTime(
         _currentToDate.toLocal().year + 1, 1, 1
-      ).subtract(const Duration(days: 1));
+      ).subtract(const Duration(days: 1)).toLocal();
       
       return _generateYearCalendar();
     } else {
@@ -434,7 +434,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
           _currentFromDate.toLocal().year,
           _currentFromDate.toLocal().month + 1,
           1
-        ).subtract(const Duration(days: 1));
+        ).subtract(const Duration(days: 1)).toLocal();
       }
 
       // ensure _currentToDate also not more than _maxDate

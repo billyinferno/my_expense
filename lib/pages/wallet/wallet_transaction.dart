@@ -85,13 +85,13 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       DateTime.now().year,
       DateTime.now().month,
       1
-    );
+    ).toLocal();
 
     _walletMaxDAte = DateTime(
       DateTime.now().year,
       DateTime.now().month + 1,
       1
-    ).subtract(Duration(days: 1));
+    ).subtract(Duration(days: 1)).toLocal();
 
     // fetch the transaction
     _getData = _fetchInitData();
@@ -184,7 +184,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     WalletTransactionExpenseIncome walletExpenseIncome;
 
     for (TransactionListModel txn in transactions) {
-      currDate = DateTime(txn.date.toLocal().year, txn.date.toLocal().month, txn.date.toLocal().day);
+      currDate = DateTime(
+        txn.date.toLocal().year,
+        txn.date.toLocal().month,
+        txn.date.toLocal().day
+      ).toLocal();
+
       if (totalDate.containsKey(currDate)) {
         walletExpenseIncome = totalDate[currDate]!;
       }
@@ -284,7 +289,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     }
 
     // get the transaction
-    String date = Globals.dfyyyyMMdd.format(
+    String date = Globals.dfyyyyMMdd.formatLocal(
       DateTime(
         fetchDate.toLocal().year,
         fetchDate.toLocal().month,
@@ -851,8 +856,12 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
   }
 
   Future<void> _updateInformation(TransactionListModel txnInfo) async {
-    String refreshDay = Globals.dfyyyyMMdd.format(
-      DateTime(txnInfo.date.toLocal().year, txnInfo.date.toLocal().month, 1)
+    String refreshDay = Globals.dfyyyyMMdd.formatLocal(
+      DateTime(
+        txnInfo.date.toLocal().year,
+        txnInfo.date.toLocal().month,
+        1
+      )
     );
     DateTime from;
     DateTime to;

@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
       DateTime.now().year,
       DateTime.now().month,
       1
-    );
+    ).toLocal();
     _currentDateString = Globals.dfyyyyMMdd.formatLocal(_currentDate);
 
     _isLogin = false;
