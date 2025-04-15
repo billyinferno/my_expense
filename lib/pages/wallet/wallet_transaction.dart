@@ -267,6 +267,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     }
   }
 
+  List<TransactionListModel> _sortTransactions(List<TransactionListModel> transactions) {
+    List<TransactionListModel> output = transactions.toList()..sort((a, b) => (a.date.compareTo(b.date)));
+    return output;
+  }
+
   Future<void> _setTransactions(List<TransactionListModel> transactions) async {
     setState(() {
       // generate the list that we can showed in the page
@@ -304,8 +309,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       date: date,
       force: force
     ).then((txns) async {
-      await _setTransactions(txns);
       _transactions = txns.toList();
+      _transactions = _sortTransactions(_transactions);
+      await _setTransactions(_transactions);
     }).onError((error, stackTrace) {
       Log.error(
         message: "Error when <_fetchTransactionWallet>",
@@ -493,6 +499,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                         try {
                           // first delete the transaction
                           await _deleteTransaction(txn);
+
+                          // sort the transactions
+                          _transactions = _sortTransactions(_transactions);
                           
                           // rebuild widget after finished
                           await _setTransactions(_transactions);
@@ -515,6 +524,21 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                 await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
                   // check if we got return
                   if (value != null) {
+                    await _walletHTTP.fetchWallets(
+                      showDisabled: true,
+                      force: true
+                    ).then((wallets) {
+                      if (context.mounted) {
+                        Provider.of<HomeProvider>(
+                          context,
+                          listen: false
+                        ).setWalletList(wallets: wallets);
+                      }
+
+                      // set wallet list to the refreshed wallets
+                      _walletList = wallets;
+                    });
+
                     // convert value to the transaction list model
                     TransactionListModel updateTxn = value as TransactionListModel;
                     await _updateTransactions(updateTxn);
@@ -584,6 +608,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         break;
       }
     }
+
+    // sort the transaction first
+    _transactions = _sortTransactions(_transactions);
 
     // rebuild the transaction
     await _setTransactions(_transactions);
@@ -912,6 +939,9 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             listen: false
           ).setWalletList(wallets: wallets);
         }
+
+        // set wallet list to the refreshed wallets
+        _walletList = wallets;
       });
 
       // store the budgets list
