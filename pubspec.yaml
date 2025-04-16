@@ -57,6 +57,7 @@ dependencies:
   hive_ce_flutter: ^2.0.0
   carousel_slider: ^5.0.0
   flutter_native_splash: ^2.4.4
+  easy_sticky_header: ^1.1.1
 
 # add for native splash
 flutter_native_splash:

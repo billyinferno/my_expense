@@ -1,7 +1,19 @@
+import 'package:easy_sticky_header/easy_sticky_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+
+enum HeaderType {
+  date,
+  name,
+  amount
+}
+
+enum GroupBy {
+  none,
+  category
+}
 
 class ListViewWithHeader extends StatelessWidget {
   final ScrollController? controller;
@@ -9,7 +21,8 @@ class ListViewWithHeader extends StatelessWidget {
   final Function(TransactionListModel)? onEdit;
   final Function(TransactionListModel)? onDelete;
   final bool showHeader;
-  final String headerType;
+  final HeaderType headerType;
+  final GroupBy groupBy;
   const ListViewWithHeader({
     super.key,
     this.controller,
@@ -17,7 +30,8 @@ class ListViewWithHeader extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.showHeader = true,
-    this.headerType = 'D',
+    this.headerType = HeaderType.date,
+    this.groupBy = GroupBy.none,
   });
 
   @override
@@ -28,12 +42,14 @@ class ListViewWithHeader extends StatelessWidget {
     else {
       final List<Widget> wigdetList = _generateChildWidget(context);
 
-      return ListView.builder(
-        controller: controller,
-        itemCount: wigdetList.length,
-        itemBuilder: (context, index) {
-          return wigdetList[index];
-        },
+      return StickyHeader(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: wigdetList.length,
+          itemBuilder: (context, index) {
+            return wigdetList[index];
+          },
+        ),
       );
     }
   }
@@ -52,19 +68,21 @@ class ListViewWithHeader extends StatelessWidget {
         // first data, add the header nonetheless
         if (i == 0) {
           switch (headerType) {
-            case 'N':
+            case HeaderType.name:
               prevName = data[i].name;
               widgetList.add(
                 _header(
                   text: data[i].name,
+                  index: i,
                 )
               );
               break;
-            case 'A':
+            case HeaderType.amount:
               prevAmount = data[i].amount;
               widgetList.add(
                 _header(
                   text: data[i].amount.formatCurrency(shorten: false, decimalNum: 2),
+                  index: i,
                 )
               );
               break;
@@ -73,6 +91,7 @@ class ListViewWithHeader extends StatelessWidget {
               widgetList.add(
                 _header(
                   text: Globals.dfddMMMMyyyy.formatLocal(prevDate),
+                  index: i,
                 )
               );
               break;
@@ -81,7 +100,7 @@ class ListViewWithHeader extends StatelessWidget {
         else {
           // check what kind of header type?
           switch (headerType) {
-            case 'N':
+            case HeaderType.name:
               // check whether prev name is same as current name or not?
               if (prevName != data[i].name) {
                 // prevName is not same with current name, generate a header and set
@@ -90,11 +109,12 @@ class ListViewWithHeader extends StatelessWidget {
                 widgetList.add(
                   _header(
                     text: data[i].name,
+                    index: i,
                   )
                 );
               }
               break;
-            case 'A':
+            case HeaderType.amount:
               // check whether prev amount is same as current amount or not?
               if (prevAmount != data[i].amount) {
                 // prevAmount is not same with current amount, generate a header and set
@@ -103,6 +123,7 @@ class ListViewWithHeader extends StatelessWidget {
                 widgetList.add(
                   _header(
                     text: data[i].amount.formatCurrency(shorten: false, decimalNum: 2),
+                    index: i,
                   )
                 );
               }
@@ -116,6 +137,7 @@ class ListViewWithHeader extends StatelessWidget {
                 widgetList.add(
                   _header(
                     text: Globals.dfddMMMMyyyy.formatLocal(prevDate),
+                    index: i,
                   )
                 );
               }
@@ -142,23 +164,28 @@ class ListViewWithHeader extends StatelessWidget {
 
   Widget _header({
     required String text,
+    required int index,
   }) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-      decoration: BoxDecoration(
-        color: secondaryDark,
-        border: Border(
-          bottom: BorderSide(
-            color: secondaryLight,
-            width: 1.0,
-            style: BorderStyle.solid,
+    return StickyContainerWidget(
+      index: index,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+        decoration: BoxDecoration(
+          color: secondaryDark,
+          border: Border(
+            bottom: BorderSide(
+              color: secondaryLight,
+              width: 1.0,
+              style: BorderStyle.solid,
+            )
           )
-        )
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: textColor2,
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: textColor2,
+          ),
         ),
       ),
     );

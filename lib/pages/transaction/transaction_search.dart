@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:badges/badges.dart' as badges;
+import 'package:easy_sticky_header/easy_sticky_header.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -97,8 +98,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final Map<int, bool> _selectedWalletList = {};
 
   late bool _sortType;
-  late String _filterType;
+  late HeaderType _filterType;
   late SummaryType _summaryType;
+  final List<Widget> _subPage = [];
 
   @override
   void initState() {
@@ -111,7 +113,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _summaryList = [];
 
     _sortType = false; // descending
-    _filterType = "D"; // date
+    _filterType = HeaderType.date; // date
     _summaryType = SummaryType.name;
 
     _filterTransactionsSort = [];
@@ -174,7 +176,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                         SimpleItem(
                           onTap: (() {
                             setState(() {
-                              _filterType = "N";
+                              _filterType = HeaderType.name;
                               _generateSortedList();
                             });
                             Navigator.pop(context);
@@ -191,12 +193,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                             ),
                           ),
                           title: "Name",
-                          isSelected: (_filterType == "N"),
+                          isSelected: (_filterType == HeaderType.name),
                         ),
                         SimpleItem(
                           onTap: (() {
                             setState(() {
-                              _filterType = "D";
+                              _filterType = HeaderType.date;
                               _generateSortedList();
                             });
                             Navigator.pop(context);
@@ -208,12 +210,12 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                             size: 15,
                           ),
                           title: "Date",
-                          isSelected: (_filterType == "D"),
+                          isSelected: (_filterType == HeaderType.date),
                         ),
                         SimpleItem(
                           onTap: (() {
                             setState(() {
-                              _filterType = "A";
+                              _filterType = HeaderType.amount;
                               _generateSortedList();
                             });
                             Navigator.pop(context);
@@ -225,7 +227,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                             size: 15,
                           ),
                           title: "Amount",
-                          isSelected: (_filterType == "A"),
+                          isSelected: (_filterType == HeaderType.amount),
                         ),
                       ],
                     ),
@@ -274,6 +276,92 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     );
   }
 
+  void _generateSubPage() {
+    final SplayTreeMap<int, Widget> mapSubPage = SplayTreeMap<int, Widget>();
+
+    // All transaction page
+    mapSubPage[PageName.all.index] = ListViewWithHeader(
+      controller: _scrollControllerAll,
+      data: _filterTransactionsSort,
+      headerType: _filterType,
+      showHeader: (_filterType != HeaderType.amount),
+      onEdit: (txn) {
+        // show the transaction edit screen
+        _showTransactionEditScreen(txn);
+      },
+      onDelete: (txn) async {
+        Log.info(message: "Delete (${txn.id}) ${txn.name}");
+
+        // remove the transaction from the transaction list and group
+        // again the transaction.
+        await _deleteTransactionData(txn: txn);
+      },
+    );
+
+    // Summary Page
+    mapSubPage[PageName.summary.index] = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.all(10),
+          child: Center(
+            child: SizedBox(
+              width: (100 * _summaryItems.length).toDouble(),
+              child: TypeSlide<SummaryType>(
+                onValueChanged: (value) {
+                  setState(() {
+                    _summaryType = value;
+                    _setSummaryList();
+                  });
+                },
+                items: _summaryItems,
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: StickyHeader(
+            child: ListView.builder(
+              controller: _scrollControllerSummary,
+              itemCount: _summaryList.length,
+              itemBuilder: ((context, index) {
+                return _summaryList[index];
+              })
+            ),
+          ),
+        ),
+      ],
+    );
+
+    mapSubPage[PageName.income.index] = ListViewWithHeader(
+      controller: _scrollControllerIncome,
+      data: _incomeSort,
+      headerType: _filterType,
+      showHeader: (_filterType != HeaderType.amount),
+    );
+
+    mapSubPage[PageName.expense.index] = ListViewWithHeader(
+      controller: _scrollControllerExpense,
+      data: _expenseSort,
+      headerType: _filterType,
+    );
+
+    mapSubPage[PageName.transfer.index] = ListViewWithHeader(
+      controller: _scrollControllerTransfer,
+      data: _transferSort,
+      headerType: _filterType,
+      showHeader: (_filterType != HeaderType.amount),
+    );
+
+    // loop thru map and put on the sub page
+    _subPage.clear();
+
+    mapSubPage.forEach((pageName, widget) {
+      _subPage.add(widget);
+    },);
+  }
+
   Widget _getResultPage() {
     // check if we got transactions or not?
     if (_transactions.isEmpty) {
@@ -289,6 +377,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         ),
       );
     }
+
+    // generate the sub page
+    _generateSubPage();
 
     // if got transaction we will result the transaction
     return Expanded(
@@ -499,87 +590,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             ),
           ),
           Expanded(
-            child: _getResultChild(),
+            child: IndexedStack(
+              index: _resultPageName.index,
+              children: _subPage,
+            ),
           ),
         ],
       ),
     );
-  }
-
-  Widget _getResultChild() {
-    switch (_resultPageName) {
-      case PageName.all:
-        return ListViewWithHeader(
-          controller: _scrollControllerAll,
-          data: _filterTransactionsSort,
-          headerType: _filterType,
-          showHeader: (_filterType != 'A'),
-          onEdit: (txn) {
-            // show the transaction edit screen
-            _showTransactionEditScreen(txn);
-          },
-          onDelete: (txn) async {
-            Log.info(message: "Delete (${txn.id}) ${txn.name}");
-
-            // remove the transaction from the transaction list and group
-            // again the transaction.
-            await _deleteTransactionData(txn: txn);
-          },
-        );
-      case PageName.summary:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.all(10),
-              child: Center(
-                child: SizedBox(
-                  width: (100 * _summaryItems.length).toDouble(),
-                  child: TypeSlide<SummaryType>(
-                    onValueChanged: (value) {
-                      setState(() {
-                        _summaryType = value;
-                        _setSummaryList();
-                      });
-                    },
-                    items: _summaryItems,
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                controller: _scrollControllerSummary,
-                itemCount: _summaryList.length,
-                itemBuilder: ((context, index) {
-                  return _summaryList[index];
-                })
-              ),
-            ),
-          ],
-        );
-      case PageName.income:
-        return ListViewWithHeader(
-          controller: _scrollControllerIncome,
-          data: _incomeSort,
-          headerType: _filterType,
-          showHeader: (_filterType != 'A'),
-        );
-      case PageName.expense:
-        return ListViewWithHeader(
-          controller: _scrollControllerExpense,
-          data: _expenseSort,
-          headerType: _filterType,
-        );
-      case PageName.transfer:
-        return ListViewWithHeader(
-          controller: _scrollControllerTransfer,
-          data: _transferSort,
-          headerType: _filterType,
-          showHeader: (_filterType != 'A'),
-        );
-    }
   }
 
   Widget _categoryIcon(
@@ -899,6 +917,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     DateTime? startDate;
     DateTime? endDate;
     int count;
+    int index;
     String subSummaryKey = "";
     TransactionListModel tmpSubSummaryData;
 
@@ -916,35 +935,42 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     ));
 
     // loop thru all the currency we have for this summary list item data
+    index = 0;
     data.forEach((currencySymbol, value) {
-      widget.add(Container(
-        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-        color: primaryDark,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              "Total $currencySymbol",
-              style: TextStyle(
-                color: color,
-              ),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            Expanded(
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  Globals.fCCY.format(value),
-                  style: TextStyle(
-                    color: color,
-                  ),
+      // add the index for the sticky header
+      index = index + 1;
+      
+      widget.add(StickyContainerWidget(
+        index: index,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+          color: primaryDark,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                "Total $currencySymbol",
+                style: TextStyle(
+                  color: color,
                 ),
               ),
-            )
-          ],
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    Globals.fCCY.format(value),
+                    style: TextStyle(
+                      color: color,
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ));
 
@@ -958,7 +984,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         List<String> keyCheck = key.split('_');
         
         // check if the currencySymbol is the same as the key
-        debugPrint("${keyCheck[0]} = $currencySymbol");
         if (keyCheck[0].toLowerCase() == currencySymbol.toLowerCase()) {
           // initialize the data
           amount = 0;
@@ -1594,29 +1619,23 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // switch the filter type
     switch(_filterType) {
-      case "N":
+      case HeaderType.name:
         _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.name.compareTo(b.name));
         _incomeSort = _income.toList()..sort((a, b) => a.name.compareTo(b.name));
         _expenseSort = _expense.toList()..sort((a, b) => a.name.compareTo(b.name));
         _transferSort = _transfer.toList()..sort((a, b) => a.name.compareTo(b.name));
         break;
-      case "D":
+      case HeaderType.date:
         _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.date.compareTo(b.date));
         _incomeSort = _income.toList()..sort((a, b) => a.date.compareTo(b.date));
         _expenseSort = _expense.toList()..sort((a, b) => a.date.compareTo(b.date));
         _transferSort = _transfer.toList()..sort((a, b) => a.date.compareTo(b.date));
         break;
-      case "A":
+      case HeaderType.amount:
         _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.amount.compareTo(b.amount));
         _incomeSort = _income.toList()..sort((a, b) => a.amount.compareTo(b.amount));
         _expenseSort = _expense.toList()..sort((a, b) => a.amount.compareTo(b.amount));
         _transferSort = _transfer.toList()..sort((a, b) => a.amount.compareTo(b.amount));
-        break;
-      default:
-        _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.date.compareTo(b.date));
-        _incomeSort = _income.toList()..sort((a, b) => a.date.compareTo(b.date));
-        _expenseSort = _expense.toList()..sort((a, b) => a.date.compareTo(b.date));
-        _transferSort = _transfer.toList()..sort((a, b) => a.date.compareTo(b.date));
         break;
     }
 
