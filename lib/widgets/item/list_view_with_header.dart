@@ -22,6 +22,7 @@ class ListViewWithHeader extends StatelessWidget {
   final Function(TransactionListModel)? onDelete;
   final bool showHeader;
   final HeaderType headerType;
+  //TODO: to add group by function when we generate the list view
   final GroupBy groupBy;
   const ListViewWithHeader({
     super.key,

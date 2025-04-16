@@ -277,6 +277,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   void _generateSubPage() {
+    //TODO: still got issue when filter based on name
     final SplayTreeMap<int, Widget> mapSubPage = SplayTreeMap<int, Widget>();
 
     // All transaction page
