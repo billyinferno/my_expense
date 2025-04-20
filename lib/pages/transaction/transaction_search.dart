@@ -68,11 +68,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final List<TransactionListModel> _expense = [];
   final List<TransactionListModel> _transfer = [];
 
-  late List<TransactionListModel> _filterTransactionsSort;
-  late List<TransactionListModel> _incomeSort;
-  late List<TransactionListModel> _expenseSort;
-  late List<TransactionListModel> _transferSort;
-
   final SplayTreeMap<String, List<TransactionListModel>> _summaryIncome = SplayTreeMap<String, List<TransactionListModel>>();
   final SplayTreeMap<String, List<TransactionListModel>> _summaryIncomeCategory = SplayTreeMap<String, List<TransactionListModel>>();
   
@@ -97,9 +92,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   late List<WalletModel> _walletList;
   final Map<int, bool> _selectedWalletList = {};
 
-  late bool _sortType;
+  late bool _isDescending;
   late HeaderType _filterType;
   late SummaryType _summaryType;
+  final SplayTreeMap<int, Widget> _mapSubPage = SplayTreeMap<int, Widget>();
   final List<Widget> _subPage = [];
 
   @override
@@ -112,14 +108,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     
     _summaryList = [];
 
-    _sortType = false; // descending
+    _isDescending = true; // descending
     _filterType = HeaderType.date; // date
     _summaryType = SummaryType.name;
-
-    _filterTransactionsSort = [];
-    _incomeSort = [];
-    _expenseSort = [];
-    _transferSort = [];
 
     // get the category expense and income list from shared preferences
     _categoryExpenseList = CategorySharedPreferences.getCategory(type: 'expense');
@@ -168,7 +159,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   return MyBottomSheet(
                     context: context,
                     title: "Select Filter",
-                    screenRatio: 0.3,
+                    screenRatio: 0.4,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -177,7 +168,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           onTap: (() {
                             setState(() {
                               _filterType = HeaderType.name;
-                              _generateSortedList();
                             });
                             Navigator.pop(context);
                           }),
@@ -199,7 +189,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           onTap: (() {
                             setState(() {
                               _filterType = HeaderType.date;
-                              _generateSortedList();
                             });
                             Navigator.pop(context);
                           }),
@@ -215,8 +204,23 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                         SimpleItem(
                           onTap: (() {
                             setState(() {
+                              _filterType = HeaderType.category;
+                            });
+                            Navigator.pop(context);
+                          }),
+                          color: Colors.grey[900]!,
+                          icon: Icon(
+                            Ionicons.list_outline,
+                            color: textColor2,
+                            size: 15,
+                          ),
+                          title: "Category",
+                          isSelected: (_filterType == HeaderType.category),
+                        ),
+                        SimpleItem(
+                          onTap: (() {
+                            setState(() {
                               _filterType = HeaderType.amount;
-                              _generateSortedList();
                             });
                             Navigator.pop(context);
                           }),
@@ -242,11 +246,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             )
           ),
           SortIcon(
-            asc: _sortType,
+            asc: !_isDescending,
             onPress: (() {
               setState(() {
-                _sortType = !_sortType;
-                _generateSortedList();
+                _isDescending = !_isDescending;
               });
             }),
           ),
@@ -276,16 +279,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     );
   }
 
-  void _generateSubPage() {
-    //TODO: still got issue when filter based on name
-    final SplayTreeMap<int, Widget> mapSubPage = SplayTreeMap<int, Widget>();
-
+  void _generateSubPageDate() {
     // All transaction page
-    mapSubPage[PageName.all.index] = ListViewWithHeader(
+    _mapSubPage[PageName.all.index] = ListViewWithHeader<DateTime>(
       controller: _scrollControllerAll,
-      data: _filterTransactionsSort,
+      data: _filterTransactions,
       headerType: _filterType,
-      showHeader: (_filterType != HeaderType.amount),
+      showHeader: true,
+      reverse: _isDescending,
       onEdit: (txn) {
         // show the transaction edit screen
         _showTransactionEditScreen(txn);
@@ -299,8 +300,146 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       },
     );
 
+    _mapSubPage[PageName.income.index] = ListViewWithHeader<DateTime>(
+      controller: _scrollControllerIncome,
+      data: _income,
+      headerType: _filterType,
+      showHeader: true,
+      reverse: _isDescending,
+    );
+
+    _mapSubPage[PageName.expense.index] = ListViewWithHeader<DateTime>(
+      controller: _scrollControllerExpense,
+      data: _expense,
+      headerType: _filterType,
+      showHeader: true,
+      reverse: _isDescending,
+    );
+
+    _mapSubPage[PageName.transfer.index] = ListViewWithHeader<DateTime>(
+      controller: _scrollControllerTransfer,
+      data: _transfer,
+      headerType: _filterType,
+      showHeader: true,
+      reverse: _isDescending,
+    );
+  }
+
+  void _generateSubPageString() {
+    // All transaction page
+    _mapSubPage[PageName.all.index] = ListViewWithHeader<String>(
+      controller: _scrollControllerAll,
+      data: _filterTransactions,
+      headerType: _filterType,
+      showHeader: true,
+      reverse: _isDescending,
+      onEdit: (txn) {
+        // show the transaction edit screen
+        _showTransactionEditScreen(txn);
+      },
+      onDelete: (txn) async {
+        Log.info(message: "Delete (${txn.id}) ${txn.name}");
+
+        // remove the transaction from the transaction list and group
+        // again the transaction.
+        await _deleteTransactionData(txn: txn);
+      },
+    );
+
+    _mapSubPage[PageName.income.index] = ListViewWithHeader<String>(
+      controller: _scrollControllerIncome,
+      data: _income,
+      headerType: _filterType,
+      showHeader: true,
+      reverse: _isDescending,
+    );
+
+    _mapSubPage[PageName.expense.index] = ListViewWithHeader<String>(
+      controller: _scrollControllerExpense,
+      data: _expense,
+      headerType: _filterType,
+      showHeader: true,
+      reverse: _isDescending,
+    );
+
+    _mapSubPage[PageName.transfer.index] = ListViewWithHeader<String>(
+      controller: _scrollControllerTransfer,
+      data: _transfer,
+      headerType: _filterType,
+      showHeader: true,
+      reverse: _isDescending,
+    );
+  }
+
+  void _generateSubPageDouble() {
+    // All transaction page
+    _mapSubPage[PageName.all.index] = ListViewWithHeader<double>(
+      controller: _scrollControllerAll,
+      data: _filterTransactions,
+      headerType: _filterType,
+      showHeader: false,
+      reverse: _isDescending,
+      onEdit: (txn) {
+        // show the transaction edit screen
+        _showTransactionEditScreen(txn);
+      },
+      onDelete: (txn) async {
+        Log.info(message: "Delete (${txn.id}) ${txn.name}");
+
+        // remove the transaction from the transaction list and group
+        // again the transaction.
+        await _deleteTransactionData(txn: txn);
+      },
+    );
+
+    _mapSubPage[PageName.income.index] = ListViewWithHeader<double>(
+      controller: _scrollControllerIncome,
+      data: _income,
+      headerType: _filterType,
+      showHeader: false,
+      reverse: _isDescending,
+    );
+
+    _mapSubPage[PageName.expense.index] = ListViewWithHeader<double>(
+      controller: _scrollControllerExpense,
+      data: _expense,
+      headerType: _filterType,
+      showHeader: false,
+      reverse: _isDescending,
+    );
+
+    _mapSubPage[PageName.transfer.index] = ListViewWithHeader<double>(
+      controller: _scrollControllerTransfer,
+      data: _transfer,
+      headerType: _filterType,
+      showHeader: false,
+      reverse: _isDescending,
+    );
+  }
+
+  void _generateSubPage() {
+    // clear the map sub page
+    _mapSubPage.clear();
+
+    // check the header type so we knew what kind of type we can passed on the
+    // list view with header.
+    switch(_filterType) {
+      case HeaderType.date:
+        _generateSubPageDate();
+        break;
+      case HeaderType.name:
+        _generateSubPageString();
+        break;
+      case HeaderType.amount:
+        _generateSubPageDouble();
+        break;
+      case HeaderType.category:
+        _generateSubPageString();
+        break;
+    }
+
     // Summary Page
-    mapSubPage[PageName.summary.index] = Column(
+    _mapSubPage[PageName.summary.index] = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
@@ -335,30 +474,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       ],
     );
 
-    mapSubPage[PageName.income.index] = ListViewWithHeader(
-      controller: _scrollControllerIncome,
-      data: _incomeSort,
-      headerType: _filterType,
-      showHeader: (_filterType != HeaderType.amount),
-    );
-
-    mapSubPage[PageName.expense.index] = ListViewWithHeader(
-      controller: _scrollControllerExpense,
-      data: _expenseSort,
-      headerType: _filterType,
-    );
-
-    mapSubPage[PageName.transfer.index] = ListViewWithHeader(
-      controller: _scrollControllerTransfer,
-      data: _transferSort,
-      headerType: _filterType,
-      showHeader: (_filterType != HeaderType.amount),
-    );
-
     // loop thru map and put on the sub page
     _subPage.clear();
 
-    mapSubPage.forEach((pageName, widget) {
+    _mapSubPage.forEach((pageName, widget) {
       _subPage.add(widget);
     },);
   }
@@ -780,9 +899,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           break;
       }
     }
-
-    // generate listed of sorted income, expense, transfer
-    _generateSortedList();
 
     // sorted the total amount income and expense
     // so it will showed in the same order on the summary list
@@ -1610,43 +1726,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     },);
 
     return categories;
-  }
-
-  void _generateSortedList() {
-    // clear the sorted income, expense, and transfer first
-    _incomeSort.clear();
-    _expenseSort.clear();
-    _transferSort.clear();
-
-    // switch the filter type
-    switch(_filterType) {
-      case HeaderType.name:
-        _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.name.compareTo(b.name));
-        _incomeSort = _income.toList()..sort((a, b) => a.name.compareTo(b.name));
-        _expenseSort = _expense.toList()..sort((a, b) => a.name.compareTo(b.name));
-        _transferSort = _transfer.toList()..sort((a, b) => a.name.compareTo(b.name));
-        break;
-      case HeaderType.date:
-        _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.date.compareTo(b.date));
-        _incomeSort = _income.toList()..sort((a, b) => a.date.compareTo(b.date));
-        _expenseSort = _expense.toList()..sort((a, b) => a.date.compareTo(b.date));
-        _transferSort = _transfer.toList()..sort((a, b) => a.date.compareTo(b.date));
-        break;
-      case HeaderType.amount:
-        _filterTransactionsSort = _filterTransactions.toList()..sort((a, b) => a.amount.compareTo(b.amount));
-        _incomeSort = _income.toList()..sort((a, b) => a.amount.compareTo(b.amount));
-        _expenseSort = _expense.toList()..sort((a, b) => a.amount.compareTo(b.amount));
-        _transferSort = _transfer.toList()..sort((a, b) => a.amount.compareTo(b.amount));
-        break;
-    }
-
-    // check whether this is ascending or descending
-    if (!_sortType) {
-      _filterTransactionsSort = _filterTransactionsSort.reversed.toList();
-      _incomeSort = _incomeSort.reversed.toList();
-      _expenseSort = _expenseSort.reversed.toList();
-      _transferSort = _transferSort.reversed.toList();
-    }
   }
 
   void _setSummaryList() {

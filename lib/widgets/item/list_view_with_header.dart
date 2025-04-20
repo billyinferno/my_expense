@@ -8,23 +8,19 @@ import 'package:my_expense/_index.g.dart';
 enum HeaderType {
   date,
   name,
-  amount
+  amount,
+  category,
 }
 
-enum GroupBy {
-  none,
-  category
-}
-
-class ListViewWithHeader extends StatelessWidget {
+class ListViewWithHeader<T> extends StatelessWidget {
   final ScrollController? controller;
   final List<TransactionListModel> data;
   final Function(TransactionListModel)? onEdit;
   final Function(TransactionListModel)? onDelete;
   final bool showHeader;
   final HeaderType headerType;
-  //TODO: to add group by function when we generate the list view
-  final GroupBy groupBy;
+  final bool reverse;
+
   const ListViewWithHeader({
     super.key,
     this.controller,
@@ -33,7 +29,7 @@ class ListViewWithHeader extends StatelessWidget {
     this.onDelete,
     this.showHeader = true,
     this.headerType = HeaderType.date,
-    this.groupBy = GroupBy.none,
+    this.reverse = false,
   });
 
   @override
@@ -56,47 +52,44 @@ class ListViewWithHeader extends StatelessWidget {
     }
   }
 
-  Map<String, List<TransactionListModel>> _groupData() {
-    final SplayTreeMap<String, List<TransactionListModel>> mapData = SplayTreeMap<String, List<TransactionListModel>>();
-    String mapKey;
+  Map<T, List<TransactionListModel>> _groupData() {
+    final SplayTreeMap<T, List<TransactionListModel>> mapData = SplayTreeMap<T, List<TransactionListModel>>();
+    T mapKey;
     
-    if (groupBy == GroupBy.none) {
-      mapData[""] = data;
-    }
-    else {
-      // let's generate the mapData based on the category
-      // the data is already sorted so what we need to do is just to add it
-      // on the correct category
-      
-      // loop on the data
-      for(int i=0; i<data.length; i++) {
-        if (data[i].type.toLowerCase() == 'transfer') {
-          // we will loop transfer into single category
-          if (!mapData.containsKey('transfer')) {
-            // no map data transfer, create a new one
-            mapData['transfer_transfer'] = [];
+    // let's generate the mapData based on the category
+    // the data is already sorted so what we need to do is just to add it
+    // on the correct category
+    
+    // loop on the data
+    for(int i=0; i<data.length; i++) {
+      // generate the map key based on the header type
+      switch(headerType) {
+        case HeaderType.date:
+          mapKey = data[i].date as T;
+          break;
+        case HeaderType.name:
+          mapKey = data[i].name as T;
+          break;
+        case HeaderType.amount:
+          mapKey = data[i].amount as T;
+          break;
+        case HeaderType.category:
+          if (data[i].type.toLowerCase() == 'transfer') {
+            mapKey = 'transfer_transfer' as T;
           }
-
-          // add data to the map data
-          mapData['transfer_transfer']!.add(data[i]);
-        }
-        else {
-          // this is income and expense, for this we can store it based on the
-          // correct category for the transaction it self
-
-          // generate map key
-          mapKey = "${data[i].type.toLowerCase()}_${data[i].category!.name.toLowerCase()}";
-
-          // check if map key already exists or not?
-          if (!mapData.containsKey(mapKey)) {
-            // map key not exists, create a new list for this
-            mapData[mapKey] = [];
+          else {
+            mapKey = "${data[i].type.toLowerCase()}_${data[i].category!.name}" as T;
           }
-
-          // add data to the map data
-          mapData[mapKey]!.add(data[i]);
-        }
+          break;
       }
+
+      // check if the map key already exist on the map or ot?
+      if (!mapData.containsKey(mapKey)) {
+        mapData[mapKey] = [];
+      }
+
+      // add data to the map data
+      mapData[mapKey]!.add(data[i]);
     }
 
     return mapData;
@@ -104,203 +97,97 @@ class ListViewWithHeader extends StatelessWidget {
 
   List<Widget> _generateChildWidget(BuildContext context) {
     final List<Widget> widgetList = [];
-    final Map<String, List<TransactionListModel>> mapData = _groupData();
+    final Map<T, List<TransactionListModel>> mapData = _groupData();
 
-    DateTime prevDate = DateTime.now();
-    String prevName = '';
-    double prevAmount = 0;
     int index = 0;
-    int? parentIndex;
     
     // check if map data is empty or not?
     if (mapData.isNotEmpty) {
-      // loop thru the map data
-      mapData.forEach((key, transactions) {
-        // check if key is not empty
-        if (key.isNotEmpty) {
-          // create header for the group
-          widgetList.add(_groupHeader(index: index, keys: key));
+      // create the current list of keys of the map
+      List<T> keys = mapData.keys.toList();
 
-          // set parent index as this index
-          parentIndex = index;
+      // check if this is need to be sorted as ascending or descending?
+      if (reverse) {
+        keys = keys.reversed.toList();
+      }
 
-          // add index since we already use this index
+      // loop thru the keys
+      for(int x=0; x<keys.length; x++) {
+        // check if we need to show the header or not?
+        if (showHeader) {
+          // create the header
+          widgetList.add(_groupHeader(index: index, keys: keys[x]));
+
+          // add index
           index = index + 1;
         }
 
-        // loop thru the transactions
-        for(int i=0; i<transactions.length; i++) {
-          // check whether we want to show header or not?
-          if (showHeader) {
-            // first data, add the header nonetheless
-            if (i == 0) {
-              switch (headerType) {
-                case HeaderType.name:
-                  prevName = transactions[i].name;
-                  widgetList.add(
-                    _header(
-                      text: transactions[i].name,
-                      index: index,
-                      parentIndex: parentIndex,
-                    )
-                  );
-                  break;
-                case HeaderType.amount:
-                  prevAmount = transactions[i].amount;
-                  widgetList.add(
-                    _header(
-                      text: transactions[i].amount.formatCurrency(
-                        shorten: false,
-                        decimalNum: 2
-                      ),
-                      index: index,
-                      parentIndex: parentIndex,
-                    )
-                  );
-                  break;
-                default:
-                  prevDate = transactions[i].date;
-                  widgetList.add(
-                    _header(
-                      text: Globals.dfddMMMMyyyy.formatLocal(prevDate),
-                      index: index,
-                      parentIndex: parentIndex,
-                    )
-                  );
-                  break;
-              }
-            }
-            else {
-              // check what kind of header type?
-              switch (headerType) {
-                case HeaderType.name:
-                  // check whether prev name is same as current name or not?
-                  if (prevName != transactions[i].name) {
-                    // prevName is not same with current name, generate a header
-                    // and set prevName as current name.
-                    prevName = transactions[i].name;
-                    widgetList.add(
-                      _header(
-                        text: transactions[i].name,
-                        index: index,
-                        parentIndex: parentIndex,
-                      )
-                    );
-                  }
-                  break;
-                case HeaderType.amount:
-                  // check whether prev amount is same as current amount or not?
-                  if (prevAmount != transactions[i].amount) {
-                    // prevAmount is not same with current amount, generate a
-                    // header and set prevAmount as current amount.
-                    prevAmount = transactions[i].amount;
-                    widgetList.add(
-                      _header(
-                        text: transactions[i].amount.formatCurrency(shorten: false, decimalNum: 2),
-                        index: index,
-                        parentIndex: parentIndex,
-                      )
-                    );
-                  }
-                  break;
-                default:
-                  // check whether prev date is same as current date or not?
-                  if (!prevDate.isSameDate(date: transactions[i].date)) {
-                    // prevDate is not same with current date, generate a header
-                    // and set prevDate as current date.
-                    prevDate = transactions[i].date;
-                    widgetList.add(
-                      _header(
-                        text: Globals.dfddMMMMyyyy.formatLocal(prevDate),
-                        index: index,
-                        parentIndex: parentIndex,
-                      )
-                    );
-                  }
-                  break;
-              }
-            }
-
-            // add index for header
-            index = index + 1;
-          }
-
-          // other than that, we can just create the item based on the
-          // transaction data given.
+        // loop thru the transaction for this map
+        for(int i=0; i<mapData[keys[x]]!.length; i++) {
+          // create the transaction data given.
           widgetList.add(
             _createItem(
-              txn: data[i],
+              txn: mapData[keys[x]]![i],
               canEdit: (onEdit != null),
               canDelete: (onDelete != null),
               context: context,
             )
           );
-
-          // add index
-          index = index + 1;
         }
-      },);
+      }
     }
 
     // return the widget list
     return widgetList;
   }
 
-  Widget _groupHeader({required String keys, required int index}) {
-    // split the "_" in the key
-    List<String> key = keys.split('_');
-    Color headerTextColor;
+  Widget _groupHeader({
+    required T keys,
+    required int index,
+  }) {
+    // as key will be dynamic based on the type passed from the parent page
+    // we will need to format each key based on the header type
+    String headerText = '';
+    Color headerColor = textColor2;
 
-    // check the first key whether this is income, expense, or transfer
-    // this will determine the color of the group text
-    switch(key[0]) {
-      case 'expense':
-        headerTextColor = lightAccentColors[2];
+    switch(headerType) {
+      case HeaderType.date:
+        headerText = Globals.dfddMMMMyyyy.format(keys as DateTime);
         break;
-      case 'income':
-        headerTextColor = lightAccentColors[0];
+      case HeaderType.name:
+        headerText = (keys as String).toTitleCase();
         break;
-      case 'transfer':
-        headerTextColor = lightAccentColors[4];
+      case HeaderType.amount:
+        headerText = (keys as double).formatCurrency(shorten: false, decimalNum: 2);
         break;
-      default:
-        headerTextColor = textColor;
+      case HeaderType.category:
+        // category will have 2 section, 1st section will be the category type
+        // 2nd one will be the actual key
+        List<String> key = (keys as String).split('_');
+        if (key.length == 2) {
+          switch(key[0]) {
+            case 'expense':
+              headerColor = lightAccentColors[2];
+              break;
+            case 'income':
+              headerColor = lightAccentColors[0];
+              break;
+            default:
+              headerColor = lightAccentColors[4];
+              break;
+          }
+
+          headerText = key[1].toTitleCase();
+        }
+        else {
+          // default to the first one for the header text
+          headerText = key[0].toTitleCase();
+        }
         break;
     }
 
     return StickyContainerWidget(
       index: index,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-        decoration: BoxDecoration(
-          color: primaryDark,
-          border: Border(
-            bottom: BorderSide(
-              color: primaryLight,
-              width: 1.0,
-              style: BorderStyle.solid,
-            )
-          )
-        ),
-        child: Text(
-          key[1].toTitleCase(),
-          style: TextStyle(
-            color: headerTextColor,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _header({
-    required String text,
-    required int index,
-    int? parentIndex,
-  }) {
-    return StickyContainerWidget(
-      index: index,
-      parentIndex: parentIndex,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
@@ -314,11 +201,19 @@ class ListViewWithHeader extends StatelessWidget {
             )
           )
         ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: textColor2,
-          ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Text(
+                headerText,
+                style: TextStyle(
+                  color: headerColor,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
