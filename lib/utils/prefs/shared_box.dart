@@ -23,12 +23,10 @@ class MyBox {
     List<int> key;
     Uint8List keyInt;
     if (!keyBox!.containsKey('key')) {
-      //print("HIVE : key not exists");
       key = Hive.generateSecureKey();
       keyInt = key as Uint8List;
       keyBox!.put('key', key);
     } else {
-      //print("HIVE : key exists");
       key = keyBox!.get('key');
       keyInt = key as Uint8List;
     }

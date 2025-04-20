@@ -8,10 +8,7 @@ class PinSharedPreferences {
     if (MyBox.encryptedBox == null) {
       await MyBox.init();
     }
-    //print(pin.toJson().toString());
-    //print("AAAA");
     await MyBox.encryptedBox!.put(_pinModel, jsonEncode(pin.toJson()));
-    //print("BBBB");
   }
 
   static PinModel? getPin() {

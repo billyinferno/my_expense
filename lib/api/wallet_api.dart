@@ -299,7 +299,6 @@ class WalletHTTPService {
     for (int i = 0; i < wallets.length; i++) {
       if (wallets[i].id == walletEnabled.id) {
         wallets[i] = walletEnabled;
-        //print("Disable wallet index : " + i.toString());
       }
     }
 

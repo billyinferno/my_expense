@@ -107,7 +107,6 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
 
     while(startDate.year != endDate.year || startDate.month != endDate.month) {
       startDate = DateTime(start.year, start.month + total);
-      //print(_start.toString() + " - " + end.toString());
 
       // check if this is the same as today year and month
       if(startDate.year == DateTime.now().year && startDate.month == DateTime.now().month) {

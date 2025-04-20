@@ -1386,7 +1386,6 @@ class _TransactionInputState extends State<TransactionInput> {
 
     return GestureDetector(
       onTap: () {
-        //print("Select category");
         setState(() {
           _currentCategoryID = category.id;
           _currentCategoryName = category.name;
