@@ -543,28 +543,6 @@ class _TransactionInputState extends State<TransactionInput> {
                             ),
                           ),
                           const SizedBox(width: 10,),
-                          //TODO: to check API to get current exchange rate
-                          // InkWell(
-                          //   onTap: () async {
-                          //     debugPrint("Get current exchange rate");
-                          //   },
-                          //   child: Container(
-                          //     width: 35,
-                          //     height: 35,
-                          //     decoration: BoxDecoration(
-                          //       color: accentColors[6],
-                          //       borderRadius: BorderRadius.circular(35),
-                          //     ),
-                          //     child: Center(
-                          //       child: Icon(
-                          //         Ionicons.refresh,
-                          //         color: textColor,
-                          //         size: 20,
-                          //       ),
-                          //     ),
-                          //   ),
-                          // ),
-                          // const SizedBox(width: 10,),
                         ],
                       ),
                     ),
