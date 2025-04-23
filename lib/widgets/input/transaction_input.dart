@@ -917,8 +917,21 @@ class _TransactionInputState extends State<TransactionInput> {
                   // ensure that the value got some length, before we focus
                   // on the amount controller
                   if(value.trim().isNotEmpty) {
-                    // show the calculator
-                    await _showCalculator();
+                    // check whether we already have amount or not?
+                    // if already have amount, then we don't need to show the
+                    // calculator again, as it might be user input the amount
+                    // first, then put the name later.
+                    if (_currentAmount <= 0) {
+                      // show the calculator
+                      await _showCalculator();
+                    }
+                    else {
+                      // check if name has focus or not?
+                      if (_nameFocus.hasFocus) {
+                        // unfocus from name text field
+                        _nameFocus.unfocus();
+                      }
+                    }
                   }
                 }),
                 textInputAction: TextInputAction.done,
@@ -1341,8 +1354,20 @@ class _TransactionInputState extends State<TransactionInput> {
                   _getCurrentCategoryIconAndColor(categoryId: _filterList[index].category.id);
                 });
 
-                // show the calculator
-                await _showCalculator();
+                // check if we already have amount or not?
+                // if already have amount, then no need to showed the calculator
+                // as user might be already put the amount before input name
+                if (_currentAmount <= 0) {
+                  // show the calculator
+                  await _showCalculator();
+                }
+                else {
+                  // check if name has focus or not?
+                  if (_nameFocus.hasFocus) {
+                    // unfocus from name text field
+                    _nameFocus.unfocus();
+                  }
+                }
               }),
               child: Container(
                 margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
