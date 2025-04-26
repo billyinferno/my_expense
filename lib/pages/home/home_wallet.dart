@@ -23,6 +23,7 @@ class _HomeWalletState extends State<HomeWallet> {
   final Map<String, Map<String, double>> _walletsFilterSummary = {};
   late Map<String, CurrencyModel> _currencies;
   late String _tabSelected;
+  late bool _showDisabled;
 
   @override
   void initState() {
@@ -33,6 +34,9 @@ class _HomeWalletState extends State<HomeWallet> {
 
     // get the currencies map that will be needed for the wallet summary here
     _currencies = WalletSharedPreferences.getMapWalletCurrency();
+
+    // default to show disabled waller
+    _showDisabled = true;
 
     // get wallet
     _getData = _refreshWallet();
@@ -50,8 +54,12 @@ class _HomeWalletState extends State<HomeWallet> {
     return Scaffold(
       appBar: HomeAppBar(
         title: const Center(child: Text("Account")),
-        iconItem: const Icon(
+        iconItem: Icon(
           Ionicons.create,
+          size: 20,
+        ),
+        additionalIconItem: Icon(
+          (_showDisabled ? Ionicons.eye : Ionicons.eye_off),
           size: 20,
         ),
         onUserPress: () {
@@ -59,6 +67,11 @@ class _HomeWalletState extends State<HomeWallet> {
         },
         onActionPress: () {
           Navigator.pushNamed(context, '/wallet/add');
+        },
+        onAdditionalActionPress: () {
+          setState(() {
+            _showDisabled = !_showDisabled;
+          });
         },
       ),
       body: FutureBuilder(
@@ -142,6 +155,14 @@ class _HomeWalletState extends State<HomeWallet> {
                   itemCount: _walletsFilter[_tabSelected]!.length + 1,
                   itemBuilder: (BuildContext ctx, int index) {
                     if (index < _walletsFilter[_tabSelected]!.length) {
+                      // check whether we want to show disabled wallet or not?
+                      if (!_showDisabled) {
+                        // check whether this wallet is enabled or disabled?
+                        if (!_walletsFilter[_tabSelected]![index].enabled) {
+                          return const SizedBox.shrink();
+                        }
+                      }
+                      
                       return _generateSlidable(
                         wallet: _walletsFilter[_tabSelected]![index]
                       );
