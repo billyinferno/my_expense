@@ -519,34 +519,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                 ),
               ],
             ),
-            child: GestureDetector(
-              onTap: () async {
-                await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
-                  // check if we got return
-                  if (value != null) {
-                    await _walletHTTP.fetchWallets(
-                      showDisabled: true,
-                      force: true
-                    ).then((wallets) {
-                      if (context.mounted) {
-                        Provider.of<HomeProvider>(
-                          context,
-                          listen: false
-                        ).setWalletList(wallets: wallets);
-                      }
-
-                      // set wallet list to the refreshed wallets
-                      _walletList = wallets;
-                    });
-
-                    // convert value to the transaction list model
-                    TransactionListModel updateTxn = value as TransactionListModel;
-                    await _updateTransactions(updateTxn);
-                  }
-                });
-              },
-              child:  _generateItemList(txn),
-            ),
+            child: _generateItemList(txn),
           );
         }
         else {
@@ -710,6 +683,31 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],
+          onTap: () async {
+            await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
+              // check if we got return
+              if (value != null) {
+                await _walletHTTP.fetchWallets(
+                  showDisabled: true,
+                  force: true
+                ).then((wallets) {
+                  if (mounted) {
+                    Provider.of<HomeProvider>(
+                      context,
+                      listen: false
+                    ).setWalletList(wallets: wallets);
+                  }
+
+                  // set wallet list to the refreshed wallets
+                  _walletList = wallets;
+                });
+
+                // convert value to the transaction list model
+                TransactionListModel updateTxn = value as TransactionListModel;
+                await _updateTransactions(updateTxn);
+              }
+            });
+          },
         );
       case "income":
         return MyItemList(
@@ -722,6 +720,31 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[6],
+          onTap: () async {
+            await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
+              // check if we got return
+              if (value != null) {
+                await _walletHTTP.fetchWallets(
+                  showDisabled: true,
+                  force: true
+                ).then((wallets) {
+                  if (mounted) {
+                    Provider.of<HomeProvider>(
+                      context,
+                      listen: false
+                    ).setWalletList(wallets: wallets);
+                  }
+
+                  // set wallet list to the refreshed wallets
+                  _walletList = wallets;
+                });
+
+                // convert value to the transaction list model
+                TransactionListModel updateTxn = value as TransactionListModel;
+                await _updateTransactions(updateTxn);
+              }
+            });
+          },
         );
       case "transfer":
         return MyItemList(
@@ -739,6 +762,31 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           amountColor: accentColors[4],
           symbolTo: txn.walletTo!.symbol,
           amountTo: (txn.amount * txn.exchangeRate),
+          onTap: () async {
+            await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
+              // check if we got return
+              if (value != null) {
+                await _walletHTTP.fetchWallets(
+                  showDisabled: true,
+                  force: true
+                ).then((wallets) {
+                  if (mounted) {
+                    Provider.of<HomeProvider>(
+                      context,
+                      listen: false
+                    ).setWalletList(wallets: wallets);
+                  }
+
+                  // set wallet list to the refreshed wallets
+                  _walletList = wallets;
+                });
+
+                // convert value to the transaction list model
+                TransactionListModel updateTxn = value as TransactionListModel;
+                await _updateTransactions(updateTxn);
+              }
+            });
+          },
         );
       default:
         return MyItemList(
@@ -751,6 +799,31 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],
+          onTap: () async {
+            await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
+              // check if we got return
+              if (value != null) {
+                await _walletHTTP.fetchWallets(
+                  showDisabled: true,
+                  force: true
+                ).then((wallets) {
+                  if (mounted) {
+                    Provider.of<HomeProvider>(
+                      context,
+                      listen: false
+                    ).setWalletList(wallets: wallets);
+                  }
+
+                  // set wallet list to the refreshed wallets
+                  _walletList = wallets;
+                });
+
+                // convert value to the transaction list model
+                TransactionListModel updateTxn = value as TransactionListModel;
+                await _updateTransactions(updateTxn);
+              }
+            });
+          },
         );
     }
   }

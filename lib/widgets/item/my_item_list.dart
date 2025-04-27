@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:my_expense/_index.g.dart';
 
 class MyItemList extends StatelessWidget {
@@ -20,6 +20,7 @@ class MyItemList extends StatelessWidget {
   final Color? amountColorTo;
   final EdgeInsets? padding;
   final Color? borderColor;
+  final Function()? onTap;
   const MyItemList({
     super.key,
     this.height,
@@ -40,6 +41,7 @@ class MyItemList extends StatelessWidget {
     this.amountColorTo,
     this.padding,
     this.borderColor,
+    this.onTap,
   });
 
   @override
@@ -54,66 +56,75 @@ class MyItemList extends StatelessWidget {
           )
         )
       ),
-      padding: (padding ?? const EdgeInsets.fromLTRB(10, 5, 10, 5)),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: iconColor,
-            ),
-            child: icon,
-          ),
-          const SizedBox(width: 10,),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  title,
-                  overflow: TextOverflow.ellipsis,
-                  style: (titleStyle ?? const TextStyle(color: textColor)),
+      child: InkWell(
+        onTap: () {
+          if (onTap != null) {
+            onTap!();
+          }
+        },
+        child: Container(
+          padding: (padding ?? const EdgeInsets.fromLTRB(10, 5, 10, 5)),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: iconColor,
                 ),
-                Text(
-                  subTitle,
-                  style: (subTitleStyle ?? const TextStyle(
-                    fontSize: 12,
-                    color: textColor2,
-                  )),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                _getDescription(),
-              ],
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                "$symbol ${Globals.fCCY.format(amount)}",
-                style: TextStyle(
-                  color: (amountColor ?? textColor)
+                child: icon,
+              ),
+              const SizedBox(width: 10,),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      overflow: TextOverflow.ellipsis,
+                      style: (titleStyle ?? const TextStyle(color: textColor)),
+                    ),
+                    Text(
+                      subTitle,
+                      style: (subTitleStyle ?? const TextStyle(
+                        fontSize: 12,
+                        color: textColor2,
+                      )),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    _getDescription(),
+                  ],
                 ),
               ),
-              Visibility(
-                visible: (symbolTo != null && amountTo != null),
-                child: Text(
-                  "${symbolTo ?? ''} ${Globals.fCCY.format(amountTo ?? 0)}",
-                  style: TextStyle(
-                    color: (amountColorTo ?? (amountColor ?? textColor)).lighten(amount: 0.25),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    "$symbol ${Globals.fCCY.format(amount)}",
+                    style: TextStyle(
+                      color: (amountColor ?? textColor)
+                    ),
                   ),
-                  textAlign: TextAlign.right,
-                ),
+                  Visibility(
+                    visible: (symbolTo != null && amountTo != null),
+                    child: Text(
+                      "${symbolTo ?? ''} ${Globals.fCCY.format(amountTo ?? 0)}",
+                      style: TextStyle(
+                        color: (amountColorTo ?? (amountColor ?? textColor)).lighten(amount: 0.25),
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

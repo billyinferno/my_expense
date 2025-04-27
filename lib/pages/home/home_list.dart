@@ -418,12 +418,7 @@ class _HomeListState extends State<HomeList> {
           ),
         ],
       ),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.pushNamed(context, '/transaction/edit', arguments: txn);
-        },
-        child: _generateItem(txn),
-      ),
+      child: _generateItem(txn),
     );
   }
 
@@ -440,6 +435,9 @@ class _HomeListState extends State<HomeList> {
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],
+          onTap: () {
+            Navigator.pushNamed(context, '/transaction/edit', arguments: txn);
+          },
         );
       case "income":
         return MyItemList(
@@ -452,6 +450,9 @@ class _HomeListState extends State<HomeList> {
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[6],
+          onTap: () {
+            Navigator.pushNamed(context, '/transaction/edit', arguments: txn);
+          },
         );
       case "transfer":
         return MyItemList(
@@ -469,6 +470,9 @@ class _HomeListState extends State<HomeList> {
           amountColor: accentColors[4],
           symbolTo: txn.walletTo!.symbol,
           amountTo: (txn.amount * txn.exchangeRate),
+          onTap: () {
+            Navigator.pushNamed(context, '/transaction/edit', arguments: txn);
+          },
         );
       default:
         return MyItemList(
@@ -481,6 +485,9 @@ class _HomeListState extends State<HomeList> {
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],
+          onTap: () {
+            Navigator.pushNamed(context, '/transaction/edit', arguments: txn);
+          },
         );
     }
   }
