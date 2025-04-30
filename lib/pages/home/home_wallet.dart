@@ -1,3 +1,4 @@
+import 'package:easy_sticky_header/easy_sticky_header.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -149,29 +150,85 @@ class _HomeWalletState extends State<HomeWallet> {
                 onRefresh: () async {
                   _getData = _refreshWallet(showDialog: true);
                 },
-                child: ListView.builder(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  controller: _scrollControllerWallet,
-                  itemCount: _walletsFilter[_tabSelected]!.length + 1,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    if (index < _walletsFilter[_tabSelected]!.length) {
-                      // check whether we want to show disabled wallet or not?
-                      if (!_showDisabled) {
-                        // check whether this wallet is enabled or disabled?
-                        if (!_walletsFilter[_tabSelected]![index].enabled) {
-                          return const SizedBox.shrink();
+                child: StickyHeader(
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    controller: _scrollControllerWallet,
+                    itemCount: _walletsFilter[_tabSelected]!.length + 1,
+                    itemBuilder: (BuildContext ctx, int index) {
+                      if (index < _walletsFilter[_tabSelected]!.length) {
+                        // check whether we want to show disabled wallet or not?
+                        if (!_showDisabled) {
+                          // check whether this wallet is enabled or disabled?
+                          if (!_walletsFilter[_tabSelected]![index].enabled) {
+                            return const SizedBox.shrink();
+                          }
                         }
+                  
+                        // check index to see whether we need to generate the
+                        // sticky header or not?
+                        bool generateStickyHeader = false;
+                        String stickyHeaderText = '';
+                        
+                        // only generate for all tab
+                        if (_tabSelected == 'all') {
+                          // if index is = 0
+                          if (index == 0) {
+                            generateStickyHeader = true;
+                          }
+                          else {
+                            // check if previous wallet is enabled and this one
+                            // is being disabled or not?
+                            if (_walletsFilter[_tabSelected]![index].enabled == false) {
+                              if (
+                                _walletsFilter[_tabSelected]![index].enabled == false &&
+                                _walletsFilter[_tabSelected]![index - 1].enabled == true
+                              ) {
+                                generateStickyHeader = true;
+                                stickyHeaderText = 'Disabled';
+                              }
+                            }
+                            else {
+                              // check if current wallet type is same as before or
+                              // if not the same ensure that if previously is enabled
+                              // and this one is disabled
+                              if (_walletsFilter[_tabSelected]![index].walletType.type != _walletsFilter[_tabSelected]![index - 1].walletType.type) {
+                                generateStickyHeader = true;
+                              }
+                            }
+                          }
+                  
+                          // check if we need to generate sticky header or not?
+                          if (generateStickyHeader) {
+                            // check if the sticky header text is empty or not?
+                            if (stickyHeaderText.isEmpty) {
+                              // put the wallet type in the sticky header text
+                              stickyHeaderText = _walletsFilter[_tabSelected]![index].walletType.type;
+                            }
+                          }
+                        }
+                        
+                        if (generateStickyHeader) {
+                          return _generateStickyHeader(
+                            index: index,
+                            text: stickyHeaderText,
+                            child: _generateSlidable(
+                              wallet: _walletsFilter[_tabSelected]![index]
+                            ),
+                          );
+                        }
+                        else {
+                          return _generateSlidable(
+                            wallet: _walletsFilter[_tabSelected]![index]
+                          );
+                        }
+                      } else {
+                        return const SizedBox(
+                          height: 30,
+                        );
                       }
-                      
-                      return _generateSlidable(
-                        wallet: _walletsFilter[_tabSelected]![index]
-                      );
-                    } else {
-                      return const SizedBox(
-                        height: 30,
-                      );
-                    }
-                  },
+                    },
+                  ),
                 ),
               ),
             ),
@@ -272,6 +329,41 @@ class _HomeWalletState extends State<HomeWallet> {
     });
 
     return true;
+  }
+
+  Widget _generateStickyHeader({
+    required int index,
+    required String text,
+    required Widget child,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        StickyContainerWidget(
+          index: index,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+            margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [
+                IconList.getDarkColor(text),
+                IconList.getColor(text),
+              ]),
+            ),
+            child: Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10,),
+        child,
+      ],
+    );
   }
 
   Widget _generateSlidable({required WalletModel wallet}) {
