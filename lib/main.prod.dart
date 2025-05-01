@@ -19,7 +19,7 @@ Future main() async {
         await MyBox.init();
       }).then((_) {
         // run the actual application
-        Log.success(message: "🚀 Initialize finished, run application v${Globals.appVersion}");
+        Log.success(message: "🚀 Initialize finished, run application");
       }).onError(
         (error, stackTrace) {
           Log.error(
