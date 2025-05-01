@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ionicons/ionicons.dart';
@@ -19,6 +20,7 @@ class _BudgetInputState extends State<BudgetInput> {
 
   late BudgetDetailArgs _budget;
   late double _budgetAmount;
+  late bool _budgetUseForDaily;
 
   @override
   void initState() {
@@ -29,6 +31,9 @@ class _BudgetInputState extends State<BudgetInput> {
 
     // set the budget amount
     _budgetAmount = _budget.budgetAmount;
+
+    // set the use for daily
+    _budgetUseForDaily = _budget.useForDaily;
   }
   
   @override
@@ -50,7 +55,10 @@ class _BudgetInputState extends State<BudgetInput> {
         leading: IconButton(
           onPressed: () {
             // return back the budget if got changes
-            if (_budget.budgetAmount != _budgetAmount) {
+            if (
+              _budget.budgetAmount != _budgetAmount ||
+              _budget.useForDaily != _budgetUseForDaily
+            ) {
               BudgetDetailArgs newBudget = BudgetDetailArgs(
                 budgetId: _budget.budgetId,
                 categoryId: _budget.categoryId,
@@ -59,7 +67,8 @@ class _BudgetInputState extends State<BudgetInput> {
                 categoryName: _budget.categoryName,
                 currencyId: _budget.currencyId,
                 currencySymbol: _budget.currencySymbol,
-                budgetAmount: _budgetAmount
+                budgetAmount: _budgetAmount,
+                useForDaily: _budgetUseForDaily,
               );
 
               Navigator.pop(context, newBudget);
@@ -131,6 +140,27 @@ class _BudgetInputState extends State<BudgetInput> {
                   }
                 }),
               ),
+              const SizedBox(height: 5,),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      "Use for daily average",
+                    ),
+                  ),
+                  const SizedBox(width: 10,),
+                  CupertinoSwitch(
+                    value: _budgetUseForDaily,
+                    onChanged: (value) {
+                      setState(() {                      
+                        _budgetUseForDaily = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: 30,),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -179,7 +209,8 @@ class _BudgetInputState extends State<BudgetInput> {
                           categoryName: _budget.categoryName,
                           currencyId: _budget.currencyId,
                           currencySymbol: _budget.currencySymbol,
-                          budgetAmount: _budgetAmount
+                          budgetAmount: _budgetAmount,
+                          useForDaily: _budgetUseForDaily,
                         );
 
                         Navigator.pop(context, newBudget);

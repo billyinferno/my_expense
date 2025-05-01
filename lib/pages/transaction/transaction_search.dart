@@ -1902,6 +1902,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               totalTransaction: (budgets[i].totalTransaction - 1),
               amount: budgets[i].amount,
               used: budgets[i].used - txn.amount,
+              useForDaily: budgets[i].useForDaily,
               status: budgets[i].status,
               currency: budgets[i].currency
             );

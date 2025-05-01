@@ -793,13 +793,16 @@ class _HomeStatsState extends State<HomeStats> {
             if (currentBudget.isNotEmpty) {
               // loop thru the current budget to get the budget
               for(BudgetModel budget in currentBudget) {
-                maxBudget += budget.amount;
+                if (budget.useForDaily) {
+                  maxBudget += budget.amount;
+                }
               }
             }
 
             // once finished add max budget to the max budget map divide by
-            // 30, assuming that we will always have 30 days
-            _maxBudget[ccy.id] = maxBudget / 30;
+            // as this is assume as monthly budget, we will times this 12 first
+            // then divide by 365 to actually get the daily budget
+            _maxBudget[ccy.id] = (maxBudget * 12) / 365;
           });
         }
       }).onError((error, stackTrace) {

@@ -9,6 +9,7 @@ class BudgetDetailArgs {
   final int currencyId;
   final String currencySymbol;
   final double budgetAmount;
+  final bool useForDaily;
 
   BudgetDetailArgs({
     required this.budgetId,
@@ -18,6 +19,7 @@ class BudgetDetailArgs {
     required this.categoryName,
     required this.currencyId,
     required this.currencySymbol,
-    required this.budgetAmount}
-  );
+    required this.budgetAmount,
+    required this.useForDaily,
+  });
 }

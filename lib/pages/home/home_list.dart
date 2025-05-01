@@ -657,8 +657,9 @@ class _HomeListState extends State<HomeList> {
                 totalTransaction: (_budgets[i].totalTransaction - 1),
                 amount: _budgets[i].amount,
                 used: _budgets[i].used - txnInfo.amount,
+                useForDaily: _budgets[i].useForDaily,
                 status: _budgets[i].status,
-                currency: _budgets[i].currency
+                currency: _budgets[i].currency,
               );
 
               _budgets[i] = newBudget;

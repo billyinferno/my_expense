@@ -21,6 +21,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
   int _currencyID = -1;
   double _totalAmount = 0.0;
+  double _totalDailyUse = 0.0;
   bool _isDataChanged = false;
   Map<int, CategoryModel> _expenseCategory = {};
 
@@ -221,6 +222,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
         _budgetCurrencySelector(
           ccy: (_budgetList?.currency),
           totalAmount: _totalAmount,
+          totalDailyUse: _totalDailyUse,
         ),
         Expanded(
           child: _generateListItem(),
@@ -283,7 +285,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
             categoryName: budget.category.name,
             currencyId: budget.currency.id,
             currencySymbol: budget.currency.symbol,
-            budgetAmount: budget.amount
+            budgetAmount: budget.amount,
+            useForDaily: budget.useForDaily,
           );
 
           return CategoryListItem(
@@ -296,6 +299,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
             currencyId: budget.currency.id,
             currencySymbol: budget.currency.symbol,
             budgetAmount: budget.amount,
+            showFlagged: true,
+            flagColor: (budget.useForDaily ? accentColors[6] : secondaryDark),
             onDelete: (() async {
               await _deleteBudgetList(budget.id, budget.currency.id);
 
@@ -350,8 +355,11 @@ class _BudgetListPageState extends State<BudgetListPage> {
     }
   }
 
-  Widget _budgetCurrencySelector(
-      {required CurrencyModel? ccy, required double totalAmount}) {
+  Widget _budgetCurrencySelector({
+    required CurrencyModel? ccy,
+    required double totalAmount,
+    required double totalDailyUse,
+  }) {
     if (ccy != null) {
       return Container(
         padding: const EdgeInsets.all(10),
@@ -380,7 +388,20 @@ class _BudgetListPageState extends State<BudgetListPage> {
             const SizedBox(
               width: 10,
             ),
-            Text("(${ccy.symbol} ${Globals.fCCY.format(totalAmount)})"),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text("(${ccy.symbol} ${Globals.fCCY.format(totalAmount)})"),
+                Text(
+                  "(${ccy.symbol} ${Globals.fCCY.format(totalDailyUse)})",
+                  style: TextStyle(
+                    color: secondaryLight,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       );
@@ -394,9 +415,13 @@ class _BudgetListPageState extends State<BudgetListPage> {
       _budgetList = budgetList;
 
       _totalAmount = 0.0;
+      _totalDailyUse = 0.0;
       if (_budgetList!.budgets.isNotEmpty) {
         for (BudgetModel budget in _budgetList!.budgets) {
           _totalAmount += budget.amount;
+          if (budget.useForDaily) {
+            _totalDailyUse += budget.amount;
+          }
         }
       }
     });
@@ -471,7 +496,10 @@ class _BudgetListPageState extends State<BudgetListPage> {
     });
   }
 
-  Future<void> _addBudget(int categoryId, int currencyId) async {
+  Future<void> _addBudget(
+    int categoryId,
+    int currencyId
+  ) async {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
@@ -519,7 +547,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
         budgetList: _budgetList!.budgets
       ).then((updatedBudgetList) {
         // store back the home budget list
-        String currentBudgetDate = BudgetSharedPreferences.getBudgetCurrent();
         String budgetDate = "";
         List<BudgetModel> newHomeBudgetList = [];
         List<BudgetModel>? currentHomeBudgetList;
@@ -541,24 +568,25 @@ class _BudgetListPageState extends State<BudgetListPage> {
           // if got data then we can loop and add the new amount on the existing list
           if (currentHomeBudgetList != null) {
             // loop through the _currentHomeBudgetList and add on the _newHomeBudgetList
-            for (BudgetModel element in updatedBudgetList) {
+            for (BudgetModel budget in updatedBudgetList) {
               // check if this element same to which id and store the amount
               double used = 0.0;
               for (int i = 0; i < currentHomeBudgetList.length; i++) {
-                if (element.id == currentHomeBudgetList[i].id) {
+                if (budget.id == currentHomeBudgetList[i].id) {
                   used = currentHomeBudgetList[i].used;
                 }
               }
 
               // add the new budget
               newHomeBudgetList.add(BudgetModel(
-                id: element.id,
-                category: element.category,
-                totalTransaction: element.totalTransaction,
-                amount: element.amount,
+                id: budget.id,
+                category: budget.category,
+                totalTransaction: budget.totalTransaction,
+                amount: budget.amount,
                 used: used,
+                useForDaily: budget.useForDaily,
                 status: "in",
-                currency: element.currency)
+                currency: budget.currency)
               );
             }
           } else {
@@ -574,14 +602,13 @@ class _BudgetListPageState extends State<BudgetListPage> {
             budgets: newHomeBudgetList
           );
           
-          if (budgetDate == currentBudgetDate) {
-            if (mounted) {
-              // after that notify the budget list on the home if this is the same as the current budget
-              Provider.of<HomeProvider>(
-                context,
-                listen: false
-              ).setBudgetList(budgets: newHomeBudgetList);
-            }
+          // notify the budget list on the home so all page that use budget
+          // will be update accordingly
+          if (mounted) {
+            Provider.of<HomeProvider>(
+              context,
+              listen: false
+            ).setBudgetList(budgets: newHomeBudgetList);
           }
         }
       }).onError((error, stackTrace) {
@@ -665,6 +692,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
           used: _budgetList!.budgets[i].used,
           status: "in",
           currency: _budgetList!.budgets[i].currency,
+          useForDaily: budgetArgs.useForDaily,
         ));
       } else {
         newBudgetList.add(_budgetList!.budgets[i]);

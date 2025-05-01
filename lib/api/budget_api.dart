@@ -74,13 +74,14 @@ class BudgetHTTPService {
 
     // create the body request we will sent to API
     var body = [];
-    for (var element in budgetList) {
+    for (BudgetModel currBudget in budgetList) {
       var budget = {
-        "id": element.id,
-        "category": element.category.id,
-        "amount": element.amount,
+        "id": currBudget.id,
+        "category": currBudget.category.id,
+        "amount": currBudget.amount,
+        "use_for_daily": currBudget.useForDaily,
         "users_permissions_user": userMe.id,
-        "currency": element.currency.id
+        "currency": currBudget.currency.id
       };
       body.add(budget);
     }

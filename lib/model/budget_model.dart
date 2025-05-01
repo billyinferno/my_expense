@@ -7,6 +7,7 @@ class BudgetModel {
     required this.totalTransaction,
     required this.amount,
     required this.used,
+    required this.useForDaily,
     required this.status,
     required this.currency,
   });
@@ -16,6 +17,7 @@ class BudgetModel {
   final int totalTransaction;
   final double amount;
   final double used;
+  final bool useForDaily;
   final String status;
   final CurrencyModel currency;
 
@@ -25,6 +27,7 @@ class BudgetModel {
         totalTransaction: (json["total_transaction"] ?? 0),
         amount: (json["amount"] ?? 0).toDouble(),
         used: (json["used"] ?? 0).toDouble(),
+        useForDaily: (json["use_for_daily"] ?? true),
         status: (json["status"] ?? "in"),
         currency: CurrencyModel.fromJson(json["currency"]),
       );
@@ -35,6 +38,7 @@ class BudgetModel {
         "total_transaction": totalTransaction,
         "amount": amount,
         "used": used,
+        "use_for_daily": useForDaily,
         "status": status,
         "currency": currency.toJson(),
       };

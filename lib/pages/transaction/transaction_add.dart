@@ -389,13 +389,15 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
             if (txnAdd.category!.id == budgets[i].category.id) {
               // as this is expense, add the total transaction and used for this
               BudgetModel newBudget = BudgetModel(
-                  id: budgets[i].id,
-                  category: budgets[i].category,
-                  totalTransaction: (budgets[i].totalTransaction + 1),
-                  amount: budgets[i].amount,
-                  used: budgets[i].used + txnAdd.amount,
-                  status: budgets[i].status,
-                  currency: budgets[i].currency);
+                id: budgets[i].id,
+                category: budgets[i].category,
+                totalTransaction: (budgets[i].totalTransaction + 1),
+                amount: budgets[i].amount,
+                used: budgets[i].used + txnAdd.amount,
+                useForDaily: budgets[i].useForDaily,
+                status: budgets[i].status,
+                currency: budgets[i].currency,
+              );
               budgets[i] = newBudget;
               // break from for loop
               break;
