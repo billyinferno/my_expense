@@ -13,6 +13,7 @@ Future main() async {
       WidgetsFlutterBinding.ensureInitialized();
 
       // after that we can initialize the box
+      Log.info(message: "🚀 Release mode ${Globals.appVersion}");
       await Future.microtask(() async {
         await dotenv.load(fileName: "conf/.prod.env");
         await Hive.initFlutter();

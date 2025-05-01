@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -14,17 +13,9 @@ Future main() async {
       WidgetsFlutterBinding.ensureInitialized();
 
       // after that we can initialize the box
+      Log.info(message: "🚀 Development mode");
       await Future.microtask(() async {
-        // check which .env we need to load, whether we are runnig for release
-        // or debug (development)?
-        if (kReleaseMode) {
-          Log.info(message: "🚀 Production release ${Globals.appVersion}");
-          await dotenv.load(fileName: "conf/.prod.env");
-        }
-        else {
-          Log.info(message: "🚀 Development mode");
-          await dotenv.load(fileName: "conf/.dev.env");
-        }
+        await dotenv.load(fileName: "conf/.dev.env");
         await Hive.initFlutter();
         await MyBox.init();
       }).then((_) {
