@@ -78,8 +78,18 @@ class _AccountSelectorState extends State<AccountSelector> {
               });
             }),
           ),
-          Divider(
-            color: secondaryBackground,
+          Container(
+            width: double.infinity,
+            height: 10,
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: primaryLight,
+                  width: 1.0,
+                  style: BorderStyle.solid,
+                )
+              )
+            ),
           ),
           Expanded(
             child: ListView.builder(
