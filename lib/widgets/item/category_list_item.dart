@@ -13,6 +13,8 @@ class CategoryListItem extends StatelessWidget {
   final int currencyId;
   final String currencySymbol;
   final double budgetAmount;
+  final bool showFlagged;
+  final Color flagColor;
   final Function(int)? onTap;
   final Function(int)? onDoubleTap;
   final Function? onDelete;
@@ -27,6 +29,8 @@ class CategoryListItem extends StatelessWidget {
     required this.currencyId,
     required this.currencySymbol,
     required this.budgetAmount,
+    this.showFlagged = false,
+    this.flagColor = Colors.transparent,
     this.onTap,
     this.onDoubleTap,
     this.onDelete,
@@ -85,45 +89,66 @@ class CategoryListItem extends StatelessWidget {
             ),
           ],
         ),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: GestureDetector(
-            onTap: (() {
-              if (onTap != null) {
-                onTap!(index);
-              }
-            }),
-            onDoubleTap: (() {
-              if (onDoubleTap != null) {
-                onDoubleTap!(index);
-              }
-            }),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  height: 40,
-                  width: 40,
-                  margin: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(40),
-                    color: categoryColor,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: GestureDetector(
+                  onTap: (() {
+                    if (onTap != null) {
+                      onTap!(index);
+                    }
+                  }),
+                  onDoubleTap: (() {
+                    if (onDoubleTap != null) {
+                      onDoubleTap!(index);
+                    }
+                  }),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        height: 40,
+                        width: 40,
+                        margin: const EdgeInsets.fromLTRB(0, 10, 0, 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(40),
+                          color: categoryColor,
+                        ),
+                        child: categoryIcon,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(child: Text(categoryName)),
+                      const SizedBox(width: 10,),
+                      Text("$currencySymbol ${Globals.fCCY.format(budgetAmount)}"),
+                      const SizedBox(width: 5,),
+                    ],
                   ),
-                  child: categoryIcon,
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(child: Text(categoryName)),
-                const SizedBox(width: 10,),
-                Text("$currencySymbol ${Globals.fCCY.format(budgetAmount)}"),
-                const SizedBox(width: 5,),
-              ],
+              ),
             ),
-          ),
+            _showFlagged(),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _showFlagged() {
+    if (!showFlagged) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      width: 10,
+      height: 60,
+      color: flagColor,
     );
   }
 
