@@ -13,14 +13,13 @@ Future main() async {
       WidgetsFlutterBinding.ensureInitialized();
 
       // after that we can initialize the box
-      Log.info(message: "🚀 Release mode ${Globals.appVersion}");
       await Future.microtask(() async {
         await dotenv.load(fileName: "conf/.prod.env");
         await Hive.initFlutter();
         await MyBox.init();
       }).then((_) {
         // run the actual application
-        Log.success(message: "🚀 Initialize finished, run application");
+        Log.success(message: "🚀 Initialize finished, run application v${Globals.appVersion}");
       }).onError(
         (error, stackTrace) {
           Log.error(
