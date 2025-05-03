@@ -1048,6 +1048,7 @@ class _TransactionInputState extends State<TransactionInput> {
                   autofocus: true,
                   theme: CalculatorThemeData(
                     operatorColor: Colors.orange[600],
+                    equalColor: Colors.orange[800],
                   ),
                   maximumDigits: 14,
                   numberFormat: Globals.fCCYnf,
