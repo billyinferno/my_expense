@@ -279,13 +279,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     );
   }
 
-  void _generateSubPageDate() {
+  void _generateSubPageTplt<T>({required showHeader}) {
     // All transaction page
-    _mapSubPage[PageName.all.index] = ListViewWithHeader<DateTime>(
+    _mapSubPage[PageName.all.index] = ListViewWithHeader<T>(
       controller: _scrollControllerAll,
       data: _filterTransactions,
       headerType: _filterType,
-      showHeader: true,
+      showHeader: showHeader,
       reverse: _isDescending,
       onEdit: (txn) {
         // show the transaction edit screen
@@ -300,38 +300,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       },
     );
 
-    _mapSubPage[PageName.income.index] = ListViewWithHeader<DateTime>(
+    _mapSubPage[PageName.income.index] = ListViewWithHeader<T>(
       controller: _scrollControllerIncome,
       data: _income,
       headerType: _filterType,
-      showHeader: true,
-      reverse: _isDescending,
-    );
-
-    _mapSubPage[PageName.expense.index] = ListViewWithHeader<DateTime>(
-      controller: _scrollControllerExpense,
-      data: _expense,
-      headerType: _filterType,
-      showHeader: true,
-      reverse: _isDescending,
-    );
-
-    _mapSubPage[PageName.transfer.index] = ListViewWithHeader<DateTime>(
-      controller: _scrollControllerTransfer,
-      data: _transfer,
-      headerType: _filterType,
-      showHeader: true,
-      reverse: _isDescending,
-    );
-  }
-
-  void _generateSubPageString() {
-    // All transaction page
-    _mapSubPage[PageName.all.index] = ListViewWithHeader<String>(
-      controller: _scrollControllerAll,
-      data: _filterTransactions,
-      headerType: _filterType,
-      showHeader: true,
+      showHeader: showHeader,
       reverse: _isDescending,
       onEdit: (txn) {
         // show the transaction edit screen
@@ -346,38 +319,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       },
     );
 
-    _mapSubPage[PageName.income.index] = ListViewWithHeader<String>(
-      controller: _scrollControllerIncome,
-      data: _income,
-      headerType: _filterType,
-      showHeader: true,
-      reverse: _isDescending,
-    );
-
-    _mapSubPage[PageName.expense.index] = ListViewWithHeader<String>(
+    _mapSubPage[PageName.expense.index] = ListViewWithHeader<T>(
       controller: _scrollControllerExpense,
       data: _expense,
       headerType: _filterType,
-      showHeader: true,
-      reverse: _isDescending,
-    );
-
-    _mapSubPage[PageName.transfer.index] = ListViewWithHeader<String>(
-      controller: _scrollControllerTransfer,
-      data: _transfer,
-      headerType: _filterType,
-      showHeader: true,
-      reverse: _isDescending,
-    );
-  }
-
-  void _generateSubPageDouble() {
-    // All transaction page
-    _mapSubPage[PageName.all.index] = ListViewWithHeader<double>(
-      controller: _scrollControllerAll,
-      data: _filterTransactions,
-      headerType: _filterType,
-      showHeader: false,
+      showHeader: showHeader,
       reverse: _isDescending,
       onEdit: (txn) {
         // show the transaction edit screen
@@ -392,28 +338,23 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       },
     );
 
-    _mapSubPage[PageName.income.index] = ListViewWithHeader<double>(
-      controller: _scrollControllerIncome,
-      data: _income,
-      headerType: _filterType,
-      showHeader: false,
-      reverse: _isDescending,
-    );
-
-    _mapSubPage[PageName.expense.index] = ListViewWithHeader<double>(
-      controller: _scrollControllerExpense,
-      data: _expense,
-      headerType: _filterType,
-      showHeader: false,
-      reverse: _isDescending,
-    );
-
-    _mapSubPage[PageName.transfer.index] = ListViewWithHeader<double>(
+    _mapSubPage[PageName.transfer.index] = ListViewWithHeader<T>(
       controller: _scrollControllerTransfer,
       data: _transfer,
       headerType: _filterType,
-      showHeader: false,
+      showHeader: showHeader,
       reverse: _isDescending,
+      onEdit: (txn) {
+        // show the transaction edit screen
+        _showTransactionEditScreen(txn);
+      },
+      onDelete: (txn) async {
+        Log.info(message: "Delete (${txn.id}) ${txn.name}");
+
+        // remove the transaction from the transaction list and group
+        // again the transaction.
+        await _deleteTransactionData(txn: txn);
+      },
     );
   }
 
@@ -425,16 +366,14 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // list view with header.
     switch(_filterType) {
       case HeaderType.date:
-        _generateSubPageDate();
+        _generateSubPageTplt<DateTime>(showHeader: true);
         break;
       case HeaderType.name:
-        _generateSubPageString();
+      case HeaderType.category:
+        _generateSubPageTplt<String>(showHeader: true);
         break;
       case HeaderType.amount:
-        _generateSubPageDouble();
-        break;
-      case HeaderType.category:
-        _generateSubPageString();
+        _generateSubPageTplt<double>(showHeader: false);
         break;
     }
 
