@@ -655,17 +655,17 @@ class _HomeStatsState extends State<HomeStats> {
                   children: List<Widget>.generate(
                     _transactionTop[_currentCurrencyId]![_resultPageName]!.length,
                     ((index) {
-                     return MyItemList(
-                      height: 70,
-                      iconColor: IconColorList.getIncomeColor(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
-                      icon: IconColorList.getIncomeIcon(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
-                      type: type,
-                      title: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionName,
-                      subTitle: "(${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName}) ${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName}",
-                      symbol: _currentCurrencySymbol,
-                      amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount,
-                      amountColor: accentColors[6],
-                    );
+                      return MyItemList(
+                        height: 70,
+                        iconColor: IconColorList.getIncomeColor(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                        icon: IconColorList.getIncomeIcon(_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName),
+                        type: type,
+                        title: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionName,
+                        subTitle: "(${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionWalletName}) ${_transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionCategoryName}",
+                        symbol: _currentCurrencySymbol,
+                        amount: _transactionTop[_currentCurrencyId]![_resultPageName]![index].transactionAmount,
+                        amountColor: accentColors[6],
+                      );
                     }),
                   ),
                 ),
