@@ -225,74 +225,69 @@ class ListViewWithHeader<T> extends StatelessWidget {
     bool canDelete = false,
     required BuildContext context,
   }) {
-    return InkWell(
-      onTap: (() {
-        if (canEdit) {
-          // ensure edit function is not null
-          if (onEdit != null) {
-            // call the edit function
-            onEdit!(txn);
-          }
-        }
-      }),
-      child: Slidable(
-        key: Key("${txn.id}_${txn.wallet.id}_${txn.type}"),
-        endActionPane: (canDelete ? ActionPane(
-          motion: const DrawerMotion(),
-          extentRatio: 0.2,
-          dismissible: DismissiblePane(
-            onDismissed: () async {
-              // check if the onDelete function is not null or not?
-              if (onDelete != null) {
-                // call the onDelete function
-                onDelete!(txn);
-              }
-            },
-            confirmDismiss: () async {
-              return await ShowMyDialog(
+    return Slidable(
+      key: Key("${txn.id}_${txn.wallet.id}_${txn.type}"),
+      endActionPane: (canDelete ? ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.2,
+        dismissible: DismissiblePane(
+          onDismissed: () async {
+            // check if the onDelete function is not null or not?
+            if (onDelete != null) {
+              // call the onDelete function
+              onDelete!(txn);
+            }
+          },
+          confirmDismiss: () async {
+            return await ShowMyDialog(
+              dialogTitle: "Delete Item",
+              dialogText: "Do you want to delete ${txn.name}?",
+              confirmText: "Delete",
+              confirmColor: accentColors[2],
+              cancelText: "Cancel")
+            .show(context) ?? false;
+          },
+        ),
+        children: <Widget>[
+          SlideButton(
+            icon: Ionicons.trash,
+            iconColor: textColor,
+            bgColor: accentColors[2],
+            text: 'Delete',
+            onTap: () {
+              // check if we can delete the transaction or not?
+              late Future<bool?> result = ShowMyDialog(
                 dialogTitle: "Delete Item",
                 dialogText: "Do you want to delete ${txn.name}?",
                 confirmText: "Delete",
                 confirmColor: accentColors[2],
                 cancelText: "Cancel")
-              .show(context) ?? false;
+              .show(context);
+    
+              // check the result of the dialog box
+              result.then((value) {
+                if (value == true) {
+                  // check if the onDelete function is not null
+                  if (onDelete != null) {
+                    onDelete!(txn);
+                  }
+                }
+              });
             },
           ),
-          children: <Widget>[
-            SlideButton(
-              icon: Ionicons.trash,
-              iconColor: textColor,
-              bgColor: accentColors[2],
-              text: 'Delete',
-              onTap: () {
-                // check if we can delete the transaction or not?
-                late Future<bool?> result = ShowMyDialog(
-                  dialogTitle: "Delete Item",
-                  dialogText: "Do you want to delete ${txn.name}?",
-                  confirmText: "Delete",
-                  confirmColor: accentColors[2],
-                  cancelText: "Cancel")
-                .show(context);
-
-                // check the result of the dialog box
-                result.then((value) {
-                  if (value == true) {
-                    // check if the onDelete function is not null
-                    if (onDelete != null) {
-                      onDelete!(txn);
-                    }
-                  }
-                });
-              },
-            ),
-          ],
-        ) : null),
-        child: _createItemType(txn)
+        ],
+      ) : null),
+      child: _createItemType(
+        canEdit: canEdit,
+        txn: txn,
       ),
     );
   }
 
-  Widget _createItemType(TransactionListModel txn) {
+  Widget _createItemType({
+    required bool canEdit,
+    required TransactionListModel txn,
+  }) {
     switch (txn.type.toLowerCase()) {
       case "expense":
         return MyItemList(
@@ -310,6 +305,13 @@ class ListViewWithHeader<T> extends StatelessWidget {
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],
+          onTap: () {
+            if (canEdit) {
+              if (onEdit != null) {
+                onEdit!(txn);
+              }
+            }
+          },
         );
       case "income":
         return MyItemList(
@@ -327,6 +329,13 @@ class ListViewWithHeader<T> extends StatelessWidget {
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[6],
+          onTap: () {
+            if (canEdit) {
+              if (onEdit != null) {
+                onEdit!(txn);
+              }
+            }
+          },
         );
       case "transfer":
         return MyItemList(
@@ -349,6 +358,13 @@ class ListViewWithHeader<T> extends StatelessWidget {
           amountColor: accentColors[4],
           symbolTo: txn.walletTo!.symbol,
           amountTo: (txn.amount * txn.exchangeRate),
+          onTap: () {
+            if (canEdit) {
+              if (onEdit != null) {
+                onEdit!(txn);
+              }
+            }
+          },
         );
       default:
         return MyItemList(
@@ -366,6 +382,13 @@ class ListViewWithHeader<T> extends StatelessWidget {
           symbol: txn.wallet.symbol,
           amount: txn.amount,
           amountColor: accentColors[2],
+          onTap: () {
+            if (canEdit) {
+              if (onEdit != null) {
+                onEdit!(txn);
+              }
+            }
+          },
         );
     }
   }
