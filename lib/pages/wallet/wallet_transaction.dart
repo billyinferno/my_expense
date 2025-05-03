@@ -684,27 +684,14 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           amount: txn.amount,
           amountColor: accentColors[2],
           onTap: () async {
-            await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
+            await Navigator.pushNamed(
+              context,
+              '/transaction/edit',
+              arguments: txn,
+            ).then(<TransactionListModel>(value) async {
               // check if we got return
               if (value != null) {
-                await _walletHTTP.fetchWallets(
-                  showDisabled: true,
-                  force: true
-                ).then((wallets) {
-                  if (mounted) {
-                    Provider.of<HomeProvider>(
-                      context,
-                      listen: false
-                    ).setWalletList(wallets: wallets);
-                  }
-
-                  // set wallet list to the refreshed wallets
-                  _walletList = wallets;
-                });
-
-                // convert value to the transaction list model
-                TransactionListModel updateTxn = value as TransactionListModel;
-                await _updateTransactions(updateTxn);
+                await _refreshWalletAndTransaction(updateTxn: value);
               }
             });
           },
@@ -721,27 +708,14 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           amount: txn.amount,
           amountColor: accentColors[6],
           onTap: () async {
-            await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
+            await Navigator.pushNamed(
+              context,
+              '/transaction/edit',
+              arguments: txn,
+            ).then(<TransactionListModel>(value) async {
               // check if we got return
               if (value != null) {
-                await _walletHTTP.fetchWallets(
-                  showDisabled: true,
-                  force: true
-                ).then((wallets) {
-                  if (mounted) {
-                    Provider.of<HomeProvider>(
-                      context,
-                      listen: false
-                    ).setWalletList(wallets: wallets);
-                  }
-
-                  // set wallet list to the refreshed wallets
-                  _walletList = wallets;
-                });
-
-                // convert value to the transaction list model
-                TransactionListModel updateTxn = value as TransactionListModel;
-                await _updateTransactions(updateTxn);
+                await _refreshWalletAndTransaction(updateTxn: value);
               }
             });
           },
@@ -763,27 +737,14 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           symbolTo: txn.walletTo!.symbol,
           amountTo: (txn.amount * txn.exchangeRate),
           onTap: () async {
-            await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
+            await Navigator.pushNamed(
+              context,
+              '/transaction/edit',
+              arguments: txn,
+            ).then(<TransactionListModel>(value) async {
               // check if we got return
               if (value != null) {
-                await _walletHTTP.fetchWallets(
-                  showDisabled: true,
-                  force: true
-                ).then((wallets) {
-                  if (mounted) {
-                    Provider.of<HomeProvider>(
-                      context,
-                      listen: false
-                    ).setWalletList(wallets: wallets);
-                  }
-
-                  // set wallet list to the refreshed wallets
-                  _walletList = wallets;
-                });
-
-                // convert value to the transaction list model
-                TransactionListModel updateTxn = value as TransactionListModel;
-                await _updateTransactions(updateTxn);
+                await _refreshWalletAndTransaction(updateTxn: value);
               }
             });
           },
@@ -800,27 +761,14 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           amount: txn.amount,
           amountColor: accentColors[2],
           onTap: () async {
-            await Navigator.pushNamed(context, '/transaction/edit', arguments: txn).then((value) async {
+            await Navigator.pushNamed(
+              context,
+              '/transaction/edit',
+              arguments: txn,
+            ).then(<TransactionListModel>(value) async {
               // check if we got return
               if (value != null) {
-                await _walletHTTP.fetchWallets(
-                  showDisabled: true,
-                  force: true
-                ).then((wallets) {
-                  if (mounted) {
-                    Provider.of<HomeProvider>(
-                      context,
-                      listen: false
-                    ).setWalletList(wallets: wallets);
-                  }
-
-                  // set wallet list to the refreshed wallets
-                  _walletList = wallets;
-                });
-
-                // convert value to the transaction list model
-                TransactionListModel updateTxn = value as TransactionListModel;
-                await _updateTransactions(updateTxn);
+                await _refreshWalletAndTransaction(updateTxn: value);
               }
             });
           },
@@ -832,6 +780,30 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
     setState(() {
       _currentDate = newDate;
     });
+  }
+
+  Future<void> _refreshWalletAndTransaction({
+    required TransactionListModel updateTxn,
+  }) async {
+    await Future.microtask(() async {  
+      await _walletHTTP.fetchWallets(
+        showDisabled: true,
+        force: true
+      ).then((wallets) {
+        if (mounted) {
+          Provider.of<HomeProvider>(
+            context,
+            listen: false
+          ).setWalletList(wallets: wallets);
+        }
+
+        // set wallet list to the refreshed wallets
+        _walletList = wallets;
+      });
+
+      // update the transaction
+      await _updateTransactions(updateTxn);
+    },);
   }
 
   Future<bool> _fetchInitData() async {
