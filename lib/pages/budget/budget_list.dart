@@ -300,7 +300,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
             currencySymbol: budget.currency.symbol,
             budgetAmount: budget.amount,
             showFlagged: true,
-            flagColor: (budget.useForDaily ? accentColors[6] : secondaryDark),
+            flagColor: (budget.useForDaily ? accentColors[4] : secondaryDark),
             onDelete: (() async {
               await _deleteBudgetList(budget.id, budget.currency.id);
 
