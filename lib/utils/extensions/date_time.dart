@@ -28,4 +28,11 @@ extension CustomDateExtestion on DateTime {
     }
     return false;
   }
+
+  bool sameMonth({required DateTime date}) {
+    if (toLocal().month == date.toLocal().month) {
+      return true;
+    }
+    return false;
+  }
 }
