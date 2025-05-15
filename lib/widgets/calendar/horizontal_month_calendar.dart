@@ -5,6 +5,7 @@ class HorizontalMonthCalendar extends StatefulWidget {
   final DateTime firstDay;
   final DateTime lastDay;
   final DateTime selectedDate;
+  final DateTime? currentDate;
   final MyDateTimeCallback? onDateSelected;
 
   const HorizontalMonthCalendar({
@@ -12,6 +13,7 @@ class HorizontalMonthCalendar extends StatefulWidget {
     required this.firstDay,
     required this.lastDay,
     required this.selectedDate,
+    this.currentDate,
     this.onDateSelected
   });
 
@@ -24,6 +26,7 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
   late int _initialPage;
   late int _totalPages;
   late int _diffMonths;
+  late DateTime _currentDate;
 
   @override
   void initState() {
@@ -33,6 +36,7 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
     _initialPage = 0;
     _totalPages = 0;
     _diffMonths = 0;
+    _currentDate = (widget.currentDate ?? DateTime.now());
 
     // calculate total month we have
     _diffMonths = _computeTotalMonths(widget.firstDay, widget.lastDay);
@@ -121,12 +125,22 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
   }
 
   Widget _dateItem(DateTime dt) {
+    Color currentTextColor = textColor;
+    // check whether this is current date or not?
+    if (dt.sameMonth(date: _currentDate)) {
+      if (!dt.sameMonth(date: widget.selectedDate)) {
+        currentTextColor = accentColors[1];
+      }
+    }
+
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          if(widget.onDateSelected != null) {
-            widget.onDateSelected!(dt);
-          }
+          setState(() {            
+            if(widget.onDateSelected != null) {
+              widget.onDateSelected!(dt);
+            }
+          });
         },
         child: Container(
           color: Colors.transparent,
@@ -138,7 +152,7 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
                 child: Text(
                   Globals.dfMMMyyyy.formatLocal(dt),
                   style: TextStyle(
-                    color: (dt.isSameDate(date: DateTime.now()) ? (dt.isSameDate(date: widget.selectedDate) ? textColor : accentColors[1]) : textColor),
+                    color: currentTextColor,
                   ),
                 ),
               ),
