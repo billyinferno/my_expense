@@ -39,74 +39,74 @@ class CategoryListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(width: 1.0, color: primaryLight)),
-        color: Colors.transparent,
-      ),
-      child: Slidable(
-        key: Key("${categoryId}_$categoryName"),
-        endActionPane: ActionPane(
-          motion: const DrawerMotion(),
-          extentRatio: 0.4,
-          dismissible: onDelete == null ? null : DismissiblePane(onDismissed: () async {
-            if (onDelete != null) {
-              onDelete!();
-            }
-          },
-          confirmDismiss: () async {
-            // show dialog first
-            return await _showConfirmDialog(context) ?? false;
-            
-          },),
-          children: <Widget>[
-            SlideButton(
-              icon: Ionicons.pencil,
-              iconColor: textColor,
-              bgColor: accentColors[6],
-              text: 'Edit',
-              onTap: () {
-                if (onEdit != null) {
-                  onEdit!(index);
-                }
-              },
-            ),
-            SlideButton(
-              icon: Ionicons.trash,
-              iconColor: textColor,
-              bgColor: accentColors[2],
-              text: 'Delete',
-              onTap: () async {
-                if (onDelete != null) {
-                  // show dialog first
-                  await _showConfirmDialog(context).then((value) {
-                    if (value ?? false) {
-                      onDelete!();
-                    }
-                  });
-                }
-              },
-            ),
-          ],
+    return GestureDetector(
+      onTap: (() {
+        if (onTap != null) {
+          onTap!(index);
+        }
+      }),
+      onDoubleTap: (() {
+        if (onDoubleTap != null) {
+          onDoubleTap!(index);
+        }
+      }),
+      child: Container(
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(width: 1.0, color: primaryLight)),
+          color: Colors.transparent,
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                child: GestureDetector(
-                  onTap: (() {
-                    if (onTap != null) {
-                      onTap!(index);
-                    }
-                  }),
-                  onDoubleTap: (() {
-                    if (onDoubleTap != null) {
-                      onDoubleTap!(index);
-                    }
-                  }),
+        child: Slidable(
+          key: Key("${categoryId}_$categoryName"),
+          endActionPane: ActionPane(
+            motion: const DrawerMotion(),
+            extentRatio: 0.4,
+            dismissible: onDelete == null ? null : DismissiblePane(onDismissed: () async {
+              if (onDelete != null) {
+                onDelete!();
+              }
+            },
+            confirmDismiss: () async {
+              // show dialog first
+              return await _showConfirmDialog(context) ?? false;
+              
+            },),
+            children: <Widget>[
+              SlideButton(
+                icon: Ionicons.pencil,
+                iconColor: textColor,
+                bgColor: accentColors[6],
+                text: 'Edit',
+                onTap: () {
+                  if (onEdit != null) {
+                    onEdit!(index);
+                  }
+                },
+              ),
+              SlideButton(
+                icon: Ionicons.trash,
+                iconColor: textColor,
+                bgColor: accentColors[2],
+                text: 'Delete',
+                onTap: () async {
+                  if (onDelete != null) {
+                    // show dialog first
+                    await _showConfirmDialog(context).then((value) {
+                      if (value ?? false) {
+                        onDelete!();
+                      }
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -132,9 +132,9 @@ class CategoryListItem extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-            _showFlagged(),
-          ],
+              _showFlagged(),
+            ],
+          ),
         ),
       ),
     );
