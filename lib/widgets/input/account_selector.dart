@@ -9,8 +9,8 @@ class AccountSelector extends StatefulWidget {
   final Map<String, List<WalletModel>> walletMap;
   final int disableID;
   final int selectedID;
-  final Function(int) onTap;
-  final Function(String) onTabSelected;
+  final String? selectedTab;
+  final Function(WalletModel) onTap;
   const AccountSelector({
     super.key,
     required this.title,
@@ -19,8 +19,8 @@ class AccountSelector extends StatefulWidget {
     required this.walletMap,
     this.disableID = -1,
     required this.selectedID,
+    this.selectedTab,
     required this.onTap,
-    required this.onTabSelected,
   });
 
   @override
@@ -30,15 +30,16 @@ class AccountSelector extends StatefulWidget {
 class _AccountSelectorState extends State<AccountSelector> {
   final ScrollController _accountTypeController = ScrollController();
   final ScrollController _walletController = ScrollController();
-
+  
   late String _tabSelected;
 
   @override
   void initState() {
     super.initState();
 
-    // default the tab selected
-    _tabSelected = 'all';
+    // default the tab selected to the first key of account map if selected
+    // tab is not being passed.
+    _tabSelected = (widget.selectedTab ?? widget.accountMap.keys.first);
   }
 
   @override
@@ -74,7 +75,6 @@ class _AccountSelectorState extends State<AccountSelector> {
             onTap: ((tab) {
               setState(() {
                 _tabSelected = tab;
-                widget.onTabSelected(tab);
               });
             }),
           ),
@@ -118,7 +118,7 @@ class _AccountSelectorState extends State<AccountSelector> {
                   isDisabled: isDisabled,
                   onTap: (() {
                     Navigator.pop(context);
-                    widget.onTap(index);
+                    widget.onTap(widget.walletMap[_tabSelected]![index]);
                   }),
                   icon: IconList.getIcon(widget.walletMap[_tabSelected]![index].walletType.type.toLowerCase()),
                 );

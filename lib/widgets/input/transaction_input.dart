@@ -133,7 +133,6 @@ class _TransactionInputState extends State<TransactionInput> {
   
   final Map<String, List<WalletModel>> _walletMap = {};
   final Map<String, String> _accountMap = {};
-  late String _tabSelected;
 
   late bool _showCalendar;
   late bool _showDescription;
@@ -194,8 +193,6 @@ class _TransactionInputState extends State<TransactionInput> {
     _walletList = WalletSharedPreferences.getWallets(showDisabled: false);
 
     // generate wallet map
-    // default the tab selected to all
-    _tabSelected = 'all';
     _generateWalletMap();
     
     // get the list of disabled wallet if needed
@@ -983,14 +980,14 @@ class _TransactionInputState extends State<TransactionInput> {
                           title: "From Account",
                           selectedId: _currentWalletFromID,
                           disableID: _currentWalletToID,
-                          onTap: ((index) async {
+                          onTap: ((wallet) async {
                             // set the current wallet from and showed the account
                             // selection for the to account directly
                             setState(() {
-                              _currentWalletFromID = _walletMap[_tabSelected]![index].id;
-                              _currentWalletFromName = _walletMap[_tabSelected]![index].name;
-                              _currentWalletFromType = _walletMap[_tabSelected]![index].walletType.type.toLowerCase();
-                              _currentWalletFromCCY = _walletMap[_tabSelected]![index].currency.name.toLowerCase();
+                              _currentWalletFromID = wallet.id;
+                              _currentWalletFromName = wallet.name;
+                              _currentWalletFromType = wallet.walletType.type.toLowerCase();
+                              _currentWalletFromCCY = wallet.currency.name.toLowerCase();
                             });
 
                             // show the to account selection
@@ -998,12 +995,12 @@ class _TransactionInputState extends State<TransactionInput> {
                               title: "To Account",
                               selectedId: _currentWalletToID,
                               disableID: _currentWalletFromID,
-                              onTap: ((index) {
+                              onTap: ((wallet) {
                                 setState(() {
-                                  _currentWalletToID = _walletMap[_tabSelected]![index].id;
-                                  _currentWalletToName = _walletMap[_tabSelected]![index].name;
-                                  _currentWalletToType = _walletMap[_tabSelected]![index].walletType.type.toLowerCase();
-                                  _currentWalletToCCY = _walletMap[_tabSelected]![index].currency.name.toLowerCase();
+                                  _currentWalletToID = wallet.id;
+                                  _currentWalletToName = wallet.name;
+                                  _currentWalletToType = wallet.walletType.type.toLowerCase();
+                                  _currentWalletToCCY = wallet.currency.name.toLowerCase();
                                 });
                               })
                             );
@@ -1015,12 +1012,12 @@ class _TransactionInputState extends State<TransactionInput> {
                         await _showAccountSelection(
                           title: "From Account",
                           selectedId: _currentWalletFromID,
-                          onTap: ((index) {
+                          onTap: ((wallet) {
                             setState(() {
-                              _currentWalletFromID = _walletMap[_tabSelected]![index].id;
-                              _currentWalletFromName = _walletMap[_tabSelected]![index].name;
-                              _currentWalletFromType = _walletMap[_tabSelected]![index].walletType.type.toLowerCase();
-                              _currentWalletFromCCY = _walletMap[_tabSelected]![index].currency.name.toLowerCase();
+                              _currentWalletFromID = wallet.id;
+                              _currentWalletFromName = wallet.name;
+                              _currentWalletFromType = wallet.walletType.type.toLowerCase();
+                              _currentWalletFromCCY = wallet.currency.name.toLowerCase();
                             });
                           })
                         );
@@ -1080,7 +1077,7 @@ class _TransactionInputState extends State<TransactionInput> {
     required String title,
     required int selectedId,
     int disableID = -1,
-    required Function(int) onTap,
+    required Function(WalletModel) onTap,
   }) async {
     // IconData disableIcon;
     // Color? disableColor;
@@ -1097,9 +1094,6 @@ class _TransactionInputState extends State<TransactionInput> {
           onTap: onTap,
           disableID: disableID,
           screenRatio: 0.50,
-          onTabSelected: ((tab) {
-            _tabSelected = tab;
-          }),
         );
       }
     );
@@ -1112,12 +1106,12 @@ class _TransactionInputState extends State<TransactionInput> {
           await _showAccountSelection(
             title: "Account",
             selectedId: _currentWalletFromID,
-            onTap: ((index) {
+            onTap: ((wallet) {
               setState(() {
-                _currentWalletFromID = _walletMap[_tabSelected]![index].id;
-                _currentWalletFromName = _walletMap[_tabSelected]![index].name;
-                _currentWalletFromType = _walletMap[_tabSelected]![index].walletType.type.toLowerCase();
-                _currentWalletFromCCY = _walletMap[_tabSelected]![index].currency.name.toLowerCase();
+                _currentWalletFromID = wallet.id;
+                _currentWalletFromName = wallet.name;
+                _currentWalletFromType = wallet.walletType.type.toLowerCase();
+                _currentWalletFromCCY = wallet.currency.name.toLowerCase();
               });
             })
           );
@@ -1164,14 +1158,14 @@ class _TransactionInputState extends State<TransactionInput> {
                     title: "From Account",
                     selectedId: _currentWalletFromID,
                     disableID: _currentWalletToID,
-                    onTap: ((index) async {
+                    onTap: ((wallet) async {
                       // set the current wallet from and showed the account
                       // selection for the to account directly
                       setState(() {
-                        _currentWalletFromID = _walletMap[_tabSelected]![index].id;
-                        _currentWalletFromName = _walletMap[_tabSelected]![index].name;
-                        _currentWalletFromType = _walletMap[_tabSelected]![index].walletType.type.toLowerCase();
-                        _currentWalletFromCCY = _walletMap[_tabSelected]![index].currency.name.toLowerCase();
+                        _currentWalletFromID = wallet.id;
+                        _currentWalletFromName = wallet.name;
+                        _currentWalletFromType = wallet.walletType.type.toLowerCase();
+                        _currentWalletFromCCY = wallet.currency.name.toLowerCase();
                       });
 
                       // show the to account selection
@@ -1179,12 +1173,12 @@ class _TransactionInputState extends State<TransactionInput> {
                         title: "To Account",
                         selectedId: _currentWalletToID,
                         disableID: _currentWalletFromID,
-                        onTap: ((index) {
+                        onTap: ((wallet) {
                           setState(() {
-                            _currentWalletToID = _walletMap[_tabSelected]![index].id;
-                            _currentWalletToName = _walletMap[_tabSelected]![index].name;
-                            _currentWalletToType = _walletMap[_tabSelected]![index].walletType.type.toLowerCase();
-                            _currentWalletToCCY = _walletMap[_tabSelected]![index].currency.name.toLowerCase();
+                            _currentWalletToID = wallet.id;
+                            _currentWalletToName = wallet.name;
+                            _currentWalletToType = wallet.walletType.type.toLowerCase();
+                            _currentWalletToCCY = wallet.currency.name.toLowerCase();
                           });
                         })
                       );
@@ -1232,12 +1226,12 @@ class _TransactionInputState extends State<TransactionInput> {
                     title: "To Account",
                     selectedId: _currentWalletToID,
                     disableID: _currentWalletFromID,
-                    onTap: ((index) {
+                    onTap: ((wallet) {
                       setState(() {
-                        _currentWalletToID = _walletMap[_tabSelected]![index].id;
-                        _currentWalletToName = _walletMap[_tabSelected]![index].name;
-                        _currentWalletToType = _walletMap[_tabSelected]![index].walletType.type.toLowerCase();
-                        _currentWalletToCCY = _walletMap[_tabSelected]![index].currency.name.toLowerCase();
+                        _currentWalletToID = wallet.id;
+                        _currentWalletToName = wallet.name;
+                        _currentWalletToType = wallet.walletType.type.toLowerCase();
+                        _currentWalletToCCY = wallet.currency.name.toLowerCase();
                       });
                     })
                   );
