@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
@@ -103,10 +104,10 @@ class _RouterPageState extends State<RouterPage> {
               }
             case '/budget/list/edit':
               {
-                return createAnimationRoute(
-                  page: BudgetInput(
-                    budget: settings.arguments,
-                  )
+                return CupertinoSheetRoute(
+                  builder: (context) {
+                    return BudgetInput(budget: settings.arguments);  
+                  },
                 );
               }
             case '/budget/transaction':
