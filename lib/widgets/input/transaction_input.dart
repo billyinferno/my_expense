@@ -912,7 +912,10 @@ class _TransactionInputState extends State<TransactionInput> {
                 textInputAction: TextInputAction.done,
               ),
               const SizedBox(height: 5,),
-              Text(_currentCategoryName),
+              Container(
+                padding: const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                child: Text(_currentCategoryName),
+              ),
             ],
           ),
         ),
