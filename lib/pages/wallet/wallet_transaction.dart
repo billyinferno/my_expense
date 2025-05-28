@@ -684,11 +684,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           amount: txn.amount,
           amountColor: accentColors[2],
           onTap: () async {
-            await Navigator.pushNamed(
+            await Navigator.pushNamed<TransactionListModel>(
               context,
               '/transaction/edit',
               arguments: txn,
-            ).then(<TransactionListModel>(value) async {
+            ).then((value) async {
               // check if we got return
               if (value != null) {
                 await _refreshWalletAndTransaction(updateTxn: value);
@@ -708,11 +708,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           amount: txn.amount,
           amountColor: accentColors[6],
           onTap: () async {
-            await Navigator.pushNamed(
+            await Navigator.pushNamed<TransactionListModel>(
               context,
               '/transaction/edit',
               arguments: txn,
-            ).then(<TransactionListModel>(value) async {
+            ).then((value) async {
               // check if we got return
               if (value != null) {
                 await _refreshWalletAndTransaction(updateTxn: value);
@@ -737,11 +737,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           symbolTo: txn.walletTo!.symbol,
           amountTo: (txn.amount * txn.exchangeRate),
           onTap: () async {
-            await Navigator.pushNamed(
+            await Navigator.pushNamed<TransactionListModel>(
               context,
               '/transaction/edit',
               arguments: txn,
-            ).then(<TransactionListModel>(value) async {
+            ).then((value) async {
               // check if we got return
               if (value != null) {
                 await _refreshWalletAndTransaction(updateTxn: value);
@@ -761,11 +761,11 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
           amount: txn.amount,
           amountColor: accentColors[2],
           onTap: () async {
-            await Navigator.pushNamed(
+            await Navigator.pushNamed<TransactionListModel>(
               context,
               '/transaction/edit',
               arguments: txn,
-            ).then(<TransactionListModel>(value) async {
+            ).then((value) async {
               // check if we got return
               if (value != null) {
                 await _refreshWalletAndTransaction(updateTxn: value);

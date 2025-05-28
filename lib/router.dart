@@ -82,7 +82,7 @@ class _RouterPageState extends State<RouterPage> {
               }
             case '/transaction/edit':
               {
-                return createAnimationRoute(
+                return createAnimationRoute<TransactionListModel>(
                   page: TransactionEditPage(
                     params: settings.arguments,
                   )
@@ -104,7 +104,7 @@ class _RouterPageState extends State<RouterPage> {
               }
             case '/budget/list/edit':
               {
-                return CupertinoSheetRoute(
+                return CupertinoSheetRoute<BudgetDetailArgs>(
                   builder: (context) {
                     return BudgetInput(budget: settings.arguments);  
                   },

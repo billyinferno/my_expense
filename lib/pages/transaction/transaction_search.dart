@@ -704,11 +704,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
   Future<void> _showTransactionEditScreen(TransactionListModel txn) async {
     // go to the transaction edit for this txn
-    await Navigator.pushNamed(
+    await Navigator.pushNamed<TransactionListModel>(
       context,
       '/transaction/edit',
       arguments: txn
-    ).then(<TransactionListModel>(result) async {
+    ).then((result) async {
       // check if we got return
       if (result != null) {
         // set state to rebuild the widget

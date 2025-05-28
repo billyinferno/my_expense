@@ -176,11 +176,11 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
                   TransactionListModel currTxn = _list[index].data as TransactionListModel;
                   return GestureDetector(
                     onTap: () async {
-                      await Navigator.pushNamed(
+                      await Navigator.pushNamed<TransactionListModel>(
                         context,
                         '/transaction/edit',
                         arguments: currTxn
-                      ).then(<TransactionListModel>(result) {
+                      ).then((result) {
                         if (result != null) {
                           // check what we need to do for this new result
                           // as we are in budget transaction then check if the
