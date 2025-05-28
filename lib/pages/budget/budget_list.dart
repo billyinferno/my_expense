@@ -17,6 +17,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
   final ScrollController _scrollControllerAddCategory = ScrollController();
 
   late BudgetListModel? _budgetList;
+  late Map<int, BudgetModel> _budgetMap;
+  late Map<int, CurrencyModel> _currencyMap;
   late Future<bool> _getData;
 
   int _currencyID = -1;
@@ -24,6 +26,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
   double _totalDailyUse = 0.0;
   bool _isDataChanged = false;
   Map<int, CategoryModel> _expenseCategory = {};
+  List<CategoryModel> _expenseCategoryList = [];
 
   @override
   void initState() {
@@ -31,12 +34,17 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
     // initialize value
     _budgetList = null;
+    _budgetMap = {};
 
     // get the currency ID being sent from the home budget page
     _currencyID = widget.currencyId as int;
 
     // get the expense category model
     _expenseCategory = CategorySharedPreferences.getCategory(type: "expense");
+    _expenseCategoryList = _expenseCategory.values.toList();
+
+    // get the currency map
+    _currencyMap = WalletSharedPreferences.getMapWalletCurrencyID();
 
     // fetch the current budget
     _getData = _fetchBudget(true);
@@ -82,80 +90,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
           }),
         ),
         actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              showModalBottomSheet<void>(
-                context: context,
-                builder: (BuildContext context) {
-                  return MyBottomSheet(
-                    context: context,
-                    title: "Categories",
-                    screenRatio: 0.75,
-                    child: ListView.builder(
-                      controller: _scrollControllerAddCategory,
-                      itemCount: _expenseCategory.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        int key = _expenseCategory.keys.elementAt(index);
-                        return SimpleItem(
-                          color: IconColorList.getExpenseColor(_expenseCategory[key]!.name),
-                          title: _expenseCategory[key]!.name,
-                          isSelected: (_checkIfCategorySelected(_expenseCategory[key]!.id)),
-                          onTap: (() async {
-                            // check if this is not already added as budget or not?
-                            // if not yet then we can add this new budget to the budget list
-                            if (!_checkIfCategorySelected(_expenseCategory[key]!.id)) {
-                              await _addBudget(
-                                _expenseCategory[key]!.id,
-                                _currencyID
-                              ).then((_) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    createSnackBar(
-                                      message: "Success add new category",
-                                      icon: Icon(
-                                        Ionicons.checkmark_circle_outline,
-                                        color: accentColors[6],
-                                      ),
-                                    ),
-                                  );
-                                }
-                              }).onError((error, stackTrace) async {
-                                // print the error
-                                Log.error(
-                                  message: "Error while add budget category",
-                                  error: error,
-                                  stackTrace: stackTrace,
-                                );
-
-                                if (context.mounted) {
-                                  // show error dialog
-                                  await ShowMyDialog(
-                                    cancelEnabled: false,
-                                    confirmText: "OK",
-                                    dialogTitle: "Error Add Budget",
-                                    dialogText: "Error while add budget category.")
-                                  .show(context);
-                                }
-                              });
-                            }
-                            // remove the modal dialog
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                            }
-                          }),
-                          icon: IconColorList.getExpenseIcon(_expenseCategory[key]!.name),
-                        );
-                      },
-                    ),
-                  );
-                }
-              );
-            },
-            icon: Icon(
-              Ionicons.add,
-              color: textColor,
-            )
-          ),
           IconButton(
             onPressed: () async {
               await _updateBudgetList().then((_) {
@@ -224,42 +158,34 @@ class _BudgetListPageState extends State<BudgetListPage> {
           totalAmount: _totalAmount,
           totalDailyUse: _totalDailyUse,
         ),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+          color: secondaryBackground,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: accentColors[4],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              const SizedBox(width: 5,),
+              Text(
+                "Use for Daily",
+                style: TextStyle(
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ),
         Expanded(
           child: _generateListItem(),
-        ),
-        Container(
-          padding: const EdgeInsets.all(10),
-          child: MaterialButton(
-            height: 40,
-            minWidth: double.infinity,
-            onPressed: (() async {
-              await _updateBudgetList().then((_) {
-                if (mounted) {
-                  // this is success, we can going back from this page
-                  Navigator.pop(context);
-                }
-              }).onError((error, stackTrace) async {
-                // print the error
-                Log.error(
-                  message: "Error while updating budget list",
-                  error: error,
-                  stackTrace: stackTrace,
-                );
-
-                if (mounted) {
-                  // show dialog of error
-                  await ShowMyDialog(
-                    cancelEnabled: false,
-                    confirmText: "OK",
-                    dialogTitle: "Error Update Budget",
-                    dialogText: "Error while updating budget list.")
-                  .show(context);
-                }
-              });
-            }),
-            color: accentColors[6],
-            child: const Text("Save Budget List"),
-          ),
         ),
       ],
     );
@@ -272,9 +198,29 @@ class _BudgetListPageState extends State<BudgetListPage> {
     } else {
       return ListView.builder(
         controller: _scrollController,
-        itemCount: _budgetList!.budgets.length,
+        itemCount: _expenseCategoryList.length,
         itemBuilder: (BuildContext ctx, int index) {
-          BudgetModel budget = _budgetList!.budgets[index];
+          // get the category ID and see if we have budget for this category
+          // or not?
+          int categoryId = _expenseCategoryList[index].id;
+
+          BudgetModel budget;
+          // check if we have budget for this category?
+          if (_budgetMap.containsKey(categoryId)) {
+            budget = _budgetMap[categoryId]!;
+          }
+          else {
+            budget = BudgetModel(
+              id: -1,
+              category: _expenseCategoryList[index],
+              totalTransaction: 0,
+              amount: 0,
+              used: 0,
+              useForDaily: false,
+              status: 'in',
+              currency: _currencyMap[_currencyID]!,
+            );
+          }
 
           // generate budget detail arguments
           BudgetDetailArgs budgetArgs = BudgetDetailArgs(
@@ -291,52 +237,80 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
           return CategoryListItem(
             index: index,
-            budgetId: budget.id,
-            categoryId: budget.category.id,
-            categoryIcon: IconColorList.getExpenseIcon(budget.category.name),
-            categoryColor: IconColorList.getExpenseColor(budget.category.name),
-            categoryName: budget.category.name,
-            currencyId: budget.currency.id,
-            currencySymbol: budget.currency.symbol,
-            budgetAmount: budget.amount,
-            showFlagged: true,
+            budget: budget,
+            showFlagged: (budget.useForDaily),
             flagColor: (budget.useForDaily ? accentColors[4] : secondaryDark),
-            onDelete: (() async {
-              await _deleteBudgetList(budget.id, budget.currency.id);
+            isSelected: (budget.id != -1),
+            onSelect: (index) async {
+              // check the index if it's -1 means that this is not yet added
+              if (budget.id == -1) {
+                // add the budget
+                try {
+                  await _addBudget(categoryId, _currencyID);
 
-              if (mounted) {
-                // show snack bar
-                ScaffoldMessenger.of(context).showSnackBar(
-                  createSnackBar(message: 'Delete of ${budget.category.name} success'),
-                );
-              }
-            }),
-            onTap: ((index) async {
-              // show edit budget form
-              await Navigator.pushNamed(
-                context,
-                '/budget/list/edit',
-                arguments: budgetArgs
-              ).then(<BudgetDetailArgs>(result) {
-                if (result != null) {
-                  // set the is data change into true
-                  _isDataChanged = true;
-
-                  // we got the budget, now we can change the budget
-                  _changeBudget(
-                    budgetArgs: result,
-                    index: index
-                  );
+                  if (mounted) {
+                    // show snack bar
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      createSnackBar(
+                        icon: Icon(
+                          Ionicons.checkmark_circle_outline,
+                          color: accentColors[6],
+                        ),
+                        message: '${budget.category.name} added',
+                      ),
+                    );
+                  }
                 }
-              });
-            }),
+                catch(error, _) {
+                  if (mounted) {
+                    // show error dialog
+                    await ShowMyDialog(
+                      cancelEnabled: false,
+                      confirmText: "OK",
+                      dialogTitle: "Error Add Budget",
+                      dialogText: "Error while add ${budget.category.name} to budget list.")
+                    .show(context);
+                  }
+                }
+              }
+              else {
+                // show the confirmation dialog
+                await _showConfirmDialog(
+                  name: budget.category.name,
+                ).then((value) async {
+                  if (value ?? false) {
+                    // delete the budget instead
+                    try {
+                      await _deleteBudgetList(budget.id, budget.currency.id);
+                      if (mounted) {
+                        // show snack bar
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          createSnackBar(message: 'Delete of ${budget.category.name} success'),
+                        );
+                      }
+                    }
+                    catch(error, _) {
+                      if (mounted) {
+                        // show error dialog
+                        await ShowMyDialog(
+                          cancelEnabled: false,
+                          confirmText: "OK",
+                          dialogTitle: "Error Delete Budget",
+                          dialogText: "Error while deleting ${budget.category.name}.")
+                        .show(context);
+                      }
+                    }
+                  }
+                });
+              }
+            },
             onEdit: ((index) async {
               // show edit budget form
-              await Navigator.pushNamed(
+              await Navigator.pushNamed<BudgetDetailArgs>(
                 context,
                 '/budget/list/edit',
                 arguments: budgetArgs
-              ).then(<BudgetDetailArgs>(result) {
+              ).then((result) {
                 if (result != null) {
                   // set the is data change into true
                   _isDataChanged = true;
@@ -392,11 +366,16 @@ class _BudgetListPageState extends State<BudgetListPage> {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text("(${ccy.symbol} ${Globals.fCCY.format(totalAmount)})"),
+                Text(
+                  "(${ccy.symbol} ${Globals.fCCY.format(totalAmount)})",
+                  style: TextStyle(
+                    color: accentColors[2],
+                  ),
+                ),
                 Text(
                   "(${ccy.symbol} ${Globals.fCCY.format(totalDailyUse)})",
                   style: TextStyle(
-                    color: secondaryLight,
+                    color: accentColors[4],
                     fontSize: 11,
                   ),
                 ),
@@ -410,20 +389,32 @@ class _BudgetListPageState extends State<BudgetListPage> {
     }
   }
 
+  void _calculateAndGenerateBudgetMap() {
+    _totalAmount = 0.0;
+    _totalDailyUse = 0.0;
+    
+    // clear the budget map
+    _budgetMap.clear();
+
+    // check if we have budget or not?
+    if (_budgetList!.budgets.isNotEmpty) {
+      // if have loop thru the budget
+      for (BudgetModel budget in _budgetList!.budgets) {
+        _totalAmount += budget.amount;
+        if (budget.useForDaily) {
+          _totalDailyUse += budget.amount;
+        }
+
+        // put the category ID into the budget map
+        _budgetMap[budget.category.id] = budget;
+      }
+    }
+  }
+
   void _setBudgetList(BudgetListModel budgetList) {
     setState(() {
       _budgetList = budgetList;
-
-      _totalAmount = 0.0;
-      _totalDailyUse = 0.0;
-      if (_budgetList!.budgets.isNotEmpty) {
-        for (BudgetModel budget in _budgetList!.budgets) {
-          _totalAmount += budget.amount;
-          if (budget.useForDaily) {
-            _totalDailyUse += budget.amount;
-          }
-        }
-      }
+      _calculateAndGenerateBudgetMap();
     });
   }
 
@@ -446,22 +437,6 @@ class _BudgetListPageState extends State<BudgetListPage> {
     return true;
   }
 
-  bool _checkIfCategorySelected(int id) {
-    // loop throught the budget list budgets
-    if (_budgetList != null) {
-      if (_budgetList!.budgets.isNotEmpty) {
-        for (int i = 0; i < _budgetList!.budgets.length; i++) {
-          // this budget is selected already
-          if (_budgetList!.budgets[i].category.id == id) {
-            return true;
-          }
-        }
-      }
-    }
-    // defualted to return false.
-    return false;
-  }
-
   Future<void> _deleteBudgetList(int budgetId, int currencyId) async {
     // show the loading screen
     LoadingScreen.instance().show(context: context);
@@ -479,6 +454,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
             element.currency.id == budget.currency.id
           );
         }
+
+        // calculate the total amount and budget map, so we can map correctly
+        _calculateAndGenerateBudgetMap();
 
         // store and update budget list so we can align the current budget list
         // with the one showed on the home budget page.
@@ -514,8 +492,12 @@ class _BudgetListPageState extends State<BudgetListPage> {
           _budgetList!.budgets.add(budget);
 
           // sort budget list
-          List<BudgetModel> newBudget = _budgetList!.budgets.toList()..sort((a,b) => (a.category.name.compareTo(b.category.name)));
+          List<BudgetModel> newBudget = _budgetList!.budgets.toList()..sort((a,b) => (a.category.id.compareTo(b.category.id)));
           _budgetList!.setBudgets(newBudget);
+
+          // recalculate the total amount and budget map, so we can map correctly
+          // on the home budget list page.
+          _calculateAndGenerateBudgetMap();
         }
         
         // store and update budget list so we can align the current budget list
@@ -674,6 +656,20 @@ class _BudgetListPageState extends State<BudgetListPage> {
         listen: false
       ).setBudgetList(budgets: currentBudgetList);
     }
+  }
+
+  Future<bool?> _showConfirmDialog({
+    required String name,
+  }) {
+    late Future<bool?> result = ShowMyDialog(
+      dialogTitle: "Delete Budget",
+      dialogText: "Do you want to delete $name?",
+      confirmText: "Delete",
+      confirmColor: accentColors[2],
+      cancelText: "Cancel")
+    .show(context);
+
+    return (result);
   }
 
   void _changeBudget({

@@ -5,41 +5,31 @@ import 'package:my_expense/_index.g.dart';
 
 class CategoryListItem extends StatelessWidget {
   final int index;
-  final int budgetId;
-  final int categoryId;
-  final Icon categoryIcon;
-  final Color categoryColor;
-  final String categoryName;
-  final int currencyId;
-  final String currencySymbol;
-  final double budgetAmount;
+  final BudgetModel budget;
   final bool showFlagged;
   final Color flagColor;
+  final bool isSelected;
   final Function(int)? onTap;
   final Function(int)? onDoubleTap;
   final Function? onDelete;
   final Function(int)? onEdit;
+  final Function(int)? onSelect;
   const CategoryListItem({super.key,
     required this.index,
-    required this.budgetId,
-    required this.categoryId,
-    required this.categoryIcon,
-    required this.categoryColor,
-    required this.categoryName,
-    required this.currencyId,
-    required this.currencySymbol,
-    required this.budgetAmount,
+    required this.budget,
     this.showFlagged = false,
     this.flagColor = Colors.transparent,
+    this.isSelected = false,
     this.onTap,
     this.onDoubleTap,
     this.onDelete,
     this.onEdit,
+    this.onSelect,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: (() {
         if (onTap != null) {
           onTap!(index);
@@ -56,7 +46,7 @@ class CategoryListItem extends StatelessWidget {
           color: Colors.transparent,
         ),
         child: Slidable(
-          key: Key("${categoryId}_$categoryName"),
+          key: Key("${budget.category.id}_${budget.category.name}"),
           endActionPane: ActionPane(
             motion: const DrawerMotion(),
             extentRatio: 0.4,
@@ -73,28 +63,34 @@ class CategoryListItem extends StatelessWidget {
             children: <Widget>[
               SlideButton(
                 icon: Ionicons.pencil,
-                iconColor: textColor,
-                bgColor: accentColors[6],
+                iconColor: (budget.id != -1 ? textColor : secondaryLight),
+                bgColor: (budget.id != -1 ? accentColors[6] : secondaryDark),
                 text: 'Edit',
+                textColor: (budget.id != -1 ? textColor : secondaryLight),
                 onTap: () {
                   if (onEdit != null) {
-                    onEdit!(index);
+                    if (budget.id != -1) {
+                      onEdit!(index);
+                    }
                   }
                 },
               ),
               SlideButton(
                 icon: Ionicons.trash,
-                iconColor: textColor,
-                bgColor: accentColors[2],
+                iconColor: (budget.id != -1 ? textColor : secondaryLight),
+                bgColor: (budget.id != -1 ? accentColors[2] : secondaryDark),
                 text: 'Delete',
+                textColor: (budget.id != -1 ? textColor : secondaryLight),
                 onTap: () async {
                   if (onDelete != null) {
-                    // show dialog first
-                    await _showConfirmDialog(context).then((value) {
-                      if (value ?? false) {
-                        onDelete!();
-                      }
-                    });
+                    if (budget.id != -1) {
+                      // show dialog first
+                      await _showConfirmDialog(context).then((value) {
+                        if (value ?? false) {
+                          onDelete!();
+                        }
+                      });
+                    }
                   }
                 },
               ),
@@ -104,9 +100,42 @@ class CategoryListItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
+              const SizedBox(width: 10,),
+              GestureDetector(
+                onTap: () {
+                  if (onSelect != null) {
+                    onSelect!(index);
+                  }
+                },
+                child: SizedBox(
+                  width: 20,
+                  height: 60,
+                  child: Center(
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        color: (isSelected ? accentColors[6] : secondaryDark),
+                      ),
+                      child: Center(
+                        child: (isSelected ? Icon(
+                          Ionicons.checkmark,
+                          color: Colors.white,
+                          size: 12,
+                        ) : const SizedBox.shrink()),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                  padding: const EdgeInsets.all(10),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -114,25 +143,32 @@ class CategoryListItem extends StatelessWidget {
                       Container(
                         height: 40,
                         width: 40,
-                        margin: const EdgeInsets.fromLTRB(0, 10, 0, 10),
                         decoration: BoxDecoration(
+                          border: Border.all(
+                            color: (showFlagged ? flagColor : Colors.transparent),
+                            width: 2.0,
+                          ),
                           borderRadius: BorderRadius.circular(40),
-                          color: categoryColor,
+                          color: IconColorList.getExpenseColor(budget.category.name),
                         ),
-                        child: categoryIcon,
+                        child: IconColorList.getExpenseIcon(budget.category.name),
                       ),
                       const SizedBox(
                         width: 10,
                       ),
-                      Expanded(child: Text(categoryName)),
+                      Expanded(child: Text(budget.category.name)),
                       const SizedBox(width: 10,),
-                      Text("$currencySymbol ${Globals.fCCY.format(budgetAmount)}"),
+                      Text(
+                        (budget.id != -1 ? "${budget.currency.symbol} ${Globals.fCCY.format(budget.amount)}" : '-'),
+                        style: TextStyle(
+                          color: (budget.id != -1 ? textColor2 : secondaryLight),
+                        ),
+                      ),
                       const SizedBox(width: 5,),
                     ],
                   ),
                 ),
               ),
-              _showFlagged(),
             ],
           ),
         ),
@@ -140,22 +176,10 @@ class CategoryListItem extends StatelessWidget {
     );
   }
 
-  Widget _showFlagged() {
-    if (!showFlagged) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      width: 10,
-      height: 60,
-      color: flagColor,
-    );
-  }
-
   Future<bool?> _showConfirmDialog(BuildContext context) {
     late Future<bool?> result = ShowMyDialog(
       dialogTitle: "Delete Budget",
-      dialogText: "Do you want to delete $categoryName?",
+      dialogText: "Do you want to delete ${budget.category.name}?",
       confirmText: "Delete",
       confirmColor: accentColors[2],
       cancelText: "Cancel")

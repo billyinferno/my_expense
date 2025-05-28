@@ -96,6 +96,25 @@ class WalletSharedPreferences {
     }
   }
 
+  static Map<int, CurrencyModel> getMapWalletCurrencyID() {
+    List<String>? data = MyBox.getStringList(key: _walletCurrencyKey);
+
+    if(data != null) {
+      List<CurrencyModel> currencies = data.map((e) => CurrencyModel.fromJson(jsonDecode(e))).toList();
+      
+      // loop thru currency and generate map
+      Map<int, CurrencyModel> currenciesMap = {};
+      for(CurrencyModel ccy in currencies) {
+        currenciesMap[ccy.id] = ccy;
+      }
+
+      return currenciesMap;
+    }
+    else {
+      return {};
+    }
+  }
+
   static Future<void> setWalletUserCurrency({required List<CurrencyModel> currencies}) async {
     List<String> data = currencies.map((e) => jsonEncode(e.toJson())).toList();
     if(data.isNotEmpty) {
