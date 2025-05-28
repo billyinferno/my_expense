@@ -141,6 +141,14 @@ class _UserPageState extends State<UserPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text("User")),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.maybePop(context, false);
+          },
+          icon: const Icon(
+            Ionicons.close,
+          ),
+        ),
         actions: <Widget>[
           IconButton(
             onPressed: () {
