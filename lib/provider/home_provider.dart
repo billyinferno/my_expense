@@ -10,12 +10,12 @@ class HomeProvider extends ChangeNotifier {
   Map<int, IncomeExpenseModel> incomeExpense = {};
   Map<int, Map<String, List<TransactionTopModel>>> topTransaction = {};
 
-  setTransactionList({required List<TransactionListModel> transactions}) {
+  void setTransactionList({required List<TransactionListModel> transactions}) {
     transactionList = transactions;
     notifyListeners();
   }
 
-  popTransactionList({required TransactionListModel transaction}) {
+  void popTransactionList({required TransactionListModel transaction}) {
     // loop transaction list until find the same id
     for(int i=0; i<transactionList.length; i++) {
       if (transactionList[i].id == transaction.id) {
@@ -26,52 +26,52 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  clearTransactionList() {
+  void clearTransactionList() {
     transactionList.clear();
     transactionList = [];
     notifyListeners();
   }
 
-  setWalletList({required List<WalletModel> wallets}) {
+  void setWalletList({required List<WalletModel> wallets}) {
     walletList = wallets;
     notifyListeners();
   }
 
-  setBudgetList({required List<BudgetModel> budgets}) {
+  void setBudgetList({required List<BudgetModel> budgets}) {
     budgetList = budgets;
     notifyListeners();
   }
 
-  clearBudgetList() {
+  void clearBudgetList() {
     budgetList.clear();
     budgetList = [];
     notifyListeners();
   }
 
-  setWalletCurrency({required List<CurrencyModel> currencies}) {
+  void setWalletCurrency({required List<CurrencyModel> currencies}) {
     walletCurrency = currencies;
     notifyListeners();
   }
 
-  setNetWorth({required List<WorthModel> worth}) {
+  void setNetWorth({required List<WorthModel> worth}) {
     netWorth = worth;
     notifyListeners();
   }
 
-  clearNetWorth() {
+  void clearNetWorth() {
     netWorth.clear();
     netWorth = [];
     notifyListeners();
   }
 
-  setIncomeExpense({
+  void setIncomeExpense({
     required int ccyId,
     required IncomeExpenseModel data}) {
     incomeExpense[ccyId] = data;
     notifyListeners();
   }
 
-  setTopTransaction({
+  void setTopTransaction({
     required int ccy,
     required String type,
     required List<TransactionTopModel> data
@@ -86,7 +86,7 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
   
-  addTopTransaction({
+  void addTopTransaction({
     required int ccy,
     required String type,
     required TransactionListModel transaction
@@ -138,7 +138,7 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  clearProvider() {
+  void clearProvider() {
     transactionList.clear();
     transactionList = [];
 

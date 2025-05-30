@@ -279,7 +279,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     );
   }
 
-  void _generateSubPageTplt<T>({required showHeader}) {
+  void _generateSubPageTplt<T>({required bool showHeader}) {
     // All transaction page
     _mapSubPage[PageName.all.index] = ListViewWithHeader<T>(
       controller: _scrollControllerAll,
