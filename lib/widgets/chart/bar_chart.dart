@@ -24,21 +24,6 @@ class BarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // check if data is empty or not?
-    if (data.expense.isEmpty && data.income.isEmpty) {
-      return const SizedBox(
-        width: double.infinity,
-        child: Center(
-          child: Text("No data"),
-        ),
-      );
-    }
-    else {
-      return _buildBarChart();
-    }
-  }
-
-  Widget _buildBarChart()  {
     bool isShowed = (showed ?? false);
     
     // check if showed or not?

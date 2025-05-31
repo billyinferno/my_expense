@@ -369,7 +369,7 @@ class _HomeStatsState extends State<HomeStats> {
     double currentWorthIncome = (_incomeExpense[_currentWorth.currenciesId] != null ? _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.income)) : 0.0);
     double currentWorthExpense = (_incomeExpense[_currentWorth.currenciesId] != null ? _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.expense)) : 0.0);
     double currentWorthExpensePositive = currentWorthExpense.makePositive();
-    double totalCurrentWorth = currentWorthIncome + currentWorthExpense;
+    double totalCurrentWorth = currentWorthIncome - currentWorthExpense;
 
     // calculate income and expense flex
     int incomeFlex = 0;
@@ -675,6 +675,18 @@ class _HomeStatsState extends State<HomeStats> {
           );
         }
       case 'chart':
+        if (_incomeExpense[_currentCurrencyId] == null) {
+          // no data for this, so return no data
+          return const Center(child: Text("No data"),);
+        }
+        else {
+          // check if we got data on the expense and income or not
+          if (_incomeExpense[_currentCurrencyId]!.expense.isEmpty && _incomeExpense[_currentCurrencyId]!.income.isEmpty) {
+            // no data for this, so return no data
+            return const Center(child: Text("No data"),);
+          }
+        }
+        
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
