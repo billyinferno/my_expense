@@ -35,4 +35,14 @@ extension CustomDateExtestion on DateTime {
     }
     return false;
   }
+
+  bool sameMonthAndYear({required DateTime date}) {
+    if (
+      (toLocal().month == date.toLocal().month) &&
+      (toLocal().year == date.toLocal().year)
+    ) {
+      return true;
+    }
+    return false;
+  }
 }

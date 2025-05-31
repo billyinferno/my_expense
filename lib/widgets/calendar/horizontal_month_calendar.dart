@@ -127,8 +127,8 @@ class _HorizontalMonthCalendarState extends State<HorizontalMonthCalendar> {
   Widget _dateItem(DateTime dt) {
     Color currentTextColor = textColor;
     // check whether this is current date or not?
-    if (dt.sameMonth(date: _currentDate)) {
-      if (!dt.sameMonth(date: widget.selectedDate)) {
+    if (dt.sameMonthAndYear(date: _currentDate)) {
+      if (!dt.sameMonthAndYear(date: widget.selectedDate)) {
         currentTextColor = accentColors[1];
       }
     }
