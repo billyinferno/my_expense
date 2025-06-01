@@ -17,9 +17,11 @@ Future main() async {
       await Future.microtask(() async {
         if (kReleaseMode) {
           await dotenv.load(fileName: "conf/.prod.env");
+          Log.info(message: "⏳ Loading production environment variables");
         }
         else {
           await dotenv.load(fileName: "conf/.dev.env");
+          Log.info(message: "⏳ Loading development environment variables");
         }
         await Hive.initFlutter();
         await MyBox.init();
