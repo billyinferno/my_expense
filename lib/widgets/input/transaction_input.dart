@@ -2008,9 +2008,9 @@ class _TransactionInputState extends State<TransactionInput> {
         throw Exception('Name is mandatory for $_currentType');
       }
       else {
-        // ensure the name length is >= 3
-        if (_nameController.text.trim().length < 3) {
-          throw Exception('Minimum length for name are 3');
+        // ensure the name length is >= 2
+        if (_nameController.text.trim().length < 2) {
+          throw Exception('Minimum length for name are 2');
         }
       }
 

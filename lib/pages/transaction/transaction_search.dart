@@ -1291,10 +1291,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       _searchText = _searchController.text;
       _searchText = _searchText.trim();
 
-      // ensure the searchText is more than 3
-      if (_searchText.length < 3) {
+      // ensure the searchText is more than 2
+      if (_searchText.length < 2) {
         ScaffoldMessenger.of(context).showSnackBar(createSnackBar(
-          message: "Minimum text search is 3 character",
+          message: "Minimum text search is 2 character",
         ));
         return;
       }
