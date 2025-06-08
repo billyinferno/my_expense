@@ -477,8 +477,25 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
             key: Key("${txn.id}_${txn.wallet.id}_${txn.name}"),
             endActionPane: ActionPane(
               motion: const DrawerMotion(),
-              extentRatio: 0.20,
+              extentRatio: 0.40,
               children: <Widget>[
+                SlideButton(
+                  icon: Ionicons.copy,
+                  iconColor: textColor,
+                  bgColor: accentColors[3],
+                  text: 'Duplicate',
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context, '/transaction/add',
+                      arguments: TransactionAddArgs(
+                        date: (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now()).toLocal(),
+                        transaction: txn,
+                      ),
+                    ).then((_) {
+                      _getData = _fetchNewData();
+                    },);
+                  },
+                ),
                 SlideButton(
                   icon: Ionicons.trash,
                   iconColor: textColor,

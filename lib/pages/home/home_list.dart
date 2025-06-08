@@ -290,8 +290,13 @@ class _HomeListState extends State<HomeList> {
       }),
     ).then((newDate) {
       if (newDate != null) {
-        _setFocusedDay(DateTime(newDate.toLocal().year, newDate.toLocal().month,
-            newDate.toLocal().day)..toLocal());
+        _setFocusedDay(
+          DateTime(
+            newDate.toLocal().year,
+            newDate.toLocal().month,
+            newDate.toLocal().day,
+          )..toLocal()
+        );
         _getData = _refreshTransaction(
           refreshDay: _currentFocusedDay,
           showLoading: true,
@@ -377,7 +382,7 @@ class _HomeListState extends State<HomeList> {
       key: Key("${txn.id}_${txn.wallet.id}_${txn.type}"),
       endActionPane: ActionPane(
         motion: const DrawerMotion(),
-        extentRatio: 0.20,
+        extentRatio: 0.40,
         dismissible: DismissiblePane(
           onDismissed: () async {
             // if dismissed then delete the transaction
@@ -394,6 +399,21 @@ class _HomeListState extends State<HomeList> {
           },
         ),
         children: <Widget>[
+          SlideButton(
+            icon: Ionicons.copy,
+            iconColor: textColor,
+            bgColor: accentColors[3],
+            text: 'Duplicate',
+            onTap: () {
+              Navigator.pushNamed(
+                context, '/transaction/add',
+                arguments: TransactionAddArgs(
+                  date: (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now()).toLocal(),
+                  transaction: txn,
+                ),
+              );
+            },
+          ),
           SlideButton(
             icon: Ionicons.trash,
             iconColor: textColor,

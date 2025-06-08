@@ -167,7 +167,12 @@ class _HomePageState extends State<HomePage> {
   Widget _createFloatingAddButton() {
     return GestureDetector(
       onTap: (() {
-        Navigator.pushNamed(context, '/transaction/add', arguments: _selectedDate);
+        Navigator.pushNamed(
+          context, '/transaction/add',
+          arguments: TransactionAddArgs(
+            date: _selectedDate,
+          ),
+        );
       }),
       child: Container(
         width: 60,

@@ -2,6 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
+class TransactionAddArgs {
+  final DateTime date;
+  final TransactionListModel? transaction;
+
+  TransactionAddArgs({
+    required this.date,
+    this.transaction,
+  });
+}
+
 class TransactionAddPage extends StatefulWidget {
   final Object? params;
 
@@ -12,7 +22,9 @@ class TransactionAddPage extends StatefulWidget {
 }
 
 class _TransactionAddPageState extends State<TransactionAddPage> {
+  late TransactionAddArgs _args;
   late DateTime _selectedDate;
+  late TransactionListModel? _txnDuplicate;
 
   final WalletHTTPService _walletHttp = WalletHTTPService();
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
@@ -24,9 +36,15 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
   void initState() {
     super.initState();
 
+    // get the args from the widget.params
+    _args = widget.params as TransactionAddArgs;
+
     // check on the shared preferences if the transaction list current time is already set or not?
     // if not then use default to widget.params.
-    _selectedDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? widget.params as DateTime);
+    _selectedDate = (TransactionSharedPreferences.getTransactionListCurrentDate() ?? _args.date);
+
+    // check if the transaction is being passed on the argumenst or not?
+    _txnDuplicate = _args.transaction;
   }
 
   @override
@@ -34,6 +52,7 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
     return TransactionInput(
       title: "Add Transaction",
       type: TransactionInputType.add,
+      currentTransaction: _txnDuplicate,
       saveTransaction: (value) async {
         try {
           // loop to add the transaction in API

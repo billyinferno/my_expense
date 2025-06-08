@@ -237,8 +237,35 @@ class _TransactionInputState extends State<TransactionInput> {
   }
 
   void _initAdd() {
-    // get the current category and icon
-    _getCurrentCategoryIconAndColor();
+    if (widget.currentTransaction != null) {
+      // put the current item name to the name controller
+      _nameController.text = widget.currentTransaction!.name;
+
+      // set the current date as today date
+      _currentDate = _todayDate;
+
+      // set for the correct category
+      // check whether this is transfer or not first.
+      if (_currentType == 'transfer') {
+        // default the category icon and color as transfer
+        _currentCategoryName = "";
+        _currentCategoryColor = accentColors[4];
+        _currentCategoryIcon = const Icon(
+          Ionicons.repeat,
+          color: textColor,
+        );
+      }
+      else {
+        // get the actual category icon and color for this transaction
+        _getCurrentCategoryIconAndColor(
+          categoryId: widget.currentTransaction!.category!.id,
+        );
+      }
+    }
+    else {
+      // get the current category and icon
+      _getCurrentCategoryIconAndColor();
+    }
 
     // set exchange rate as 1 (assuming that we will always send the same CCY)
     _currentExchangeRate = 1;
