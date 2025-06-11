@@ -79,7 +79,7 @@ class _ScrollableTabState extends State<ScrollableTab> {
               }
             }),
             child: Container(
-              height: 38,
+              height: (widget.showIcon ? 46 : 38),
               padding: EdgeInsets.fromLTRB(widget.leftPadding, 10, 10, 10),
               decoration: BoxDecoration(
                 color: widget.backgroundColor,
