@@ -3,87 +3,88 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_expense/_index.g.dart';
 
 class IconColorList {
-  static Icon getExpenseIcon(String name, [double? size]) {
+  static Icon getExpenseIcon(String name, [double? size, Color? color]) {
     double currentSize = (size ?? 20);
+    Color currentColor = (color ?? textColor);
     String iconName = name.toLowerCase().trim().replaceAll(RegExp('${String.fromCharCode(160)}+'), ' ');
 
     switch(iconName) {
       case "auto":
-        return Icon(FontAwesomeIcons.car, color: textColor, size: currentSize,);
+        return Icon(FontAwesomeIcons.car, color: currentColor, size: currentSize,);
       case "bank charge":
-        return Icon(FontAwesomeIcons.fileInvoiceDollar, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.fileInvoiceDollar, color: currentColor, size: currentSize);
       case "cash":
-        return Icon(FontAwesomeIcons.moneyBill, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.moneyBill, color: currentColor, size: currentSize);
       case "charity":
-        return Icon(FontAwesomeIcons.circleDollarToSlot, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.circleDollarToSlot, color: currentColor, size: currentSize);
       case "childcare":
-        return Icon(FontAwesomeIcons.baby, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.baby, color: currentColor, size: currentSize);
       case "clothing":
-        return Icon(FontAwesomeIcons.shirt, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.shirt, color: currentColor, size: currentSize);
       case "credit card":
-        return Icon(FontAwesomeIcons.solidCreditCard, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.solidCreditCard, color: currentColor, size: currentSize);
       case "dining":
-        return Icon(FontAwesomeIcons.utensils, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.utensils, color: currentColor, size: currentSize);
       case "eating out": 
-        return Icon(FontAwesomeIcons.utensils, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.utensils, color: currentColor, size: currentSize);
       case "education":
-        return Icon(FontAwesomeIcons.school, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.school, color: currentColor, size: currentSize);
       case "entertainment":
-        return Icon(FontAwesomeIcons.champagneGlasses, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.champagneGlasses, color: currentColor, size: currentSize);
       case "gifts":
-        return Icon(FontAwesomeIcons.gift, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.gift, color: currentColor, size: currentSize);
       case "groceries":
-        return Icon(FontAwesomeIcons.basketShopping, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.basketShopping, color: currentColor, size: currentSize);
       case "grooming":
-        return Icon(FontAwesomeIcons.scissors, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.scissors, color: currentColor, size: currentSize);
       case "health":
-        return Icon(FontAwesomeIcons.suitcaseMedical, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.suitcaseMedical, color: currentColor, size: currentSize);
       case "holiday":
-        return Icon(FontAwesomeIcons.plane, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.plane, color: currentColor, size: currentSize);
       case "home repair":
-        return Icon(FontAwesomeIcons.hammer, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.hammer, color: currentColor, size: currentSize);
       case "household":
-        return Icon(FontAwesomeIcons.toiletPaper, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.toiletPaper, color: currentColor, size: currentSize);
       case "insurance":
-        return Icon(FontAwesomeIcons.carBurst, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.carBurst, color: currentColor, size: currentSize);
       case "investment":
-        return Icon(FontAwesomeIcons.scaleUnbalanced, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.scaleUnbalanced, color: currentColor, size: currentSize);
       case "loan":
-        return Icon(FontAwesomeIcons.moneyCheck, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.moneyCheck, color: currentColor, size: currentSize);
       case "medical":
-        return Icon(FontAwesomeIcons.capsules, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.capsules, color: currentColor, size: currentSize);
       case "misc":
-        return Icon(FontAwesomeIcons.box, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.box, color: currentColor, size: currentSize);
       case "mortgage":
-        return Icon(FontAwesomeIcons.house, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.house, color: currentColor, size: currentSize);
       case "others":
-        return Icon(FontAwesomeIcons.dollarSign, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.dollarSign, color: currentColor, size: currentSize);
       case "pets":
-        return Icon(FontAwesomeIcons.dog, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.dog, color: currentColor, size: currentSize);
       case "rent":
-        return Icon(FontAwesomeIcons.houseUser, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.houseUser, color: currentColor, size: currentSize);
       case "tax":
-        return Icon(FontAwesomeIcons.fileInvoice, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.fileInvoice, color: currentColor, size: currentSize);
       case "transport":
-        return Icon(FontAwesomeIcons.bus, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.bus, color: currentColor, size: currentSize);
       case "travel":
-        return Icon(FontAwesomeIcons.earthAsia, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.earthAsia, color: currentColor, size: currentSize);
       case "utilities":
-        return Icon(FontAwesomeIcons.solidLightbulb, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.solidLightbulb, color: currentColor, size: currentSize);
       case "utilities: cable tv":
-        return Icon(FontAwesomeIcons.tv, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.tv, color: currentColor, size: currentSize);
       case "utilities: garbage":
-        return Icon(FontAwesomeIcons.solidTrashCan, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.solidTrashCan, color: currentColor, size: currentSize);
       case "utilities: gas & electric":
-        return Icon(FontAwesomeIcons.chargingStation, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.chargingStation, color: currentColor, size: currentSize);
       case "utilities: internet":
-        return Icon(FontAwesomeIcons.wifi, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.wifi, color: currentColor, size: currentSize);
       case "utilities: telephone":
-        return Icon(FontAwesomeIcons.mobileScreenButton, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.mobileScreenButton, color: currentColor, size: currentSize);
       case "utilities: water":
-        return Icon(FontAwesomeIcons.shower, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.shower, color: currentColor, size: currentSize);
       default:
-        return Icon(FontAwesomeIcons.dollarSign, color: textColor, size: currentSize);
+        return Icon(FontAwesomeIcons.dollarSign, color: currentColor, size: currentSize);
     }
   }
 
@@ -131,19 +132,20 @@ class IconColorList {
     }
   }
 
-  static Icon getIncomeIcon(String name, [double? size]) {
+  static Icon getIncomeIcon(String name, [double? size, Color? color]) {
     double currentSize = (size ?? 20);
+    Color currentColor = (color ?? textColor);
     String iconName = name.toLowerCase().trim().replaceAll(RegExp('${String.fromCharCode(160)}+'), ' ');
     switch(iconName) {
-      case "bonus": { return Icon(FontAwesomeIcons.gift, color: textColor, size: currentSize); }
-      case "investment": { return Icon(FontAwesomeIcons.scaleUnbalancedFlip, color: textColor, size: currentSize); }
-      case "loan payment": { return Icon(FontAwesomeIcons.fileInvoiceDollar, color: textColor, size: currentSize); }
-      case "misc": { return Icon(FontAwesomeIcons.box, color: textColor, size: currentSize); }
-      case "others": { return Icon(FontAwesomeIcons.dollarSign, color: textColor, size: currentSize); }
-      case "salary": { return Icon(FontAwesomeIcons.moneyCheckDollar, color: textColor, size: currentSize); }
-      case "deposit": { return Icon(FontAwesomeIcons.moneyCheck, color: textColor, size: currentSize); }
-      case "tax refund": { return Icon(FontAwesomeIcons.fileInvoice, color: textColor, size: currentSize); }
-      default: { return Icon(FontAwesomeIcons.dollarSign, color: textColor, size: currentSize); }
+      case "bonus": { return Icon(FontAwesomeIcons.gift, color: currentColor, size: currentSize); }
+      case "investment": { return Icon(FontAwesomeIcons.scaleUnbalancedFlip, color: currentColor, size: currentSize); }
+      case "loan payment": { return Icon(FontAwesomeIcons.fileInvoiceDollar, color: currentColor, size: currentSize); }
+      case "misc": { return Icon(FontAwesomeIcons.box, color: currentColor, size: currentSize); }
+      case "others": { return Icon(FontAwesomeIcons.dollarSign, color: currentColor, size: currentSize); }
+      case "salary": { return Icon(FontAwesomeIcons.moneyCheckDollar, color: currentColor, size: currentSize); }
+      case "deposit": { return Icon(FontAwesomeIcons.moneyCheck, color: currentColor, size: currentSize); }
+      case "tax refund": { return Icon(FontAwesomeIcons.fileInvoice, color: currentColor, size: currentSize); }
+      default: { return Icon(FontAwesomeIcons.dollarSign, color: currentColor, size: currentSize); }
     }
   }
 
@@ -162,12 +164,12 @@ class IconColorList {
     }
   }
 
-  static Icon getIcon(String name, String type, [double? size]) {
+  static Icon getIcon(String name, String type, [double? size, Color? color]) {
     if (type == "expense") {
-      return getExpenseIcon(name, (size ?? 20));
+      return getExpenseIcon(name, (size ?? 20), (color ?? textColor));
     }
     else {
-      return getIncomeIcon(name, (size ?? 20));
+      return getIncomeIcon(name, (size ?? 20), (color ?? textColor));
     }
   }
 

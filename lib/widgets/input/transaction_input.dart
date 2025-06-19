@@ -1374,12 +1374,33 @@ class _TransactionInputState extends State<TransactionInput> {
               }),
               child: Container(
                 margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
+                padding: const EdgeInsets.fromLTRB(2, 2, 10, 2),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(35),
                   color: IconColorList.getColor(_filterList[index].category.name, _currentType),
                 ),
-                child: Center(child: Text(_filterList[index].name)),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: IconColorList.getIcon(
+                        _filterList[index].category.name,
+                        _currentType,
+                        14,
+                        IconColorList.getColor(_filterList[index].category.name, _currentType),
+                      ),
+                    ),
+                    const SizedBox(width: 5,),
+                    Center(child: Text(_filterList[index].name)),
+                  ],
+                ),
               ),
             );
           }),
