@@ -10,6 +10,7 @@ export './income_expense_model.dart';
 export './last_transaction_model.dart';
 export './login_model.dart';
 export './pin_model.dart';
+export './search_request_model.dart';
 export './transaction_list_model.dart';
 export './transaction_max_id_model.dart';
 export './transaction_model.dart';

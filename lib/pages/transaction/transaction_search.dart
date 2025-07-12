@@ -52,9 +52,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     PageName.transfer: accentColors[4],
   };
 
-  String _searchText = "";
-  String _categoryId = "";
-  String _type = "name";
+  late String _searchText;
+  late List<int> _categoryId;
 
   int _resultPage = 1;
   PageName _resultPageName = PageName.all;
@@ -107,6 +106,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     _totalAmountExpense = {};
     
     _summaryList = [];
+
+    // initialize the search text and category id
+    _searchText = "";
+    _categoryId = [];
 
     _isDescending = true; // descending
     _filterType = HeaderType.date; // date
@@ -1243,12 +1246,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   Future<void> _findTransaction({
-    required String searchText,
-    required String categoryId,
-    required String type,
+    String searchText = '',
+    List<int> categoryId = const [],
   }) async {
     await _transactionHttp.findTransaction(
-      type: type,
       name: searchText,
       category: categoryId,
     ).then((results) {
@@ -1259,34 +1260,19 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   Future<void> _submitSearch() async {
-    // 1 will be text search only
-    // 2 will be category search only
-    // 3 will be both
-    int determineType = 0;
-
     // default the category id value as empty string
-    _categoryId = '';
+    _categoryId.clear();
 
     // check if category selected is empty or not?
     if (_categorySelected.isNotEmpty) {
-      // category selected not empty
-      determineType += 2;
-
       // generate the _categoryId based on the list of the category selected
       _categorySelected.forEach((key, value) {
-        // if not the first one, then add ,
-        if (_categoryId.isNotEmpty) {
-          _categoryId = '$_categoryId,';
-        }
-        _categoryId = _categoryId + key.toString();
+        _categoryId.add(key);
       });
     }
 
     // check if the text is empty or not?
     if (_searchController.text.trim().isNotEmpty) {
-      // not empty, add 1 to the determine type
-      determineType += 1;
-
       // set the search text as current search controller text
       _searchText = _searchController.text;
       _searchText = _searchText.trim();
@@ -1301,24 +1287,11 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     }
 
     // ensure that we already determine the type when reaching here
-    if (determineType == 0) {
+    if (_searchText.isEmpty && _categoryId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(createSnackBar(
         message: "Add text or category before searching.",
       ));
       return;
-    }
-
-    // now determine the _type
-    switch (determineType) {
-      case 1:
-        _type = "name";
-        break;
-      case 2:
-        _type = "category";
-        break;
-      case 3:
-        _type = "both";
-        break;
     }
 
     // show the loader dialog
@@ -1331,7 +1304,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     await _findTransaction(
       searchText: _searchText,
       categoryId: _categoryId,
-      type: _type,
     ).onError((error, stackTrace) {
       Log.error(
         message: "Error when searching transaction",

@@ -380,23 +380,18 @@ class TransactionHTTPService {
   }
 
   Future<List<TransactionListModel>> findTransaction({
-    required String type,
-    required String name,
-    required String category,
+    String name = '',
+    List<int> category = const [],
   }) async {
-    String url = '${Globals.apiURL}transactions/search/v2/type/$type';
+    String url = '${Globals.apiURL}transactions/search';
     
-    // check the type, if both then add both name and category, if name then only name, if category then only category
-    if (type == "name" || type == "both") {
-      url = "$url/search/$name";
-    }
-    if (type == "category" || type == "both") {
-      url = "$url/category/$category";
-    }
-
     // send the request to find transaction
-    final String result = await NetUtils.get(
+    final String result = await NetUtils.post(
       url: url,
+      body: SearchRequestModel(
+        category: category,
+        text: name,
+      ).toJson(),
     ).onError((error, stackTrace) {
       Log.error(
         message: 'Error on findTransaction',
