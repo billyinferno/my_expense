@@ -1260,6 +1260,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   }
 
   Future<void> _submitSearch() async {
+    // clear the search text value before we search
+    _searchText = "";
+    
     // default the category id value as empty string
     _categoryId.clear();
 
@@ -1274,8 +1277,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // check if the text is empty or not?
     if (_searchController.text.trim().isNotEmpty) {
       // set the search text as current search controller text
-      _searchText = _searchController.text;
-      _searchText = _searchText.trim();
+      _searchText = _searchController.text.trim();
 
       // ensure the searchText is more than 2
       if (_searchText.length < 2) {
