@@ -160,6 +160,24 @@ class _HomeListState extends State<HomeList> {
                         ),
                       );
                     },
+                    selectedBuilder: (context, day, focusedDay) {
+                      if (focusedDay.isSameDate(date: DateTime.now())) {
+                        return Container(
+                          margin: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: accentColors[1],
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            Globals.dfd.formatLocal(day),
+                            style: TextStyle(
+                              color: textColor,
+                            ),
+                          ),
+                        );
+                      }
+                    },
                   ),
                   calendarStyle: CalendarStyle(
                     weekendTextStyle: TextStyle(color: accentColors[2]),
