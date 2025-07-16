@@ -7,8 +7,6 @@ class BarChart extends StatelessWidget {
   final DateTime from;
   final DateTime to;
   final IncomeExpenseModel data;
-  final double? barWidth;
-  final double? fontSize;
   final bool? showed;
   final double? maxAmount;
   const BarChart({
@@ -16,8 +14,6 @@ class BarChart extends StatelessWidget {
     required this.from,
     required this.to,
     required this.data,
-    this.barWidth,
-    this.fontSize,
     this.showed,
     this.maxAmount
   });
@@ -106,6 +102,8 @@ class BarChart extends StatelessWidget {
     bool isIncomeExceeded;
     bool isExpenseExceeded;
 
+    double diff = (income - expense);
+
     // check if the maxIncome or maxExpense is actually 0
     // if zero then cancelled the _incomeLength and _expenseLength as we should print
     // blank chart instead full one
@@ -167,12 +165,15 @@ class BarChart extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 5,),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 color: primaryLight,
                 borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: primaryLight,
+                  width: 2,
+                ),
               ),
               child: Stack(
                 alignment: Alignment.center,
@@ -240,12 +241,7 @@ class BarChart extends StatelessWidget {
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.fromLTRB(
-                      10,
-                      0,
-                      10,
-                      0
-                    ),
+                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -269,6 +265,22 @@ class BarChart extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+          SizedBox(
+            width: 45,
+            child: Text(
+              diff.formatCurrency(
+                checkThousand: true,
+                showDecimal: true,
+                shorten: true,
+              ),
+              style: TextStyle(
+                color: (diff == 0 ? secondaryBackground : (diff > 0 ? accentColors[6] : accentColors[2])),
+                fontSize: 10,
+              ),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
             ),
           ),
         ],
