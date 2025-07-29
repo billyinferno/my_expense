@@ -408,14 +408,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.16.0"
-  month_picker_dialog:
-    dependency: "direct main"
-    description:
-      name: month_picker_dialog
-      sha256: "3892caf1110800a8ccdcef285275bc0d63106eed135eb822a29b233f8a5f877c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.4.1"
   nested:
     dependency: transitive
     description:

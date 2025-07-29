@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
-import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:my_expense/_index.g.dart';
 
 class MonthPrevNextCalendar extends StatefulWidget {
@@ -58,79 +57,39 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
     return GestureDetector(
       onTap: (() async {
         // show the month dialog
-        await showMonthPicker(
+        await showDialog(
           context: context,
-          initialDate: _currentDate,
-          firstDate: _minDate,
-          lastDate: _maxDate,
-          monthPickerDialogSettings: MonthPickerDialogSettings(
-            dateButtonsSettings: PickerDateButtonsSettings(
-              unselectedMonthsTextColor: textColor2,
-              selectedMonthTextColor: textColor,
-              currentMonthTextColor: accentColors[0],
-              unselectedYearsTextColor: textColor2,
-              selectedYearTextColor: textColor,
-              currentYearTextColor: accentColors[0],
-            ),
-            actionBarSettings: PickerActionBarSettings(
-              cancelWidget: Container(
-                padding: const EdgeInsets.all(10),
-                margin: const EdgeInsets.only(
-                  bottom: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: accentColors[2],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  "Cancel",
-                  style: TextStyle(
-                    color: textColor2,
-                  ),
-                ),
-              ),
-              confirmWidget: Container(
-                padding: const EdgeInsets.all(10),
-                margin: const EdgeInsets.only(
-                  bottom: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: accentColors[7],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  "Confirm",
-                  style: TextStyle(
-                    color: textColor,
-                  ),
-                ),
-              ),
-            )
-          ),
-        ).then((newDate) async {
-          if (newDate != null) {
-            setState(() {
-              // set current date as new date
-              _currentDate = newDate;
+          barrierDismissible: false,
+          builder: (context) {
+            return MonthCalendarDialog(
+              minDate: _minDate,
+              maxDate: _maxDate,
+              initialDate: _currentDate,
+              onDateChange: (newDate) {
+                setState(() {
+                  // set current date as new date
+                  _currentDate = newDate;
 
-              // calculate the begining and end of the date
-              DateTime from = DateTime(
-                newDate.year,
-                newDate.month,
-                1
-              ).toLocal();
-              
-              DateTime to = DateTime(
-                newDate.year,
-                newDate.month+1,
-                1
-              ).subtract(const Duration(days: 1)).toLocal();
+                  // calculate the begining and end of the date
+                  DateTime from = DateTime(
+                    newDate.year,
+                    newDate.month,
+                    1
+                  ).toLocal();
+                  
+                  DateTime to = DateTime(
+                    newDate.year,
+                    newDate.month+1,
+                    1
+                  ).subtract(const Duration(days: 1)).toLocal();
 
-              // call the onDateChange
-              widget.onDateChange(from, to);
-            });
-          }
-        });
+                  // call the onDateChange
+                  widget.onDateChange(from, to);
+                });
+              },
+            );
+          },
+        );
       }),
       onDoubleTap: (() {
         setState(() {
