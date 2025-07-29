@@ -7,12 +7,20 @@ class MonthCalendarDialog extends StatefulWidget {
   final DateTime? maxDate;
   final DateTime? initialDate;
   final Function(DateTime) onDateChange;
+  final Color headerTextColor;
+  final Color headerBackgroundColor;
+  final Color bodyBackgroundColor;
+  final Color? barColor;
   const MonthCalendarDialog({
     super.key,
     this.minDate,
     this.maxDate,
     this.initialDate,
     required this.onDateChange,
+    this.headerTextColor = textColor,
+    this.headerBackgroundColor = secondaryBackground,
+    this.bodyBackgroundColor = primaryBackground,
+    this.barColor,
   });
 
   @override
@@ -67,13 +75,14 @@ class _MonthCalendarDialogState extends State<MonthCalendarDialog> {
                     icon: Icon(
                       Ionicons.close,
                       size: 20,
+                      color: widget.headerTextColor,
                     ),
                   ),
                   Expanded(
                     child: Text(
                       Globals.dfMMMMyyyy.format(_currentDate),
                       style: TextStyle(
-                        color: textColor,
+                        color: widget.headerTextColor,
                         fontSize: 16,
                       ),
                       textAlign: TextAlign.center,
@@ -87,6 +96,7 @@ class _MonthCalendarDialogState extends State<MonthCalendarDialog> {
                     icon: Icon(
                       Ionicons.checkmark,
                       size: 20,
+                      color: widget.headerTextColor,
                     ),
                   ),
                 ],
@@ -94,7 +104,7 @@ class _MonthCalendarDialogState extends State<MonthCalendarDialog> {
             ),
             Container(
               decoration: BoxDecoration(
-                color: primaryBackground,
+                color: widget.bodyBackgroundColor,
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(10),
                   bottomRight: Radius.circular(10),
@@ -111,8 +121,8 @@ class _MonthCalendarDialogState extends State<MonthCalendarDialog> {
                       minDate: _minDate,
                       maxDate: _maxDate,
                       type: ScrollDateType.monthYear,
-                      borderColor: primaryDark,
-                      barColor: accentColors[0],
+                      borderColor: widget.headerBackgroundColor,
+                      barColor: (widget.barColor ?? accentColors[0]),
                       onDateChange: (date) {
                         setState(() {
                           _currentDate = date;
