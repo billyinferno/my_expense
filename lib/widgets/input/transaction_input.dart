@@ -31,6 +31,8 @@ class TransactionInput extends StatefulWidget {
 }
 
 class _TransactionInputState extends State<TransactionInput> {
+  final TransactionHTTPService _transactionHTTP = TransactionHTTPService();
+
   final ScrollController _optionController = ScrollController();
   final ScrollController _autoCompleteController = ScrollController();
   final ScrollController _walletController = ScrollController();
@@ -137,6 +139,9 @@ class _TransactionInputState extends State<TransactionInput> {
   late bool _showCalendar;
   late bool _showDescription;
 
+  late int _maxID;
+  late Future<bool> _finishFetchAndSyncTransaction;
+
   @override
   void initState() {
     super.initState();
@@ -214,6 +219,13 @@ class _TransactionInputState extends State<TransactionInput> {
         _initEdit();
         break;
     }
+
+    // once all finished, get the current _maxID from Shared Preferences
+    _maxID = TransactionSharedPreferences.getMaxID();
+
+    // then try to get the latest max ID from server, if this is not the same
+    // then sync the transaction first before we perform any action
+    _finishFetchAndSyncTransaction = _fetchAndSyncTransaction();
   }
 
   @override
@@ -329,399 +341,412 @@ class _TransactionInputState extends State<TransactionInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Center(child: Text(widget.title)),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Ionicons.close,
-          ),
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () async {
-              // check if transaction being disabled due to one of the wallets
-              // are disabled.
-              if (!_isDisabled) {
-                // call parent save, all the handler on the async call should be
-                // coming from the parent instead here.
-                try {
-                  List<TransactionModel> gen = [];
+    return FutureBuilder(
+      future: _finishFetchAndSyncTransaction,
+      builder: (context, snapshot) {
+        if (snapshot.hasData || snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Center(child: Text(widget.title)),
+              leading: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(
+                  Ionicons.close,
+                ),
+              ),
+              actions: <Widget>[
+                IconButton(
+                  onPressed: () async {
+                    // check if transaction being disabled due to one of the wallets
+                    // are disabled.
+                    if (!_isDisabled) {
+                      // call parent save, all the handler on the async call should be
+                      // coming from the parent instead here.
+                      try {
+                        List<TransactionModel> gen = [];
 
-                  // default isOkay to false
-                  bool isOkay = false;
+                        // default isOkay to false
+                        bool isOkay = false;
 
-                  gen = _generateTransaction();
+                        gen = _generateTransaction();
 
-                  // if all good then check the date whether this is future date
-                  // or not?
-                  if (_currentDate.isAfter(_todayDate.toLocal())) {
-                    // show the dialog to ask user if they want to add future date
-                    // transaction or else?
-                    
-                    late Future<bool?> result = ShowMyDialog(
-                        dialogTitle: "Future Date",
-                        dialogText: "Are you sure want to ${widget.type == TransactionInputType.add ? "add" : "update"} a future date?",
-                        confirmText: "Add",
-                        confirmColor: accentColors[0],
-                        cancelText: "Cancel"
-                    ).show(context);
+                        // if all good then check the date whether this is future date
+                        // or not?
+                        if (_currentDate.isAfter(_todayDate.toLocal())) {
+                          // show the dialog to ask user if they want to add future date
+                          // transaction or else?
+                          
+                          late Future<bool?> result = ShowMyDialog(
+                              dialogTitle: "Future Date",
+                              dialogText: "Are you sure want to ${widget.type == TransactionInputType.add ? "add" : "update"} a future date?",
+                              confirmText: "Add",
+                              confirmColor: accentColors[0],
+                              cancelText: "Cancel"
+                          ).show(context);
 
-                    await result.then((value) {
-                      // check whether user press Add or Cancel
-                      if(value == true) {
-                        // user still want to add so add this transaction
-                        isOkay = true;
-                      }
-                    });
-                  }
-                  else {
-                    // same date, so just save the transaction
-                    isOkay = true;
-                  }
-
-                  // check whether generated transaction have more than 1
-                  // transaction or not?
-                  if (
-                    widget.type == TransactionInputType.add &&
-                    gen.length > 1 &&
-                    isOkay
-                  ) {
-                    // set isOkay to false again as we will ask user wheter
-                    // they want to save all transaction or not?
-                    isOkay = false;
-
-                    DateTime firstDate = gen[0].date;
-                    DateTime lastDate = gen[gen.length-1].date;
-
-                    if (context.mounted) {                        
-                      late Future<bool?> result = ShowMyDialog(
-                          dialogTitle: "Repeat Transaction",
-                          dialogText: "This will automatically add ${gen.length} transactions from ${Globals.dfddMMyyyy.formatLocal(firstDate)} until ${Globals.dfddMMyyyy.formatLocal(lastDate)}?",
-                          confirmText: "Add",
-                          confirmColor: accentColors[0],
-                          cancelText: "Cancel"
-                      ).show(context);
-
-                      await result.then((value) {
-                        // check whether user press Add or Cancel
-                        if(value == true) {
-                          // user still want to add so add this transaction
+                          await result.then((value) {
+                            // check whether user press Add or Cancel
+                            if(value == true) {
+                              // user still want to add so add this transaction
+                              isOkay = true;
+                            }
+                          });
+                        }
+                        else {
+                          // same date, so just save the transaction
                           isOkay = true;
                         }
-                      });
-                    }
-                  }
 
-                  // check whether it's okay or not
-                  if (isOkay) {
-                    // save the transaction
-                    widget.saveTransaction(gen);
-                  }
-                }
-                catch(error) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      createSnackBar(
-                        message: error.toString().replaceAll('Exception: ', ''),
-                      )
-                    );
-                  }
-                }
-              }
-            },
-            icon: Icon(
-              Ionicons.checkmark,
-              color: (_isDisabled ? primaryLight : Colors.white),
+                        // check whether generated transaction have more than 1
+                        // transaction or not?
+                        if (
+                          widget.type == TransactionInputType.add &&
+                          gen.length > 1 &&
+                          isOkay
+                        ) {
+                          // set isOkay to false again as we will ask user wheter
+                          // they want to save all transaction or not?
+                          isOkay = false;
+
+                          DateTime firstDate = gen[0].date;
+                          DateTime lastDate = gen[gen.length-1].date;
+
+                          if (context.mounted) {                        
+                            late Future<bool?> result = ShowMyDialog(
+                                dialogTitle: "Repeat Transaction",
+                                dialogText: "This will automatically add ${gen.length} transactions from ${Globals.dfddMMyyyy.formatLocal(firstDate)} until ${Globals.dfddMMyyyy.formatLocal(lastDate)}?",
+                                confirmText: "Add",
+                                confirmColor: accentColors[0],
+                                cancelText: "Cancel"
+                            ).show(context);
+
+                            await result.then((value) {
+                              // check whether user press Add or Cancel
+                              if(value == true) {
+                                // user still want to add so add this transaction
+                                isOkay = true;
+                              }
+                            });
+                          }
+                        }
+
+                        // check whether it's okay or not
+                        if (isOkay) {
+                          // save the transaction
+                          widget.saveTransaction(gen);
+                        }
+                      }
+                      catch(error) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            createSnackBar(
+                              message: error.toString().replaceAll('Exception: ', ''),
+                            )
+                          );
+                        }
+                      }
+                    }
+                  },
+                  icon: Icon(
+                    Ionicons.checkmark,
+                    color: (_isDisabled ? primaryLight : Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 10,),
+              ],
             ),
-          ),
-          const SizedBox(width: 10,),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 20),
-            color: secondaryDark,
-            child: Column(
+            body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Visibility(
-                  visible: _isDisabled,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: primaryDark,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Center(
-                      child: Text("Unable to edit wallet is disabled")
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10,),
-                Center(
-                  child: SizedBox(
-                    width: (100 * _txnTypeSlideItem.length).toDouble(),
-                    child: TypeSlide<String>(
-                      initialItem: _currentType,
-                      editable: (widget.type == TransactionInputType.add ? true : false),
-                      onValueChanged: ((selected) {
-                        setState(() {
-                          _currentType = selected.toLowerCase();
-                    
-                          // if type is transfer, change the name into "From Wallet"
-                          // instead of wallet only
-                          if (_currentType == 'transfer') {
-                            _getUserFromWalletInfo(
-                              walletId: _currentWalletFromID,
-                              name: "From Wallet"
-                            );
-                          }
-                          else {
-                            _getUserFromWalletInfo(
-                              walletId: _currentWalletFromID,
-                              name: "Wallet"
-                            );
-                          }
-                          _getCurrentCategoryIconAndColor();
-                        });
-                      }),
-                      items: _txnTypeSlideItem,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20,),
-                _buildInput(),
-              ],
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              controller: _optionController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Visibility(
-                    visible: (_currentType == 'transfer'),
-                    child: _buildTransferWalletSelection()
-                  ),
-                  Visibility(
-                    visible: (
-                      _currentType == 'transfer' &&
-                      (_currentWalletFromID > 0 && _currentWalletToID > 0) &&
-                      (_currentWalletFromCCY != _currentWalletToCCY)
-                    ),
-                    child: Container(
-                      height: 50,
-                      decoration: const BoxDecoration(
-                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 10,),
-                          const Icon(
-                            Ionicons.swap_horizontal_sharp,
-                            size: 20,
-                            color: textColor,
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 20),
+                  color: secondaryDark,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Visibility(
+                        visible: _isDisabled,
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: primaryDark,
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          const SizedBox(width: 10,),
-                          Expanded(
+                          child: const Center(
+                            child: Text("Unable to edit wallet is disabled")
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10,),
+                      Center(
+                        child: SizedBox(
+                          width: (100 * _txnTypeSlideItem.length).toDouble(),
+                          child: TypeSlide<String>(
+                            initialItem: _currentType,
+                            editable: (widget.type == TransactionInputType.add ? true : false),
+                            onValueChanged: ((selected) {
+                              setState(() {
+                                _currentType = selected.toLowerCase();
+                          
+                                // if type is transfer, change the name into "From Wallet"
+                                // instead of wallet only
+                                if (_currentType == 'transfer') {
+                                  _getUserFromWalletInfo(
+                                    walletId: _currentWalletFromID,
+                                    name: "From Wallet"
+                                  );
+                                }
+                                else {
+                                  _getUserFromWalletInfo(
+                                    walletId: _currentWalletFromID,
+                                    name: "Wallet"
+                                  );
+                                }
+                                _getCurrentCategoryIconAndColor();
+                              });
+                            }),
+                            items: _txnTypeSlideItem,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20,),
+                      _buildInput(),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: _optionController,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Visibility(
+                          visible: (_currentType == 'transfer'),
+                          child: _buildTransferWalletSelection()
+                        ),
+                        Visibility(
+                          visible: (
+                            _currentType == 'transfer' &&
+                            (_currentWalletFromID > 0 && _currentWalletToID > 0) &&
+                            (_currentWalletFromCCY != _currentWalletToCCY)
+                          ),
+                          child: Container(
+                            height: 50,
+                            decoration: const BoxDecoration(
+                              border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                            ),
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 10,),
+                                const Icon(
+                                  Ionicons.swap_horizontal_sharp,
+                                  size: 20,
+                                  color: textColor,
+                                ),
+                                const SizedBox(width: 10,),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _exchangeController,
+                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                    cursorColor: primaryLight,
+                                    decoration: const InputDecoration(
+                                      hintText: "1.00",
+                                      hintStyle: TextStyle(
+                                        color: primaryLight,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding: EdgeInsets.zero,
+                                      isCollapsed: true,
+                                    ),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                    ),
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(12),
+                                      DecimalTextInputFormatter(decimalRange: 11),
+                                    ],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _currentExchangeRate = (double.tryParse(value) ?? 1);
+                                        _conversionAmount = _currentAmount * _currentExchangeRate;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 10,),
+                              ],
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            if (!_isDisabled) {
+                              setState(() {
+                                if (_showDescription) {
+                                  _showDescription = !_showDescription;
+                                }
+                                _showCalendar = !_showCalendar;
+                              });
+                            }
+                          },
+                          child: Container(
+                            height: 50,
+                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            decoration: const BoxDecoration(
+                              border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Ionicons.calendar_outline,
+                                  size: 20,
+                                  color: textColor,
+                                ),
+                                const SizedBox(width: 10,),
+                                Text(_calendarText()),
+                              ],
+                            ),
+                          ),
+                        ),
+                        AnimationExpand(
+                          expand: _showCalendar,
+                          child: SizedBox(
+                            height: 200,
+                            child: ScrollDatePicker(
+                              initialDate: _currentDate.toLocal(),
+                              minDate: DateTime(2010, 1, 1),
+                              barColor: accentColors[0],
+                              selectedColor: primaryDark,
+                              onDateChange: ((val) {
+                                setState(() {
+                                  _currentDate = val.toLocal();
+                                });
+                              }),
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: (_currentType != 'transfer'),
+                          child: _buildIncomeExpenseWalletSelection(),
+                        ),
+                        ..._repeatTransactionInput(),
+                        Container(
+                          height: 50,
+                          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                          decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Ionicons.checkbox_outline,
+                                size: 20,
+                                color: textColor,
+                              ),
+                              const SizedBox(width: 10,),
+                              const Expanded(child: Text("Cleared")),
+                              CupertinoSwitch(
+                                value: _currentClear,
+                                activeTrackColor: accentColors[0],
+                                inactiveTrackColor: primaryLight,
+                                onChanged: (_isDisabled ? null : (value) {
+                                  setState(() {
+                                    _currentClear = value;
+                                  });
+                                }),
+                              ),
+                            ],
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            if (!_isDisabled) {
+                              setState(() {
+                                if(_showCalendar) {
+                                  _showCalendar = false;
+                                }
+                                _showDescription = !_showDescription;
+                              });
+                            }
+                          },
+                          child: Container(
+                            height: 50,
+                            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            decoration: const BoxDecoration(
+                              border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Ionicons.newspaper_outline,
+                                  size: 20,
+                                  color: textColor,
+                                ),
+                                const SizedBox(width: 10,),
+                                Text(
+                                  (_descriptionController.text.trim().isEmpty ? "Description" : _descriptionController.text),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        AnimationExpand(
+                          expand: _showDescription,
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
                             child: TextFormField(
-                              controller: _exchangeController,
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              cursorColor: primaryLight,
+                              controller: _descriptionController,
+                              cursorColor: textColor.withValues(alpha: 0.6),
+                              keyboardType: TextInputType.multiline,
+                              maxLines: 8,
+                              maxLength: 250,
                               decoration: const InputDecoration(
-                                hintText: "1.00",
+                                hintText: "Input description",
                                 hintStyle: TextStyle(
                                   color: primaryLight,
                                 ),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide.none,
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: textColor,
+                                    width: 1.0,
+                                  ),
                                 ),
-                                contentPadding: EdgeInsets.zero,
-                                isCollapsed: true,
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: textColor,
+                                    width: 1.0,
+                                  ),
+                                ),
                               ),
-                              style: const TextStyle(
-                                fontSize: 15,
-                              ),
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(12),
-                                DecimalTextInputFormatter(decimalRange: 11),
-                              ],
-                              onChanged: (value) {
-                                setState(() {
-                                  _currentExchangeRate = (double.tryParse(value) ?? 1);
-                                  _conversionAmount = _currentAmount * _currentExchangeRate;
-                                });
-                              },
                             ),
-                          ),
-                          const SizedBox(width: 10,),
-                        ],
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      if (!_isDisabled) {
-                        setState(() {
-                          if (_showDescription) {
-                            _showDescription = !_showDescription;
-                          }
-                          _showCalendar = !_showCalendar;
-                        });
-                      }
-                    },
-                    child: Container(
-                      height: 50,
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      decoration: const BoxDecoration(
-                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Ionicons.calendar_outline,
-                            size: 20,
-                            color: textColor,
-                          ),
-                          const SizedBox(width: 10,),
-                          Text(_calendarText()),
-                        ],
-                      ),
-                    ),
-                  ),
-                  AnimationExpand(
-                    expand: _showCalendar,
-                    child: SizedBox(
-                      height: 200,
-                      child: ScrollDatePicker(
-                        initialDate: _currentDate.toLocal(),
-                        minDate: DateTime(2010, 1, 1),
-                        barColor: accentColors[0],
-                        selectedColor: primaryDark,
-                        onDateChange: ((val) {
-                          setState(() {
-                            _currentDate = val.toLocal();
-                          });
-                        }),
-                      ),
-                    ),
-                  ),
-                  Visibility(
-                    visible: (_currentType != 'transfer'),
-                    child: _buildIncomeExpenseWalletSelection(),
-                  ),
-                  ..._repeatTransactionInput(),
-                  Container(
-                    height: 50,
-                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    decoration: const BoxDecoration(
-                      border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Ionicons.checkbox_outline,
-                          size: 20,
-                          color: textColor,
-                        ),
-                        const SizedBox(width: 10,),
-                        const Expanded(child: Text("Cleared")),
-                        CupertinoSwitch(
-                          value: _currentClear,
-                          activeTrackColor: accentColors[0],
-                          inactiveTrackColor: primaryLight,
-                          onChanged: (_isDisabled ? null : (value) {
-                            setState(() {
-                              _currentClear = value;
-                            });
-                          }),
+                          )
                         ),
                       ],
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      if (!_isDisabled) {
-                        setState(() {
-                          if(_showCalendar) {
-                            _showCalendar = false;
-                          }
-                          _showDescription = !_showDescription;
-                        });
-                      }
-                    },
-                    child: Container(
-                      height: 50,
-                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                      decoration: const BoxDecoration(
-                        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Ionicons.newspaper_outline,
-                            size: 20,
-                            color: textColor,
-                          ),
-                          const SizedBox(width: 10,),
-                          Text(
-                            (_descriptionController.text.trim().isEmpty ? "Description" : _descriptionController.text),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  AnimationExpand(
-                    expand: _showDescription,
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      child: TextFormField(
-                        controller: _descriptionController,
-                        cursorColor: textColor.withValues(alpha: 0.6),
-                        keyboardType: TextInputType.multiline,
-                        maxLines: 8,
-                        maxLength: 250,
-                        decoration: const InputDecoration(
-                          hintText: "Input description",
-                          hintStyle: TextStyle(
-                            color: primaryLight,
-                          ),
-                          enabledBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                              color: textColor,
-                              width: 1.0,
-                            ),
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                              color: textColor,
-                              width: 1.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  ),
-                ],
-              ),
+                ),
+                _buildBottomBar(),
+              ],
             ),
-          ),
-          _buildBottomBar(),
-        ],
-      ),
+          );
+        }
+        else {
+          return CommonLoadingPage(
+            isNeedScaffold: true,
+            loadingText: "Check and sync transaction",
+          );
+        }
+      },
     );
   }
 
@@ -2217,5 +2242,73 @@ class _TransactionInputState extends State<TransactionInput> {
     }
 
     return ret;
+  }
+
+  Future<bool> _fetchAndSyncTransaction() async {
+    bool continueSync = true;
+    int currentMaxID = -1;
+
+    // check if user enable the transaction sync or not?
+    if (!_userMe.autoSyncTransaction) {
+      // user not enable auto sync transaction, so we can just return true
+      return true;
+    }
+
+    // ensure that max ID is more than 0
+    if (_maxID <= 1) {
+      Log.info(message: "No transaction yet in the server, no need to sync");
+      return true;
+    }
+
+    // check if current max ID is the same as the one in the server
+    await _transactionHTTP.fetchMaxID(id: _maxID).then((maxID) async {
+      // check if current max ID is less than the one in the server
+      if (_maxID < maxID.id) {
+        currentMaxID = maxID.id;
+        Log.info(message: "⏳ Data unsyc (Local MaxID $_maxID, Remote MaxID ${maxID.id}), sync data");
+      }
+      else {
+        // seems like the transaction is deleted, as this max ID is coming from
+        // server we should make this max ID as the truth source and use it
+        // for current max ID
+        TransactionSharedPreferences.setMaxID(id: maxID.id);
+        continueSync = false;
+      }
+    });
+
+    // check if we need to continue sync or not?
+    if (continueSync) {
+      await _transactionHTTP.fetchUnsyncDate(id: _maxID).then((dateList) async {
+        // check if we have this transaction in our shared preferences or not?
+        // if got the we will need to refresh the transaction, if not we can just
+        // ignore, as we will fetch it when open the transaction date.
+        String txnDate;
+
+        for(int i=0; i<dateList.length; i++) {
+          txnDate = Globals.dfyyyyMMdd.formatLocal(dateList[i].date);
+          if (TransactionSharedPreferences.checkTransaction(txnDate)) {
+            Log.info(message: " ℹ️ Fetch for $txnDate");
+            // we have this transaction in cache, refresh the transaction
+            await _transactionHTTP.fetchTransaction(
+              date: txnDate,
+              force: true
+            ).then((result) {
+              // stored this to local storage
+              Log.success(message: " ℹ️ Fetch for $txnDate");
+              TransactionSharedPreferences.setTransaction(
+                date: txnDate,
+                txn: result,
+              );
+            },);
+          }
+        }
+      },);
+
+      // once finished, we can set the max ID to the current max ID
+      TransactionSharedPreferences.setMaxID(id: currentMaxID);
+    }
+
+    // just return true so we can load the transaction input widget
+    return true;
   }
 }

@@ -681,4 +681,27 @@ class TransactionHTTPService {
     List<TransactionUnsyncDateModel> transactionModel = jsonData.map((e) => TransactionUnsyncDateModel.fromJson(e)).toList();
     return transactionModel;
   }
+
+  Future<void> updateAutoSyncTransaction({
+    required bool autoSync,
+  }) async {
+    // send the request to update the transaction
+    final String result = await NetUtils.put(
+      url: '${Globals.apiURL}transactions/autosync',
+      body: {
+        'autoSyncTransaction': autoSync,
+      }
+    ).onError((error, stackTrace) {
+      Log.error(
+        message: 'Error on updateAutoSyncTransaction',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      throw error as NetException;
+    });
+
+    // success, it will return the userMe model, so we can just replace the current userMe
+    UsersMeModel userMe = UsersMeModel.fromJson(jsonDecode(result));
+    await UserSharedPreferences.setUserMe(userMe);
+  }
 }

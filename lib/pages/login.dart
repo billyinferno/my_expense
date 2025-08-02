@@ -401,7 +401,7 @@ class _LoginPageState extends State<LoginPage> {
       _transactionHTTP.fetchMaxID(id: _maxID).then((maxID) async {
         // ensure maxID from remote is > 0
         if (maxID.id > 0) {
-          // check ic stored max ID is -1, if so then just store the maxID
+          // check if stored max ID is -1, if so then just store the maxID
           if (_maxID > 0) {
             // stored max ID is not less than zero, compare it so we knew that
             // whether the data in the local storage is sync with server or not?

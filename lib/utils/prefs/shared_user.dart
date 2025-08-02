@@ -55,7 +55,7 @@ class UserSharedPreferences {
       userModel = UsersMeModel.fromJson(userJson);
     } else {
       // initialize with blank data
-      userModel = UsersMeModel(-1, "", "", false, true, -1, -1, -1, -1);
+      userModel = UsersMeModel(-1, "", "", false, true, -1, -1, -1, -1, false);
     }
 
     return userModel;

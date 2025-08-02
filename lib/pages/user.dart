@@ -373,6 +373,20 @@ class _UserPageState extends State<UserPage> {
                         );
                       }),
                     ),
+                    UserButton(
+                      icon: Ionicons.refresh,
+                      iconColor: accentColors[7],
+                      label: "Auto Sync Transaction",
+                      trailing: Align(
+                        alignment: Alignment.centerRight,
+                        child: MySwitch(
+                          enabled: _userMe.autoSyncTransaction,
+                        ),
+                      ),
+                      callback: (() async {
+                        await _updateAutoSyncTransaction();
+                      }),
+                    ),
                     const SizedBox(height: 20,),
                     const LabelHeader("Tags"),
                     UserButton(
@@ -860,6 +874,51 @@ class _UserPageState extends State<UserPage> {
         error: error,
         stackTrace: stackTrace,
       );
+    }).whenComplete(() {
+      // remove the loading screen
+      LoadingScreen.instance().hide();
+    },);
+  }
+
+  Future<void> _updateAutoSyncTransaction() async {
+    // show loading screen
+    LoadingScreen.instance().show(context: context);
+
+    bool autoSync = !_userMe.autoSyncTransaction;
+
+    // update the auto sync transaction
+    await _transactionHTTP.updateAutoSyncTransaction(
+      autoSync: autoSync
+    ).then((_) {
+      // refresh the user me, as we already stored the updated user me
+      // in the shared preferences
+      _refreshUserMe();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Auto Sync Transaction is ${_userMe.autoSyncTransaction ? "enabled" : "disabled"}",
+            icon: Icon(
+              Ionicons.checkmark_circle_outline,
+              color: accentColors[6],
+            )
+          )
+        );
+      }
+    }).onError((error, stackTrace) {
+      Log.error(
+        message: "Got error when update auto sync transaction!",
+        error: error,
+        stackTrace: stackTrace,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          createSnackBar(
+            message: "Unable to update auto sync transaction",
+          )
+        );
+      }
     }).whenComplete(() {
       // remove the loading screen
       LoadingScreen.instance().hide();
