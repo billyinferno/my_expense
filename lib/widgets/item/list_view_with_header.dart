@@ -17,6 +17,7 @@ class ListViewWithHeader<T> extends StatelessWidget {
   final List<TransactionListModel> data;
   final Function(TransactionListModel)? onEdit;
   final Function(TransactionListModel)? onDelete;
+  final Function(TransactionListModel)? onDuplicate;
   final bool showHeader;
   final HeaderType headerType;
   final bool reverse;
@@ -27,6 +28,7 @@ class ListViewWithHeader<T> extends StatelessWidget {
     required this.data,
     this.onEdit,
     this.onDelete,
+    this.onDuplicate,
     this.showHeader = true,
     this.headerType = HeaderType.date,
     this.reverse = false,
@@ -130,6 +132,7 @@ class ListViewWithHeader<T> extends StatelessWidget {
               txn: mapData[keys[x]]![i],
               canEdit: (onEdit != null),
               canDelete: (onDelete != null),
+              canDuplicate: (onDuplicate != null),
               context: context,
             )
           );
@@ -223,57 +226,26 @@ class ListViewWithHeader<T> extends StatelessWidget {
     required TransactionListModel txn,
     bool canEdit = false,
     bool canDelete = false,
+    bool canDuplicate = false,
     required BuildContext context,
   }) {
     return Slidable(
       key: Key("${txn.id}_${txn.wallet.id}_${txn.type}"),
-      endActionPane: (canDelete ? ActionPane(
+      endActionPane: (canDelete || canDuplicate ? ActionPane(
         motion: const DrawerMotion(),
-        extentRatio: 0.2,
-        dismissible: DismissiblePane(
-          onDismissed: () async {
-            // check if the onDelete function is not null or not?
-            if (onDelete != null) {
-              // call the onDelete function
-              onDelete!(txn);
-            }
-          },
-          confirmDismiss: () async {
-            return await ShowMyDialog(
-              dialogTitle: "Delete Item",
-              dialogText: "Do you want to delete ${txn.name}?",
-              confirmText: "Delete",
-              confirmColor: accentColors[2],
-              cancelText: "Cancel")
-            .show(context) ?? false;
-          },
+        extentRatio: 0.4,
+        dismissible: _dismissiblePanel(
+          txn: txn,
+          context: context
         ),
         children: <Widget>[
-          SlideButton(
-            icon: Ionicons.trash,
-            iconColor: textColor,
-            bgColor: accentColors[2],
-            text: 'Delete',
-            onTap: () {
-              // check if we can delete the transaction or not?
-              late Future<bool?> result = ShowMyDialog(
-                dialogTitle: "Delete Item",
-                dialogText: "Do you want to delete ${txn.name}?",
-                confirmText: "Delete",
-                confirmColor: accentColors[2],
-                cancelText: "Cancel")
-              .show(context);
-    
-              // check the result of the dialog box
-              result.then((value) {
-                if (value == true) {
-                  // check if the onDelete function is not null
-                  if (onDelete != null) {
-                    onDelete!(txn);
-                  }
-                }
-              });
-            },
+          _duplicateButton(
+            context: context,
+            txn: txn,
+          ),
+          _deleteButton(
+            context: context,
+            txn: txn,
           ),
         ],
       ) : null),
@@ -391,5 +363,83 @@ class ListViewWithHeader<T> extends StatelessWidget {
           },
         );
     }
+  }
+
+  Widget? _dismissiblePanel({
+    required BuildContext context,
+    required TransactionListModel txn,
+  }) {
+    if (onDelete == null) {
+      // if onDelete is null, then we don't need to show the dismissible panel
+      return null;
+    }
+
+    return DismissiblePane(
+      onDismissed: () async {
+        // check if the onDelete function is not null or not?
+        if (onDelete != null) {
+          // call the onDelete function
+          onDelete!(txn);
+        }
+      },
+      confirmDismiss: () async {
+        return await ShowMyDialog(
+          dialogTitle: "Delete Item",
+          dialogText: "Do you want to delete ${txn.name}?",
+          confirmText: "Delete",
+          confirmColor: accentColors[2],
+          cancelText: "Cancel")
+        .show(context) ?? false;
+      },
+    );
+  }
+
+  Widget _deleteButton({
+    required BuildContext context,
+    required TransactionListModel txn,
+  }) {
+    return SlideButton(
+      icon: Ionicons.trash,
+      iconColor: textColor,
+      bgColor: accentColors[2],
+      text: 'Delete',
+      onTap: () {
+        // check if we can delete the transaction or not?
+        late Future<bool?> result = ShowMyDialog(
+          dialogTitle: "Delete Item",
+          dialogText: "Do you want to delete ${txn.name}?",
+          confirmText: "Delete",
+          confirmColor: accentColors[2],
+          cancelText: "Cancel")
+        .show(context);
+
+        // check the result of the dialog box
+        result.then((value) {
+          if (value == true) {
+            // check if the onDelete function is not null
+            if (onDelete != null) {
+              onDelete!(txn);
+            }
+          }
+        });
+      },
+    );
+  }
+
+  Widget _duplicateButton({
+    required BuildContext context,
+    required TransactionListModel txn,
+  }) {
+    return SlideButton(
+      icon: Ionicons.copy,
+      iconColor: textColor,
+      bgColor: accentColors[3],
+      text: 'Duplicate',
+      onTap: () {
+        if (onDuplicate != null) {
+          onDuplicate!(txn);
+        }
+      },
+    );
   }
 }

@@ -75,6 +75,8 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
   }
 
   Future<void> _saveTransaction(List<TransactionModel> transactions) async {
+    List<TransactionListModel> txnList = [];
+
     // show the loading screen
     LoadingScreen.instance().show(context: context);
 
@@ -83,6 +85,10 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       await _transactionHttp.addMultiTransaction(
         txn: transactions,
       ).then((results) async {
+        // put the results into the transaction list
+        txnList = results;
+
+        // loop thru the results so we can update the information
         for(TransactionListModel result in results) {
           // update necessary information after we add the transaction
           await _updateInformation(result).then((_) {
@@ -139,6 +145,9 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
       await _transactionHttp.addTransaction(
         txn: transactions[0],
       ).then((result) async {
+        // add result to the transaction list
+        txnList.add(result);
+
         // update necessary information after we add the transaction
         await _updateInformation(result).then((_) {
           // get the transaction edit date
@@ -193,7 +202,8 @@ class _TransactionAddPageState extends State<TransactionAddPage> {
 
     // finished update information, return back to the previous page
     if (mounted) {
-      Navigator.pop(context);
+      // inform that we are done with the transaction add
+      Navigator.pop(context, txnList);
     }
   }
 

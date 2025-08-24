@@ -1,5 +1,4 @@
 import 'dart:collection';
-
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_sticky_header/easy_sticky_header.dart';
 import 'package:flutter/cupertino.dart';
@@ -301,6 +300,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         // again the transaction.
         await _deleteTransactionData(txn: txn);
       },
+      onDuplicate: (txn) async {
+        _showTransactionDuplicateScreen(txn: txn);
+      },
     );
 
     _mapSubPage[PageName.income.index] = ListViewWithHeader<T>(
@@ -319,6 +321,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         // remove the transaction from the transaction list and group
         // again the transaction.
         await _deleteTransactionData(txn: txn);
+      },
+      onDuplicate: (txn) async {
+        _showTransactionDuplicateScreen(txn: txn);
       },
     );
 
@@ -339,6 +344,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         // again the transaction.
         await _deleteTransactionData(txn: txn);
       },
+      onDuplicate: (txn) async {
+        _showTransactionDuplicateScreen(txn: txn);
+      },
     );
 
     _mapSubPage[PageName.transfer.index] = ListViewWithHeader<T>(
@@ -357,6 +365,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         // remove the transaction from the transaction list and group
         // again the transaction.
         await _deleteTransactionData(txn: txn);
+      },
+      onDuplicate: (txn) async {
+        _showTransactionDuplicateScreen(txn: txn);
       },
     );
   }
@@ -717,13 +728,44 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         // set state to rebuild the widget
         setState(() {
           // update the current transaction list based on the updated transaction
-          for (int i = 0; i < _filterTransactions.length; i++) {
+          for (int i = 0; i < _transactions.length; i++) {
             // check which transaction is being updated
-            if (_filterTransactions[i].id == result.id) {
-              _filterTransactions[i] = result;
+            if (_transactions[i].id == result.id) {
+              _transactions[i] = result;
               break;
             }
           }
+
+          // filter the transaction
+          _filterTheTransaction();
+
+          // after that we will perform grouping of the transactions to income, expense, and transfer
+          _groupTransactions();
+        });
+      }
+    });
+  }
+
+  Future<void> _showTransactionDuplicateScreen({
+    required TransactionListModel txn,
+  }) async {
+    // go to the transaction edit for this txn
+    await Navigator.pushNamed(
+      context, '/transaction/add',
+      arguments: TransactionAddArgs(
+        date: (TransactionSharedPreferences.getTransactionListCurrentDate() ?? DateTime.now()).toLocal(),
+        transaction: txn,
+      ),
+    ).then((result) async {
+      // check if we got return
+      if (result != null) {
+        // set state to rebuild the widget
+        setState(() {
+          // just add the transaction to the current filter transaction list
+          _transactions.addAll(result as List<TransactionListModel>);
+
+          // filter the transaction
+          _filterTheTransaction();
 
           // after that we will perform grouping of the transactions to income, expense, and transfer
           _groupTransactions();
@@ -1674,10 +1716,6 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       if (txnLocation >= 0) {
         // remove from _transactions list
         _transactions.removeAt(txnLocation);
-
-        // then we can call the filter and group transaction again
-        _filterTheTransaction();
-        _groupTransactions();
       }
 
       // now try to check if we have this data on the shared preferences or not?
@@ -1735,6 +1773,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     // setState to rebuild the widget
     setState(() {
+      // then we can call the filter and group transaction again
+      _filterTheTransaction();
+      _groupTransactions();
     });
   }
 
