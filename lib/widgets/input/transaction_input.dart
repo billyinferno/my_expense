@@ -345,6 +345,14 @@ class _TransactionInputState extends State<TransactionInput> {
       future: _finishFetchAndSyncTransaction,
       builder: (context, snapshot) {
         if (snapshot.hasData || snapshot.hasError) {
+          String descriptionText = (_descriptionController.text.trim().isEmpty ? "Description" : _descriptionController.text);
+          
+          // limit the description text to 2 lines only
+          if (descriptionText.split('\n').length > 2) {
+            List<String> descList = descriptionText.split('\n');
+            descriptionText = "${descList[0]}\n${descList[1]}…";
+          }
+
           return Scaffold(
             appBar: AppBar(
               title: Center(child: Text(widget.title)),
@@ -692,9 +700,13 @@ class _TransactionInputState extends State<TransactionInput> {
                                   color: textColor,
                                 ),
                                 const SizedBox(width: 10,),
-                                Text(
-                                  (_descriptionController.text.trim().isEmpty ? "Description" : _descriptionController.text),
-                                  overflow: TextOverflow.ellipsis,
+                                Expanded(
+                                  child: Text(
+                                    descriptionText,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                    softWrap: true,
+                                  ),
                                 ),
                               ],
                             ),
