@@ -260,10 +260,10 @@ packages:
     dependency: "direct main"
     description:
       name: hive_ce
-      sha256: "5620f634fb51c760144de69b55199419360f2aadba56bbcd5c7c2f1fe4bbfdd6"
+      sha256: "74461ee89e97fe347dd894fd6ea1dbdc8c745ea6fe0d6e0b1746530abd02eb95"
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.4"
+    version: "2.12.0"
   hive_ce_flutter:
     dependency: "direct main"
     description:
@@ -340,10 +340,10 @@ packages:
     dependency: transitive
     description:
       name: leak_tracker
-      sha256: "8dcda04c3fc16c14f48a7bb586d4be1f0d1572731b6d81d51772ef47c02081e0"
+      sha256: "33e2e26bdd85a0112ec15400c8cbffea70d0f9c3407491f672a2fad47915e2de"
       url: "https://pub.dev"
     source: hosted
-    version: "11.0.1"
+    version: "11.0.2"
   leak_tracker_flutter_testing:
     dependency: transitive
     description:
