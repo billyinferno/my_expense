@@ -166,6 +166,14 @@ class Wallet extends StatelessWidget {
       endColor = Colors.green;
     }
 
+    BorderRadius borderRadius = BorderRadius.circular(22);
+    if (percentageUse <= 5) {
+      borderRadius = const BorderRadius.only(
+        topRight: Radius.circular(22),
+        bottomRight: Radius.circular(22),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.fromLTRB(5, 0, 5, 0),
       width: double.infinity,
@@ -200,7 +208,7 @@ class Wallet extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [endColor, barColor]
                       ),
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: borderRadius,
                     ),
                   ),
                 ),
