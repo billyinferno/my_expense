@@ -138,20 +138,29 @@ class MyBox {
     return result;
   }
 
-  static Future<void> clear() async {
-    if(keyBox != null) {
-      // clear the keyBox
-      var keys = keyBox!.keys;
-      for (var key in keys) {
-        // skip the "key" as this is hold the encryption key for our encryptedBox
-        // if we removed the key, it will got error during logon as we cannot re-open the
-        // encrypted box and need to recreate it.
-        if(key.toString().toLowerCase() != "key") {
-          keyBox!.delete(key);
+  static Future<void> clear({
+    bool clearKeyBox = true,
+    bool clearEncryptedBox = true,
+  }) async {
+    // check if we need to clear keyBox or not?
+    if (clearKeyBox) {  
+      if(keyBox != null) {
+        // clear the keyBox
+        var keys = keyBox!.keys;
+        for (var key in keys) {
+          // skip the "key" as this is hold the encryption key for our encryptedBox
+          // if we removed the key, it will got error during logon as we cannot re-open the
+          // encrypted box and need to recreate it.
+          if(key.toString().toLowerCase() != "key") {
+            keyBox!.delete(key);
+          }
         }
+        await keyBox!.compact();
       }
-      await keyBox!.compact();
-      
+    }
+
+    // check if we need to clear encryptedBox or not?
+    if (clearEncryptedBox) {
       // delete the jwt from encrypted box
       if(encryptedBox != null) {
         if(encryptedBox!.containsKey("jwt")) {

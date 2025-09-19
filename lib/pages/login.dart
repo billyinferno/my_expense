@@ -536,6 +536,14 @@ class _LoginPageState extends State<LoginPage> {
     await UserSharedPreferences.setUserLogin(
       login: loginModel
     ).then((value) async {
+      // clear the previous keyBox as in case the keyBox is coming from other
+      // user that automatically logout (e.g., due to token expired).
+      // then that user can see all the transaction from previous user.
+      await MyBox.clear(
+        clearKeyBox: true,
+        clearEncryptedBox: false,
+      );
+      
       // refresh JWT token with the latest JWT token that we just get after
       // login.
       NetUtils.refreshJWT();
