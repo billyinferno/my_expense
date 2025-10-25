@@ -8,7 +8,7 @@ import 'package:my_expense/_index.g.dart';
 import 'package:provider/provider.dart';
 
 enum PageName { summary, all, income, expense, transfer }
-enum SummaryType { name, category }
+enum SummaryType { summary, name, category }
 
 class TransactionSearchPage extends StatefulWidget {
   const TransactionSearchPage({super.key});
@@ -33,6 +33,10 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   final ScrollController _categoryController = ScrollController();
 
   final Map<SummaryType, TypeSlideItem> _summaryItems = <SummaryType, TypeSlideItem> {
+    SummaryType.summary: TypeSlideItem(
+      color: accentColors[6],
+      text: "Summary",
+    ),
     SummaryType.name: TypeSlideItem(
       color: accentColors[6],
       text: "Name",
@@ -82,6 +86,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
   late List<Widget> _summaryList;
   final List<Widget> _summaryListName = [];
   final List<Widget> _summaryListCategory = [];
+  final List<Widget> _summaryListSummary = [];
 
   final Map<int, CategoryModel> _categorySelected = {};
   late Map<int, CategoryModel> _categoryExpenseList;
@@ -112,7 +117,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
 
     _isDescending = true; // descending
     _filterType = HeaderType.date; // date
-    _summaryType = SummaryType.name;
+    _summaryType = SummaryType.summary;
 
     // get the category expense and income list from shared preferences
     _categoryExpenseList = CategorySharedPreferences.getCategory(type: 'expense');
@@ -895,6 +900,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
     // clear the summary list widget
     _summaryListName.clear();
     _summaryListCategory.clear();
+    _summaryListSummary.clear();
 
     // check if we have expense or not?
     if (_summaryExpense.isNotEmpty) {
@@ -924,6 +930,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       );
     }
 
+    _generateSummaryData(
+      title: "Expense",
+      color: accentColors[2],
+      data: _totalAmountExpense,
+      widget: _summaryListSummary,
+    );
+
     // check if summary income is not empty
     if (_summaryIncome.isNotEmpty) {
       // add the income bar on the _summaryListName
@@ -951,6 +964,13 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         summaryType: SummaryType.category,
       );
     }
+
+    _generateSummaryData(
+      title: "Income",
+      color: accentColors[6],
+      data: _totalAmountIncome,
+      widget: _summaryListSummary,
+    );
 
     // check if summary transfer is not empty
     if (_summaryTransfer.isNotEmpty) {
@@ -980,34 +1000,75 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
       );
     }
 
+    _generateSummaryData(
+      title: "Transfer",
+      color: accentColors[4],
+      data: _totalAmountTransfer,
+      widget: _summaryListSummary,
+    );
+
     // set initial summary list
     _setSummaryList();
+  }
+
+  void _generateSummaryData({
+    required String title,
+    required Color color,
+    required Map<String, double> data,
+    required List<Widget> widget,
+  }) {
+    // add the title
+    widget.add(Container(
+      padding: const EdgeInsets.all(10),
+      color: secondaryDark,
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      ),
+    ));
+
+    // loop thru all the list item data
+    data.forEach((currencySymbol, value) {
+      widget.add(Container(
+        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+        color: secondaryBackground,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              currencySymbol,
+              style: TextStyle(
+                color: color,
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  Globals.fCCY.format(value),
+                  style: TextStyle(
+                    color: color,
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ));
+    });
   }
 
   void _generateSummaryBox({
     required String title,
     required Color color,
     required Map<String, double> data,
-    required Map<String, List<TransactionListModel>> listItem,
-    required List<Widget> widget,
-    required PageName page,
-    required SummaryType summaryType,
-  }) {
-    _generateSubSummaryBox(
-      title: title,
-      data: data,
-      color: color,
-      listItem: listItem,
-      page: page,
-      summaryType: summaryType,
-      widget: widget,
-    );
-  }
-
-  void _generateSubSummaryBox({
-    required String title,
-    required Map<String, double> data,
-    required Color color,
     required Map<String, List<TransactionListModel>> listItem,
     required List<Widget> widget,
     required PageName page,
@@ -1691,6 +1752,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
         break;
       case SummaryType.category:
         _summaryList = _summaryListCategory;
+        break;
+      case SummaryType.summary:
+        _summaryList = _summaryListSummary;
         break;
     }
   }
