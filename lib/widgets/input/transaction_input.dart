@@ -2084,7 +2084,7 @@ class _TransactionInputState extends State<TransactionInput> {
     WalletCategoryTransactionModel walletFrom;
     WalletCategoryTransactionModel? walletTo;
     WalletCategoryTransactionModel usersPermissionsUser = WalletCategoryTransactionModel(_userMe.id);
-    DateTime txnDate = _currentDate;
+    DateTime txnDate = _currentDate.toLocal();
     String description = _descriptionController.text.trim();
 
     // if this is expense or income, check for name and category
@@ -2208,24 +2208,24 @@ class _TransactionInputState extends State<TransactionInput> {
           // generate the next date
           switch(_currentRepeatType) {
             case "day":
-              txnDate = txnDate.add(Duration(days: _currentRepeat));
+              txnDate = txnDate.add(Duration(days: _currentRepeat)).toLocal();
               break;
             case "week":
-              txnDate = txnDate.add(Duration(days: (_currentRepeat * 7)));
+              txnDate = txnDate.add(Duration(days: (_currentRepeat * 7))).toLocal();
               break;
             case "month":
               txnDate = DateTime(
                 txnDate.year,
                 txnDate.month + 1,
                 txnDate.day
-              );
+              ).toLocal();
               break;
             case "year":
               txnDate = DateTime(
                 txnDate.year + 1,
                 txnDate.month,
                 txnDate.day
-              );
+              ).toLocal();
               break;
           }
         }
