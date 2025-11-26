@@ -10,6 +10,20 @@ enum TransactionInputType {
   add, edit
 }
 
+class TransactionInputAccount {
+  final int id;
+  final String name;
+  final String type;
+  final String ccy;
+
+  TransactionInputAccount({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.ccy,
+  });
+}
+
 class TransactionInput extends StatefulWidget {
   final String title;
   final TransactionInputType type;
@@ -35,10 +49,6 @@ class _TransactionInputState extends State<TransactionInput> {
 
   final ScrollController _optionController = ScrollController();
   final ScrollController _autoCompleteController = ScrollController();
-  final ScrollController _walletController = ScrollController();
-  final ScrollController _transferFromWalletController = ScrollController();
-  final ScrollController _transferToWalletController = ScrollController();
-  final ScrollController _accountTypeController = ScrollController();
 
   final TextEditingController _nameController  = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -83,9 +93,9 @@ class _TransactionInputState extends State<TransactionInput> {
 
   late DateTime _currentDate;
   final DateTime _todayDate = DateTime(
-    DateTime.now().year,
-    DateTime.now().month,
-    DateTime.now().day
+    DateTime.now().toLocal().year,
+    DateTime.now().toLocal().month,
+    DateTime.now().toLocal().day
   );
   final Map<String, String> _repeatMap = {
     "day": "Day",
@@ -103,15 +113,8 @@ class _TransactionInputState extends State<TransactionInput> {
   late Icon _currentCategoryIcon;
   late Color _currentCategoryColor;
 
-  late int _currentWalletFromID;
-  late String _currentWalletFromName;
-  late String _currentWalletFromType;
-  late String _currentWalletFromCCY;
-
-  late int _currentWalletToID;
-  late String _currentWalletToName;
-  late String _currentWalletToType;
-  late String _currentWalletToCCY;
+  late TransactionInputAccount _currentWalletFrom;
+  late TransactionInputAccount _currentWalletTo;
 
   late bool _currentClear;
   late String _currentTransactionRepeatType;
@@ -122,7 +125,6 @@ class _TransactionInputState extends State<TransactionInput> {
   late bool _fullAmount;
 
   late double _currentExchangeRate;
-
   late double _currentAmount;
   late double _conversionAmount;
 
@@ -232,10 +234,6 @@ class _TransactionInputState extends State<TransactionInput> {
   void dispose() {
     _optionController.dispose();
     _autoCompleteController.dispose();
-    _walletController.dispose();
-    _transferFromWalletController.dispose();
-    _transferToWalletController.dispose();
-    _accountTypeController.dispose();
 
     // name fields
     _nameFocus.dispose();
@@ -506,13 +504,13 @@ class _TransactionInputState extends State<TransactionInput> {
                                 // instead of wallet only
                                 if (_currentType == 'transfer') {
                                   _getUserFromWalletInfo(
-                                    walletId: _currentWalletFromID,
+                                    walletId: _currentWalletFrom.id,
                                     name: "From Wallet"
                                   );
                                 }
                                 else {
                                   _getUserFromWalletInfo(
-                                    walletId: _currentWalletFromID,
+                                    walletId: _currentWalletFrom.id,
                                     name: "Wallet"
                                   );
                                 }
@@ -542,8 +540,8 @@ class _TransactionInputState extends State<TransactionInput> {
                         Visibility(
                           visible: (
                             _currentType == 'transfer' &&
-                            (_currentWalletFromID > 0 && _currentWalletToID > 0) &&
-                            (_currentWalletFromCCY != _currentWalletToCCY)
+                            (_currentWalletFrom.id > 0 && _currentWalletTo.id > 0) &&
+                            (_currentWalletFrom.ccy != _currentWalletTo.ccy)
                           ),
                           child: Container(
                             height: 50,
@@ -776,8 +774,8 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // check if we have transfer to account
     if (
-      (_currentWalletFromID > 0 && _currentWalletToID > 0) &&
-      (_currentWalletFromCCY != _currentWalletToCCY)
+      (_currentWalletFrom.id > 0 && _currentWalletTo.id > 0) &&
+      (_currentWalletFrom.ccy != _currentWalletTo.ccy)
     ) {
       isShowConversionAmount = true;
     }
@@ -852,7 +850,7 @@ class _TransactionInputState extends State<TransactionInput> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 AutoSizeText(
-                  (isShowConversionAmount ? "${_currentWalletFromCCY.toUpperCase()} ${Globals.fCCY.format(_currentAmount)}" : Globals.fCCY.format(_currentAmount)),
+                  (isShowConversionAmount ? "${_currentWalletFrom.ccy.toUpperCase()} ${Globals.fCCY.format(_currentAmount)}" : Globals.fCCY.format(_currentAmount)),
                   style: const TextStyle(
                     fontSize: 25,
                     color: textColor,
@@ -861,7 +859,7 @@ class _TransactionInputState extends State<TransactionInput> {
                   maxLines: 1,
                 ),
                 (isShowConversionAmount ? AutoSizeText(
-                  (isShowConversionAmount ? "${_currentWalletToCCY.toUpperCase()} ${Globals.fCCY.format(_conversionAmount)}" : Globals.fCCY.format(_conversionAmount)),
+                  (isShowConversionAmount ? "${_currentWalletTo.ccy.toUpperCase()} ${Globals.fCCY.format(_conversionAmount)}" : Globals.fCCY.format(_conversionAmount)),
                   style: const TextStyle(
                     fontSize: 18,
                     color: secondaryLight,
@@ -1045,29 +1043,33 @@ class _TransactionInputState extends State<TransactionInput> {
                         // show the to account selection for transfer
                         await _showAccountSelection(
                           title: "From Account",
-                          selectedId: _currentWalletFromID,
-                          disableID: _currentWalletToID,
+                          selectedId: _currentWalletFrom.id,
+                          disableID: _currentWalletTo.id,
                           onTap: ((wallet) async {
                             // set the current wallet from and showed the account
                             // selection for the to account directly
                             setState(() {
-                              _currentWalletFromID = wallet.id;
-                              _currentWalletFromName = wallet.name;
-                              _currentWalletFromType = wallet.walletType.type.toLowerCase();
-                              _currentWalletFromCCY = wallet.currency.name.toLowerCase();
+                              _currentWalletFrom = TransactionInputAccount(
+                                id: wallet.id,
+                                name: wallet.name,
+                                type: wallet.walletType.type.toLowerCase(),
+                                ccy: wallet.currency.name.toLowerCase(),
+                              );
                             });
 
                             // show the to account selection
                             await _showAccountSelection(
                               title: "To Account",
-                              selectedId: _currentWalletToID,
-                              disableID: _currentWalletFromID,
+                              selectedId: _currentWalletTo.id,
+                              disableID: _currentWalletFrom.id,
                               onTap: ((wallet) {
                                 setState(() {
-                                  _currentWalletToID = wallet.id;
-                                  _currentWalletToName = wallet.name;
-                                  _currentWalletToType = wallet.walletType.type.toLowerCase();
-                                  _currentWalletToCCY = wallet.currency.name.toLowerCase();
+                                  _currentWalletTo = TransactionInputAccount(
+                                    id: wallet.id,
+                                    name: wallet.name,
+                                    type: wallet.walletType.type.toLowerCase(),
+                                    ccy: wallet.currency.name.toLowerCase(),
+                                  );
                                 });
                               })
                             );
@@ -1078,13 +1080,15 @@ class _TransactionInputState extends State<TransactionInput> {
                         // show the to account selection for expense/income
                         await _showAccountSelection(
                           title: "From Account",
-                          selectedId: _currentWalletFromID,
+                          selectedId: _currentWalletFrom.id,
                           onTap: ((wallet) {
                             setState(() {
-                              _currentWalletFromID = wallet.id;
-                              _currentWalletFromName = wallet.name;
-                              _currentWalletFromType = wallet.walletType.type.toLowerCase();
-                              _currentWalletFromCCY = wallet.currency.name.toLowerCase();
+                              _currentWalletFrom = TransactionInputAccount(
+                                id: wallet.id,
+                                name: wallet.name,
+                                type: wallet.walletType.type.toLowerCase(),
+                                ccy: wallet.currency.name.toLowerCase(),
+                              );
                             });
                           })
                         );
@@ -1172,13 +1176,15 @@ class _TransactionInputState extends State<TransactionInput> {
         if (!_isDisabled) {
           await _showAccountSelection(
             title: "Account",
-            selectedId: _currentWalletFromID,
+            selectedId: _currentWalletFrom.id,
             onTap: ((wallet) {
               setState(() {
-                _currentWalletFromID = wallet.id;
-                _currentWalletFromName = wallet.name;
-                _currentWalletFromType = wallet.walletType.type.toLowerCase();
-                _currentWalletFromCCY = wallet.currency.name.toLowerCase();
+                _currentWalletFrom = TransactionInputAccount(
+                  id: wallet.id,
+                  name: wallet.name,
+                  type: wallet.walletType.type.toLowerCase(),
+                  ccy: wallet.currency.name.toLowerCase(),
+                );
               });
             })
           );
@@ -1198,7 +1204,7 @@ class _TransactionInputState extends State<TransactionInput> {
               color: textColor,
             ),
             const SizedBox(width: 10,),
-            Text(_currentWalletFromName),
+            Text(_currentWalletFrom.name),
           ],
         ),
       ),
@@ -1223,32 +1229,40 @@ class _TransactionInputState extends State<TransactionInput> {
                 if (!_isDisabled) {
                   await _showAccountSelection(
                     title: "From Account",
-                    selectedId: _currentWalletFromID,
-                    disableID: _currentWalletToID,
+                    selectedId: _currentWalletFrom.id,
+                    disableID: _currentWalletTo.id,
                     onTap: ((wallet) async {
                       // set the current wallet from and showed the account
                       // selection for the to account directly
                       setState(() {
-                        _currentWalletFromID = wallet.id;
-                        _currentWalletFromName = wallet.name;
-                        _currentWalletFromType = wallet.walletType.type.toLowerCase();
-                        _currentWalletFromCCY = wallet.currency.name.toLowerCase();
+                        _currentWalletFrom = TransactionInputAccount(
+                          id: wallet.id,
+                          name: wallet.name,
+                          type: wallet.walletType.type.toLowerCase(),
+                          ccy: wallet.currency.name.toLowerCase(),
+                        );
                       });
 
-                      // show the to account selection
-                      await _showAccountSelection(
-                        title: "To Account",
-                        selectedId: _currentWalletToID,
-                        disableID: _currentWalletFromID,
-                        onTap: ((wallet) {
-                          setState(() {
-                            _currentWalletToID = wallet.id;
-                            _currentWalletToName = wallet.name;
-                            _currentWalletToType = wallet.walletType.type.toLowerCase();
-                            _currentWalletToCCY = wallet.currency.name.toLowerCase();
-                          });
-                        })
-                      );
+                      // check if we already have to account selected or not?
+                      // if not, then we can show the to account selection directly
+                      if (_currentWalletTo.id <= 0) {
+                        // show the to account selection
+                        await _showAccountSelection(
+                          title: "To Account",
+                          selectedId: _currentWalletTo.id,
+                          disableID: _currentWalletFrom.id,
+                          onTap: ((wallet) {
+                            setState(() {
+                              _currentWalletTo = TransactionInputAccount(
+                                id: wallet.id,
+                                name: wallet.name,
+                                type: wallet.walletType.type.toLowerCase(),
+                                ccy: wallet.currency.name.toLowerCase(),
+                              );
+                            });
+                          })
+                        );
+                      }
                     }),
                   );
                 }
@@ -1264,24 +1278,36 @@ class _TransactionInputState extends State<TransactionInput> {
                       width: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(40),
-                        color: (_currentWalletFromType.isNotEmpty ? IconList.getColor(_currentWalletFromType) : accentColors[4]),
+                        color: (_currentWalletFrom.type.isNotEmpty ? IconList.getColor(_currentWalletFrom.type) : accentColors[4]),
                       ),
-                      child: _getTransferOutIcon(_currentWalletFromType),
+                      child: _getTransferOutIcon(_currentWalletFrom.type),
                     ),
                     const SizedBox(height: 5,),
-                    Text((_currentWalletFromName.isNotEmpty ? _currentWalletFromName : "From Account")),
+                    Text((_currentWalletFrom.name.isNotEmpty ? _currentWalletFrom.name : "From Account")),
                   ],
                 ),
               ),
             ),
           ),
           const SizedBox(width: 10,),
-          const SizedBox(
-            height: 40,
-            child: Icon(
-              Ionicons.git_compare_sharp,
-              size: 40,
-              color: primaryLight,
+          GestureDetector(
+            onDoubleTap: (() {
+              // swap from and to account
+              if (_currentWalletFrom.id > 0 && _currentWalletTo.id > 0) {
+                setState(() {
+                  TransactionInputAccount temp = _currentWalletFrom;
+                  _currentWalletFrom = _currentWalletTo;
+                  _currentWalletTo = temp;
+                });
+              }
+            }),
+            child: const SizedBox(
+              height: 40,
+              child: Icon(
+                Ionicons.git_compare_sharp,
+                size: 40,
+                color: primaryLight,
+              ),
             ),
           ),
           const SizedBox(width: 10,),
@@ -1291,14 +1317,16 @@ class _TransactionInputState extends State<TransactionInput> {
                 if (!_isDisabled) {
                   await _showAccountSelection(
                     title: "To Account",
-                    selectedId: _currentWalletToID,
-                    disableID: _currentWalletFromID,
+                    selectedId: _currentWalletTo.id,
+                    disableID: _currentWalletFrom.id,
                     onTap: ((wallet) {
                       setState(() {
-                        _currentWalletToID = wallet.id;
-                        _currentWalletToName = wallet.name;
-                        _currentWalletToType = wallet.walletType.type.toLowerCase();
-                        _currentWalletToCCY = wallet.currency.name.toLowerCase();
+                        _currentWalletTo = TransactionInputAccount(
+                          id: wallet.id,
+                          name: wallet.name,
+                          type: wallet.walletType.type.toLowerCase(),
+                          ccy: wallet.currency.name.toLowerCase(),
+                        );
                       });
                     })
                   );
@@ -1315,12 +1343,12 @@ class _TransactionInputState extends State<TransactionInput> {
                       width: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(40),
-                        color: (_currentWalletToType.isNotEmpty ? IconList.getColor(_currentWalletToType) : Colors.grey[600]),
+                        color: (_currentWalletTo.type.isNotEmpty ? IconList.getColor(_currentWalletTo.type) : Colors.grey[600]),
                       ),
-                      child: _getTransferInIcon(_currentWalletToType),
+                      child: _getTransferInIcon(_currentWalletTo.type),
                     ),
                     const SizedBox(height: 5,),
-                    Text((_currentWalletToName.isNotEmpty ? _currentWalletToName : "To Account")),
+                    Text((_currentWalletTo.name.isNotEmpty ? _currentWalletTo.name : "To Account")),
                   ],
                 ),
               ),
@@ -1991,10 +2019,12 @@ class _TransactionInputState extends State<TransactionInput> {
 
   void _getUserFromWalletInfo({int? walletId, String? name}) {
     // default the value of wallet information
-    _currentWalletFromID = -1;
-    _currentWalletFromName = (name ?? "Wallet");
-    _currentWalletFromType = "";
-    _currentWalletFromCCY = "";
+    _currentWalletFrom = TransactionInputAccount(
+      id: -1,
+      name: (name ?? "Wallet"),
+      type: "",
+      ccy: "",
+    );
 
     // check if wallet ID more than 0, if so then we can default the wallet
     // with the one user selected.
@@ -2003,10 +2033,12 @@ class _TransactionInputState extends State<TransactionInput> {
       for(int i = 0; i < _walletListAll.length; i++) {
         // check if the wallet id is the same as the one being sent?
         if (walletId! == _walletListAll[i].id) {
-          _currentWalletFromID = walletId;
-          _currentWalletFromName = _walletListAll[i].name;
-          _currentWalletFromType = _walletListAll[i].walletType.type.toLowerCase();
-          _currentWalletFromCCY = _walletListAll[i].currency.name.toLowerCase();
+          _currentWalletFrom = TransactionInputAccount(
+            id: walletId,
+            name: _walletListAll[i].name,
+            type: _walletListAll[i].walletType.type.toLowerCase(),
+            ccy: _walletListAll[i].currency.name.toLowerCase(),
+          );
 
           // check whether this wallet is enabled or not?
           if (!_walletListAll[i].enabled) {
@@ -2022,20 +2054,24 @@ class _TransactionInputState extends State<TransactionInput> {
     // the ID is > 0.
     if ((walletId ?? 0) <= 0) {
       // just put default value for the wallet selection.
-      _currentWalletToID = -1;
-      _currentWalletToName = (name ?? "Wallet");
-      _currentWalletToType = "";
-      _currentWalletToCCY = "";
+      _currentWalletTo = TransactionInputAccount(
+        id: -1,
+        name: (name ?? "Wallet"),
+        type: "",
+        ccy: "",
+      );
     }
     else {
       // loop thru wallet list and set the correct info to the wallet
       for(int i = 0; i < _walletListAll.length; i++) {
         // check if the wallet id is the same as the one being sent?
         if (walletId! == _walletListAll[i].id) {
-          _currentWalletToID = walletId;
-          _currentWalletToName = _walletListAll[i].name;
-          _currentWalletToType = _walletListAll[i].walletType.type.toLowerCase();
-          _currentWalletToCCY = _walletListAll[i].currency.name.toLowerCase();
+          _currentWalletTo = TransactionInputAccount(
+            id: walletId,
+            name: _walletListAll[i].name,
+            type: _walletListAll[i].walletType.type.toLowerCase(),
+            ccy: _walletListAll[i].currency.name.toLowerCase(),
+          );
 
           // check whether this wallet is enabled or not?
           if (!_walletListAll[i].enabled) {
@@ -2129,23 +2165,23 @@ class _TransactionInputState extends State<TransactionInput> {
     }
 
     // check if wallet already selected or not?
-    if (_currentWalletFromID <= 0) {
+    if (_currentWalletFrom.id <= 0) {
       // wallet not yet selected
       throw Exception('Select wallet');
     }
     else {
-      walletFrom = WalletCategoryTransactionModel(_currentWalletFromID);
+      walletFrom = WalletCategoryTransactionModel(_currentWalletFrom.id);
     }
 
     // if this is transfer then the to wallet should be selected also
     if (_currentType == 'transfer') {
       // check the to wallet id
-      if (_currentWalletToID <= 0) {
+      if (_currentWalletTo.id <= 0) {
         throw Exception('Select destination wallet');
       }
       else {
         // create the walletTo
-        walletTo = WalletCategoryTransactionModel(_currentWalletToID);
+        walletTo = WalletCategoryTransactionModel(_currentWalletTo.id);
       }
 
       // default the category as -1, since transfer doesn't have any category
@@ -2156,7 +2192,7 @@ class _TransactionInputState extends State<TransactionInput> {
       _currentExchangeRate = 1;
 
       // check if wallet from and to have different currency ID
-      if (_currentWalletFromCCY != _currentWalletToCCY) {
+      if (_currentWalletFrom.ccy != _currentWalletTo.ccy) {
         // try to convert the exchange rate text fields
         try {
           _currentExchangeRate = double.parse(_exchangeController.text.trim());
