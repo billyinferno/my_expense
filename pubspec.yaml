@@ -45,7 +45,7 @@ dependencies:
   hive: ^2.0.4
   crypto: ^3.0.1
   flutter_slidable: ^4.0.0
-  smooth_page_indicator: ^1.1.0
+  smooth_page_indicator: ^2.0.1
   badges: ^3.1.2
   calendar_date_picker2: ^2.0.0
   flutter_simple_calculator: ^2.2.5
