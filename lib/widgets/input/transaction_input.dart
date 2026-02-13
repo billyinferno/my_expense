@@ -2,9 +2,9 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_simple_calculator/flutter_simple_calculator.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/pages/transaction/transaction_calculator.dart';
 
 enum TransactionInputType {
   add, edit
@@ -1012,136 +1012,99 @@ class _TransactionInputState extends State<TransactionInput> {
       _nameFocus.unfocus();
     }
 
-    // show the calculator on the modal bottom sheet
-    return showModalBottomSheet(
-      isScrollControlled: true,
-      isDismissible: false,
-      useSafeArea: true,
-      context: context,
-      builder: (BuildContext context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.75,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Container(
-                width: double.infinity,
-                color: secondaryDark,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: (() {
-                      Navigator.pop(context);
-                    }),
-                    onDoubleTap: (() async {
-                      // remove the calculator first
-                      Navigator.pop(context);
-                      
-                      // check whether this is expense/income/transfer
-                      if (_currentType == 'transfer') {
-                        // show the to account selection for transfer
-                        await _showAccountSelection(
-                          title: "From Account",
-                          selectedId: _currentWalletFrom.id,
-                          disableID: _currentWalletTo.id,
-                          onTap: ((wallet) async {
-                            // set the current wallet from and showed the account
-                            // selection for the to account directly
-                            setState(() {
-                              _currentWalletFrom = TransactionInputAccount(
-                                id: wallet.id,
-                                name: wallet.name,
-                                type: wallet.walletType.type.toLowerCase(),
-                                ccy: wallet.currency.name.toLowerCase(),
-                              );
-                            });
+    // navigate to the transaction calculator, as showing the calculator in
+    // bottom sheet causing a lot of issue due to safe area in phone.
+    // iOS is shit, and yes, it still shit for PWA application.
 
-                            // show the to account selection
-                            await _showAccountSelection(
-                              title: "To Account",
-                              selectedId: _currentWalletTo.id,
-                              disableID: _currentWalletFrom.id,
-                              onTap: ((wallet) {
-                                setState(() {
-                                  _currentWalletTo = TransactionInputAccount(
-                                    id: wallet.id,
-                                    name: wallet.name,
-                                    type: wallet.walletType.type.toLowerCase(),
-                                    ccy: wallet.currency.name.toLowerCase(),
-                                  );
-                                });
-                              })
-                            );
-                          }),
-                        );
-                      }
-                      else {
-                        // show the to account selection for expense/income
-                        await _showAccountSelection(
-                          title: "From Account",
-                          selectedId: _currentWalletFrom.id,
-                          onTap: ((wallet) {
-                            setState(() {
-                              _currentWalletFrom = TransactionInputAccount(
-                                id: wallet.id,
-                                name: wallet.name,
-                                type: wallet.walletType.type.toLowerCase(),
-                                ccy: wallet.currency.name.toLowerCase(),
-                              );
-                            });
-                          })
-                        );
-                      }
-                    }),
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(50, 10, 10, 10),
-                      color: Colors.transparent,
-                      child: const Text(
-                        "DONE",
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    )
-                  ),
-                ),
-              ),
-              Expanded(
-                child: SimpleCalculator(
-                  value: (currentAmount ? _currentAmount : _conversionAmount),
-                  hideExpression: false,
-                  hideSurroundingBorder: true,
-                  autofocus: true,
-                  theme: CalculatorThemeData(
-                    operatorColor: Colors.orange[600],
-                    equalColor: Colors.orange[800],
-                  ),
-                  maximumDigits: 14,
-                  numberFormat: Globals.fCCYnf,
-                  onChanged: (key, value, expression) {
-                    setState(() {
-                      if (currentAmount) {
-                        // set the current amount as previous current amount if value is null
-                        _currentAmount = (value ?? _currentAmount);
-                      }
-                      else {
-                        // it means that this is for the conversion amount
-                        _conversionAmount = (value ?? _conversionAmount);
-                      }
-
-                      // generate the list amount
-                      _generateListAmount();
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    // first create the TransactionCalculatorArgs
+    TransactionCalculatorArgs args = TransactionCalculatorArgs(
+      isCurrentAmount: currentAmount,
+      currentAmount: _currentAmount,
+      conversionAmount: _conversionAmount,
+      currentType: _currentType,
     );
+    
+    // call the transaction calculator page
+    await Navigator.pushNamed<TransactionCalculatorArgs>(
+      context,
+      '/transaction/calculator',
+      arguments: args,
+    ).then((result) async {
+      if (result != null) {
+        setState(() {
+          if (currentAmount) {
+            // set the current amount as previous current amount if value is null
+            _currentAmount = result.currentAmount;
+          }
+          else {
+            // it means that this is for the conversion amount
+            _conversionAmount = result.conversionAmount;
+          }
+
+          // generate the list amount
+          _generateListAmount();
+        });
+
+        // check if we got double tap or not?
+        if (result.isDoubleTap ?? false) {
+          // check whether this is expense/income/transfer
+          if (_currentType == 'transfer') {
+            // show the to account selection for transfer
+            await _showAccountSelection(
+              title: "From Account",
+              selectedId: _currentWalletFrom.id,
+              disableID: _currentWalletTo.id,
+              onTap: ((wallet) async {
+                // set the current wallet from and showed the account
+                // selection for the to account directly
+                setState(() {
+                  _currentWalletFrom = TransactionInputAccount(
+                    id: wallet.id,
+                    name: wallet.name,
+                    type: wallet.walletType.type.toLowerCase(),
+                    ccy: wallet.currency.name.toLowerCase(),
+                  );
+                });
+
+                // show the to account selection
+                await _showAccountSelection(
+                  title: "To Account",
+                  selectedId: _currentWalletTo.id,
+                  disableID: _currentWalletFrom.id,
+                  onTap: ((wallet) {
+                    setState(() {
+                      _currentWalletTo = TransactionInputAccount(
+                        id: wallet.id,
+                        name: wallet.name,
+                        type: wallet.walletType.type.toLowerCase(),
+                        ccy: wallet.currency.name.toLowerCase(),
+                      );
+                    });
+                  })
+                );
+              }),
+            );
+          }
+          else {
+            // show the to account selection for expense/income
+            await _showAccountSelection(
+              title: "From Account",
+              selectedId: _currentWalletFrom.id,
+              onTap: ((wallet) {
+                setState(() {
+                  _currentWalletFrom = TransactionInputAccount(
+                    id: wallet.id,
+                    name: wallet.name,
+                    type: wallet.walletType.type.toLowerCase(),
+                    ccy: wallet.currency.name.toLowerCase(),
+                  );
+                });
+              })
+            );
+          }
+        }
+      }
+    });
   }
 
   Future<void> _showAccountSelection({

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:my_expense/pages/transaction/transaction_calculator.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -88,6 +89,17 @@ class _RouterPageState extends State<RouterPage> {
                   )
                 );
               }
+            case '/transaction/calculator':
+              {
+                return CupertinoSheetRoute<TransactionCalculatorArgs>(
+                  scrollableBuilder: (BuildContext context, ScrollController controller) {
+                    Widget widgetBuilder(BuildContext context) {
+                      return TransactionCalculator(args: settings.arguments);  
+                    }
+                    return widgetBuilder(context);
+                  },
+                );
+              }
             case '/transaction/search':
               {
                 return createAnimationRoute(
@@ -105,8 +117,11 @@ class _RouterPageState extends State<RouterPage> {
             case '/budget/list/edit':
               {
                 return CupertinoSheetRoute<BudgetDetailArgs>(
-                  builder: (context) {
-                    return BudgetInput(budget: settings.arguments);  
+                  scrollableBuilder: (BuildContext context, ScrollController controller) {
+                    Widget widgetBuilder(BuildContext context) {
+                      return BudgetInput(budget: settings.arguments);  
+                    }
+                    return widgetBuilder(context);
                   },
                 );
               }
