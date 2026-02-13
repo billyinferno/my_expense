@@ -192,6 +192,95 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
   }
 
+  Future<void> _addOrDeleteBudger(BudgetModel budget, int categoryId) async {
+    // check the index if it's -1 means that this is not yet added
+    if (budget.id == -1) {
+      // add the budget
+      try {
+        // show the confirmation dialog if user want to add this budget or not?
+        await _showConfirmDialog(
+          name: budget.category.name,
+          type: "Add",
+          color: accentColors[0],
+        ).then((value) async {
+          // ensure user confirmed    
+          if (value ?? false) {
+            try {
+              await _addBudget(categoryId, _currencyID);
+
+              if (mounted) {
+                // show snack bar
+                ScaffoldMessenger.of(context).showSnackBar(
+                  createSnackBar(
+                    icon: Icon(
+                      Ionicons.checkmark_circle_outline,
+                      color: accentColors[6],
+                    ),
+                    message: '${budget.category.name} added',
+                  ),
+                );
+              }
+            }
+            catch(error, _) {
+              if (mounted) {
+                // show error dialog
+                await ShowMyDialog(
+                  cancelEnabled: false,
+                  confirmText: "OK",
+                  dialogTitle: "Error Add Budget",
+                  dialogText: "Error while add ${budget.category.name}.")
+                .show(context);
+              }
+            }
+          }   
+        },);
+      }
+      catch(error, _) {
+        if (mounted) {
+          // show error dialog
+          await ShowMyDialog(
+            cancelEnabled: false,
+            confirmText: "OK",
+            dialogTitle: "Error Add Budget",
+            dialogText: "Error while add ${budget.category.name} to budget list.")
+          .show(context);
+        }
+      }
+    }
+    else {
+      // show the confirmation dialog
+      await _showConfirmDialog(
+        name: budget.category.name,
+        type: "Delete",
+        color: accentColors[2],
+      ).then((value) async {
+        if (value ?? false) {
+          // delete the budget instead
+          try {
+            await _deleteBudgetList(budget.id, budget.currency.id);
+            if (mounted) {
+              // show snack bar
+              ScaffoldMessenger.of(context).showSnackBar(
+                createSnackBar(message: 'Delete of ${budget.category.name} success'),
+              );
+            }
+          }
+          catch(error, _) {
+            if (mounted) {
+              // show error dialog
+              await ShowMyDialog(
+                cancelEnabled: false,
+                confirmText: "OK",
+                dialogTitle: "Error Delete Budget",
+                dialogText: "Error while deleting ${budget.category.name}.")
+              .show(context);
+            }
+          }
+        }
+      });
+    }
+  }
+
   Widget _generateListItem() {
     if (_budgetList == null) {
       return const Text("Loading Budget List");
@@ -241,69 +330,9 @@ class _BudgetListPageState extends State<BudgetListPage> {
             showFlagged: (budget.useForDaily),
             flagColor: (budget.useForDaily ? accentColors[4] : secondaryDark),
             isSelected: (budget.id != -1),
-            onSelect: (index) async {
-              // check the index if it's -1 means that this is not yet added
-              if (budget.id == -1) {
-                // add the budget
-                try {
-                  await _addBudget(categoryId, _currencyID);
-
-                  if (mounted) {
-                    // show snack bar
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      createSnackBar(
-                        icon: Icon(
-                          Ionicons.checkmark_circle_outline,
-                          color: accentColors[6],
-                        ),
-                        message: '${budget.category.name} added',
-                      ),
-                    );
-                  }
-                }
-                catch(error, _) {
-                  if (mounted) {
-                    // show error dialog
-                    await ShowMyDialog(
-                      cancelEnabled: false,
-                      confirmText: "OK",
-                      dialogTitle: "Error Add Budget",
-                      dialogText: "Error while add ${budget.category.name} to budget list.")
-                    .show(context);
-                  }
-                }
-              }
-              else {
-                // show the confirmation dialog
-                await _showConfirmDialog(
-                  name: budget.category.name,
-                ).then((value) async {
-                  if (value ?? false) {
-                    // delete the budget instead
-                    try {
-                      await _deleteBudgetList(budget.id, budget.currency.id);
-                      if (mounted) {
-                        // show snack bar
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          createSnackBar(message: 'Delete of ${budget.category.name} success'),
-                        );
-                      }
-                    }
-                    catch(error, _) {
-                      if (mounted) {
-                        // show error dialog
-                        await ShowMyDialog(
-                          cancelEnabled: false,
-                          confirmText: "OK",
-                          dialogTitle: "Error Delete Budget",
-                          dialogText: "Error while deleting ${budget.category.name}.")
-                        .show(context);
-                      }
-                    }
-                  }
-                });
-              }
-            },
+            onTap: ((index) async {
+              await _addOrDeleteBudger(budget, categoryId);
+            }),
             onEdit: ((index) async {
               // show edit budget form
               await Navigator.pushNamed<BudgetDetailArgs>(
@@ -660,12 +689,14 @@ class _BudgetListPageState extends State<BudgetListPage> {
 
   Future<bool?> _showConfirmDialog({
     required String name,
+    required String type,
+    required Color color
   }) {
     late Future<bool?> result = ShowMyDialog(
-      dialogTitle: "Delete Budget",
-      dialogText: "Do you want to delete $name?",
-      confirmText: "Delete",
-      confirmColor: accentColors[2],
+      dialogTitle: "${type.toCapitalized()} Budget",
+      dialogText: "Do you want to ${type.toLowerCase()} $name?",
+      confirmText: type.toCapitalized(),
+      confirmColor: color,
       cancelText: "Cancel")
     .show(context);
 
