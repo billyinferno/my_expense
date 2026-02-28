@@ -194,10 +194,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_grid_button
-      sha256: "51e8a3838439ccdc33363a8fec2cb7575d63a3a2cf37f189d110a05ae2740752"
+      sha256: "9f052a168fa33b875df152d23d4370283ee4d54fb156743b86a313cc3fa47e6a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.0"
+    version: "2.2.0"
   flutter_launcher_icons:
     dependency: "direct main"
     description:
@@ -226,10 +226,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_simple_calculator
-      sha256: "0646fa9f334cd717371ba76169c079a845b79175b24cb9f32498ec0e95613eff"
+      sha256: "94f3321a3646b1b3c9e614ea227b54af6508ac9e5f49c1ac3a83979a1296a23c"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.0"
+    version: "2.6.0"
   flutter_slidable:
     dependency: "direct main"
     description:
@@ -436,10 +436,10 @@ packages:
     dependency: transitive
     description:
       name: math_expressions
-      sha256: e32d803d758ace61cc6c4bdfed1226ff60a6a23646b35685670d28b5616139f8
+      sha256: "2e1ceb974c2b1893c809a68c7005f1b63f7324db0add800a0e792b1ac8ff9f03"
       url: "https://pub.dev"
     source: hosted
-    version: "2.6.0"
+    version: "3.1.0"
   meta:
     dependency: transitive
     description:
