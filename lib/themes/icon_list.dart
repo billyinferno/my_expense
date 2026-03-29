@@ -3,83 +3,104 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_expense/_index.g.dart';
 
 class IconList {
-  static Icon getIcon(String name, {double size = 20, Color color = Colors.white}) {
-    switch(name.toLowerCase()) {
-      case "all": { return Icon(FontAwesomeIcons.asterisk, color: color, size: size,); }
-      case "wallet": { return Icon(FontAwesomeIcons.wallet, color: color, size: size,); }
-      case "asset": { return Icon(FontAwesomeIcons.fileInvoiceDollar, color: color, size: size); }
-      case "cash": { return Icon(FontAwesomeIcons.moneyBill1, color: color, size: size); }
-      case "checking": { return Icon(FontAwesomeIcons.solidCreditCard, color: color, size: size); }
-      case "credit card": { return Icon(FontAwesomeIcons.ccVisa, color: color, size: size); }
-      case "debit card": { return Icon(FontAwesomeIcons.solidCreditCard, color: color, size: size); }
-      case "investment": { return Icon(FontAwesomeIcons.chartArea, color: color, size: size); }
-      case "loan": { return Icon(FontAwesomeIcons.handHoldingDollar, color: color, size: size); }
-      case "savings": { return Icon(FontAwesomeIcons.piggyBank, color: color, size: size); }
-      case "other": { return Icon(FontAwesomeIcons.coins, color: color, size: size); }
-      default: { return Icon(FontAwesomeIcons.question, color: color, size: size); }
+  static final Map<String, IconData> walletIcons = {
+    "all": FontAwesomeIcons.asterisk.data,
+    "wallet": FontAwesomeIcons.wallet.data,
+    "asset": FontAwesomeIcons.fileInvoiceDollar.data,
+    "cash": FontAwesomeIcons.moneyBill1.data,
+    "checking": FontAwesomeIcons.solidCreditCard.data,
+    "credit card": FontAwesomeIcons.solidCreditCard.data,
+    "debit card": FontAwesomeIcons.solidCreditCard.data,
+    "investment": FontAwesomeIcons.chartArea.data,
+    "loan": FontAwesomeIcons.handHoldingDollar.data,
+    "savings": FontAwesomeIcons.piggyBank.data,
+    "other": FontAwesomeIcons.coins.data,
+  };
+
+  static final Map<String, IconData> walletCCIcons = {
+    "amazon": FontAwesomeIcons.amazonPay.data,
+    "amex": FontAwesomeIcons.ccAmex.data,
+    "apple": FontAwesomeIcons.ccApplePay.data,
+    "diners": FontAwesomeIcons.ccDinersClub.data,
+    "discover": FontAwesomeIcons.ccDiscover.data,
+    "jcb": FontAwesomeIcons.ccJcb.data,
+    "mastercard": FontAwesomeIcons.ccMastercard.data,
+    "paypal": FontAwesomeIcons.ccPaypal.data,
+    "stripe": FontAwesomeIcons.ccStripe.data,
+    "visa": FontAwesomeIcons.ccVisa.data,
+  };
+
+  static Icon getIcon(String name, {double size = 20, Color color = Colors.white, String ccType = ""}) {
+    String iconName = name.toLowerCase();
+    if (iconName == "credit card" || iconName == "debit card") {
+      String ccIconName = ccType.toLowerCase();
+      return Icon(walletCCIcons[ccIconName] ?? FontAwesomeIcons.solidCreditCard.data, color: color, size: size);
+    }
+    else {
+      return Icon(walletIcons[iconName] ?? FontAwesomeIcons.question.data, color: color, size: size);
     }
   }
+
+  static final Map<String, Color> walletColors = {
+    "wallet": accentColors[0],
+    "asset": accentColors[10],
+    "cash": accentColors[5],
+    "checking": accentColors[9],
+    "credit card": accentColors[6],
+    "debit card": accentColors[7],
+    "investment": accentColors[1],
+    "loan": accentColors[2],
+    "savings": accentColors[4],
+    "other": accentColors[3],
+    "all": secondaryBackground.lighten(),
+  };
+
+  static final Map<String, Color> walletDarkColors = {
+    "wallet": darkAccentColors[0],
+    "asset": darkAccentColors[10],
+    "cash": darkAccentColors[5],
+    "checking": darkAccentColors[9],
+    "credit card": darkAccentColors[6],
+    "debit card": darkAccentColors[7],
+    "investment": darkAccentColors[1],
+    "loan": darkAccentColors[2],
+    "savings": darkAccentColors[4],
+    "other": darkAccentColors[3],
+    "all": secondaryBackground,
+  };
+
+  static final Map<String, Color> walletLightColors = {
+    "wallet": lightAccentColors[0],
+    "asset": lightAccentColors[10],
+    "cash": lightAccentColors[5],
+    "checking": lightAccentColors[9],
+    "credit card": lightAccentColors[6],
+    "debit card": lightAccentColors[7],
+    "investment": lightAccentColors[1],
+    "loan": lightAccentColors[2],
+    "savings": lightAccentColors[4],
+    "other": lightAccentColors[3],
+    "all": secondaryBackground.lighten(amount: 0.3),
+  };
 
   static Color getColor(String name, {bool enabled = true}) {
     if (!enabled) {
       return Colors.grey[800]!;
     }
-
-    switch(name.toLowerCase()) {
-      case "wallet": { return accentColors[0]; }
-      case "asset": { return accentColors[10]; }
-      case "cash": { return accentColors[5]; }
-      case "checking": { return accentColors[9]; }
-      case "credit card": { return accentColors[6]; }
-      case "debit card": { return accentColors[7]; }
-      case "investment": { return accentColors[1]; }
-      case "loan": { return accentColors[2]; }
-      case "savings": { return accentColors[4]; }
-      case "other": { return accentColors[3]; }
-      case "all": { return secondaryBackground.lighten(); }
-      default: { return Colors.grey[800]!; }
-    }
+    return walletColors[name.toLowerCase()] ?? Colors.grey[800]!;
   }
 
   static Color getDarkColor(String name, {bool enabled = true}) {
     if (!enabled) {
       return Colors.grey[900]!;
     }
-
-    switch(name.toLowerCase()) {
-      case "wallet": { return darkAccentColors[0]; }
-      case "asset": { return darkAccentColors[10]; }
-      case "cash": { return darkAccentColors[5]; }
-      case "checking": { return darkAccentColors[9]; }
-      case "credit card": { return darkAccentColors[6]; }
-      case "debit card": { return darkAccentColors[7]; }
-      case "investment": { return darkAccentColors[1]; }
-      case "loan": { return darkAccentColors[2]; }
-      case "savings": { return darkAccentColors[4]; }
-      case "other": { return darkAccentColors[3]; }
-      case "all": { return secondaryBackground; }
-      default: { return Colors.grey[900]!; }
-    }
+    return walletDarkColors[name.toLowerCase()] ?? Colors.grey[900]!;
   }
 
   static Color getLightColor(String name, {bool enabled = true}) {
     if (!enabled) {
       return Colors.grey[700]!;
     }
-
-    switch(name.toLowerCase()) {
-      case "wallet": { return lightAccentColors[0]; }
-      case "asset": { return lightAccentColors[10]; }
-      case "cash": { return lightAccentColors[5]; }
-      case "checking": { return lightAccentColors[9]; }
-      case "credit card": { return lightAccentColors[6]; }
-      case "debit card": { return lightAccentColors[7]; }
-      case "investment": { return lightAccentColors[1]; }
-      case "loan": { return lightAccentColors[2]; }
-      case "savings": { return lightAccentColors[4]; }
-      case "other": { return lightAccentColors[3]; }
-      case "all": { return secondaryBackground.lighten(amount: 0.3); }
-      default: { return Colors.grey[700]!; }
-    }
+    return walletLightColors[name.toLowerCase()] ?? Colors.grey[700]!;
   }
 }
