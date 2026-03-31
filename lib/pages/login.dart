@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/api/credit_card_type.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +14,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final UserHTTPService _userHTTP = UserHTTPService();
   final CategoryHTTPService _categoryHTTP = CategoryHTTPService();
+  final CreditCardTypeHTTPService _cardTypeHTTP = CreditCardTypeHTTPService();
   final WalletHTTPService _walletHTTP = WalletHTTPService();
   final TransactionHTTPService _transactionHTTP = TransactionHTTPService();
   final PinHTTPService _pinHTTP = PinHTTPService();
@@ -375,6 +377,9 @@ class _LoginPageState extends State<LoginPage> {
       }),
       _categoryHTTP.fetchCategory().then((_) {
         Log.success(message: "⏳ Fetch Category");
+      }),
+      _cardTypeHTTP.fetchCreditCardType().then((_) {
+        Log.success(message: "⏳ Fetch Credit Card Types");
       }),
       _walletHTTP.fetchWalletTypes().then((_) {
         Log.success(message: "⏳ Fetch Wallet Types");

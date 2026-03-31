@@ -14,12 +14,14 @@ class TransactionInputAccount {
   final int id;
   final String name;
   final String type;
+  final String ccType;
   final String ccy;
 
   TransactionInputAccount({
     required this.id,
     required this.name,
     required this.type,
+    required this.ccType,
     required this.ccy,
   });
 }
@@ -1062,6 +1064,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     id: wallet.id,
                     name: wallet.name,
                     type: wallet.walletType.type.toLowerCase(),
+                    ccType: wallet.creditCardType.type.toLowerCase(),
                     ccy: wallet.currency.name.toLowerCase(),
                   );
                 });
@@ -1077,6 +1080,7 @@ class _TransactionInputState extends State<TransactionInput> {
                         id: wallet.id,
                         name: wallet.name,
                         type: wallet.walletType.type.toLowerCase(),
+                        ccType: wallet.creditCardType.type.toLowerCase(),
                         ccy: wallet.currency.name.toLowerCase(),
                       );
                     });
@@ -1096,6 +1100,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     id: wallet.id,
                     name: wallet.name,
                     type: wallet.walletType.type.toLowerCase(),
+                    ccType: wallet.creditCardType.type.toLowerCase(),
                     ccy: wallet.currency.name.toLowerCase(),
                   );
                 });
@@ -1146,6 +1151,7 @@ class _TransactionInputState extends State<TransactionInput> {
                   id: wallet.id,
                   name: wallet.name,
                   type: wallet.walletType.type.toLowerCase(),
+                  ccType: wallet.creditCardType.type.toLowerCase(),
                   ccy: wallet.currency.name.toLowerCase(),
                 );
               });
@@ -1202,6 +1208,7 @@ class _TransactionInputState extends State<TransactionInput> {
                           id: wallet.id,
                           name: wallet.name,
                           type: wallet.walletType.type.toLowerCase(),
+                          ccType: wallet.creditCardType.type.toLowerCase(),
                           ccy: wallet.currency.name.toLowerCase(),
                         );
                       });
@@ -1220,6 +1227,7 @@ class _TransactionInputState extends State<TransactionInput> {
                                 id: wallet.id,
                                 name: wallet.name,
                                 type: wallet.walletType.type.toLowerCase(),
+                                ccType: wallet.creditCardType.type.toLowerCase(),
                                 ccy: wallet.currency.name.toLowerCase(),
                               );
                             });
@@ -1243,7 +1251,7 @@ class _TransactionInputState extends State<TransactionInput> {
                         borderRadius: BorderRadius.circular(40),
                         color: (_currentWalletFrom.type.isNotEmpty ? IconList.getColor(_currentWalletFrom.type) : accentColors[4]),
                       ),
-                      child: _getTransferOutIcon(_currentWalletFrom.type),
+                      child: _getTransferOutIcon(_currentWalletFrom.type, ccType: _currentWalletFrom.ccType),
                     ),
                     const SizedBox(height: 5,),
                     Text((_currentWalletFrom.name.isNotEmpty ? _currentWalletFrom.name : "From Account")),
@@ -1288,6 +1296,7 @@ class _TransactionInputState extends State<TransactionInput> {
                           id: wallet.id,
                           name: wallet.name,
                           type: wallet.walletType.type.toLowerCase(),
+                          ccType: wallet.creditCardType.type.toLowerCase(),
                           ccy: wallet.currency.name.toLowerCase(),
                         );
                       });
@@ -1308,7 +1317,7 @@ class _TransactionInputState extends State<TransactionInput> {
                         borderRadius: BorderRadius.circular(40),
                         color: (_currentWalletTo.type.isNotEmpty ? IconList.getColor(_currentWalletTo.type) : Colors.grey[600]),
                       ),
-                      child: _getTransferInIcon(_currentWalletTo.type),
+                      child: _getTransferInIcon(_currentWalletTo.type, ccType: _currentWalletTo.ccType),
                     ),
                     const SizedBox(height: 5,),
                     Text((_currentWalletTo.name.isNotEmpty ? _currentWalletTo.name : "To Account")),
@@ -1323,9 +1332,9 @@ class _TransactionInputState extends State<TransactionInput> {
     );
   }
 
-  Widget _getTransferInIcon(String name) {
+  Widget _getTransferInIcon(String name, {String? ccType}) {
     if(name.isNotEmpty) {
-      return IconList.getIcon(name.toLowerCase());
+      return IconList.getIcon(name.toLowerCase(), ccType: (ccType ?? "").toLowerCase());
     }
     else {
       return const Icon(
@@ -1336,9 +1345,9 @@ class _TransactionInputState extends State<TransactionInput> {
     }
   }
 
-  Widget _getTransferOutIcon(String name) {
+  Widget _getTransferOutIcon(String name, {String? ccType}) {
     if(name.isNotEmpty) {
-      return IconList.getIcon(name.toLowerCase());
+      return IconList.getIcon(name.toLowerCase(), ccType: (ccType ?? "").toLowerCase());
     }
     else {
       return const Icon(
@@ -1986,6 +1995,7 @@ class _TransactionInputState extends State<TransactionInput> {
       id: -1,
       name: (name ?? "Wallet"),
       type: "",
+      ccType: "other",
       ccy: "",
     );
 
@@ -2000,6 +2010,7 @@ class _TransactionInputState extends State<TransactionInput> {
             id: walletId,
             name: _walletListAll[i].name,
             type: _walletListAll[i].walletType.type.toLowerCase(),
+            ccType: _walletListAll[i].creditCardType.type.toLowerCase(),
             ccy: _walletListAll[i].currency.name.toLowerCase(),
           );
 
@@ -2021,6 +2032,7 @@ class _TransactionInputState extends State<TransactionInput> {
         id: -1,
         name: (name ?? "Wallet"),
         type: "",
+        ccType: "other",
         ccy: "",
       );
     }
@@ -2033,6 +2045,7 @@ class _TransactionInputState extends State<TransactionInput> {
             id: walletId,
             name: _walletListAll[i].name,
             type: _walletListAll[i].walletType.type.toLowerCase(),
+            ccType: _walletListAll[i].creditCardType.type.toLowerCase(),
             ccy: _walletListAll[i].currency.name.toLowerCase(),
           );
 

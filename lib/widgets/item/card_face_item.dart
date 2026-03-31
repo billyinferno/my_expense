@@ -30,7 +30,10 @@ class CardFace extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                IconList.getIcon(wallet.walletType.type),
+                IconList.getIcon(
+                  wallet.walletType.type,
+                  ccType: wallet.creditCardType.type.toLowerCase(),
+                ),
                 const SizedBox(width: 10,),
                 Expanded(
                   child: Column(

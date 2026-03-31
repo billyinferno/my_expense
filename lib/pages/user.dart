@@ -98,6 +98,7 @@ class _UserPageState extends State<UserPage> {
       true,
       -1,
       WalletTypeModel(-1, ""),
+      CreditCardTypeModel(-1, "", ""),
       CurrencyModel(-1, "", "", ""),
       UserPermissionModel(-1, "", "")
     );
@@ -364,7 +365,10 @@ class _UserPageState extends State<UserPage> {
                                         });
                                       }
                                     }),
-                                    icon: IconList.getIcon(_wallets[index].walletType.type.toLowerCase()),
+                                    icon: IconList.getIcon(
+                                      _wallets[index].walletType.type.toLowerCase(),
+                                      ccType: _wallets[index].creditCardType.type.toLowerCase(),
+                                    ),
                                   );
                                 },
                               ),

@@ -168,6 +168,7 @@ class WalletHTTPService {
       "enabled": wallet.enabled,
       "limit": wallet.limit,
       "wallet_type": {"id": wallet.walletType.id},
+      "credit_card_type": {"id": wallet.creditCardType.id},
       "currency": {"id": wallet.currency.id},
       "users_permissions_user": {"id": wallet.userPermissionUsers.id}
     };
@@ -203,9 +204,14 @@ class WalletHTTPService {
       "enabled": wallet.enabled,
       "limit": wallet.limit,
       "wallet_type": {"id": wallet.walletType.id},
+      "credit_card_type": {"id": wallet.creditCardType.id},
       "currency": {"id": wallet.currency.id},
       "users_permissions_user": {"id": wallet.userPermissionUsers.id}
     };
+
+    Log.info(
+      message: 'Request update wallet: ${walletEdit.toString()}',
+    );
     
     // send the request to update wallet
     final String result = await NetUtils.put(

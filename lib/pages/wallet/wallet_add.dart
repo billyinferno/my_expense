@@ -20,15 +20,18 @@ class _WalletAddPageState extends State<WalletAddPage> {
   
   late List<WalletTypeModel> _walletType = [];
   late List<CurrencyModel> _currencies = [];
+  late List<CreditCardTypeModel> _creditCardType = [];
   late UsersMeModel? _userMe;
   late CurrencyModel _currentCurrency;
   late WalletTypeModel _currentWalletType;
+  late CreditCardTypeModel _currentCreditCardType;
   late bool _currentUseForStats;
   late bool _currentEnabled;
   late double _currentLimit;
   late double _currentStartBalance;
 
   final ScrollController _scrollControllerWallet = ScrollController();
+  final ScrollController _scrollControllerCreditCardType = ScrollController();
   final ScrollController _scrollControllerCurrencies = ScrollController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
@@ -40,6 +43,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
     _walletType = WalletSharedPreferences.getWalletTypes();
     _currencies = WalletSharedPreferences.getWalletCurrency();
+    _creditCardType = CreditCardTypeSharedPreferences.getCreditCardType();
     _userMe = UserSharedPreferences.getUserMe();
 
     // initialize the currency model
@@ -47,6 +51,9 @@ class _WalletAddPageState extends State<WalletAddPage> {
 
     // initialize the wallet type model
     _currentWalletType = WalletTypeModel(-1, "");
+
+    // initialize the credit card type model
+    _currentCreditCardType = CreditCardTypeModel(-1, "other", "Other");
 
     // initialize rest of the variable needed for wallet add
     _currentUseForStats = true;
@@ -61,6 +68,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
     _nameController.dispose();
     _limitController.dispose();
     _scrollControllerWallet.dispose();
+    _scrollControllerCreditCardType.dispose();
     _scrollControllerCurrencies.dispose();
     
     super.dispose();
@@ -279,6 +287,68 @@ class _WalletAddPageState extends State<WalletAddPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                Visibility(
+                  visible: (_currentWalletType.type.toLowerCase() == "credit card" || _currentWalletType.type.toLowerCase() == "debit card"),
+                  child: GestureDetector(
+                    child: Container(
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: primaryLight,
+                            width: 1.0
+                          )
+                        ),
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          const Icon(
+                            CupertinoIcons.creditcard,
+                            size: 20,
+                            color: textColor,
+                          ),
+                          const SizedBox(width: 10,),
+                          Text(
+                            (_currentCreditCardType.id < 0 ? "Credit Card Type" : _currentCreditCardType.name)
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return MyBottomSheet(
+                            context: context,
+                            title: "${_currentWalletType.type} Type",
+                            screenRatio: 0.55,
+                            child: ListView.builder(
+                              controller: _scrollControllerCreditCardType,
+                              itemCount: _creditCardType.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SimpleItem(
+                                  color: Colors.transparent,
+                                  title: _creditCardType[index].name,
+                                  isSelected: _currentCreditCardType.type == _creditCardType[index].type,
+                                  onTap: (() {
+                                    setState(() {
+                                      _currentCreditCardType = _creditCardType[index];
+                                    });
+                                    Navigator.pop(context);
+                                  }),
+                                  icon: IconList.getIcon(
+                                    _currentWalletType.type.toLowerCase(),
+                                    ccType: _creditCardType[index].type.toLowerCase(),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+                      );
+                    },
+                  ),
+                ),
                 Container(
                   height: 50,
                   width: double.infinity,
@@ -515,7 +585,10 @@ class _WalletAddPageState extends State<WalletAddPage> {
           borderRadius: BorderRadius.circular(50),
           color: IconList.getColor(_currentWalletType.type),
         ),
-        child: IconList.getIcon(_currentWalletType.type),
+        child: IconList.getIcon(
+          _currentWalletType.type,
+          ccType: _currentCreditCardType.type.toLowerCase(),
+        ),
       );
     }
   }
@@ -570,6 +643,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
       _currentEnabled,
       _currentLimit,
       _currentWalletType,
+      _currentCreditCardType,
       _currentCurrency,
       userPermission
     );

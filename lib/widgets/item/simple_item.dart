@@ -25,41 +25,44 @@ class SimpleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
-      ),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: ListTile(
-          leading: Container(
-            height: 40,
-            width: 40,
-            padding: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(40),
-              color: color,
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        height: 60,
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
+        ),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: ListTile(
+            leading: Container(
+              height: 40,
+              width: 40,
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(40),
+                color: color,
+              ),
+              child: icon,
             ),
-            child: icon,
-          ),
-          title: Text(title),
-          trailing: Visibility(
-            visible: isSelected,
-            child: Icon(
-              checkmarkIcon,
-              size: 20,
-              color: (checkmarkColor ?? accentColors[0]),
+            title: Text(title),
+            trailing: Visibility(
+              visible: isSelected,
+              child: Icon(
+                checkmarkIcon,
+                size: 20,
+                color: (checkmarkColor ?? accentColors[0]),
+              ),
             ),
-          ),
-          onTap: () {
-            // check if disabled or not?
-            if (!isDisabled) {
-              if (onTap != null) {
-                onTap!();
+            onTap: () {
+              // check if disabled or not?
+              if (!isDisabled) {
+                if (onTap != null) {
+                  onTap!();
+                }
               }
-            }
-          },
+            },
+          ),
         ),
       ),
     );

@@ -10,6 +10,7 @@ class WalletModel {
   final bool enabled;
   final double limit;
   final WalletTypeModel walletType;
+  final CreditCardTypeModel creditCardType;
   final CurrencyModel currency;
   final UserPermissionModel userPermissionUsers;
 
@@ -23,12 +24,14 @@ class WalletModel {
     this.enabled,
     this.limit,
     this.walletType,
+    this.creditCardType,
     this.currency,
     this.userPermissionUsers
   );
 
   factory WalletModel.fromJson(Map<String, dynamic> json) {
     WalletTypeModel walletType = WalletTypeModel.fromJson(json['wallet_type']);
+    CreditCardTypeModel creditCardType = CreditCardTypeModel.fromJson(json['credit_card_type']);
     CurrencyModel currency = CurrencyModel.fromJson(json['currency']);
     UserPermissionModel userPermissionUsers = UserPermissionModel.fromJson(json['users_permissions_user']);
 
@@ -42,6 +45,7 @@ class WalletModel {
       (json['enabled'] ?? true),
       (json['limit'] ?? -1).toDouble(),
       walletType,
+      creditCardType,
       currency,
       userPermissionUsers
     );
@@ -57,6 +61,7 @@ class WalletModel {
     'enabled': enabled,
     'limit': limit,
     'wallet_type': walletType.toJson(),
+    'credit_card_type': creditCardType.toJson(),
     'currency': currency.toJson(),
     'users_permissions_user': userPermissionUsers.toJson(),
   };

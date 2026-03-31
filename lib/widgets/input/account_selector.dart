@@ -120,7 +120,10 @@ class _AccountSelectorState extends State<AccountSelector> {
                     Navigator.pop(context);
                     widget.onTap(widget.walletMap[_tabSelected]![index]);
                   }),
-                  icon: IconList.getIcon(widget.walletMap[_tabSelected]![index].walletType.type.toLowerCase()),
+                  icon: IconList.getIcon(
+                    widget.walletMap[_tabSelected]![index].walletType.type.toLowerCase(),
+                    ccType: widget.walletMap[_tabSelected]![index].creditCardType.type.toLowerCase()
+                  ),
                 );
               },
             ),

@@ -2,6 +2,7 @@ export './budget_list_model.dart';
 export './budget_model.dart';
 export './budget_stat_model.dart';
 export './category_model.dart';
+export './credit_card_type_model.dart';
 export './currency_model.dart';
 export './error_model.dart';
 export './error_net_model.dart';

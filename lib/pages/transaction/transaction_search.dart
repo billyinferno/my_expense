@@ -633,7 +633,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                                     Navigator.pop(context);
                                   }),
                                   icon: IconList.getIcon(
-                                    _walletList[index].walletType.type.toLowerCase()
+                                    _walletList[index].walletType.type.toLowerCase(),
+                                    ccType: _walletList[index].creditCardType.type.toLowerCase(),
                                   ),
                                 );
                               },

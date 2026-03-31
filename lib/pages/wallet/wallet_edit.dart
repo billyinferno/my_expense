@@ -20,8 +20,10 @@ class _WalletEditPageState extends State<WalletEditPage> {
   final WalletHTTPService _walletHttp = WalletHTTPService();
   List<WalletTypeModel> _walletType = [];
   List<CurrencyModel> _currencies = [];
+  List<CreditCardTypeModel> _creditCardType = [];
   late UsersMeModel? _userMe;
   late WalletTypeModel _currentWalletType;
+  late CreditCardTypeModel _currentCreditCardType;
   late CurrencyModel _currentCurrency;
   late int _currentWalletID;
   late bool _currentUseForStats;
@@ -34,6 +36,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
   final TextEditingController _limitController = TextEditingController();
   final ScrollController _scrollControllerWallet = ScrollController();
   final ScrollController _scrollControllerCurrency = ScrollController();
+  final ScrollController _scrollControllerCreditCardType = ScrollController();
 
   @override
   void initState() {
@@ -44,11 +47,13 @@ class _WalletEditPageState extends State<WalletEditPage> {
 
     _walletType = WalletSharedPreferences.getWalletTypes();
     _currencies = WalletSharedPreferences.getWalletCurrency();
+    _creditCardType = CreditCardTypeSharedPreferences.getCreditCardType();
     _userMe = UserSharedPreferences.getUserMe();
 
     // initialize the data for the wallet
     _currentWalletID = walletData.id;
     _currentWalletType = walletData.walletType;
+    _currentCreditCardType = walletData.creditCardType;
     _currentCurrency = walletData.currency;
     _currentUseForStats = walletData.useForStats;
     _currentEnabled = walletData.enabled;
@@ -277,6 +282,68 @@ class _WalletEditPageState extends State<WalletEditPage> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                Visibility(
+                  visible: (_currentWalletType.type.toLowerCase() == "credit card" || _currentWalletType.type.toLowerCase() == "debit card"),
+                  child: GestureDetector(
+                    child: Container(
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: primaryLight,
+                            width: 1.0
+                          )
+                        ),
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          const Icon(
+                            CupertinoIcons.creditcard,
+                            size: 20,
+                            color: textColor,
+                          ),
+                          const SizedBox(width: 10,),
+                          Text(
+                            (_currentCreditCardType.id < 0 ? "Credit Card Type" : _currentCreditCardType.name)
+                          ),
+                        ],
+                      ),
+                    ),
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return MyBottomSheet(
+                            context: context,
+                            title: "${_currentWalletType.type} Type",
+                            screenRatio: 0.55,
+                            child: ListView.builder(
+                              controller: _scrollControllerCreditCardType,
+                              itemCount: _creditCardType.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SimpleItem(
+                                  color: Colors.transparent,
+                                  title: _creditCardType[index].name,
+                                  isSelected: _currentCreditCardType.type == _creditCardType[index].type,
+                                  onTap: (() {
+                                    setState(() {
+                                      _currentCreditCardType = _creditCardType[index];
+                                    });
+                                    Navigator.pop(context);
+                                  }),
+                                  icon: IconList.getIcon(
+                                    _currentWalletType.type.toLowerCase(),
+                                    ccType: _creditCardType[index].type.toLowerCase(),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+                      );
+                    },
+                  ),
+                ),
                 Container(
                   height: 50,
                   width: double.infinity,
@@ -497,7 +564,10 @@ class _WalletEditPageState extends State<WalletEditPage> {
           borderRadius: BorderRadius.circular(50),
           color: IconList.getColor(_currentWalletType.type),
         ),
-        child: IconList.getIcon(_currentWalletType.type),
+        child: IconList.getIcon(
+          _currentWalletType.type,
+          ccType: _currentCreditCardType.type.toLowerCase(),
+        ),
       );
     }
   }
@@ -531,6 +601,14 @@ class _WalletEditPageState extends State<WalletEditPage> {
       throw Exception("Start balance is invalid");
     }
 
+    // check if the wallet type is credit card or debit card.
+    // if so, ensure that user already select the credit card type.
+    if((_currentWalletType.type.toLowerCase() == "credit card" || _currentWalletType.type.toLowerCase() == "debit card")) {
+      if(_currentCreditCardType.id < 0) {
+        throw Exception("Please select ${_currentWalletType.type} type");
+      }
+    }
+
     // check if the limit is 0 or -1
     // if 0 or less than -1, then just default it to -1
     if(_currentLimit == 0 || _currentLimit < -1) {
@@ -555,6 +633,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
       _currentEnabled,
       _currentLimit,
       _currentWalletType,
+      _currentCreditCardType,
       _currentCurrency,
       userPermission
     );

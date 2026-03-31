@@ -682,6 +682,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       _wallet.enabled,
       _wallet.limit,
       _wallet.walletType,
+      _wallet.creditCardType,
       _wallet.currency,
       _wallet.userPermissionUsers
     );
@@ -903,6 +904,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         _wallet.enabled,
         _wallet.limit,
         _wallet.walletType,
+        _wallet.creditCardType,
         _wallet.currency,
         _wallet.userPermissionUsers
       );

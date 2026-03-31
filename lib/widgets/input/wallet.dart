@@ -64,7 +64,7 @@ class Wallet extends StatelessWidget {
                   SizedBox(
                     height: 30,
                     width: 30,
-                    child: IconList.getIcon(wallet.walletType.type),
+                    child: IconList.getIcon(wallet.walletType.type, ccType: wallet.creditCardType.type.toLowerCase()),
                   ),
                   const SizedBox(width: 10),
                   Expanded(

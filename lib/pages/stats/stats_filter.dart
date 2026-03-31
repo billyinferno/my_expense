@@ -112,6 +112,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         true,
         -1,
         WalletTypeModel(-1, ""),
+        CreditCardTypeModel(-1, "", ""),
         CurrencyModel(-1, "", "", ""),
         UserPermissionModel(-1, "", ""))
       ),
@@ -574,7 +575,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                   Navigator.pop(context);
                 }),
                 icon: IconList.getIcon(
-                  _currentWallets[index].walletType.type.toLowerCase()
+                  _currentWallets[index].walletType.type.toLowerCase(),
+                  ccType: _currentWallets[index].creditCardType.type.toLowerCase(),
                 ),
               );
             },
