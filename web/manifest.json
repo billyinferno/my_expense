@@ -9,7 +9,7 @@
     "orientation": "portrait",
     "prefer_related_applications": false,
     "categories": ["utility", "tracker", "finance", "expense", "income"],
-    "version": "1.0.0-20260329",
+    "version": "1.0.0-20260401",
     "icons": [
         {
             "src": "icons/Icon-192.png",
