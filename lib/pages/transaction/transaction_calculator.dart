@@ -141,38 +141,38 @@ class _TransactionCalculatorState extends State<TransactionCalculator> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: secondaryBackground,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
-                      ),
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: secondaryLight,
                         width: 1.0,
                         style: BorderStyle.solid,
                       )
                     ),
-                    child: SimpleCalculator(
-                      controller: _controller,
-                      value: (_args.isCurrentAmount ? _currentAmount : _conversionAmount),
-                      hideExpression: false,
-                      hideSurroundingBorder: true,
-                      autofocus: true,
-                      theme: CalculatorThemeData(
-                        operatorColor: Colors.orange[600],
-                        equalColor: Colors.orange[800],
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: SimpleCalculator(
+                        controller: _controller,
+                        value: (_args.isCurrentAmount ? _currentAmount : _conversionAmount),
+                        hideExpression: false,
+                        hideSurroundingBorder: true,
+                        autofocus: true,
+                        theme: CalculatorThemeData(
+                          operatorColor: Colors.orange[600],
+                          equalColor: Colors.orange[800],
+                        ),
+                        maximumDigits: 14,
+                        numberFormat: Globals.fCCYnf,
+                        onChanged: (key, value, expression) {
+                          if (_args.isCurrentAmount) {
+                            // set the current amount as previous current amount if value is null
+                            _currentAmount = (value ?? _currentAmount);
+                          }
+                          else {
+                            // it means that this is for the conversion amount
+                            _conversionAmount = (value ?? _conversionAmount);
+                          }
+                        },
                       ),
-                      maximumDigits: 14,
-                      numberFormat: Globals.fCCYnf,
-                      onChanged: (key, value, expression) {
-                        if (_args.isCurrentAmount) {
-                          // set the current amount as previous current amount if value is null
-                          _currentAmount = (value ?? _currentAmount);
-                        }
-                        else {
-                          // it means that this is for the conversion amount
-                          _conversionAmount = (value ?? _conversionAmount);
-                        }
-                      },
                     ),
                   ),
                 ),
