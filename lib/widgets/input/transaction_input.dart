@@ -1,10 +1,12 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 import 'package:my_expense/pages/transaction/transaction_calculator.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 enum TransactionInputType {
   add, edit
@@ -91,6 +93,19 @@ class _TransactionInputState extends State<TransactionInput> {
     ),
   };
 
+  final Map<String, TypeSlideItem> _txnCalendarType = {
+    "scroll": TypeSlideItem(
+      color: accentColors[0],
+      icon: Ionicons.calendar_number,
+      iconColor: Colors.white.withValues(alpha: 0.7),
+    ),
+    "calendar": TypeSlideItem(
+      color: accentColors[4],
+      icon: Ionicons.calendar,
+      iconColor: Colors.white.withValues(alpha: 0.7),
+    ),
+  };
+
   late UsersMeModel _userMe;
 
   late DateTime _currentDate;
@@ -120,6 +135,7 @@ class _TransactionInputState extends State<TransactionInput> {
 
   late bool _currentClear;
   late String _currentTransactionRepeatType;
+  late String _currentCalendarType;
   late String _currentRepeatType;
   late int _currentRepeat;
   late int _currentTimes;
@@ -188,6 +204,9 @@ class _TransactionInputState extends State<TransactionInput> {
 
     // set repeat as single
     _currentTransactionRepeatType = 'single';
+
+    // set calendar type as scroll
+    _currentCalendarType = 'scroll';
 
     // default repeat type as month
     _currentRepeatType = 'month';
@@ -620,7 +639,23 @@ class _TransactionInputState extends State<TransactionInput> {
                                   color: textColor,
                                 ),
                                 const SizedBox(width: 10,),
-                                Text(_calendarText()),
+                                Expanded(
+                                  child: Text(
+                                    _calendarText()
+                                  )
+                                ),
+                                SizedBox(
+                                  width: 80,
+                                  child: TypeSlide<String>(
+                                    onValueChanged: ((value) {
+                                      setState(() {                
+                                        _currentCalendarType = value;
+                                      });
+                                    }),
+                                    items: _txnCalendarType,
+                                    initialItem: "scroll",
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -628,17 +663,17 @@ class _TransactionInputState extends State<TransactionInput> {
                         AnimationExpand(
                           expand: _showCalendar,
                           child: SizedBox(
-                            height: 200,
-                            child: ScrollDatePicker(
-                              initialDate: _currentDate.toLocal(),
-                              minDate: DateTime(2010, 1, 1),
-                              barColor: accentColors[0],
-                              selectedColor: primaryDark,
-                              onDateChange: ((val) {
+                            height: 250,
+                            child: GestureDetector(
+                              onDoubleTap: () {
                                 setState(() {
-                                  _currentDate = val.toLocal();
+                                  _currentDate = _todayDate;
                                 });
-                              }),
+                              },
+                              child: Container(
+                                color: Colors.transparent,
+                                child: _showCalendarWidget()
+                              ),
                             ),
                           ),
                         ),
@@ -760,6 +795,49 @@ class _TransactionInputState extends State<TransactionInput> {
         }
       },
     );
+  }
+
+  Widget _showCalendarWidget() {
+    if (_currentCalendarType == 'scroll') {
+      return ScrollDatePicker(
+        initialDate: _currentDate.toLocal(),
+        minDate: DateTime(2010, 1, 1),
+        barColor: accentColors[0],
+        selectedColor: primaryDark,
+        onDateChange: ((val) {
+          setState(() {
+            _currentDate = val.toLocal();
+          });
+        }),
+      );
+    }
+    else {
+      return CalendarDatePicker2(
+        config: CalendarDatePicker2Config(
+          calendarType: CalendarDatePicker2Type.single,
+          selectedDayHighlightColor: accentColors[0],
+          weekdayLabelTextStyle: const TextStyle(
+            color: secondaryLight,
+            fontSize: 15,
+          ),
+          dayTextStyle: const TextStyle(
+            color: textColor,
+            fontSize: 15,
+          ),
+          controlsTextStyle: const TextStyle(
+            color: textColor,
+            fontSize: 15,
+          ),
+          centerAlignModePicker: true,
+        ),
+        value: [_currentDate.toLocal()],
+        onValueChanged: (value) {
+          setState(() {
+            _currentDate = value[0].toLocal();
+          });
+        },
+      );
+    }
   }
 
   Widget _buildInput() {
