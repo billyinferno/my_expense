@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 import 'package:my_expense/pages/transaction/transaction_calculator.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 enum TransactionInputType {
   add, edit
