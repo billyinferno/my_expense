@@ -1,7 +1,7 @@
 import 'package:easy_sticky_header/easy_sticky_header.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -56,11 +56,11 @@ class _HomeWalletState extends State<HomeWallet> {
       appBar: HomeAppBar(
         title: const Center(child: Text("Account")),
         iconItem: Icon(
-          Ionicons.create,
+          MyIonicons(MyIoniconsData.create).data,
           size: 20,
         ),
         additionalIconItem: Icon(
-          (_showDisabled ? Ionicons.eye : Ionicons.eye_off),
+          (_showDisabled ? MyIonicons(MyIoniconsData.eye).data : MyIonicons(MyIoniconsData.eye_off).data),
           size: 20,
         ),
         onUserPress: () {
@@ -376,7 +376,7 @@ class _HomeWalletState extends State<HomeWallet> {
           extentRatio: 0.9,
           children: <Widget>[
             SlideButton(
-              icon: Ionicons.pencil,
+              icon: MyIonicons(MyIoniconsData.pencil).data,
               iconColor: accentColors[1],
               text: 'Edit',
               onTap: () {
@@ -384,7 +384,7 @@ class _HomeWalletState extends State<HomeWallet> {
               },
             ),
             SlideButton(
-              icon: Ionicons.trash,
+              icon: MyIonicons(MyIoniconsData.trash).data,
               iconColor: accentColors[2],
               text: 'Delete',
               onTap: () {
@@ -423,7 +423,7 @@ class _HomeWalletState extends State<HomeWallet> {
               },
             ),
             SlideButton(
-              icon: (wallet.enabled ? Ionicons.close : Ionicons.checkmark),
+              icon: (wallet.enabled ? MyIonicons(MyIoniconsData.close).data : MyIonicons(MyIoniconsData.checkmark).data),
               iconColor: (wallet.enabled ? accentColors[7] : accentColors[6]),
               text: (wallet.enabled ? 'Disable' : 'Enable'),
               onTap: () {
@@ -449,7 +449,7 @@ class _HomeWalletState extends State<HomeWallet> {
               },
             ),
             SlideButton(
-              icon: Ionicons.analytics,
+              icon: MyIonicons(MyIoniconsData.analytics).data,
               iconColor: accentColors[3],
               text: 'Stat',
               onTap: () {

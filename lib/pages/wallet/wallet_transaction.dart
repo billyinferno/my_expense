@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -112,7 +112,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
       appBar: AppBar(
         title: Center(child: Text(_wallet.name)),
         leading: IconButton(
-          icon: const Icon(Ionicons.close_outline, color: textColor),
+          icon: Icon(MyIonicons(MyIoniconsData.close).data, color: textColor),
           onPressed: (() {
             Navigator.pop(context);
           }),
@@ -123,7 +123,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               Navigator.pushNamed(context, '/wallet/stat', arguments: _wallet);
             },
             icon: Icon(
-              Ionicons.analytics
+              MyIonicons(MyIoniconsData.analytics).data
             )
           ),
           SortIcon(
@@ -480,7 +480,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
               extentRatio: 0.40,
               children: <Widget>[
                 SlideButton(
-                  icon: Ionicons.copy,
+                  icon: MyIonicons(MyIoniconsData.copy).data,
                   iconColor: textColor,
                   bgColor: accentColors[3],
                   text: 'Duplicate',
@@ -497,7 +497,7 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
                   },
                 ),
                 SlideButton(
-                  icon: Ionicons.trash,
+                  icon: MyIonicons(MyIoniconsData.trash).data,
                   iconColor: textColor,
                   bgColor: accentColors[2],
                   text: 'Delete',
@@ -742,8 +742,8 @@ class _WalletTransactionPageState extends State<WalletTransactionPage> {
         return MyItemList(
           height: 70,
           iconColor: accentColors[4],
-          icon: const Icon(
-            Ionicons.repeat,
+          icon: Icon(
+            MyIonicons(MyIoniconsData.repeat).data,
             color: textColor,
           ),
           type: txn.type.toLowerCase(),

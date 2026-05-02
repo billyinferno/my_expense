@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class CommonErrorPage extends StatelessWidget {
   final bool isNeedScaffold;
@@ -23,7 +23,7 @@ class CommonErrorPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Icon(
-                Ionicons.warning,
+                MyIonicons(MyIoniconsData.warning).data,
                 color: accentColors[2],
                 size: 25,
               ),
@@ -51,7 +51,7 @@ class CommonErrorPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Icon(
-                Ionicons.warning,
+                MyIonicons(MyIoniconsData.warning).data,
                 color: accentColors[2],
                 size: 25,
               ),

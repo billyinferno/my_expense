@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class ScrollableTab extends StatefulWidget {
   final ScrollController? controller;
@@ -92,7 +92,7 @@ class _ScrollableTabState extends State<ScrollableTab> {
                 ),
               ),
               child: Icon(
-                Ionicons.wallet,
+                MyIonicons(MyIoniconsData.wallet).data,
                 color: widget.borderColor,
                 size: 15,
               ),

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -131,7 +131,7 @@ class _HomeStatsState extends State<HomeStats> {
           Navigator.pushNamed(context, '/user');
         },
         iconItem: Icon(
-          Ionicons.pie_chart,
+          MyIonicons(MyIoniconsData.pie_chart).data,
           size: 20,
           color: (_currencies.isEmpty ? secondaryDark : textColor),
         ),
@@ -244,7 +244,7 @@ class _HomeStatsState extends State<HomeStats> {
                         extentRatio: 0.35,
                         children: <Widget>[
                           SlideButton(
-                            icon: Ionicons.analytics,
+                            icon: MyIonicons(MyIoniconsData.analytics).data,
                             iconColor: accentColors[3],
                             text: 'Stats',
                             textColor: accentColors[3],
@@ -254,7 +254,7 @@ class _HomeStatsState extends State<HomeStats> {
                             },
                           ),
                           SlideButton(
-                            icon: Ionicons.refresh,
+                            icon: MyIonicons(MyIoniconsData.refresh).data,
                             iconColor: accentColors[6],
                             text: 'Refresh',
                             textColor: accentColors[6],
@@ -560,10 +560,10 @@ class _HomeStatsState extends State<HomeStats> {
               ),
             ),
             const SizedBox(width: 5,),
-            const SizedBox(
+            SizedBox(
               height: 20,
               child: Icon(
-                  Ionicons.chevron_down_circle
+                MyIonicons(MyIoniconsData.chevron_down_circle).data
               ),
             ),
           ],

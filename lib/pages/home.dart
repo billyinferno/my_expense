@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -113,7 +113,7 @@ class _HomePageState extends State<HomePage> {
               BarButton(
                 index: 0,
                 currentIndex: _currentIndex,
-                icon: Ionicons.calendar,
+                icon: MyIonicons(MyIoniconsData.calendar).data,
                 text: "Calendar",
                 onTap: (() {
                   setState(() {
@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage> {
               BarButton(
                 index: 1,
                 currentIndex: _currentIndex,
-                icon: Ionicons.stats_chart,
+                icon: MyIonicons(MyIoniconsData.stats_chart).data,
                 text: "Stats",
                 onTap: (() {
                   setState(() {
@@ -136,7 +136,7 @@ class _HomePageState extends State<HomePage> {
               BarButton(
                 index: 2,
                 currentIndex: _currentIndex,
-                icon: Ionicons.list,
+                icon: MyIonicons(MyIoniconsData.list).data,
                 text: "Budget",
                 onTap: (() {
                   setState(() {
@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
               BarButton(
                 index: 3,
                 currentIndex: _currentIndex,
-                icon: Ionicons.wallet,
+                icon: MyIonicons(MyIoniconsData.wallet).data,
                 text: "Account",
                 onTap: (() {
                   setState(() {
@@ -181,8 +181,8 @@ class _HomePageState extends State<HomePage> {
           color: accentColors[0],
           borderRadius: BorderRadius.circular(75),
         ),
-        child: const Icon(
-          Ionicons.add,
+        child: Icon(
+          MyIonicons(MyIoniconsData.add).data,
           size: 40,
           color: textColor,
         ),

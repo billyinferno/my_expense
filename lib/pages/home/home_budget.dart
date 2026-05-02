@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -87,8 +87,8 @@ class _HomeBudgetState extends State<HomeBudget> {
     return Scaffold(
       appBar: HomeAppBar(
         title: const Center(child: Text("Budget")),
-        iconItem: const Icon(
-          Ionicons.options_outline,
+        iconItem: Icon(
+          MyIonicons(MyIoniconsData.options_outline).data,
           size: 20,
         ),
         onUserPress: () {
@@ -140,8 +140,8 @@ class _HomeBudgetState extends State<HomeBudget> {
                 color: accentColors[4],
                 borderRadius: BorderRadius.circular(50),
               ),
-              child: const Icon(
-                Ionicons.file_tray_outline,
+              child: Icon(
+                MyIonicons(MyIoniconsData.file_tray_outline).data,
                 color: textColor2,
               ),
             ),
@@ -192,7 +192,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                         extentRatio: 0.2,
                         children: <Widget>[
                           SlideButton(
-                            icon: Ionicons.analytics,
+                            icon: MyIonicons(MyIoniconsData.analytics).data,
                             iconColor: accentColors[3],
                             text: 'Stat',
                             onTap: () {
@@ -259,10 +259,10 @@ class _HomeBudgetState extends State<HomeBudget> {
                                 ),
                               ),
                               const SizedBox(width: 10,),
-                              const SizedBox(
+                              SizedBox(
                                 height: 20,
                                 child: Icon(
-                                    Ionicons.chevron_down_circle
+                                  MyIonicons(MyIoniconsData.chevron_down_circle).data
                                 ),
                               ),
                             ],
@@ -353,7 +353,7 @@ class _HomeBudgetState extends State<HomeBudget> {
                             extentRatio: 0.2,
                             children: <Widget>[
                               SlideButton(
-                                icon: Ionicons.analytics,
+                                icon: MyIonicons(MyIoniconsData.analytics).data,
                                 iconColor: accentColors[3],
                                 text: 'Stat',
                                 onTap: () {

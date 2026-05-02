@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class MySelector extends StatefulWidget {
   final Map<String, String> data;
@@ -79,7 +79,7 @@ class _MySelectorState extends State<MySelector> {
               color: Colors.transparent,
               width: 25,
               child: Icon(
-                Ionicons.caret_back,
+                MyIonicons(MyIoniconsData.caret_back).data,
                 size: 15,
                 color: textColor2,
               ),
@@ -107,7 +107,7 @@ class _MySelectorState extends State<MySelector> {
               color: Colors.transparent,
               width: 25,
               child: Icon(
-                Ionicons.caret_forward,
+                MyIonicons(MyIoniconsData.caret_forward).data,
                 size: 15,
                 color: textColor2,
               ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -64,7 +64,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
       appBar: AppBar(
         title: const Center(child: Text("Budget List")),
         leading: IconButton(
-          icon: const Icon(Ionicons.close_outline, color: textColor),
+          icon: Icon(MyIonicons(MyIoniconsData.close_outline).data, color: textColor),
           onPressed: (() {
             // check if got data changed already or not?
             if (_isDataChanged) {
@@ -116,8 +116,8 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 }
               });
             },
-            icon: const Icon(
-              Ionicons.save,
+            icon: Icon(
+              MyIonicons(MyIoniconsData.save).data,
               color: textColor,
             ),
           ),
@@ -213,7 +213,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   createSnackBar(
                     icon: Icon(
-                      Ionicons.checkmark_circle_outline,
+                      MyIonicons(MyIoniconsData.checkmark_circle_outline).data,
                       color: accentColors[6],
                     ),
                     message: '${budget.category.name} added',

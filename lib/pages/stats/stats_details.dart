@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -74,7 +74,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
       appBar: AppBar(
         title: Center(child: Text(_getAppBarTitle())),
         leading: IconButton(
-          icon: const Icon(Ionicons.close_outline, color: textColor),
+          icon: Icon(MyIonicons(MyIoniconsData.close_outline).data, color: textColor),
           onPressed: (() {
             Navigator.pop(context);
           }),
@@ -99,7 +99,7 @@ class _StatsDetailPageState extends State<StatsDetailPage> {
               );
             }),
             icon: Icon(
-              Ionicons.filter,
+              MyIonicons(MyIoniconsData.filter).data,
               size: 15,
             )
           ),

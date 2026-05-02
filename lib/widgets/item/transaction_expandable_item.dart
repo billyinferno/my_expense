@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class TransactionExpandableItem extends StatelessWidget {
   final TransactionListModel txn;
@@ -197,7 +197,7 @@ class TransactionExpandableItem extends StatelessWidget {
           color: accentColors[4],
         ),
         child: Icon(
-          Ionicons.repeat,
+          MyIonicons(MyIoniconsData.repeat).data,
           color: textColor,
           size: (size ?? 20),
         ),

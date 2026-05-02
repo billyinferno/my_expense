@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class CategoryListItem extends StatelessWidget {
   final int index;
@@ -62,7 +62,7 @@ class CategoryListItem extends StatelessWidget {
             },),
             children: <Widget>[
               SlideButton(
-                icon: Ionicons.pencil,
+                icon: MyIonicons(MyIoniconsData.pencil).data,
                 iconColor: (budget.id != -1 ? textColor : secondaryLight),
                 bgColor: (budget.id != -1 ? accentColors[6] : secondaryDark),
                 text: 'Edit',
@@ -76,7 +76,7 @@ class CategoryListItem extends StatelessWidget {
                 },
               ),
               SlideButton(
-                icon: Ionicons.trash,
+                icon: MyIonicons(MyIoniconsData.trash).data,
                 iconColor: (budget.id != -1 ? textColor : secondaryLight),
                 bgColor: (budget.id != -1 ? accentColors[2] : secondaryDark),
                 text: 'Delete',
@@ -124,7 +124,7 @@ class CategoryListItem extends StatelessWidget {
                       ),
                       child: Center(
                         child: (isSelected ? Icon(
-                          Ionicons.checkmark,
+                          MyIonicons(MyIoniconsData.checkmark).data,
                           color: Colors.white,
                           size: 12,
                         ) : const SizedBox.shrink()),

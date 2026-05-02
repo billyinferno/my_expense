@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 enum WalletDataType {
   monthly, yearly
@@ -95,7 +95,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
       appBar: AppBar(
         title: Center(child: Text(_wallet.name)),
         leading: IconButton(
-          icon: const Icon(Ionicons.close_outline, color: textColor),
+          icon: Icon(MyIonicons(MyIoniconsData.close).data, color: textColor),
           onPressed: (() {
             Navigator.pop(context);
           }),

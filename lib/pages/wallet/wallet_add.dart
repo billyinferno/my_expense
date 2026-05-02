@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -83,8 +83,8 @@ class _WalletAddPageState extends State<WalletAddPage> {
           onPressed: () {
             Navigator.maybePop(context, false);
           },
-          icon: const Icon(
-            Ionicons.close,
+          icon: Icon(
+            MyIonicons(MyIoniconsData.close).data,
           ),
         ),
         actions: <Widget>[
@@ -120,8 +120,8 @@ class _WalletAddPageState extends State<WalletAddPage> {
               },
               );
             },
-            icon: const Icon(
-              Ionicons.checkmark,
+            icon: Icon(
+              MyIonicons(MyIoniconsData.checkmark).data,
             ),
           ),
           const SizedBox(
@@ -362,8 +362,8 @@ class _WalletAddPageState extends State<WalletAddPage> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Ionicons.alert_circle_outline,
+                      Icon(
+                        MyIonicons(MyIoniconsData.alert_circle_outline).data,
                         size: 20,
                         color: textColor,
                       ),
@@ -414,7 +414,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
                           height: 30,
                           color: Colors.transparent,
                           child: Icon(
-                            Ionicons.close_circle,
+                            MyIonicons(MyIoniconsData.close_circle).data,
                             size: 20,
                             color: accentColors[2].lighten(),
                           ),
@@ -498,8 +498,8 @@ class _WalletAddPageState extends State<WalletAddPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      const Icon(
-                        Ionicons.checkbox_outline,
+                      Icon(
+                        MyIonicons(MyIoniconsData.checkbox_outline).data,
                         size: 20,
                         color: textColor,
                       ),
@@ -533,8 +533,8 @@ class _WalletAddPageState extends State<WalletAddPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
-                      const Icon(
-                        Ionicons.checkbox_outline,
+                      Icon(
+                        MyIonicons(MyIoniconsData.checkbox_outline).data,
                         size: 20,
                         color: textColor,
                       ),
@@ -573,7 +573,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
           color: Colors.white,
         ),
         child: Icon(
-          Ionicons.wallet_outline,
+          MyIonicons(MyIoniconsData.wallet_outline).data,
           color: accentColors[4],
         ),
       );

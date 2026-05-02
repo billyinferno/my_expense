@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_simple_calculator/flutter_simple_calculator.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/themes/colors.dart';
 import 'package:my_expense/utils/globals.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:my_expense/widgets/page/my_safe_area.dart';
 
 class TransactionCalculatorArgs {
@@ -83,7 +83,7 @@ class _TransactionCalculatorState extends State<TransactionCalculator> {
                         padding: const EdgeInsets.fromLTRB(10, 10, 50, 10),
                         color: Colors.transparent,
                         child: Icon(
-                          Ionicons.close,
+                          MyIonicons(MyIoniconsData.close).data,
                           size: 24,
                           color: accentColors[2],
                         ),
@@ -119,7 +119,7 @@ class _TransactionCalculatorState extends State<TransactionCalculator> {
                         padding: const EdgeInsets.fromLTRB(50, 10, 10, 10),
                         color: Colors.transparent,
                         child: Icon(
-                          Ionicons.checkmark,
+                          MyIonicons(MyIoniconsData.checkmark).data,
                           size: 24,
                           color: accentColors[0],
                         ),

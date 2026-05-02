@@ -2,8 +2,8 @@ import 'dart:collection';
 import 'package:easy_sticky_header/easy_sticky_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 enum HeaderType {
   date,
@@ -312,8 +312,8 @@ class ListViewWithHeader<T> extends StatelessWidget {
       case "transfer":
         return MyItemList(
           iconColor: accentColors[4],
-          icon: const Icon(
-            Ionicons.repeat,
+          icon: Icon(
+            MyIonicons(MyIoniconsData.repeat).data,
             color: textColor,
           ),
           type: txn.type.toLowerCase(),
@@ -399,7 +399,7 @@ class ListViewWithHeader<T> extends StatelessWidget {
     required TransactionListModel txn,
   }) {
     return SlideButton(
-      icon: Ionicons.trash,
+      icon: MyIonicons(MyIoniconsData.trash).data,
       iconColor: textColor,
       bgColor: accentColors[2],
       text: 'Delete',
@@ -431,7 +431,7 @@ class ListViewWithHeader<T> extends StatelessWidget {
     required TransactionListModel txn,
   }) {
     return SlideButton(
-      icon: Ionicons.copy,
+      icon: MyIonicons(MyIoniconsData.copy).data,
       iconColor: textColor,
       bgColor: accentColors[3],
       text: 'Duplicate',

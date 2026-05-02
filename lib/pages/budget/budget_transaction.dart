@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 
 class BudgetTransactionPage extends StatefulWidget {
@@ -57,7 +57,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
       appBar: AppBar(
         title: Center(child: Text(_budgetArgs.categoryName)),
         leading: IconButton(
-          icon: const Icon(Ionicons.close_outline, color: textColor),
+          icon: Icon(MyIonicons(MyIoniconsData.close_outline).data, color: textColor),
           onPressed: (() {
             // check if got data changed already or not?
             if (_dataChange) {
@@ -74,7 +74,7 @@ class _BudgetTransactionPageState extends State<BudgetTransactionPage> {
               Navigator.pushNamed(context, '/budget/stat', arguments: _budgetArgs);
             },
             icon: Icon(
-              Ionicons.analytics,
+              MyIonicons(MyIoniconsData.analytics).data,
             )
           ),
           SortIcon(

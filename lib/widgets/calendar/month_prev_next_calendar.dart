@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class MonthPrevNextCalendar extends StatefulWidget {
   final Color background;
@@ -139,8 +139,8 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
                 color: Colors.transparent,
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: const Icon(
-                    Ionicons.caret_back,
+                  child: Icon(
+                    MyIonicons(MyIoniconsData.caret_back).data,
                     color: textColor,
                   ),
                 ),
@@ -171,8 +171,8 @@ class _MonthPrevNextCalendarState extends State<MonthPrevNextCalendar> {
                 color: Colors.transparent,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: const Icon(
-                    Ionicons.caret_forward,
+                  child: Icon(
+                    MyIonicons(MyIoniconsData.caret_forward).data,
                     color: textColor,
                   ),
                 ),

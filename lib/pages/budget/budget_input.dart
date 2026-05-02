@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class BudgetInput extends StatefulWidget {
   final Object? budget;
@@ -78,7 +78,7 @@ class _BudgetInputState extends State<BudgetInput> {
             }
           },
           icon: Icon(
-            Ionicons.arrow_back
+            MyIonicons(MyIoniconsData.arrow_back).data,
           ),
         ),
         actions: <Widget>[
@@ -178,16 +178,16 @@ class _BudgetInputState extends State<BudgetInput> {
                         decoration: const BoxDecoration(
                           color: Colors.red,
                         ),
-                        child: const Row(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
                             Icon(
-                              Ionicons.close,
+                              MyIonicons(MyIoniconsData.close).data,
                               size: 15,
                             ),
-                            SizedBox(width: 10,),
-                            Expanded(
+                            const SizedBox(width: 10,),
+                            const Expanded(
                               child: Center(
                                 child: Text("Cancel")
                               )
@@ -220,16 +220,16 @@ class _BudgetInputState extends State<BudgetInput> {
                         decoration: const BoxDecoration(
                           color: Colors.green,
                         ),
-                        child: const Row(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
                             Icon(
-                              Ionicons.checkbox,
+                              MyIonicons(MyIoniconsData.checkbox).data,
                               size: 15,
                             ),
-                            SizedBox(width: 10,),
-                            Expanded(
+                            const SizedBox(width: 10,),
+                            const Expanded(
                               child: Center(
                                 child: Text("Save")
                               )

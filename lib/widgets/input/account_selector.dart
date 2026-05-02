@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class AccountSelector extends StatefulWidget {
   final String title;
@@ -97,14 +97,14 @@ class _AccountSelectorState extends State<AccountSelector> {
               itemCount: widget.walletMap[_tabSelected]!.length,
               itemBuilder: (BuildContext context, int index) {
                 isDisabled = false;
-                disableIcon = Ionicons.checkmark_circle;
+                disableIcon = MyIonicons(MyIoniconsData.checkmark_circle).data;
                 disableColor = null;
             
                 // check if the ID is the same with disabled ID or not?
                 // if same then we dilled the disabled icon, and checkmark color
                 // with red, and disable the onTap
                 if (widget.disableID == widget.walletMap[_tabSelected]![index].id) {
-                  disableIcon = Ionicons.alert_circle;
+                  disableIcon = MyIonicons(MyIoniconsData.alert_circle).data;
                   disableColor = accentColors[2];
                   isDisabled = true;
                 }

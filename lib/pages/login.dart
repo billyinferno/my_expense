@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 import 'package:my_expense/api/credit_card_type.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -130,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               Icon(
-                Ionicons.rocket,
+                MyIonicons(MyIoniconsData.rocket).data,
                 color: _typeColor,
                 size: 10,
               ),
@@ -233,7 +233,7 @@ class _LoginPageState extends State<LoginPage> {
                             color: textColor.withValues(alpha: 0.3),
                           ),
                           prefixIcon: Icon(
-                            Ionicons.person,
+                            MyIonicons(MyIoniconsData.person).data,
                             color: (_usernameFocus.hasFocus
                                 ? accentColors[6]
                                 : textColor2),
@@ -290,7 +290,7 @@ class _LoginPageState extends State<LoginPage> {
                             color: textColor.withValues(alpha: 0.3),
                           ),
                           prefixIcon: Icon(
-                            Ionicons.key,
+                            MyIonicons(MyIoniconsData.key).data,
                             color: (_passwordFocus.hasFocus
                                 ? accentColors[6]
                                 : textColor2),
@@ -316,7 +316,7 @@ class _LoginPageState extends State<LoginPage> {
                               });
                             }),
                             child: Icon(
-                              (_isObscure ? Ionicons.eye : Ionicons.eye_off),
+                              (_isObscure ? MyIonicons(MyIoniconsData.eye).data : MyIonicons(MyIoniconsData.eye_off).data),
                               color: textColor,
                             ),
                           ),

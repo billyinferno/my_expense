@@ -1,7 +1,7 @@
 import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class StatsFilterPage extends StatefulWidget {
   const StatsFilterPage({super.key});
@@ -167,7 +167,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
       appBar: AppBar(
         title: const Center(child: Text("Filter Stats")),
         leading: IconButton(
-          icon: const Icon(Ionicons.close_outline, color: textColor),
+          icon: Icon(MyIonicons(MyIoniconsData.close_outline).data, color: textColor),
           onPressed: (() {
             Navigator.pop(context);
           }),
@@ -177,8 +177,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
             onPressed: (() async {
               await _filterStats();
             }),
-            icon: const Icon(
-              Ionicons.caret_forward_circle_outline,
+            icon: Icon(
+              MyIonicons(MyIoniconsData.caret_forward_circle_outline).data,
               color: textColor
             ),
           )
@@ -212,7 +212,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
                         Icon(
-                          Ionicons.pencil,
+                          MyIonicons(MyIoniconsData.pencil).data,
                           color: accentColors[1],
                         ),
                         const SizedBox(width: 10,),
@@ -275,8 +275,8 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
                                 const SizedBox(
                                   width: 5,
                                 ),
-                                const Icon(
-                                  Ionicons.chevron_down,
+                                Icon(
+                                  MyIonicons(MyIoniconsData.chevron_down).data,
                                   color: secondaryLight,
                                   size: 15,
                                 ),
@@ -349,7 +349,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         color: secondaryDark,
       ),
       child: UserButton(
-        icon: Ionicons.calendar_outline,
+        icon: MyIonicons(MyIoniconsData.calendar_outline).data,
         iconColor: accentColors[6],
         label: "Date",
         trailing: Align(
@@ -594,7 +594,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         color: secondaryDark,
       ),
       child: UserButton(
-        icon: Ionicons.wallet_outline,
+        icon: MyIonicons(MyIoniconsData.wallet_outline).data,
         iconColor: accentColors[5],
         label: "Account",
         trailing: Align(
@@ -623,7 +623,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
         color: secondaryDark,
       ),
       child: UserButton(
-        icon: Ionicons.cash_outline,
+        icon: MyIonicons(MyIoniconsData.cash_outline).data,
         iconColor: accentColors[9],
         label: "Currency",
         trailing: Align(
@@ -683,7 +683,7 @@ class _StatsFilterPageState extends State<StatsFilterPage> {
               Visibility(
                 visible: (_searchType.toLowerCase() == value.toLowerCase()),
                 child: Icon(
-                  Ionicons.checkmark_circle,
+                  MyIonicons(MyIoniconsData.checkmark_circle).data,
                   size: 20,
                   color: accentColors[0],
                 )

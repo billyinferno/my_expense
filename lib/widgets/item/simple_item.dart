@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class SimpleItem extends StatelessWidget {
   final Color color;
   final Widget icon;
   final String title;
   final bool isSelected;
-  final IconData checkmarkIcon;
+  final IconData? checkmarkIcon;
   final Color? checkmarkColor;
   final Function? onTap;
   final bool isDisabled;
@@ -17,7 +17,7 @@ class SimpleItem extends StatelessWidget {
     required this.icon,
     required this.title,
     this.isSelected = false,
-    this.checkmarkIcon = Ionicons.checkmark_circle,
+    this.checkmarkIcon,
     this.checkmarkColor,
     this.onTap,
     this.isDisabled = false,
@@ -25,6 +25,8 @@ class SimpleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final IconData defaultCheckmarkIcon = checkmarkIcon ?? MyIonicons(MyIoniconsData.checkmark).data;
+
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -49,7 +51,7 @@ class SimpleItem extends StatelessWidget {
             trailing: Visibility(
               visible: isSelected,
               child: Icon(
-                checkmarkIcon,
+                defaultCheckmarkIcon,
                 size: 20,
                 color: (checkmarkColor ?? accentColors[0]),
               ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget title;
@@ -24,8 +24,8 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       leading: IconButton(
         onPressed: onUserPress,
-        icon: const Icon(
-          Ionicons.person,
+        icon: Icon(
+          MyIonicons(MyIoniconsData.person).data,
           size: 20,
         ),
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class SortIcon extends StatelessWidget {
   final bool asc;
@@ -30,7 +30,7 @@ class SortIcon extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Icon(
-              (asc ? Ionicons.arrow_up : Ionicons.arrow_down),
+              (asc ? MyIonicons(MyIoniconsData.arrow_up).data : MyIonicons(MyIoniconsData.arrow_down).data),
               size: 15,
             ),
             Column(

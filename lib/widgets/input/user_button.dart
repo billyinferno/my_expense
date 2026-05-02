@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class UserButton extends StatelessWidget {
   final IconData icon;
@@ -61,7 +61,7 @@ class UserButton extends StatelessWidget {
               Visibility(
                 visible: showArrow,
                 child: Icon(
-                  Ionicons.chevron_forward_outline,
+                  MyIonicons(MyIoniconsData.chevron_forward_outline).data,
                   color: arrowColor,
                 ),
               ),

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -93,8 +93,8 @@ class _WalletEditPageState extends State<WalletEditPage> {
           onPressed: () {
             Navigator.maybePop(context, false);
           },
-          icon: const Icon(
-            Ionicons.close,
+          icon: Icon(
+            MyIonicons(MyIoniconsData.close).data,
           ),
         ),
         actions: <Widget>[
@@ -124,8 +124,8 @@ class _WalletEditPageState extends State<WalletEditPage> {
                 }
               });
             },
-            icon: const Icon(
-              Ionicons.checkmark,
+            icon: Icon(
+              MyIonicons(MyIoniconsData.checkmark).data,
             ),
           ),
           const SizedBox(width: 10,),
@@ -357,8 +357,8 @@ class _WalletEditPageState extends State<WalletEditPage> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Ionicons.alert_circle_outline,
+                      Icon(
+                        MyIonicons(MyIoniconsData.alert_circle_outline).data,
                         size: 20,
                         color: textColor,
                       ),
@@ -414,7 +414,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
                           height: 30,
                           color: Colors.transparent,
                           child: Icon(
-                            Ionicons.close_circle,
+                            MyIonicons(MyIoniconsData.close_circle).data,
                             size: 20,
                             color: accentColors[2].lighten(),
                           ),
@@ -487,8 +487,8 @@ class _WalletEditPageState extends State<WalletEditPage> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Ionicons.checkbox_outline,
+                      Icon(
+                        MyIonicons(MyIoniconsData.checkbox_outline).data,
                         size: 20,
                         color: textColor,
                       ),
@@ -513,8 +513,8 @@ class _WalletEditPageState extends State<WalletEditPage> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(
-                        Ionicons.checkbox_outline,
+                      Icon(
+                        MyIonicons(MyIoniconsData.checkbox_outline).data,
                         size: 20,
                         color: textColor,
                       ),
@@ -551,7 +551,7 @@ class _WalletEditPageState extends State<WalletEditPage> {
           color: Colors.white,
         ),
         child: Icon(
-          Ionicons.wallet_outline,
+          MyIonicons(MyIoniconsData.wallet_outline).data,
           color: accentColors[4],
         ),
       );

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 SnackBar createSnackBar({
   required String message,
   Icon? icon,
   int duration = 3,
 }) {
-  Icon snackBarIcon = (icon ?? Icon(Ionicons.alert_circle_outline, size: 20, color: accentColors[2],));
+  Icon snackBarIcon = (icon ?? Icon(MyIonicons(MyIoniconsData.alert_circle_outline).data, size: 20, color: accentColors[2],));
 
   SnackBar snackBar = SnackBar(
     duration: Duration(seconds: duration),

@@ -3,8 +3,8 @@ import 'package:badges/badges.dart' as badges;
 import 'package:easy_sticky_header/easy_sticky_header.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 
 enum PageName { summary, all, income, expense, transfer }
@@ -155,7 +155,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           onPressed: () {
             Navigator.maybePop(context, false);
           },
-          icon: const Icon(Ionicons.close,),
+          icon: Icon(MyIonicons(MyIoniconsData.close).data),
         ),
         actions: <Widget>[
           IconButton(
@@ -201,7 +201,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           }),
                           color: Colors.grey[900]!,
                           icon: Icon(
-                            Ionicons.calendar,
+                            MyIonicons(MyIoniconsData.calendar).data,
                             color: textColor2,
                             size: 15,
                           ),
@@ -217,7 +217,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           }),
                           color: Colors.grey[900]!,
                           icon: Icon(
-                            Ionicons.list_outline,
+                            MyIonicons(MyIoniconsData.list_outline).data,
                             color: textColor2,
                             size: 15,
                           ),
@@ -233,7 +233,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           }),
                           color: Colors.grey[900]!,
                           icon: Icon(
-                            Ionicons.cash,
+                            MyIonicons(MyIoniconsData.cash).data,
                             color: textColor2,
                             size: 15,
                           ),
@@ -247,7 +247,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
               );
             }),
             icon: Icon(
-              Ionicons.funnel,
+              MyIonicons(MyIoniconsData.funnel).data,
               color: textColor,
               size: 15,
             )
@@ -593,7 +593,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                                 height: 20,
                                 width: 20,
                                 child: Icon(
-                                  Ionicons.trash_bin_outline,
+                                  MyIonicons(MyIoniconsData.trash_bin_outline).data,
                                   size: 20,
                                   color: accentColors[2],
                                 ),
@@ -655,9 +655,9 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                           fontSize: 10
                         ),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Icon(
-                          Ionicons.wallet,
+                          MyIonicons(MyIoniconsData.wallet).data,
                           size: 15,
                           color: textColor,
                         ),
@@ -714,7 +714,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
           color: accentColors[4],
         ),
         child: Icon(
-          Ionicons.repeat,
+          MyIonicons(MyIoniconsData.repeat).data,
           color: textColor,
           size: (size ?? 20),
         ),
@@ -1448,7 +1448,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                   color: textColor2,
                   fontFamily: '--apple-system'
                 ),
-                suffixIcon: const Icon(Ionicons.close),
+                suffixIcon: Icon(MyIonicons(MyIoniconsData.close).data),
                 onSubmitted: ((_) async {
                   await _submitSearch().then((_) {
                     if (mounted) {
@@ -1483,8 +1483,8 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                     style: BorderStyle.solid,
                   )
                 ),
-                child: const Icon(
-                  Ionicons.search,
+                child: Icon(
+                  MyIonicons(MyIoniconsData.search).data,
                   size: 20,
                   color: textColor,
                 ),
@@ -1523,22 +1523,22 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                       width: 1.0,
                     )
                   ),
-                  child: const Row(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
                       Icon(
-                        Ionicons.add,
+                        MyIonicons(MyIoniconsData.add).data,
                         size: 20,
                         color: textColor,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
-                      Expanded(
+                      const Expanded(
                         child: Center(
                             child: Text(
                           "Add",
@@ -1579,22 +1579,22 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
                       width: 1.0,
                     )
                   ),
-                  child: const Row(
+                  child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
                       Icon(
-                        Ionicons.trash,
+                        MyIonicons(MyIoniconsData.trash).data,
                         size: 20,
                         color: textColor,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
-                      Expanded(
+                      const Expanded(
                         child: Center(
                             child: Text(
                           "Clear",
@@ -1668,7 +1668,7 @@ class _TransactionSearchPageState extends State<TransactionSearchPage> {
             size: 15
           ),
           deleteIcon: Icon(
-            Ionicons.close,
+            MyIonicons(MyIoniconsData.close).data,
             size: 15,
           ),
           onDeleted: () {

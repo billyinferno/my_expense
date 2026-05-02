@@ -2,7 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:my_expense/_index.g.dart';
@@ -30,7 +30,7 @@ class _HomeListState extends State<HomeList> {
   String _appTitleYear = "";
   String _refreshDay = "";
   CalendarFormat _currentCalendarFormat = CalendarFormat.week;
-  Icon _currentCalendarIcon = const Icon(Ionicons.caret_down, size: 10);
+  Icon _currentCalendarIcon = Icon(MyIonicons(MyIoniconsData.caret_down).data, size: 10);
 
   final TransactionHTTPService _transactionHttp = TransactionHTTPService();
   final WalletHTTPService _walletHTTP = WalletHTTPService();
@@ -102,8 +102,8 @@ class _HomeListState extends State<HomeList> {
             ),
           ),
         ),
-        iconItem: const Icon(
-          Ionicons.search,
+        iconItem: Icon(
+          MyIonicons(MyIoniconsData.search).data,
           size: 20,
         ),
         onUserPress: widget.userIconPress,
@@ -192,14 +192,14 @@ class _HomeListState extends State<HomeList> {
                 setState(() {
                   if (_currentCalendarFormat == CalendarFormat.week) {
                     _currentCalendarFormat = CalendarFormat.month;
-                    _currentCalendarIcon = const Icon(
-                      Ionicons.caret_up,
+                    _currentCalendarIcon = Icon(
+                      MyIonicons(MyIoniconsData.caret_up).data,
                       size: 10
                     );
                   } else {
                     _currentCalendarFormat = CalendarFormat.week;
-                    _currentCalendarIcon = const Icon(
-                      Ionicons.caret_down,
+                    _currentCalendarIcon = Icon(
+                      MyIonicons(MyIoniconsData.caret_down).data,
                       size: 10
                     );
                   }
@@ -419,7 +419,7 @@ class _HomeListState extends State<HomeList> {
         ),
         children: <Widget>[
           SlideButton(
-            icon: Ionicons.copy,
+            icon: MyIonicons(MyIoniconsData.copy).data,
             iconColor: textColor,
             bgColor: accentColors[3],
             text: 'Duplicate',
@@ -434,7 +434,7 @@ class _HomeListState extends State<HomeList> {
             },
           ),
           SlideButton(
-            icon: Ionicons.trash,
+            icon: MyIonicons(MyIoniconsData.trash).data,
             iconColor: textColor,
             bgColor: accentColors[2],
             text: 'Delete',
@@ -497,8 +497,8 @@ class _HomeListState extends State<HomeList> {
         return MyItemList(
           height: 70,
           iconColor: accentColors[4],
-          icon: const Icon(
-            Ionicons.repeat,
+          icon: Icon(
+            MyIonicons(MyIoniconsData.repeat).data,
             color: textColor,
           ),
           type: txn.type.toLowerCase(),

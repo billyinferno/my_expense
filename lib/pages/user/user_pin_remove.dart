@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class PinRemovePage extends StatefulWidget {
   const PinRemovePage({super.key});
@@ -40,9 +40,9 @@ class _PinRemovePageState extends State<PinRemovePage> {
               height: 50,
               color: Colors.transparent,
               padding: const EdgeInsets.all(10),
-              child: const Center(
+              child: Center(
                 child: Icon(
-                  Ionicons.close_circle_outline,
+                  MyIonicons(MyIoniconsData.close_circle_outline).data,
                   color: textColor2,
                 ),
               ),

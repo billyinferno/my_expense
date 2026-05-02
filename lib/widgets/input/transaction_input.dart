@@ -3,9 +3,9 @@ import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
 import 'package:my_expense/pages/transaction/transaction_calculator.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 enum TransactionInputType {
   add, edit
@@ -82,12 +82,12 @@ class _TransactionInputState extends State<TransactionInput> {
   final Map<String, TypeSlideItem> _txnSingleRepeatItem = {
     "single": TypeSlideItem(
       color: accentColors[0],
-      icon: Ionicons.remove_outline,
+      icon: MyIonicons(MyIoniconsData.remove_outline).data,
       iconColor: Colors.white.withValues(alpha: 0.7),
     ),
     "repeat": TypeSlideItem(
       color: accentColors[4],
-      icon: Ionicons.repeat,
+      icon: MyIonicons(MyIoniconsData.repeat).data,
       iconColor: Colors.white.withValues(alpha: 0.7),
     ),
   };
@@ -95,12 +95,12 @@ class _TransactionInputState extends State<TransactionInput> {
   final Map<String, TypeSlideItem> _txnCalendarType = {
     "scroll": TypeSlideItem(
       color: accentColors[0],
-      icon: Ionicons.calendar_number,
+      icon: MyIonicons(MyIoniconsData.calendar_number).data,
       iconColor: Colors.white.withValues(alpha: 0.7),
     ),
     "calendar": TypeSlideItem(
       color: accentColors[4],
-      icon: Ionicons.calendar,
+      icon: MyIonicons(MyIoniconsData.calendar).data,
       iconColor: Colors.white.withValues(alpha: 0.7),
     ),
   };
@@ -280,8 +280,8 @@ class _TransactionInputState extends State<TransactionInput> {
         // default the category icon and color as transfer
         _currentCategoryName = "";
         _currentCategoryColor = accentColors[4];
-        _currentCategoryIcon = const Icon(
-          Ionicons.repeat,
+        _currentCategoryIcon = Icon(
+          MyIonicons(MyIoniconsData.repeat).data,
           color: textColor,
         );
       }
@@ -340,8 +340,8 @@ class _TransactionInputState extends State<TransactionInput> {
       // default the category icon and color as transfer
       _currentCategoryName = "";
       _currentCategoryColor = accentColors[4];
-      _currentCategoryIcon = const Icon(
-        Ionicons.repeat,
+      _currentCategoryIcon = Icon(
+        MyIonicons(MyIoniconsData.repeat).data,
         color: textColor,
       );
 
@@ -378,8 +378,8 @@ class _TransactionInputState extends State<TransactionInput> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: const Icon(
-                  Ionicons.close,
+                icon: Icon(
+                  MyIonicons(MyIoniconsData.close).data,
                 ),
               ),
               actions: <Widget>[
@@ -476,7 +476,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     }
                   },
                   icon: Icon(
-                    Ionicons.checkmark,
+                    MyIonicons(MyIoniconsData.checkmark).data,
                     color: (_isDisabled ? primaryLight : Colors.white),
                   ),
                 ),
@@ -571,8 +571,8 @@ class _TransactionInputState extends State<TransactionInput> {
                             child: Row(
                               children: [
                                 const SizedBox(width: 10,),
-                                const Icon(
-                                  Ionicons.swap_horizontal_sharp,
+                                Icon(
+                                  MyIonicons(MyIoniconsData.swap_horizontal_sharp).data,
                                   size: 20,
                                   color: textColor,
                                 ),
@@ -631,9 +631,9 @@ class _TransactionInputState extends State<TransactionInput> {
                               border: Border(bottom: BorderSide(color: primaryLight, width: 1.0)),
                             ),
                             child: Row(
-                              children: [
-                                const Icon(
-                                  Ionicons.calendar_outline,
+                              children: <Widget>[
+                                Icon(
+                                  MyIonicons(MyIoniconsData.calendar_outline).data,
                                   size: 20,
                                   color: textColor,
                                 ),
@@ -689,8 +689,8 @@ class _TransactionInputState extends State<TransactionInput> {
                           ),
                           child: Row(
                             children: [
-                              const Icon(
-                                Ionicons.checkbox_outline,
+                              Icon(
+                                MyIonicons(MyIoniconsData.checkbox_outline).data,
                                 size: 20,
                                 color: textColor,
                               ),
@@ -728,8 +728,8 @@ class _TransactionInputState extends State<TransactionInput> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Ionicons.newspaper_outline,
+                                Icon(
+                                  MyIonicons(MyIoniconsData.newspaper_outline).data,
                                   size: 20,
                                   color: textColor,
                                 ),
@@ -1244,8 +1244,8 @@ class _TransactionInputState extends State<TransactionInput> {
         ),
         child: Row(
           children: [
-            const Icon(
-              Ionicons.wallet_outline,
+            Icon(
+              MyIonicons(MyIoniconsData.wallet_outline).data,
               size: 20,
               color: textColor,
             ),
@@ -1349,10 +1349,10 @@ class _TransactionInputState extends State<TransactionInput> {
                 });
               }
             }),
-            child: const SizedBox(
+            child: SizedBox(
               height: 40,
               child: Icon(
-                Ionicons.git_compare_sharp,
+                MyIonicons(MyIoniconsData.git_compare_sharp).data,
                 size: 40,
                 color: primaryLight,
               ),
@@ -1414,8 +1414,8 @@ class _TransactionInputState extends State<TransactionInput> {
       return IconList.getIcon(name.toLowerCase(), ccType: (ccType ?? "").toLowerCase());
     }
     else {
-      return const Icon(
-        Ionicons.download,
+      return Icon(
+        MyIonicons(MyIoniconsData.download).data,
         size: 20,
         color: textColor,
       );
@@ -1427,8 +1427,8 @@ class _TransactionInputState extends State<TransactionInput> {
       return IconList.getIcon(name.toLowerCase(), ccType: (ccType ?? "").toLowerCase());
     }
     else {
-      return const Icon(
-        Ionicons.push,
+      return Icon(
+        MyIonicons(MyIoniconsData.push).data,
         size: 20,
         color: textColor,
       );
@@ -1604,8 +1604,8 @@ class _TransactionInputState extends State<TransactionInput> {
         ),
         child: Row(
           children: <Widget>[
-            const Icon(
-              Ionicons.repeat,
+            Icon(
+              MyIonicons(MyIoniconsData.repeat).data,
               size: 20,
               color: textColor,
             ),
@@ -1861,7 +1861,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     color: Colors.transparent,
                     child: Center(
                       child: Icon(
-                        Ionicons.caret_up,
+                        MyIonicons(MyIoniconsData.caret_up).data,
                         size: 15,
                         color: secondaryLight,
                       ),
@@ -1881,7 +1881,7 @@ class _TransactionInputState extends State<TransactionInput> {
                     color: Colors.transparent,
                     child: Center(
                       child: Icon(
-                        Ionicons.caret_down,
+                        MyIonicons(MyIoniconsData.caret_down).data,
                         size: 15,
                         color: secondaryLight,
                       ),
@@ -2010,8 +2010,8 @@ class _TransactionInputState extends State<TransactionInput> {
     if (_currentType == 'transfer') {
       _currentCategoryName = "";
       _currentCategoryColor = accentColors[4];
-      _currentCategoryIcon = const Icon(
-        Ionicons.repeat,
+      _currentCategoryIcon = Icon(
+        MyIonicons(MyIoniconsData.repeat).data,
         color: textColor,
       );
     }
@@ -2048,8 +2048,8 @@ class _TransactionInputState extends State<TransactionInput> {
       else {
         _currentCategoryName = "Select Category";
         _currentCategoryColor = textColor2;
-        _currentCategoryIcon = const Icon(
-          Ionicons.file_tray_full,
+        _currentCategoryIcon = Icon(
+          MyIonicons(MyIoniconsData.file_tray_full).data,
           color: Colors.black,
         );
       }

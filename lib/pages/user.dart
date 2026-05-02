@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_expense/_index.g.dart';
 
@@ -146,8 +146,8 @@ class _UserPageState extends State<UserPage> {
           onPressed: () {
             Navigator.maybePop(context, false);
           },
-          icon: const Icon(
-            Ionicons.close,
+          icon: Icon(
+            MyIonicons(MyIoniconsData.close).data,
           ),
         ),
         actions: <Widget>[
@@ -156,7 +156,7 @@ class _UserPageState extends State<UserPage> {
               _showLogoutDialog();
             },
             icon: Icon(
-              Ionicons.log_out_outline,
+              MyIonicons(MyIoniconsData.log_out_outline).data,
               color: accentColors[2],
             ),
           ),
@@ -206,7 +206,7 @@ class _UserPageState extends State<UserPage> {
                     const SizedBox(height: 10,),
                     const LabelHeader("Default"),
                     UserButton(
-                      icon: Ionicons.fast_food_outline,
+                      icon: MyIonicons(MyIoniconsData.fast_food_outline).data,
                       iconColor: accentColors[2],
                       label: "Default Expense",
                       trailing: Align(
@@ -237,7 +237,7 @@ class _UserPageState extends State<UserPage> {
                       }),
                     ),
                     UserButton(
-                      icon: Ionicons.cash_outline,
+                      icon: MyIonicons(MyIoniconsData.cash_outline).data,
                       iconColor: accentColors[0],
                       label: "Default Income",
                       trailing: Align(
@@ -266,7 +266,7 @@ class _UserPageState extends State<UserPage> {
                       }),
                     ),
                     UserButton(
-                      icon: Ionicons.list,
+                      icon: MyIonicons(MyIoniconsData.list).data,
                       iconColor: accentColors[9],
                       label: "Default Budget Currency",
                       trailing: Align(
@@ -323,7 +323,7 @@ class _UserPageState extends State<UserPage> {
                       }),
                     ),
                     UserButton(
-                      icon: Ionicons.wallet,
+                      icon: MyIonicons(MyIoniconsData.wallet).data,
                       iconColor: accentColors[5],
                       label: "Default Wallet",
                       trailing: Align(
@@ -378,7 +378,7 @@ class _UserPageState extends State<UserPage> {
                       }),
                     ),
                     UserButton(
-                      icon: Ionicons.refresh,
+                      icon: MyIonicons(MyIoniconsData.refresh).data,
                       iconColor: accentColors[7],
                       label: "Auto Sync Transaction",
                       trailing: Align(
@@ -394,7 +394,7 @@ class _UserPageState extends State<UserPage> {
                     const SizedBox(height: 20,),
                     const LabelHeader("Tags"),
                     UserButton(
-                      icon: Ionicons.pricetag_outline,
+                      icon: MyIonicons(MyIoniconsData.pricetag_outline).data,
                       iconColor: accentColors[4],
                       label: "",
                       trailing: const Align(
@@ -417,7 +417,7 @@ class _UserPageState extends State<UserPage> {
                     const SizedBox(height: 20,),
                     const LabelHeader("Security"),
                     UserButton(
-                      icon: Ionicons.lock_closed_outline,
+                      icon: MyIonicons(MyIoniconsData.lock_closed_outline).data,
                       iconColor: accentColors[1],
                       label: "",
                       trailing: const Align(
@@ -435,7 +435,7 @@ class _UserPageState extends State<UserPage> {
                       }),
                     ),
                     UserButton(
-                      icon: Ionicons.keypad_outline,
+                      icon: MyIonicons(MyIoniconsData.keypad_outline).data,
                       iconColor: accentColors[3],
                       label: "Setup PIN",
                       trailing: Align(
@@ -459,7 +459,7 @@ class _UserPageState extends State<UserPage> {
                     const SizedBox(height: 20,),
                     const LabelHeader("Information"),
                     UserButton(
-                      icon: Ionicons.information,
+                      icon: MyIonicons(MyIoniconsData.information).data,
                       iconColor: accentColors[7],
                       label: "Version",
                       trailing: Align(
@@ -476,7 +476,7 @@ class _UserPageState extends State<UserPage> {
                       }),
                     ),
                     UserButton(
-                      icon: Ionicons.rocket,
+                      icon: MyIonicons(MyIoniconsData.rocket).data,
                       iconColor: accentColors[9],
                       label: "Run As",
                       trailing: Align(
@@ -493,7 +493,7 @@ class _UserPageState extends State<UserPage> {
                       }),
                     ),
                     UserButton(
-                      icon: Ionicons.cog,
+                      icon: MyIonicons(MyIoniconsData.cog).data,
                       iconColor: accentColors[9],
                       label: "Flutter SDK",
                       trailing: Align(
@@ -512,7 +512,7 @@ class _UserPageState extends State<UserPage> {
                     const SizedBox(height: 20,),
                     const LabelHeader("Action"),
                     UserButton(
-                      icon: Ionicons.log_out_outline,
+                      icon: MyIonicons(MyIoniconsData.log_out_outline).data,
                       iconColor: accentColors[2],
                       label: "",
                       trailing: const Align(
@@ -718,7 +718,7 @@ class _UserPageState extends State<UserPage> {
           createSnackBar(
             message: "Default $type updated to $newCategoryName",
             icon: Icon(
-              Ionicons.checkmark_circle_outline,
+              MyIonicons(MyIoniconsData.checkmark_circle_outline).data,
               color: accentColors[6],
             )
           )
@@ -776,7 +776,7 @@ class _UserPageState extends State<UserPage> {
           createSnackBar(
             message: "Default budget currency updated",
             icon: Icon(
-              Ionicons.checkmark_circle_outline,
+              MyIonicons(MyIoniconsData.checkmark_circle_outline).data,
               color: accentColors[6],
             )
           )
@@ -818,7 +818,7 @@ class _UserPageState extends State<UserPage> {
           createSnackBar(
             message: "Default wallet updated",
             icon: Icon(
-              Ionicons.checkmark_circle_outline,
+              MyIonicons(MyIoniconsData.checkmark_circle_outline).data,
               color: accentColors[6],
             )
           )
@@ -866,7 +866,7 @@ class _UserPageState extends State<UserPage> {
           createSnackBar(
             message: "Fetching Transaction Tag Complete",
             icon: Icon(
-              Ionicons.checkmark_circle_outline,
+              MyIonicons(MyIoniconsData.checkmark_circle_outline).data,
               color: accentColors[6],
             )
           )
@@ -903,7 +903,7 @@ class _UserPageState extends State<UserPage> {
           createSnackBar(
             message: "Auto Sync Transaction is ${_userMe.autoSyncTransaction ? "enabled" : "disabled"}",
             icon: Icon(
-              Ionicons.checkmark_circle_outline,
+              MyIonicons(MyIoniconsData.checkmark_circle_outline).data,
               color: accentColors[6],
             )
           )
@@ -988,7 +988,7 @@ class _UserPageState extends State<UserPage> {
           createSnackBar(
             message: "PIN is set",
             icon: Icon(
-              Ionicons.checkmark_circle_outline,
+              MyIonicons(MyIoniconsData.checkmark_circle_outline).data,
               color: accentColors[6],
             )
           )

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class MonthCalendarDialog extends StatefulWidget {
   final DateTime? minDate;
@@ -73,7 +73,7 @@ class _MonthCalendarDialogState extends State<MonthCalendarDialog> {
                       Navigator.of(context).pop();
                     },
                     icon: Icon(
-                      Ionicons.close,
+                      MyIonicons(MyIoniconsData.close).data,
                       size: 20,
                       color: widget.headerTextColor,
                     ),
@@ -94,7 +94,7 @@ class _MonthCalendarDialogState extends State<MonthCalendarDialog> {
                       Navigator.of(context).pop(_currentDate);
                     },
                     icon: Icon(
-                      Ionicons.checkmark,
+                      MyIonicons(MyIoniconsData.checkmark).data,
                       size: 20,
                       color: widget.headerTextColor,
                     ),

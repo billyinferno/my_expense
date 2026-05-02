@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class BudgetStatPage extends StatefulWidget {
   final Object? arguments;
@@ -85,7 +85,7 @@ class _BudgetStatPageState extends State<BudgetStatPage> {
       appBar: AppBar(
         title: Center(child: Text("${_budgetTransaction.categoryName} Stat")),
         leading: IconButton(
-          icon: const Icon(Ionicons.close_outline, color: textColor),
+          icon: Icon(MyIonicons(MyIoniconsData.close_outline).data, color: textColor),
           onPressed: (() {
             // back to previous page
             Navigator.pop(context);

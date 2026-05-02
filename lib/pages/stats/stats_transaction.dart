@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:ionicons/ionicons.dart';
 import 'package:my_expense/_index.g.dart';
+import 'package:my_expense/utils/icon/my_ionicons.dart';
 
 class StatsTransactionPage extends StatefulWidget {
   final Object? args;
@@ -82,8 +82,8 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
           onPressed: () {
             Navigator.maybePop(context, false);
           },
-          icon: const Icon(
-            Ionicons.close,
+          icon: Icon(
+            MyIonicons(MyIoniconsData.close).data,
           ),
         ),
         actions: <Widget>[
@@ -132,7 +132,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
                           }),
                           color: Colors.grey[900]!,
                           icon: Icon(
-                            Ionicons.calendar,
+                            MyIonicons(MyIoniconsData.calendar).data,
                             color: textColor2,
                             size: 15,
                           ),
@@ -149,7 +149,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
                           }),
                           color: Colors.grey[900]!,
                           icon: Icon(
-                            Ionicons.cash,
+                            MyIonicons(MyIoniconsData.cash).data,
                             color: textColor2,
                             size: 15,
                           ),
@@ -163,7 +163,7 @@ class _StatsTransactionPageState extends State<StatsTransactionPage> {
               );
             }),
             icon: Icon(
-              Ionicons.funnel,
+              MyIonicons(MyIoniconsData.funnel).data,
               color: textColor,
               size: 15,
             )
