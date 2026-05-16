@@ -42,7 +42,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
 
   late DateTime _minDate;
   late DateTime _maxDate;
-  late Map<DateTime, bool> _walletDateRange;
+  late Map<DateTime, WalletStatModel> _walletDateRange;
   late int _dateOffset;
   late double _maxAmount;
   late double _maxAmountMonthly;
@@ -124,7 +124,7 @@ class _WalletStatPageState extends State<WalletStatPage> {
         if (snapshot.hasError) {
           return CommonErrorPage(
             isNeedScaffold: false,
-            errorText: "Unable to load data from API",
+            errorText: snapshot.error.toString(),
           );
         }
         else if (snapshot.hasData) {
@@ -200,6 +200,11 @@ class _WalletStatPageState extends State<WalletStatPage> {
             physics: const AlwaysScrollableScrollPhysics(),
             itemCount: _walletStat.length,
             itemBuilder: ((context, index) {
+              // check if the _walletState value is all 0, if all 0 then we will not display the bar chart
+              if ((_walletStat[index].income == 0) && (_walletStat[index].expense == 0)) {
+                return SizedBox();
+              }
+              
               return Container(
                 padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: BarStat(
@@ -360,37 +365,65 @@ class _WalletStatPageState extends State<WalletStatPage> {
     try {
       // perform the get company detail information here
       await _walletHTTP.getStat(id: _wallet.id).then((resp) {
-        // copy the response to company detail data
-        _walletStat = resp;
-        _origWalletStatMonthly = resp.toList();
-
-        // get the min date, where it should be the array 0 of the _origWalletStat
-        if (_origWalletStatMonthly.isNotEmpty) {
-          _minDate = DateTime(
-            _origWalletStatMonthly[0].date.year,
-            _origWalletStatMonthly[0].date.month,
-            1
-          ).toLocal();
-
-          _maxDate = DateTime(
-            _origWalletStatMonthly[_origWalletStatMonthly.length - 1].date.year,
-            _origWalletStatMonthly[_origWalletStatMonthly.length - 1].date.month,
-            1
-          ).toLocal();
-
-          // generate the list of date beased on _min and _max date
-          DateTime startDate = _minDate;
-          while (startDate.toLocal().isBefore(_maxDate.toLocal())) {
-            // add the start date in the wallet date range
-            _walletDateRange[startDate] = true;
-
-            // add next month
-            startDate = DateTime(startDate.year, startDate.month + 1, 1).toLocal();
-          }
-
-          // add the _maxDate here as _maxDate will be skipped above
-          _walletDateRange[_maxDate] = true;
+        // check if the response is empty or not, if empty then throw error
+        if (resp.isEmpty) {
+          throw 'No data available';
         }
+
+        // generate the response for wallet stat 
+        // this we can do by make a map of DateTime and WalletStatModel
+        // where we can put the date as the key and the WalletStatModel as the value
+        Map<DateTime, WalletStatModel> walletStatMap = {};
+        for (WalletStatModel data in resp) {
+          walletStatMap[DateTime(data.date.year, data.date.month, 1).toLocal()] = data;
+        }
+
+        // once we got the wallet stat map.
+        // get the start and end date of the response.
+        // we will use this to loop to create the list of wallet stat data based on the wallet stat map.
+        // if we don't have the date then we will use previous wallet stat map data to fill the data until we reach the end date.
+        _minDate = DateTime(
+          resp[0].date.year,
+          resp[0].date.month,
+          1,
+        ).toLocal();
+        _maxDate = DateTime(
+          resp[resp.length - 1].date.year,
+          resp[resp.length - 1].date.month,
+          1,
+        ).toLocal();
+
+        // get the number of month between start and end date
+        int monthDiff = ((_maxDate.year - _minDate.year) * 12) + (_maxDate.month - _minDate.month);
+
+        // loop thru the month diff and generate the wallet stat data based on the wallet stat map
+        WalletStatModel? prevWalletStat;
+        for (int i = 0; i <= monthDiff; i++) {
+          // create the walletStateDataMap key by add the month diff to the start date
+          DateTime key = DateTime(_minDate.year, _minDate.month + i, 1).toLocal();
+
+          // check if this key is exists in wallet stat map or not?
+          // if exists, then we move the wallet stat map to wallet stat data map.
+          // if not exists, then we will move the previous wallet stat map data.
+          if (walletStatMap.containsKey(key)) {
+            _walletDateRange[key] = walletStatMap[key]!;
+            prevWalletStat = walletStatMap[key]!;
+          }
+          else {
+            if (prevWalletStat != null) {
+              _walletDateRange[key] = WalletStatModel(
+                date: key,
+                income: 0,
+                expense: 0,
+              );
+            }
+          }
+        }
+
+        // once we got the wallet stat map data
+        // we will convert wallet stat map data to list and set to the _walletStat and _origWalletStatMonthly
+        _walletStat = _walletDateRange.values.toList();
+        _origWalletStatMonthly = _walletDateRange.values.toList();
 
         // get the statistic data
         _getStatData();
