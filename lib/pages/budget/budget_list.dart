@@ -709,7 +709,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
   }) {
     List<BudgetModel> newBudgetList = [];
     for (int i = 0; i < _budgetList!.budgets.length; i++) {
-      if (i == index) {
+      if (_budgetList!.budgets[i].category.id == budgetArgs.categoryId) {
         // special treatment
         newBudgetList.add(BudgetModel(
           id: _budgetList!.budgets[i].id,
