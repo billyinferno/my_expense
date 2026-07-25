@@ -92,7 +92,7 @@ class BudgetBar extends StatelessWidget {
                   Visibility(
                     visible: showLeftText,
                     child: Text(
-                      "$symbol ${Globals.fCCY.format((budgetTotal - budgetUsed).makePositive())}${budgetTotal >= budgetUsed ? " left" : " over"}",
+                      "$symbol ${Globals.fCCY.format((budgetTotal - budgetUsed).abs())}${budgetTotal >= budgetUsed ? " left" : " over"}",
                       textAlign: TextAlign.right,
                     ),
                   )

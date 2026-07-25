@@ -79,7 +79,7 @@ class BarStat extends StatelessWidget {
                   Visibility(
                     visible: showDiff,
                     child: Text(
-                      (income - expense).makePositive().formatCurrency(
+                      (income - expense).abs().formatCurrency(
                         checkThousand: false,
                         decimalNum: 2,
                         shorten: true,

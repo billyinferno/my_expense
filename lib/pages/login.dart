@@ -3,6 +3,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:my_expense/_index.g.dart';
 import 'package:my_expense/api/credit_card_type.dart';
 import 'package:my_expense/utils/icon/my_ionicons.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -135,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                 size: 10,
               ),
               const SizedBox(width: 2,),
-              Text(
+              Text( 
                 _type,
                 style: TextStyle(
                   color: _typeColor,
@@ -150,9 +151,22 @@ class _LoginPageState extends State<LoginPage> {
                   fontSize: 10,
                   fontStyle: FontStyle.italic,
                 ),
-              )
+              ),
             ],
           ),
+        ),
+        const SizedBox(height: 20,),
+        Consumer<LoadingProvider>(
+          builder: (context, value, child) {
+            return Center(
+              child: Text(
+                "Loading (${value.totalLoaded ?? 0}/${value.totalData}) (${(value.percentage ?? 0).formatDecimal(times: 100, decimal: 0)}%)",
+                style: TextStyle(
+                  fontSize: 10,
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -371,39 +385,76 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _getAdditionalInfo() async {
+    // set the login provider to show the total loading of API
+    Provider.of<LoadingProvider>(context, listen: false).resetTotalLoaded();
+    Provider.of<LoadingProvider>(context, listen: false).setTotalData(11);
+
     await Future.wait([
       _userHTTP.fetchMe().then((value) {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         Log.success(message: "⏳ Fetch User");
       }),
       _categoryHTTP.fetchCategory().then((_) {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         Log.success(message: "⏳ Fetch Category");
       }),
       _cardTypeHTTP.fetchCreditCardType().then((_) {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         Log.success(message: "⏳ Fetch Credit Card Types");
       }),
       _walletHTTP.fetchWalletTypes().then((_) {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         Log.success(message: "⏳ Fetch Wallet Types");
       }),
       _walletHTTP.fetchCurrency().then((_) {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         Log.success(message: "⏳ Fetch Currency");
       }),
       _walletHTTP.fetchWalletCurrencies(force: true).then((_) async {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         Log.success(message: "⏳ Fetch Wallet User Currency");
         await _fetchAllBudget();
       }),
       _transactionHTTP.fetchLastTransaction(type: "expense", force: true).then((value) {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         Log.success(message: "⏳ Fetch Expense Last Transaction : ${value.length}");
       }),
       _transactionHTTP.fetchLastTransaction(type: "income", force: true).then((value) {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         Log.success(message: "⏳ Fetch Income Last Transaction : ${value.length}");
       }),
       _transactionHTTP.fetchMinMaxDate().then((_) {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         Log.success(message: "⏳ Fetch min max transaction date");
       }),
       _pinHTTP.getPin(force: true).then((pin) {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        } 
         Log.success(message: "⏳ Fetch user PIN");
       }),
       _transactionHTTP.fetchMaxID(id: _maxID).then((maxID) async {
+        if (mounted) {
+          Provider.of<LoadingProvider>(context, listen: false).addTotalLoaded();
+        }
         // ensure maxID from remote is > 0
         if (maxID.id > 0) {
           // check if stored max ID is -1, if so then just store the maxID

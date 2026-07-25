@@ -32,6 +32,9 @@ class _RouterPageState extends State<RouterPage> {
         ChangeNotifierProvider<HomeProvider>(
           create: (context) => HomeProvider(),
         ),
+        ChangeNotifierProvider<LoadingProvider>(
+          create: (context) => LoadingProvider(),
+        )
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

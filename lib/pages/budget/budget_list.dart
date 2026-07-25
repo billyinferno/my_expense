@@ -221,7 +221,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
                 );
               }
             }
-            catch(error, _) {
+            catch(error) {
               if (mounted) {
                 // show error dialog
                 await ShowMyDialog(
@@ -235,7 +235,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
           }   
         },);
       }
-      catch(error, _) {
+      catch(error) {
         if (mounted) {
           // show error dialog
           await ShowMyDialog(
@@ -265,7 +265,7 @@ class _BudgetListPageState extends State<BudgetListPage> {
               );
             }
           }
-          catch(error, _) {
+          catch(error) {
             if (mounted) {
               // show error dialog
               await ShowMyDialog(

@@ -270,7 +270,7 @@ class BarChart extends StatelessWidget {
           SizedBox(
             width: 45,
             child: Text(
-              diff.makePositive().formatCurrency(
+              diff.abs().formatCurrency(
                 checkThousand: true,
                 showDecimal: true,
                 shorten: true,

@@ -26,7 +26,7 @@ class Wallet extends StatelessWidget {
       // check if wallet limit is more than 0
       if (wallet.limit > 0) {
         // we got limit, now check the wallet usage with the limit
-        percentageUse = ((walletUsage.makePositive() / wallet.limit) * 100).toInt();
+        percentageUse = ((walletUsage.abs() / wallet.limit) * 100).toInt();
       }
     }
 

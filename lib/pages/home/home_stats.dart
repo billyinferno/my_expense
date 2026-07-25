@@ -368,7 +368,7 @@ class _HomeStatsState extends State<HomeStats> {
     double amount = _currentWorth.walletsStartBalance + _currentWorth.walletsChangesAmount;
     double currentWorthIncome = (_incomeExpense[_currentWorth.currenciesId] != null ? _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.income)) : 0.0);
     double currentWorthExpense = (_incomeExpense[_currentWorth.currenciesId] != null ? _computeTotal((_incomeExpense[_currentWorth.currenciesId]!.expense)) : 0.0);
-    double currentWorthExpensePositive = currentWorthExpense.makePositive();
+    double currentWorthExpensePositive = currentWorthExpense.abs();
     double totalCurrentWorth = currentWorthIncome - currentWorthExpense;
 
     // calculate income and expense flex

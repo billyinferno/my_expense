@@ -58,10 +58,18 @@ extension MyDoubleExtension on double {
     return result;
   }
 
-  double makePositive() {
-    if (this < 0) {
-      return this * -1;
+  String formatDecimal({
+    double times = 1,
+    int decimal = 6
+  }) {
+    String decimalFormat = "0" * decimal;
+    NumberFormat decFormat = NumberFormat("##0.$decimalFormat");
+    if (decimal > 0) {
+      decFormat = NumberFormat("##0.$decimalFormat");
     }
-    return this;
+    else {
+      decFormat = NumberFormat("##0");
+    }
+    return decFormat.format(this * times);
   }
 }
