@@ -11,15 +11,22 @@
         "statusBar.background": "#8bc34a",
         "statusBar.foreground": "#15202b",
         "statusBarItem.hoverBackground": "#71a436",
-        "statusBarItem.remoteBackground": "#8bc34a",
+        "statusBarItem.remoteBackground": "#3874a8",
         "statusBarItem.remoteForeground": "#15202b",
         "titleBar.activeBackground": "#8bc34a",
         "titleBar.activeForeground": "#15202b",
         "titleBar.inactiveBackground": "#8bc34a99",
         "titleBar.inactiveForeground": "#15202b99",
-        "commandCenter.border": "#15202b99"
+        "commandCenter.border": "#15202b99",
+        "activityBarTop.activeBackground": "#a4d070",
+        "activityBarTop.background": "#a4d070",
+        "activityBarTop.foreground": "#15202b",
+        "activityBarTop.inactiveForeground": "#15202b99",
+        "commandCenter.foreground": "#15202b",
+        "statusBar.debuggingBackground": "#8bc34a",
+        "statusBar.debuggingForeground": "#15202b"
     },
     "peacock.color": "#8bc34a",
-    "cmake.sourceDirectory": "E:/Project/my_expense/windows",
+    "cmake.sourceDirectory": "D:/Project/my_expense/windows",
     "java.configuration.updateBuildConfiguration": "interactive"
 }
