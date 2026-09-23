@@ -1,7 +1,7 @@
 {
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#a4d070",
-        "activityBar.activeBorder": "#3f85c0",
+        "activityBar.activeBorder": "#15202b",
         "activityBar.background": "#a4d070",
         "activityBar.foreground": "#15202b",
         "activityBar.inactiveForeground": "#15202b99",
@@ -24,7 +24,8 @@
         "activityBarTop.inactiveForeground": "#15202b99",
         "commandCenter.foreground": "#15202b",
         "statusBar.debuggingBackground": "#8bc34a",
-        "statusBar.debuggingForeground": "#15202b"
+        "statusBar.debuggingForeground": "#15202b",
+        "activityBarTop.activeBorder": "#15202b"
     },
     "peacock.color": "#8bc34a",
     "cmake.sourceDirectory": "D:/Project/my_expense/windows",
