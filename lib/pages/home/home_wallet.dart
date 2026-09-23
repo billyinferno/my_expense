@@ -503,11 +503,11 @@ class _HomeWalletState extends State<HomeWallet> {
     }).onError((error, stackTrace) {
       // got error when we try to enable/disable wallet
       Log.error(
-        message: "Error <_enableWallet>",
+        message: "Error <_enableDisableWallet>",
         error: error,
         stackTrace: stackTrace,
       );
-      throw Exception("Error when enabling the wallet");
+      throw Exception("Error when ${wallet.enabled ? "disabling" : "enabling"} the wallet");
     }).whenComplete(() {
       // remove the loading screen
       LoadingScreen.instance().hide();
